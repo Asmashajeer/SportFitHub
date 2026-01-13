@@ -1,0 +1,16 @@
+# --- Backend specific ---
+backend/.env
+backend/venv/
+backend/__pycache__/
+backend/*.log
+
+# --- Frontend specific ---
+frontend/node_modules/
+frontend/dist/
+frontend/.next/
+frontend/build/
+
+# --- General/OS ---
+.DS_Store
+Thumbs.db
+.vscode/

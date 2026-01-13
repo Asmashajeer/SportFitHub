@@ -1,0 +1,62 @@
+
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import HomePage from '../pages/HomePage';
+import Login from '../features/auth/component/Login';
+
+import { ROLES } from '../constants/constants';
+// import { LoadingScreen } from '../components/ui/LoadingScreen';
+
+import ProtectedRoute from './ProtectedRoute';
+import UserRoutes from './UserRoutes';
+import TrainerRoutes from './TrainerRoutes';
+import ForgotPassword from '../features/auth/component/ForgotPassword';
+import ResetPassword from '../features/auth/component/ResetPassword';
+import UserRoleSelector from '../features/auth/component/UserRoleSelector';
+import { Home } from 'lucide-react';
+import VerifyEmail from '../features/auth/component/VerifyEmail';
+import MainLayout from '../components/layout/MainLayout';
+import AdminRoutes from './AdminRoutes';
+
+function AppRouter() {  
+
+  return (
+    <>
+    <Router>
+      <Routes>
+        {/* public Routes */}
+        <Route path='/' element={<HomePage/>}/>
+      
+        <Route  path= '/login' element={<Login/>}/>
+        <Route  path= '/logout' element={<Home/>}/>
+        <Route  path= '/verifyEmail' element={<VerifyEmail/>}/>
+         <Route  path= '/forgot-password' element={<ForgotPassword/>}/>
+         <Route  path= '/reset-password' element={<ResetPassword/>}/>
+        <Route  path= '/update-role' element={<UserRoleSelector/>}/>
+        <Route element={<MainLayout/>}>
+        
+            {/* user Routes */}
+            <Route path='/user/*' element={
+              <ProtectedRoute allowedRoles={[ROLES.USER]}><UserRoutes/> </ProtectedRoute>}/>
+
+            {/* Trainer Routes */}
+            <Route path='/trainer/*' element={
+              <ProtectedRoute allowedRoles={[ROLES.TRAINER]}>
+                <TrainerRoutes/>
+              </ProtectedRoute>}/> 
+    
+            
+            
+        </Route>
+             <Route path='/admin/*' element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                  <AdminRoutes/>
+              </ProtectedRoute>}/> 
+      </Routes>
+    </Router>
+  </>
+  );
+}
+
+export default AppRouter;
+

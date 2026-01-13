@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+
+@theme {
+  /* Defining your Fitness App Brand Colors */
+  /* #00608f */
+  --color-primary: #197e04;    
+  --color-secondary: #212222;  
+  --color-accent: #dc2626;     
+  
+  /* Custom spacing or shadows if needed */
+  --shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+  /* Semantic Colors - These change based on theme */
+  --color-app-bg: var(--bg-main);
+  --color-app-text: var(--text-main);
+  --color-card-bg: var(--bg-card);
+  --color-border: var(--border-main);
+}
+
+@layer base {
+  :root {
+    /* DEFAULT THEME (DARK) */
+    --bg-main: #0a0b0d; 
+         /* Deepest Black/Grey */
+    --bg-card: #191C24;      /* Your Secondary Color */
+    --text-main: #f8fafca9;    /* Off-white text */
+    --border-main: #454c59;  /* Slightly lighter than secondary */
+  }
+
+  /* LIGHT THEME OVERRIDES (Optional for later) */
+  .light {
+    --bg-main: #ffffff;
+    --bg-card: #f1f5f9;
+    --text-main: #0f172a;
+    --border-main: #e2e8f0;
+  }
+
+  body {
+    @apply bg-app-bg text-app-text transition-colors duration-300;
+  }
+
+  input {
+    @apply w-full px-4 py-2 rounded-xl bg-secondary/40 border border-border
+           text-white placeholder:text-slate-500 outline-hidden 
+           transition-all duration-200 focus:ring-2 focus:ring-primary;
+  }
+  .btn-default {
+    @apply w-full flex items-center justify-center gap-3 px-6 py-3 
+           rounded-full font-bold tracking-wider transition-all duration-200 
+           cursor-pointer active:scale-95 disabled:opacity-50 
+           disabled:pointer-events-none disabled:grayscale;
+  }
+
+  /* Add the specific styles below */
+  .btn-primary {
+    @apply bg-primary text-white hover:shadow-[0_0_20px_rgba(34,183,4,0.3)] 
+           hover:brightness-110;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-700 text-white border border-border hover:border-primary;
+  }
+  .btn-outline{
+    @apply  text-primary border-2 focus:ring-[color-primary];
+  }
+  .btn-ghost {
+       @apply bg-transparent text-sm text-white w-0.5 ;
+  }
+  .card-base {
+    @apply bg-secondary/40 border border-border/50 rounded-2xl 
+           backdrop-blur-sm overflow-hidden transition-all duration-300 p-8;
+  }
+
+  /* Modal Backdrop DNA */
+  .modal-overlay {
+    @apply fixed inset-0 z-50 bg-black/70 backdrop-blur-sm
+           flex items-center justify-center p-4;
+    /* Browser-native animation */
+    animation: modal-fade 0.2s ease-out forwards;
+  }
+
+  .modal-content {
+    @apply bg-secondary/95 border border-border w-full max-w-lg 
+           rounded-3xl shadow-2xl p-8;
+    /* Browser-native animation */
+    animation: modal-zoom 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Define the keyframes manually at the bottom of the layer */
+  @keyframes modal-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes modal-zoom {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .sidebar-container {
+    @apply fixed left-0 top-0 h-screen w-64 bg-secondary/20 
+           border-r border-border backdrop-blur-xl transition-all 
+           duration-300 z-40 flex flex-col;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 mx-3 rounded-xl 
+           font-medium transition-all duration-200 cursor-pointer;
+  }
+
+  .nav-item-active {
+    @apply bg-primary/10 text-primary shadow-[inset_0_0_10px_rgba(34,183,4,0.1)];
+  }
+
+  .nav-item-inactive {
+    @apply text-slate-400 hover:text-white hover:bg-white/5;
+  }
+}
+
+@layer components {
+  .card-glass {
+    @apply bg-white/80 backdrop-blur-md border border-slate-200 shadow-sm rounded-xl p-6 mx-auto;
+  }
+  
+  .btn-base {
+    @apply px-6 py-2 rounded-lg font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+}
