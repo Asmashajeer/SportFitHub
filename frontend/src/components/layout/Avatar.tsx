@@ -10,7 +10,7 @@ function Avatar() {
      const {user,isAuthenticated} = useAuthStore();
      const navigate=useNavigate();
      const clearAuth=useAuthStore((state)=>state.clearAuth);
-     const alias=user?.email?.[0].toUpperCase()||'U';
+     const alias=user?.email?.[0].toUpperCase()||'Login';
      const[menu,setMenu]=useState(false);
      
      const handleLogout=async ()=>{      

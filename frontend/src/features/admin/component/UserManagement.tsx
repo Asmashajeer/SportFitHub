@@ -1,99 +1,75 @@
 import StatCard from "../../../components/ui/StatCard";
 import { adminService } from "../service/adminService";
-import { useEffect, useState } from "react";
-import { ArrowRight, Ban, CheckCircle, PenIcon, Users, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowRight, Ban, CheckCircle, Users, X } from "lucide-react";
 import { UseAdminStore } from "../store/useAdminStore";
-import Sidebar from "./Sidebar";
-import type { User } from "../../auth/store/useAuthStore";
-import EditUserModal from "./EditUserModal";
-import { ROLES, type UserRole } from "../../../constants/constants";
+
+
+import { LIMIT, ROLES } from "../../../constants/constants";
 
 const UserManagement = () => {
   const setUsers = UseAdminStore((state) => state.setUsers);
   const users = UseAdminStore((state) => state.users);
   const fetchStats = UseAdminStore((state) => state.fetchStats);
   const userStats = UseAdminStore((state) => state.userStats);
+  
   const updateUser = UseAdminStore((state) => state.updateUser);
   const removeUser = UseAdminStore((state) => state.removeUser);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [selectedUser, setSelectedUser] = useState<Omit<
-    User,
-    "hasProfile"
-  > | null>(null);
+
+  
 
   useEffect(() => {
-    const listUsers = async () => {
-      const page = 1,
-        limit = 5;
-      const data = await adminService.getUsers(page);
-
-      setUsers(data);
-      const stats = await fetchStats();
-
-      setCurrentPage(page);
-      if (stats) setTotalPages(Math.ceil(stats?.totalUsers / limit));
+    const loadUsers = async () => {          
+      const [data,stats] =await Promise.all([ adminService.getUsers(currentPage), fetchStats()]);
+      setUsers(data);          
     };
-    listUsers();
-  }, [userStats]);
+     loadUsers();
+  }, [currentPage]);
 
-  useEffect(() => {
-    const loadUsers = async (currentPage: number) => {
-      const data = await adminService.getUsers(currentPage);
-      setUsers(data);
-      setCurrentPage(currentPage);
-    };
-    loadUsers(currentPage);
-  }, [currentPage, users]);
+  const totalPages=useMemo(()=>{    
+    const total=userStats?.totalUsers?? 0;
+    return Math.ceil(total/LIMIT);
+  },[userStats?.totalUsers])
+
+ 
 
   const handleToggleBlock = async (id: string) => {
     const data = await adminService.toggleBlock(id);
-    const stats = await fetchStats();
-    updateUser(data);
+    console.log('updated Data',data);
+    updateUser(data.data);    
+    console.log('users:',users);
+    await fetchStats();    
   };
 
   const handleDeleteUser = async (id: string) => {
     const data = await adminService.deleteUser(id);
     console.log(data);
-    removeUser(data);
+    removeUser(data.id);
+    console.log("user stats",userStats);
+    await fetchStats();
   };
 
-  const handleSave = async (selectedRole: UserRole) => {
-    try {
-      const updatedUser = await adminService.updateUserRole(
-        selectedUser?.id!,
-        selectedRole
-      );
-      console.log("  -", selectedRole, updatedUser);
-      updateUser(updatedUser);
-      setSelectedUser(null); // Close modal on success
-    } catch (err) {
-      console.error(err);
-    }
-  };
+ 
 
   return (
-    <div className="  flex items-center h-full w-full bg-secondary overflow-hidden">
-      <div className="w-64 shrink-0">
-        <Sidebar activePage="Users" />
-      </div>
-
+    <>
       {/* main content  */}
-      <div className=" flex-1 bg-secondary overflow-hidden p-10">
+      <div>
         <div className="mb-2">
           <h1 className="text-2xl font-bold mb-1">User Management</h1>
           <p className="text-gray-600">
             Manage users, view their details, and control account status.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6  mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-4 gap-6  mt-10">
           <StatCard
             key={1}
             title={"Total Users"}
             value={userStats?.totalUsers ?? 0}
             icon={Users}
             color={"text-primary"}
-            bgColor={"bg-secondary"}
+            borderColor={"border-r-blue-300 border-b-blue-300"}
           />
 
           <StatCard
@@ -102,7 +78,7 @@ const UserManagement = () => {
             value={userStats?.activeUsers ?? 0}
             icon={Users}
             color={"text-primary"}
-            bgColor={"bg-secondary"}
+            borderColor={"border-r-green-600 border-b-green-600"}
           />
           <StatCard
             key={3}
@@ -110,7 +86,7 @@ const UserManagement = () => {
             value={userStats?.blockedUsers ?? 0}
             icon={Users}
             color={"text-primary"}
-            bgColor={"bg-secondary"}
+            borderColor={"border-r-red-400 border-b-red-400"}
           />
         </div>
         {/* Search and filters */}
@@ -124,38 +100,38 @@ const UserManagement = () => {
         <div className="bg-secondary rounded-lg shadow-sm overflow-hidden">
           <div className="overflow-x-auto ">
             <table className="min-w-full divide-y divide-gray-600  bg-secondary">
-              <thead className="bg-gray-700">
+              <thead className="bg-green-950">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
+                  <th className="px-6 py-2 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
                     User
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
+                  <th className="px-6 py-2 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
                     Email
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
+                  <th className="px-6 py-2 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
                     Role
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
+                  <th className="px-6 py-2 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
+                  <th className="px-6 py-2 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
                     Registered On
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-200 uppercase tracking-wider">
+                  <th className="px-6 py-2 text-right text-xs font-medium text-gray-200 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-secondary divide-y divide-gray-500">
+              <tbody className="bg-gray-950 divide-y divide-gray-500">
                 {users?.length > 0 ? (
                   users
                     ?.filter((user) => user.role !== ROLES.ADMIN)
                     .map((user) => (
-                      <tr key={user.id} className="hover:bg-gray-950">
+                      <tr key={user.id} className="hover:bg-secondary">
                         {/* User Info */}
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
+                            <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden bg-gray-700 border border-green-600 flex items-center justify-center">
                               <span className="text-main text-sm font-medium">
                                 {user.email.charAt(0).toUpperCase()}
                               </span>
@@ -207,12 +183,7 @@ const UserManagement = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           {user.isActive && (
                             <div className="flex justify-end space-x-2">
-                              <button
-                                className="p-1 rounded-full text-green-600 hover:bg-gray-600 cursor-pointer"
-                                onClick={() => setSelectedUser(user)}
-                              >
-                                <PenIcon className="h-5 w-5" />
-                              </button>
+                             
                               <button
                                 className="p-1 rounded-full hover:bg-gray-600 cursor-pointer"
                                 onClick={() => handleToggleBlock(user.id)}
@@ -299,16 +270,9 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
+        
       </div>
-
-      {/* Edit user Modal Component */}
-      <EditUserModal
-        isOpen={!!selectedUser}
-        user={selectedUser}
-        onClose={() => setSelectedUser(null)}
-        onSave={handleSave}
-      />
-    </div>
+    </>
   );
 };
 

@@ -3,9 +3,9 @@ import Sidebar from "../../../components/layout/Sidebar";
 
 function Dashboard() {
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <Sidebar activePage="Dashboard" />
+    <div className="max-w-7xl mx-auto container-style bg-green-800 ">
+     
+     
       {/* main Content */}
       <h1>Admin Dashboard</h1>
     </div>

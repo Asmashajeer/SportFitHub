@@ -12,7 +12,7 @@ export const OTP_TYPE={
   PASSWORD_RESET : 'PASSWORD_RESET',
 }
 
-
+export const LIMIT=5;
 export const GENDER_TYPES={
   MALE:'Male',
   FEMALE:'Female',

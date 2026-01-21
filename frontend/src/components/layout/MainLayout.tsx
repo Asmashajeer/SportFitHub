@@ -6,10 +6,12 @@ import { Outlet } from "react-router-dom"
 
 function MainLayout() {
   return (
-    <div>
+    <div >
         <Header/>
-        <Sidebar />
-        <main>
+    
+          <Sidebar activePage="dashboard" />
+      
+        <main className="grow pl-64 p-8">
             <Outlet/>
         </main>
         <Footer/>

@@ -14,7 +14,8 @@ import toast from "react-hot-toast";
 import { useState } from "react";
 const Login = () => {
   const navigate = useNavigate();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const setUser = useAuthStore((state) => state.setUser);
+  // const authUser = useAuthStore((state) => state.user);
   const setHasProfile = useAuthStore((state) => state.setHasProfile);
   const [isLogin, setIsLogin] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,11 +37,11 @@ const Login = () => {
         toast.error("google login failed");
         return;
       }
-      console.log(idToken);
-      const userData = await authService.googleLogin(idToken);
-      console.log(userData);
-      setAuth(userData.user, userData.accessToken);
-      if (!Object.values(ROLES).includes(userData.role)) {
+      
+      const userData = await authService.googleLogin(idToken);   
+      setUser(userData.user);
+   
+      if (Object.values(ROLES).includes(userData.role) === false) {      
         return navigate("/update-role");
       }
       if (!userData.hasProfile) {
@@ -80,16 +81,14 @@ const Login = () => {
 
     try {
       if (isLogin) {
-        const data = await authService.login({ email, password, role });
-        console.log(data);
+        const data = await authService.login({ email, password, role });       
         const { hasProfile, ...user } = data.user;
-        const user_Role = user.role;
-        console.log(user_Role);
-        setAuth(data.user, data.accessToken);
+        const user_Role = user.role;      
+        setUser(data.user);
 
         if (user.role === ROLES.ADMIN) {
           setHasProfile(true);
-          return navigate("/admin/dashboard");
+          return navigate("/admin/dashboard", { replace: true });
         }
         if (!data.isVerified) {
           return navigate("/verifyEmail", { state: data.user });
@@ -99,14 +98,14 @@ const Login = () => {
         }
         if (!hasProfile) {
           if (user_Role === ROLES.TRAINER) {
-            return navigate("/trainer/add-Profile");
+            return navigate("/trainer/add-Profile", { replace: true });
           } else if (user_Role === ROLES.USER) {
             console.log("it is a user");
-            return navigate("/user/add-Profile");
+            return navigate("/user/add-Profile", { replace: true });
           }
         } else {
           setHasProfile(hasProfile);
-          navigate(`/${user_Role}/dashboard`);
+          navigate(`/${user_Role}/dashboard`, { replace: true });
         }
       } else {
         const response = await authService.register({ email, password, role });
@@ -185,10 +184,10 @@ const Login = () => {
                 setFormData({ ...formData, email: e.target.value })
               }
             />
-            
 
             <div className="space-y-2 relative w-full">
               <Input
+                // label={'Email'}
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={formData.password}
@@ -197,7 +196,7 @@ const Login = () => {
                   setFormData({ ...formData, password: e.target.value })
                 }
               />
-             
+
               <Button
                 type="button"
                 variant="ghost"
@@ -225,14 +224,13 @@ const Login = () => {
                     })
                   }
                 />
-               
               </div>
             )}
 
             {isLogin && (
               <div className="flex justify-end">
                 <Link
-                  to="/forgot-password" 
+                  to="/forgot-password"
                   className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline ml-1"
                 >
                   Forgot Password?
@@ -252,8 +250,8 @@ const Login = () => {
                   ? "Sign In..."
                   : "Creating Account..."
                 : isLogin
-                ? "Sign In"
-                : "Create Account"}
+                  ? "Sign In"
+                  : "Create Account"}
             </Button>
           </form>
 
@@ -269,10 +267,10 @@ const Login = () => {
             <GoogleLogin
               onSuccess={handleSuccess}
               onError={() => console.log("Login Failed")}
-              theme="filled_black" 
-              size="large" 
-              shape="pill" 
-              width="390" 
+              theme="filled_black"
+              size="large"
+              shape="pill"
+              width="390"
               text="signin_with"
             />
           </div>

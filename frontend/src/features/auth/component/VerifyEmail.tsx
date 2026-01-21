@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { authService } from '../service/authService';
 import { useAuthStore } from '../store/useAuthStore';
 import { OTP_EXPIRATION_MINUTES, OTP_TYPE, ROLES } from '../../../constants/constants';
-import { useAuth } from '../hook/useAuth';
+
 
 
 const VerifyEmail = () => {
@@ -14,8 +14,8 @@ const VerifyEmail = () => {
     const location=useLocation();
     const {email}=location.state;
     const navigate=useNavigate();
-    const {user}=useAuth();
-    const {setAuth}=useAuthStore();
+    const {user}=useAuthStore();
+    const {setUser}=useAuthStore();
     const [otp, setOtp] = useState("");
     const [timeLeft, setTimeLeft] = useState(OTP_EXPIRATION_MINUTES*60);
     const [isLoading, setIsLoading] = useState(false);
@@ -89,7 +89,7 @@ const VerifyEmail = () => {
             const userData=await authService.verify({ email, otp: otpValue });
             console.log(userData);
             toast.success("Verification successful!");
-            setAuth(userData.user,userData.accessToken);
+            setUser(userData.user);
             const userRole=userData.user.role;
             userRole===ROLES.USER && navigate('/user/add-UserProfile');       
             userRole===ROLES.TRAINER && navigate('/trainer/add-TrainerProfile')   ;      

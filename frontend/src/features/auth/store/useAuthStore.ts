@@ -1,11 +1,10 @@
-// src/store/useAuthStore.ts
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { UserRole } from '../../../constants/constants';
+import { create } from "zustand";
+import { devtools, persist} from "zustand/middleware";
+
+import type { UserRole } from "../../../constants/constants";
 
 export interface User {
-  id: string; 
-  // name:string, 
+  id: string;
   email: string;
   role: UserRole;
   hasProfile: boolean;
@@ -13,57 +12,49 @@ export interface User {
 
 export interface AuthState {
   user: User | null;
-  accessToken: string | null;
   isAuthenticated: boolean;
-  isLoading: boolean; 
-  // Actions to update the state
-  setAuth: (user: User,accessToken: string) => void;
-  setAccessToken: (token: string)=>void;
-  setUser: (user:User)=>void;
+  isLoading: boolean;
+  setUser: (user: User) => void;
   setHasProfile: (status: boolean) => void;
   clearAuth: () => void;
   setLoading: (loading: boolean) => void;
 }
 
-
 export const useAuthStore = create<AuthState>()(
-  persist(
+  devtools(
+    persist(
     (set) => ({
-      // INITIAL STATE
       user: null,
-      accessToken:  null,
       isAuthenticated: false,
-      isLoading: true,      
+      isLoading: true, 
 
-      // ACTIONS ( to change the state)      
-      
-      setAuth: (user, accessToken) => set({ 
-        user, 
-        accessToken, 
-        isAuthenticated: true, 
-        isLoading: false 
-      }),
-      setAccessToken: (accessToken) => set({ accessToken }),
-      setUser: (user) => set({ user, isAuthenticated: true }),
-      clearAuth: () => {
-       set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false });
-        localStorage.removeItem('otpExpiry');
-      },
+      setUser: (user) =>
+        set({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+        }),
 
-      //  Update hasProfile 
-      setHasProfile: (status: boolean) => 
+      clearAuth: () =>
+        set({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        }),
+
+      setHasProfile: (status) =>
         set((state) => ({
-          user: state.user ? { ...state.user, hasProfile: status } : null
+          user: state.user ? { ...state.user, hasProfile: status } : null,
         })),
 
-      setLoading: (loading: boolean) => set({ isLoading: loading }),
+      setLoading: (loading) => set({ isLoading: loading }),
     }),
     {
-      name: 'auth-storage', // The key name in  LocalStorage
-      partialize: (state) => ({ 
-          user: state.user, 
-          // isAuthenticated: state.isAuthenticated 
-        }), 
+      name: "auth-storage",      
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
-  )
+  ))
 );

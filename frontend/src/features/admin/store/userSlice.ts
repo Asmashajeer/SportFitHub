@@ -16,15 +16,16 @@ export interface Users{
   createdAt: Date
 }
 export interface UserStats{
-  totalUsers:number|0,
-  activeUsers:number|0,
-  blockedUsers:number|0
+  totalUsers:number,
+  activeUsers:number,
+  blockedUsers:number
 }
 export interface UserSlice {
 
     users:Users[],
     userStats:UserStats |null,
     setUsers:(users:Users[])=>void,
+    setUserStats:(userStats:UserStats)=>void,
     fetchStats:()=>Promise<UserStats | undefined>,
     updateUser:(user:Users)=>void
     removeUser:(id:string)=>void,
@@ -34,9 +35,14 @@ export interface UserSlice {
 
 export const createUserSlice:StateCreator<UserSlice>=(set)=>({
     users:[],
-    userStats:null,
+    userStats:{
+        totalUsers:0,
+        activeUsers:0,
+        blockedUsers:0
+    },
        
     setUsers:(users:Users[])=>set({users}),
+    setUserStats:(userStats:UserStats)=>set({userStats}),
     fetchStats: async () => {
         try {
             const stats = await adminService.getStats();           
@@ -47,10 +53,13 @@ export const createUserSlice:StateCreator<UserSlice>=(set)=>({
             console.error("Failed to fetch stats", error);
         }
     },
-    setUserStats:(userStats:UserStats)=>set({userStats}),
-    updateUser:(updatedUser:Users)=>set((state)=>({
-        users:state.users.map(user=>user.id === updatedUser.id ? updatedUser : user)
-    })),
+        updateUser:(updatedUser:Users)=>set((state)=>({
+               users:state.users.map((user)=>user.id===updatedUser.id?{...updatedUser}:user)
+               
+            })
+        ),
+    
+
     removeUser:(id:string)=>set((state)=>({
         users:state.users.filter((user=>user.id!==id))
      })),

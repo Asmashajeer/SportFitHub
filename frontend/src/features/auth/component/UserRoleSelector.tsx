@@ -1,68 +1,45 @@
-import React, { useState } from 'react';
-import { UserCog,  ChevronDown, ArrowRight } from 'lucide-react';
-import { ROLES, type UserRole } from '../../../constants/constants';
-import { authService } from '../service/authService';
-
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/useAuthStore';
-import toast from 'react-hot-toast';
-
-
+import React, { useState } from "react";
+import { UserCog, ChevronDown, ArrowRight } from "lucide-react";
+import { ROLES, type UserRole } from "../../../constants/constants";
+import { authService } from "../service/authService";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
+import toast from "react-hot-toast";
 
 const UserRoleSelector: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>(ROLES.USER);
   const [isLoading, setIsLoading] = useState(false);
-
-    const navigate=useNavigate();
-    const user=useAuthStore(state=>state.user);
-    const setAuth=useAuthStore(state=>state.setAuth);
-    
-
-
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
 
   const handleContinue = async () => {
-  
-      console.log("selectedrole",selectedRole);
-      console.log("user",user);
- 
-    if(!user) {
+    if (!user) {
       console.log("no user");
       return;
     }
-    const email=user.email;
 
-    setIsLoading(true);    
-   
-     try{
-            console.log(email);
-            const data= await authService.updateRole(email,selectedRole);
-            setAuth(data.user,data.accessToken);
-           
-            if (!user!.hasProfile &&user!.role===ROLES.USER) {
-              navigate('/user/add-Profile');
-            } else if(!user!.hasProfile &&user!.role===ROLES.TRAINER) {
-               navigate('/trainer/add-Profile');
-             
-            }
-            else{
-             navigate(`/${user?.role}/dashboard`);
-            }
-           
-           
-           
-          } 
-          catch(error:any){
-                toast.error(error.message || "Invalid code");
-                         
-            } 
-   
-    console.log('Selected Role:', selectedRole);
+    const email = user.email;
+    setIsLoading(true);
 
+    try {
+      const data = await authService.updateRole(email, selectedRole);
+      setUser(data.user);
+      const { role } = data.user;
+      if (!user.hasProfile) {
+        navigate(`/${role}/add-Profile`);
+      } else if (role) {
+        navigate(`/${role}/dashboard`);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Invalid code");
+    }
+
+    console.log("Selected Role:", selectedRole);
     setIsLoading(false);
-   
   };
 
-  const selectedRoleData =  selectedRole;
+  const selectedRoleData = selectedRole;
 
   return (
     <div className="min-h-screen bg-[#0a0b0d] flex items-center justify-center p-4">
@@ -92,12 +69,13 @@ const UserRoleSelector: React.FC = () => {
                 onChange={(e) => setSelectedRole(e.target.value as UserRole)}
                 className="w-full px-4 py-3 pr-10 rounded-xl bg-secondary/60 border border-[#454c59] text-white appearance-none focus:ring-2 focus:ring-primary outline-none transition-all duration-200 cursor-pointer"
               >
-                
-                {Object.values(ROLES).filter((role)=>role!==ROLES.ADMIN).map((role) => (
-                  <option key={role} value={role}>
-                   {role.charAt(0).toUpperCase() + role.slice(1)}
-                  </option>
-                ))}
+                {Object.values(ROLES)
+                  .filter((role) => role !== ROLES.ADMIN)
+                  .map((role) => (
+                    <option key={role} value={role}>
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </option>
+                  ))}
               </select>
               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
             </div>
@@ -107,12 +85,10 @@ const UserRoleSelector: React.FC = () => {
           {selectedRoleData && (
             <div className="mb-6 p-4 rounded-xl bg-primary/10 border border-primary/20">
               <div className="flex items-start gap-3">
-                
                 <div>
                   <h3 className="text-primary font-bold text-lg">
                     {selectedRole}
                   </h3>
-                  
                 </div>
               </div>
             </div>

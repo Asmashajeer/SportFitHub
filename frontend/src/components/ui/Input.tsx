@@ -10,7 +10,7 @@ export const Input = ({ label, type,className = "", ...props }: InputProps) => {
   return (
     <div className="flex flex-col gap-1.5 my-3 w-full">
      
-      
+      <label className="left-0">{label}</label>
       <input
         {...props} 
         type={type}       

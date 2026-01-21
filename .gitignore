@@ -1,16 +1,23 @@
-# --- Backend specific ---
-backend/.env
-backend/venv/
-backend/__pycache__/
-backend/*.log
+# --- Dependencies ---
+**/node_modules/
+**/venv/
+**/__pycache__/
 
-# --- Frontend specific ---
-frontend/node_modules/
+# --- Environment Variables (CRITICAL) ---
+**/.env
+**/.env.local
+**/.env.*.local
+
+# --- Build & Logs ---
+**/dist/
+**/build/
+**/.next/
+**/*.log
+backend/dist/
 frontend/dist/
-frontend/.next/
-frontend/build/
 
-# --- General/OS ---
+# --- OS & Editors ---
 .DS_Store
 Thumbs.db
 .vscode/
+.idea/

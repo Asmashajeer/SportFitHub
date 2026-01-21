@@ -10,6 +10,12 @@ function App() {
  
    const { isLoading } = useAuth(); // Initialize here
 
+    if (isLoading) {
+      return (
+      <div>Loading Session...
+        <LoadingScreen/>
+      </div>
+    )}
       
   return (
     <>

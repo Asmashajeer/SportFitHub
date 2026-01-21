@@ -5,9 +5,10 @@ import {  z } from "zod";
 import { OTP_TYPE, ROLES } from "../../../constants/constants";
 
 
-export const EmailSchema=z.email("Invalid Email")
-  .min(4,"Email required")
-  .transform((email)=>email.trim())
+export const EmailSchema = z.email("invalid email")                 
+  .trim()                    // 2. Trim FIRST (so " a@b.com" becomes "a@b.com")
+  .min(4, "Email required")  // 3. Check length
+  
 
 export const  passwordSchema=z.string()
     .min(8, "Password must be at least 8 characters")

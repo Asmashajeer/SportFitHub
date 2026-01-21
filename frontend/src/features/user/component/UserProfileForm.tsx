@@ -111,9 +111,9 @@ const UserProfileForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0b0d] p-4 py-8">
+    <div className="min-h-screen bg-[#0a0b0d] p-4">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-[#212222] border border-[#454c59] rounded-3xl shadow-2xl p-8">
+        <div className="bg-secondary border border-[#454c59] rounded-3xl shadow-2xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-[#f8fafca9] mb-2">
@@ -127,7 +127,7 @@ const UserProfileForm: React.FC = () => {
           {/* Profile Picture */}
           <div className="flex flex-col items-center mb-8">
             <div className="relative">
-              <div className="w-32 h-32 rounded-full bg-[#212222]/60 border-2 border-[#454c59] overflow-hidden flex items-center justify-center">
+              <div className="w-32 h-32 rounded-full bg-secondary/60 border-2 border-[#454c59] overflow-hidden flex items-center justify-center">
                 {previewImage ? (
                   <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
@@ -136,7 +136,7 @@ const UserProfileForm: React.FC = () => {
               </div>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-0 right-0 w-10 h-10 bg-[#197e04] rounded-full flex items-center justify-center text-black hover:brightness-110 transition-all duration-200 active:scale-95"
+                className="absolute bottom-0 right-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-black hover:brightness-110 transition-all duration-200 active:scale-95"
               >
                 <Camera className="w-5 h-5" />
               </button>
@@ -164,7 +164,7 @@ const UserProfileForm: React.FC = () => {
                   value={profile.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="Enter your full name"
-                  className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#212222]/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#197e04] outline-none transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
                 />
               </div>
             </div>
@@ -182,7 +182,7 @@ const UserProfileForm: React.FC = () => {
                     type="date"
                     value={profile.dob}
                     onChange={(e) => handleInputChange('dob', e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#212222]/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#197e04] outline-none transition-all duration-200"
+                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
                   />
                 </div>
               </div>
@@ -196,7 +196,7 @@ const UserProfileForm: React.FC = () => {
                   <select
                     value={profile.gender}
                     onChange={(e) => handleInputChange('gender', e.target.value as GenderType)}
-                    className="w-full px-4 py-3 rounded-xl bg-[#212222]/60 border border-[#454c59] text-white focus:ring-2 focus:ring-[#197e04] outline-none transition-all duration-200"
+                    className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
                   > 
                   {Object.values(GENDER_TYPES).map((gType)=>(
                     <option key={gType} value={gType}>{gType}</option> 
@@ -214,7 +214,7 @@ const UserProfileForm: React.FC = () => {
                 <select
                   value={profile.relationship}
                   onChange={(e) => handleInputChange('relationship', e.target.value as RelationType)}
-                  className="w-full px-4 py-3 rounded-xl bg-[#212222]/60 border border-[#454c59] text-white focus:ring-2 focus:ring-[#197e04] outline-none transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
                 >{Object.values(RELATIONSHIP_TYPES).map((relation)=> (
                    <option  key={relation} value={relation}>{relation}</option>   ))}                 
                 </select>
@@ -224,7 +224,7 @@ const UserProfileForm: React.FC = () => {
             {/* Address Section */}
             <div className="border-t border-[#454c59] pt-6">
               <h3 className="text-xl font-bold text-[#f8fafca9] mb-4 flex items-center gap-2">
-                <Home className="w-5 h-5 text-[#197e04]" />
+                <Home className="w-5 h-5 text-primary" />
                 Address
               </h3>
 
@@ -239,7 +239,7 @@ const UserProfileForm: React.FC = () => {
                     value={profile.address.street}
                     onChange={(e) => handleAddressChange('street', e.target.value)}
                     placeholder="Enter street address"
-                    className="w-full px-4 py-3 rounded-xl bg-[#212222]/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#197e04] outline-none transition-all duration-200"
+                    className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
                   />
                 </div>
 
@@ -254,7 +254,7 @@ const UserProfileForm: React.FC = () => {
                       value={profile.address.city}
                       onChange={(e) => handleAddressChange('city', e.target.value)}
                       placeholder="Enter city"
-                      className="w-full px-4 py-3 rounded-xl bg-[#212222]/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#197e04] outline-none transition-all duration-200"
+                      className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
                     />
                   </div>
                   <div>
@@ -266,7 +266,7 @@ const UserProfileForm: React.FC = () => {
                       value={profile.address.zip}
                       onChange={(e) => handleAddressChange('zip', e.target.value)}
                       placeholder="Enter ZIP code"
-                      className="w-full px-4 py-3 rounded-xl bg-[#212222]/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#197e04] outline-none transition-all duration-200"
+                      className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
                     />
                   </div>
                 </div>
@@ -277,12 +277,12 @@ const UserProfileForm: React.FC = () => {
             <div className="border-t border-[#454c59] pt-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-[#f8fafca9] flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-[#197e04]" />
+                  <MapPin className="w-5 h-5 text-primary" />
                   Location Coordinates
                 </h3>
                 <button
                   onClick={getCurrentLocation}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#197e04]/10 border border-[#197e04]/30 text-[#197e04] text-sm font-medium hover:bg-[#197e04]/20 transition-all duration-200"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30ext-[#197e04] text-sm font-medium hover:bg-primary/20 transition-all duration-200"
                 >
                   <Navigation className="w-4 h-4" />
                   Get Current
@@ -300,7 +300,7 @@ const UserProfileForm: React.FC = () => {
                     value={profile.location.latitude}
                     onChange={(e) => handleLocationChange('latitude', e.target.value)}
                     placeholder="0.000000"
-                    className="w-full px-4 py-3 rounded-xl bg-[#212222]/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#197e04] outline-none transition-all duration-200"
+                    className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
                   />
                 </div>
                 <div>
@@ -313,7 +313,7 @@ const UserProfileForm: React.FC = () => {
                     value={profile.location.longitude}
                     onChange={(e) => handleLocationChange('longitude', e.target.value)}
                     placeholder="0.000000"
-                    className="w-full px-4 py-3 rounded-xl bg-[#212222]/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#197e04] outline-none transition-all duration-200"
+                    className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
                   />
                 </div>
               </div>
@@ -323,7 +323,7 @@ const UserProfileForm: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold tracking-tight transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:grayscale bg-[#197e04] text-black hover:shadow-[0_0_20px_rgba(25,126,4,0.3)] hover:brightness-110 mt-8"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold tracking-tight transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:grayscale bg-primary text-black hover:shadow-[0_0_20px_rgba(25,126,4,0.3)] hover:brightness-110 mt-8"
             >
               {isLoading ? (
                 <>
