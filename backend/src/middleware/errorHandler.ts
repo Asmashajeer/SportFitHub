@@ -7,7 +7,7 @@ const errorHandler = (
   next: NextFunction) => {
   console.log(`Error:`, err);
   const statusCode = err instanceof AppError ? err.status : 500;
-  const message=err.message|| 'Internal Server Error';
+  const message=err.message||'Internal Server Error';
   return res.status(statusCode).json({message});
 };
 export default errorHandler;

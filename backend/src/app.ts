@@ -17,10 +17,15 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 );
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(function (req, res, next) {
+    res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+    next();
+});
 
 import authRoutes from './api/routes/auth.route';
 import adminRoute from './api/routes/admin/admin.route';

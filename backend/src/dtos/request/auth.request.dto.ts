@@ -5,6 +5,7 @@ import { UserRole } from '../../models/user.model';
 
 // RegisterRequestDTO
 export const RegisterSchema = z.object({ 
+  name:z.string().min(3,"please provide a proper name"),
   email: z.email("invalid email.format")
     .min(1, "Email is required")    
     .trim()

@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom"
 import AdminDashboard from "../pages/admin/AdminDashboard"
-import UserManagement from "../features/admin/component/UserManagement"
+import UserManagement from "../features/admin/component/user-management/UserManagement"
 import AdminMainLayout from "../components/layout/AdminLayout"
 
 const AdminRoutes=()=>{

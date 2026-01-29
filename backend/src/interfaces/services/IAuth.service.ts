@@ -12,6 +12,6 @@ export interface IAuthService {
     googleLogin(token: string):Promise <UserResponseDTO>;
     updateRole(data:UpdateRoleDTO):Promise<UserResponseDTO>;
      authMe(userId:string):Promise<AuthMeResponseDto>
-    refreshAccessToken(refreshToken: string): Promise<{ accessToken: string }>
+    refreshAccessToken(refreshToken: string): Promise<{ accessToken: string,refreshToken:string }>
 
 }

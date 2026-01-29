@@ -40,7 +40,8 @@ export default class AuthController {
 
   resendOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { email, otpContext } = req.body.data;
+      
+      const { email, otpContext } = req.body;
       const result: RegisterResponseDTO = await this._authService.resendOtp(email, otpContext);
       res.status(result.statusCode).json(result);
     } catch (error) {
@@ -75,10 +76,10 @@ export default class AuthController {
   // login user
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      console.log(" welcome");
       const { email, password, role } = req.body;
       const result = await this._authService.login({ email, password });
-      const { refreshToken, accessToken, ...data } = result;
-      console.log(accessToken);
+      const { refreshToken, accessToken, ...data } = result; 
       this._setAuthCookies(res, accessToken, refreshToken);
       res.status(200).json(data);
     } catch (error) {
@@ -96,7 +97,7 @@ export default class AuthController {
       this._setAuthCookies(res, accessToken, refreshToken);
       res.status(200).json(user);
     } catch (error) {
-      console.error('Google Auth Error:', error);
+      console.error('Google Auth Error:', error.message);
       next(error);
     }
   };
@@ -124,9 +125,9 @@ export default class AuthController {
   authMe = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.user as any;
-      const user: AuthMeResponseDto = await this._authService.authMe(id);
-      console.log(user);
-      res.status(200).json(user);
+      const data: AuthMeResponseDto = await this._authService.authMe(id);
+      
+      res.status(200).json(data);
     } catch (error) {
       next(error);
     }
@@ -135,17 +136,13 @@ export default class AuthController {
   //refresh AccessToken
   refresh = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const refreshToken = req.cookies.refreshToken;
-      if (!refreshToken)
+      const refreshTokenExisted = req.cookies.refreshToken;
+      if (!refreshTokenExisted)
              throw new AppError('No refreshToken provided', 401);
 
-      const accessToken = await this._authService.refreshAccessToken(refreshToken);
-      res.cookie('accessToken', accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
-      });
+      const {accessToken,refreshToken} = await this._authService.refreshAccessToken(refreshTokenExisted);
+     
+      this._setAuthCookies(res, accessToken, refreshToken);
 
       res.status(200).json({ success: true });
     } catch (error) {

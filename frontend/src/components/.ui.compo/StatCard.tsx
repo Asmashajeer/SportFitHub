@@ -10,7 +10,7 @@ interface StatCardProps {
 }
 const  StatCard=({title, value,icon:Icon,color,borderColor}:StatCardProps)=> {
   return (
-    <div className={`bg-secondary p-3 rounded-xl shadow-sm border-r-2 border-b-2 ${borderColor} flex items-center justify-between`}>
+    <div className={`bg-secondary p-3 rounded-br-3xl shadow-sm border-2 border-transparent border-r-2 border-b-2 ${borderColor} flex items-center justify-between`}>
         <div>
         <p className="text-sm font-medium text-gray-400 mb-1">{title}</p>
         <h3 className="text-2xl font-bold text-primary">{value}</h3>

@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { authService } from "../service/authService";
 import toast from "react-hot-toast";
 import { EmailSchema } from "../types/auth.schema";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 
 const ForgotPassword: React.FC = () => {
@@ -20,17 +22,23 @@ const ForgotPassword: React.FC = () => {
     if (!result.success) {
       const errorMessage = result?.error?.issues[0].message || "check mail";
       setError(errorMessage);
+       setIsLoading(false);
       return;
     }
 
     try {
-      const response = await authService.forgotPassword(email);
-      
+      await authService.forgotPassword(email);     
+      toast.success("Please check your mail for verification code.");
       navigate("/reset-Password", { state: { email: email } });
-      toast.success(response.message);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Invalid code");
-    }
+      
+    } catch(error:unknown){
+        if (error instanceof Error) {
+            toast.error("Invalid Code " + error.message);
+        } else {
+            toast.error("An unexpected error occurred");
+        }
+        console.error(error)
+     }    
   };
 
   const handleBackToLogin = () => {
@@ -43,7 +51,7 @@ const ForgotPassword: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0b0d] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm ">
         {/* Back Button */}
         <button
           onClick={handleBackToLogin}
@@ -54,16 +62,16 @@ const ForgotPassword: React.FC = () => {
         </button>
 
         {/* Main Card */}
-        <div className="bg-secondary border border-[#454c59] rounded-3xl shadow-2xl p-8">
+        <div className="--color-card border border-[#454c59] rounded-3xl shadow-4xl p-8">
           <>
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
-                <Mail className="w-10 h-10 text-primary" />
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
+                <Mail className="w-8 h-8 text-primary" />
               </div>
-              <h1 className="text-3xl font-bold text-[#f8fafca9] mb-2">
+              <h3 className="text-2xl font-bold text-[#f8fafca9] mb-2">
                 Forgot Password?
-              </h1>
+              </h3>
               <p className="text-slate-400 text-sm">
                 No worries, we'll send you reset instructions
               </p>
@@ -80,7 +88,7 @@ const ForgotPassword: React.FC = () => {
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                  <input
+                  <Input
                     id="email"
                     type="email"
                     value={email}
@@ -102,10 +110,11 @@ const ForgotPassword: React.FC = () => {
                 )}
               </div>
 
-              <button
+              <Button
                 type="submit"
+                variant="default"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold tracking-tight transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:grayscale bg-primary text-black hover:shadow-[0_0_20px_rgba(25,126,4,0.3)] hover:brightness-110"
+                className="w-full flex items-center justify-center gap-2 px-6 py-2  font-bold tracking-tight transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:grayscale bg-primary text-black hover:shadow-[0_0_20px_rgba(25,126,4,0.3)] hover:brightness-110"
               >
                 {isLoading ? (
                   <>
@@ -118,13 +127,13 @@ const ForgotPassword: React.FC = () => {
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}
-              </button>
+              </Button>
             </form>
           </>
         </div>
 
         {/* Footer Text */}
-        <p className="text-center text-slate-500 text-sm mt-6">
+        <p className="text-center text-slate-500 text-sm mt-3">
           Remember your password?{" "}
           <button
             onClick={handleBackToLogin}

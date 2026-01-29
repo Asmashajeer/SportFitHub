@@ -36,10 +36,11 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
     return await this.model.find(query).exec();
   }
 
-  async findAll(page: number = 1, limit: number = 5): Promise<IUser[]> {
-    const query: FilterQuery<IUser> = {role: { $ne: 'admin' } };
-    const skip = (page - 1) * limit;
-    return await this.model.find(query).skip(skip).limit(limit).sort({'email':1}).exec();
+  async findAll(filter:FilterQuery<IUser>={},options: { skip: number; limit: number }): Promise<IUser[]> {     
+    return await this.model.find(filter).sort({ createdAt: -1 })
+    .skip(options.skip)  
+    .limit(options.limit) 
+    .exec();;
   }
   async countOfUsers(FilterQuery:object={}):Promise<number>{
     const query: FilterQuery<IUser> = {...FilterQuery,role: { $ne: 'admin' } };

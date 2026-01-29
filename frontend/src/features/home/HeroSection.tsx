@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import  Button  from "../../components/ui/Button";
+import  Button  from "../../components/.ui.compo/Button";
 // import { useAuthStore } from "../../store/useAuthStore";
 
 const HeroSection = () => {

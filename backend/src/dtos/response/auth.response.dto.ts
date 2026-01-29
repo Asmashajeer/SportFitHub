@@ -8,24 +8,21 @@ export interface BaseResponseDTO {
 
 export interface  RegisterDataDTO{   
     id: string,
+    name:string,
     email: string,
-    role: UserRole,    
-    createdAt: string,  
-    
+    role: UserRole, 
+    isVerified:boolean,
 }
 
 export interface RegisterResponseDTO extends BaseResponseDTO{
-  data: RegisterDataDTO,
-  emailSent: boolean,
-  
+  user: RegisterDataDTO,
+  emailSent: boolean,  
 }
 //UserResponseDTO
-export interface UserDataDTO {
-      id:string
-      email:string,
-      role: string,     
+export interface UserDataDTO extends RegisterDataDTO{       
       hasProfile?: boolean,
 }
+
 export interface UserResponseDTO extends BaseResponseDTO{
   user:UserDataDTO,  
   accessToken: string,

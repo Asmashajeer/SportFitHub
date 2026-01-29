@@ -4,8 +4,9 @@ import { AdminIUserView, IUser } from "@/models/user.model";
 export const toUsersResponseData= (user:IUser):usersResposeDTO=>{
     return{
             id: user._id.toString(),
+            name:user.name,
             email: user.email, 
-            password:user.password,
+            
             role: user.role,
             googleId: user.googleId||" ",
             isVerified:user.isVerified,

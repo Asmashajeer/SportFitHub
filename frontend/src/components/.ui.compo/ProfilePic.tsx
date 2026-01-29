@@ -1,10 +1,10 @@
-import { UserCheck } from "lucide-react";
+
 import { useAuthStore } from "../../features/auth/store/useAuthStore";
 
 function ProfilePic() {
-    const {user} = useAuthStore();
+    const user = useAuthStore((state)=>state.user);
     
-   const alias=user?.email?.[0].toUpperCase();
+   const alias=user?.name?.[0].toUpperCase();
 
   return (
     <div className="flex items-center justify-around pb-2">

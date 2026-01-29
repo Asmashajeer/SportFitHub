@@ -1,22 +1,18 @@
 // src/components/layout/Sidebar.tsx
-import { LayoutDashboard, Dumbbell, Calendar, User, Settings, LogOut, PlayCircle, Tent, CheckSquare, TicketPercent, Users, Ticket, CalendarDays, ShieldCheck } from 'lucide-react';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { LogOut} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 
 import { ROLES } from '../../constants/constants';
 import { authService } from '../../features/auth/service/authService';
 import toast from 'react-hot-toast';
 import { UseAdminStore } from '../../features/admin/store/useAdminStore';
-const navLinks = [
-  { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { name: 'User Management', icon: User, path: '/users' },
-  { name: 'Session Management ', icon: PlayCircle, path: '/sessions' },
-  { name: 'Camp Management', icon:Tent , path: '/camps' },
-  { name: 'Approvals', icon: CheckSquare, path: '/approvals' },
-  { name: 'Coupon', icon: TicketPercent, path: '/coupon' },
-  { name: 'Settings', icon: Settings, path: '/settings' },
+import { userNavLinks } from '../../constants/constants';
+import { trainerNavLinks } from '../../constants/constants';
+import Avatar from './Avatar';
+import ProfilePic from '../.ui.compo/ProfilePic';
+// import UserRoleSelector from '@/features/auth/component/UserRoleSelector';
 
-];
 interface SidebarItemProps{
   label:string,
   icon:React.ReactNode,
@@ -70,6 +66,9 @@ const Sidebar:React.FC<SidebarProps> = ({activePage}) => {
   const user=useAuthStore(state=>state.user);
   const clearAuth=useAuthStore(state=>state.clearAuth);
   const clearStore=UseAdminStore(state=>state.clearAdminData);
+  const role=user?.role ;
+  const navLinks=role===ROLES.USER?userNavLinks:trainerNavLinks;
+
   const handleLogout=async ()=>{      
             try{
                 await authService.logout();
@@ -78,74 +77,39 @@ const Sidebar:React.FC<SidebarProps> = ({activePage}) => {
                 navigate('/login');   
                toast.success("Logging out.....") ;
             }
-            catch(error:any){
+            catch(error:unknown){
+              if(error instanceof Error)
                    toast.error(error.message) ;
+              else
+                toast.error("unexpected error occured while logout");
             }
             
                 
         }
   return (
-    <aside className="sidebar-container">
-       <span className="text-xl md:text-2xl font-extrabold tracking-tighter font-sans uppercase">
-            <span className="text-primary">SportFit</span>
-            <span className="text-foreground">Hub</span>
-          </span>
-      <div className="p-8">
+    <aside className="sidebar-container sticky top-16 h-[calc(100vh-4rem)] hidden md:block">
+      
+      <div className="p-8 flex flex-col items-center">
+
+        <ProfilePic/>
         <h1 className="text-2xl font-black italic tracking-tighter text-primary">
-          {user?.role===ROLES.ADMIN ?'Admin':<span className="">user</span>}
+          {user?.role===ROLES.ADMIN ?'Admin':<span className="">{user?.name}</span>}
         </h1>
       </div>
-
+      
       {/* Navigation Links */}
       <nav>
         <div>
-            <SidebarItem 
-              path="/admin/dashboard"
-              icon={<LayoutDashboard className="h-5 w-5" />}
-              label="Dashboard"
-              isActive={activePage === "Dashboard"}/>
-            <SidebarItem 
-                path="/admin/user-management"
-                icon={<Users className="h-5 w-5" />}
-                label="Users"
-                isActive={activePage === "Users"}
-                onClick={()=>navigate('/admin/user-management')}
-            />
-            <SidebarItem 
-                path="/admin/session-management"
-                icon={<Ticket className="h-5 w-5" />}
-                label="Sessions"
-                isActive={activePage === "Sessions"}
-                onClick={()=>navigate('/admin/session-management')}
-            />
-            <SidebarItem 
-                path="/admin/camp-management"
-                icon={<CalendarDays className="h-5 w-5" />}
-                label="Camps"
-                isActive={activePage === "Camps"}
-                onClick={()=>navigate('/admin/camp-management')}
-            />
+          {navLinks.map((item)=>(
               <SidebarItem 
-                path="/admin/approvals"
-                icon={<ShieldCheck className="h-5 w-5" />}
-                label="Approvals"
-                isActive={activePage === "Approvals"}
-                onClick={()=>navigate('/admin/approvals')}
-            />
-              <SidebarItem 
-                path="/admin/coupons"
-                icon={<Ticket className="h-5 w-5" />}
-                label="Coupons"
-                isActive={activePage === "Coupons"}
-                onClick={()=>navigate('/admin/coupons')}
-            />
-            <SidebarItem 
-                path="/admin/settings"
-                icon={<Settings className="h-5 w-5" />}
-                label="settings"
-                isActive={activePage === "Settings"}
-                onClick={()=>navigate('/admin/settings')}
-            />
+                    path={item.path}
+                    icon={<item.icon className="h-5 w-5" />}
+                    label={item.label}
+                    isActive={activePage === item.label}
+              />
+          ))}
+            
+
         </div>
       </nav>
       

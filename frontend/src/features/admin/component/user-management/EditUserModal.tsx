@@ -1,29 +1,30 @@
-import { useEffect, useState } from "react";
-import { ROLES, type UserRole } from "../../../constants/constants";
-import type { User } from "../../auth/store/useAuthStore";
+import {  useState } from "react";
+import { type UserRole } from "../../../../constants/constants";
+import type { User } from "../../../auth/store/useAuthStore"
 interface EditUserModalProps {
   user: Omit<User, "hasProfile"> | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (updatedData: any) => Promise<void>;
+  // onSave: (updatedData: any) => Promise<void>;
 }
 
 const EditUserModal: React.FC<EditUserModalProps> = ({
   user,
   isOpen,
   onClose,
-  onSave,
+  // onSave,
 }) => {
-  const [selectedRole, setSelectedRole] = useState<UserRole | "">("");
-  useEffect(() => {
-    if (user) {
-      setSelectedRole(user.role as UserRole);
-    }
-  }, [user]);
+
+  const [selectedRole, setSelectedRole] = useState<UserRole>(user?.role as UserRole);
+  // useEffect(() => {
+  //   if (user) {
+  //     setSelectedRole(user.role as UserRole);
+  //   }
+  // }, [user]);
   if (!isOpen || !user) return null;
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await onSave(selectedRole);
+    // await onSave(selectedRole);
   };
 
   return (
@@ -55,11 +56,11 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               onChange={(e) => setSelectedRole(e.target.value as UserRole)}
               className="w-full bg-gray-800 border border-gray-700 text-white p-2 rounded-md"
             >
-              {Object.values(ROLES).map((role) => (
+              {/* {Object.values(ROLES).map((role as UserRole) => (
                 <option key={role} value={role}>
                   {role}
                 </option>
-              ))}
+              ))} */}
             </select>
           </div>
 

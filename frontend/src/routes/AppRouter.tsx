@@ -16,6 +16,8 @@ import VerifyEmail from "../features/auth/component/VerifyEmail";
 import MainLayout from "../components/layout/MainLayout";
 import AdminRoutes from "./AdminRoutes";
 import { useAuthStore } from "../features/auth/store/useAuthStore";
+import { UnauthorizedPage } from "@/pages/UnauthorizedPage";
+import Register from "@/features/auth/component/Register";
 function AppRouter() {
   const isAuthenticated=useAuthStore(state=>state.isAuthenticated);
   const user =useAuthStore(state=>state.user);
@@ -26,20 +28,21 @@ function AppRouter() {
         <Routes>
           {/* public Routes */}
           <Route path="/" element={<HomePage />} />
-
+          <Route path="/register" element={<Register/>} />
          
           <Route path="/login" element={
-              isAuthenticated && user 
+              isAuthenticated && user &&user.isVerified 
                 ? <Navigate to={Object.values(ROLES).includes(user.role) ? `/${user.role}/dashboard` : "/update-role"} replace />
                 : <Login />
             } />
          
           
-          <Route path="/logout" element={<Home />} />
+          <Route path="/logout" element={<HomePage />} />
           <Route path="/verifyEmail" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/update-role" element={<UserRoleSelector />} />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
           
           <Route element={<MainLayout />}>
             {/* user Routes */}

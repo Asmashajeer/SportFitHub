@@ -1,3 +1,5 @@
+import { CalendarDays, CircleUser, LayoutDashboard, MessageCircle, MessageSquare, MessageSquareDiff, Ticket, UserCheck, Wallet, Wallet2 } from "lucide-react";
+
 export const ROLES = {
   ADMIN: 'admin',
   TRAINER: 'trainer',
@@ -28,3 +30,24 @@ export const RELATIONSHIP_TYPES = {
   OTHER: 'Other'
 };
 export type RelationType = typeof RELATIONSHIP_TYPES[keyof typeof RELATIONSHIP_TYPES];
+
+
+export const userNavLinks = [
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/user/dashboard',},
+  { label: 'Calender', icon: CalendarDays, path: '/user/calender' },
+  { label: 'Enrollments ', icon: Ticket, path: '/user/enrolment' },
+  { label: 'Payments', icon:Wallet , path: '/user/payments' },
+  { label: 'Messages', icon: MessageSquare, path: '/user/messages' },
+  { label: 'Profile', icon: CircleUser, path: '/user/profile' },
+];
+
+export const trainerNavLinks = [
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/trainer/dashboard' },
+  { label: 'Schedule', icon:CalendarDays, path: '/traner/schedule' },
+  { label: 'Mark Attendance ', icon:UserCheck, path: '/trainer/mark-attendace' },
+  { label: 'Earnings', icon:Wallet2 , path: '/camps' },
+  { label: 'Communication', icon: MessageCircle, path: '/trainer/communication' },
+  { label: 'feedback Rating', icon: MessageSquareDiff, path: '/trainer/feedback-rating' },
+  { label: 'Profile', icon: CircleUser, path: 'trainer/profile' },
+
+];

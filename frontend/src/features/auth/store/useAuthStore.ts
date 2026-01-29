@@ -5,9 +5,11 @@ import type { UserRole } from "../../../constants/constants";
 
 export interface User {
   id: string;
+  name:string;
   email: string;
   role: UserRole;
   hasProfile: boolean;
+  isVerified:boolean;
 }
 
 export interface AuthState {

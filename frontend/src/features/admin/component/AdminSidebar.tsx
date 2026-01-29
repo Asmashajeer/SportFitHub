@@ -14,7 +14,7 @@ import { ROLES } from "../../../constants/constants";
 import { authService } from "../../auth/service/authService";
 import toast from "react-hot-toast";
 import { UseAdminStore } from "../store/useAdminStore";
-import ProfilePic from "../../../components/ui/ProfilePic";
+import ProfilePic from "../../../components/.ui.compo/ProfilePic";
 
 interface SidebarItemProps {
   label: string;
@@ -70,8 +70,11 @@ const AdminSidebar: React.FC<SidebarProps> = ({ activePage }) => {
       clearStore();
       navigate("/login");
       toast.success("Logging out.....");
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if(error instanceof Error){
+        toast.error(error.message);
+      }
+      else toast.error("unexpected error occured")
     }
   };
   return (
@@ -83,11 +86,9 @@ const AdminSidebar: React.FC<SidebarProps> = ({ activePage }) => {
       <div className="  mx-auto  p-5">
         <ProfilePic />
         <h1 className="text-2xl font-black m-auto tracking-tighter text-primary">
-          {user?.role === ROLES.ADMIN ? (
+          {user?.role === ROLES.ADMIN &&(
             "Admin"
-          ) : (
-            <span className="">user</span>
-          )}
+          ) }
         </h1>
       </div>
 

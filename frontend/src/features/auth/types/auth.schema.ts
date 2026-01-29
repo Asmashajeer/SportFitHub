@@ -5,12 +5,12 @@ import {  z } from "zod";
 import { OTP_TYPE, ROLES } from "../../../constants/constants";
 
 
-export const EmailSchema = z.email("invalid email")                 
+export const EmailSchema = z.email("Email is required")                 
   .trim()                    // 2. Trim FIRST (so " a@b.com" becomes "a@b.com")
   .min(4, "Email required")  // 3. Check length
   
 
-export const  passwordSchema=z.string()
+export const  passwordSchema=z.string("Password is required")
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
@@ -18,14 +18,15 @@ export const  passwordSchema=z.string()
   
 
 
-export const LoginSchema = z.object({
+export const LoginSchema = z.object({  
   email: EmailSchema,
   password: passwordSchema,
   role: z.enum(ROLES),
 });
 
-
 export const RegisterSchema = LoginSchema.extend({
+  name:z.string()
+    .min(3,"Please enter a valid name"), 
   confirmPassword: z.string(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords do not match",
@@ -35,6 +36,11 @@ export const RegisterSchema = LoginSchema.extend({
 // 3. Export the clean types
 export type LoginCredentials = z.infer<typeof LoginSchema>;
 export type RegisterFormData = z.infer<typeof RegisterSchema>;
+export  const registerCredentialSchema=LoginSchema.extend({
+     name:z.string()
+    .min(3,"Please enter a valid name"), 
+})
+export type registerCredentials=z.infer<typeof registerCredentialSchema>;
 
 
 export const UpdateRoleSchema =  z.object({
@@ -59,10 +65,7 @@ export const ResendOtpSchema=z.object({
 export type ResendOtpData=z.infer<typeof ResendOtpSchema>
 
 
-// export const EmailSchema=z.object({
-//   email:z.email("Enter a valid Email")
-//   .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "enter a valid email")
-// });
+
 
 
 
@@ -81,51 +84,51 @@ export type ResetPasswordData=z.infer<typeof ResetPasswordSchema>
 
 
 
-// ------------Validation function----------
-export type ValidationResult<T> = 
-  | { success: true; data: T } 
-  | { success: false; errors: Record<string, string> };
+// // ------------Validation function----------
+// export type ValidationResult<T> = 
+//   | { success: true; data: T } 
+//   | { success: false; errors: Record<string, string> };
 
 
-export const validateRegisterForm=(data:any):ValidationResult<any>=>{
+// export const validateRegisterForm=(data:any):ValidationResult<any>=>{
  
-      const formData={
-        email: data.email||"",
-        password: data.password||"",
-        confirmPassword: data?.confirmPassword||"",
-        role: data.role||"",
-      }
-      const result=RegisterSchema.safeParse(formData);
-     if (!result.success) {   
-        const errors: Record<string, string> = {};
-        result.error.issues.forEach((issue) => {
-          const path = issue.path[0] as string;
-          errors[path] = issue.message;
-        });
-        return { success: false, errors };
-      }
-      return { success: true, data: result.data };
-    }
+//       const formData={
+//         email: data.email||"",
+//         password: data.password||"",
+//         confirmPassword: data?.confirmPassword||"",
+//         role: data.role||"",
+//       }
+//       const result=RegisterSchema.safeParse(formData);
+//      if (!result.success) {   
+//         const errors: Record<string, string> = {};
+//         result.error.issues.forEach((issue) => {
+//           const path = issue.path[0] as string;
+//           errors[path] = issue.message;
+//         });
+//         return { success: false, errors };
+//       }
+//       return { success: true, data: result.data };
+//     }
 
 
 
     
-export const validateLoginForm=(data:any):ValidationResult<any>=>{
+// export const validateLoginForm=(data:any):ValidationResult<any>=>{
 
-      const formData={
-        email: data.email||"",
-        password: data.password||"",      
-        role: data.role||"",
-      }
-      const result=LoginSchema.safeParse(formData);
-      if (!result.success) {   
-        const errors: Record<string, string> = {};
-        result.error.issues.forEach((issue) => {
-          const path = issue.path[0] as string;
-          errors[path] = issue.message;
-        });
-        return { success: false, errors };
-      }
-      return { success: true, data: result.data };
+//       const formData={
+//         email: data.email||"",
+//         password: data.password||"",      
+//         role: data.role||"",
+//       }
+//       const result=LoginSchema.safeParse(formData);
+//       if (!result.success) {   
+//         const errors: Record<string, string> = {};
+//         result.error.issues.forEach((issue) => {
+//           const path = issue.path[0] as string;
+//           errors[path] = issue.message;
+//         });
+//         return { success: false, errors };
+//       }
+//       return { success: true, data: result.data };
    
-}
+// }

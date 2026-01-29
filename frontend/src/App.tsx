@@ -4,7 +4,7 @@ import {Toaster} from 'react-hot-toast'
 import './App.css'
 import AppRouter from "./routes/AppRouter"
 import { useAuth } from './features/auth/hook/useAuth';
-import { LoadingScreen } from './components/ui/LoadingScreen';
+import { LoadingScreen } from './components/.ui.compo/LoadingScreen';
 
 function App() {
  
@@ -20,7 +20,7 @@ function App() {
   return (
     <>
      <Toaster 
-        position="top-right"       
+        position="bottom-center"       
         
         toastOptions={{
           // Define default options
@@ -37,12 +37,12 @@ function App() {
           success: {
             duration: 3000,
             style: {
-            background: '#22c55e',
-            color: '#fff',
+            background: '#000',
+            color: '#22c55e',
             },
             icon: '✅',
             iconTheme: {
-            primary: '#fff',   
+            primary: '#000',   
             secondary: '#22c55e', 
       },
           },

@@ -1,4 +1,5 @@
-import type { UserRole } from "../../../constants/constants";
+
+import type { UserRole } from "@/constants/constants";
 import type {User } from "../store/useAuthStore";
 
 //-------------------------------------------API response structure-----------------------
@@ -13,12 +14,14 @@ export interface LoginResponse extends AuthResponse {
   isVerified:boolean
 }
 export interface RegisterResponse{
-  data:{
-    id: string,
-    email: string,
-    emailSent:boolean,
-    createdAt:string
+  user:{
+    id:string,
+      name:string
+      email:string,
+      role: UserRole,  
+      isVerified:boolean,           
   },
+  emailSent: boolean,
   message:string
 }
 

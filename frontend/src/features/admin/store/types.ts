@@ -7,4 +7,12 @@ export interface DashboardStats{
 }
 
 
-
+export interface queryParamsOptions {
+  page: number;
+  search?: string;
+  status?: string;
+  role?: string;
+}
+export interface getAllusersParams extends queryParamsOptions{
+  limit:number
+}

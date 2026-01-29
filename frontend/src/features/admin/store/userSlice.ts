@@ -7,6 +7,7 @@ import { adminService } from "../service/adminService";
 
 export interface Users{
   id:string,
+  name:string,
   email: string, 
   role: UserRole,
   googleId?: string,
@@ -26,7 +27,7 @@ export interface UserSlice {
     userStats:UserStats |null,
     setUsers:(users:Users[])=>void,
     setUserStats:(userStats:UserStats)=>void,
-    fetchStats:()=>Promise<UserStats | undefined>,
+    fetchStats:()=>void
     updateUser:(user:Users)=>void
     removeUser:(id:string)=>void,
     resetUserSlice:()=>void
@@ -46,18 +47,17 @@ export const createUserSlice:StateCreator<UserSlice>=(set)=>({
     fetchStats: async () => {
         try {
             const stats = await adminService.getStats();           
-            set({ userStats: stats.userStats });
-         
-            return stats.userStats;
+            set({ userStats: stats.userStats });       
+            
         } catch (error) {
-            console.error("Failed to fetch stats", error);
+            console.error("Failed to fetch stats", error);                       
         }
     },
-        updateUser:(updatedUser:Users)=>set((state)=>({
-               users:state.users.map((user)=>user.id===updatedUser.id?{...updatedUser}:user)
-               
-            })
-        ),
+    updateUser:(updatedUser:Users)=>set((state)=>({
+            users:state.users.map((user)=>user.id===updatedUser.id?{...updatedUser}:user)
+            
+        })
+    ),
     
 
     removeUser:(id:string)=>set((state)=>({

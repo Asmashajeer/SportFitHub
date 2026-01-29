@@ -5,7 +5,8 @@ import toast from 'react-hot-toast';
 import { authService } from '../service/authService';
 import { useAuthStore } from '../store/useAuthStore';
 import { OTP_EXPIRATION_MINUTES, OTP_TYPE, ROLES } from '../../../constants/constants';
-
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 
 const VerifyEmail = () => {
@@ -14,10 +15,15 @@ const VerifyEmail = () => {
     const location=useLocation();
     const {email}=location.state;
     const navigate=useNavigate();
-    const {user}=useAuthStore();
+ 
     const {setUser}=useAuthStore();
     const [otp, setOtp] = useState("");
-    const [timeLeft, setTimeLeft] = useState(OTP_EXPIRATION_MINUTES*60);
+    const [timeLeft, setTimeLeft] = useState(()=>{
+        const savedExpiry=localStorage.getItem("otpExpiry") ;
+        if(!savedExpiry) return OTP_EXPIRATION_MINUTES * 60 ;
+        const left=Math.floor((parseInt(savedExpiry)-Date.now())/1000);
+        return left>0?left:0;
+    });
     const [isLoading, setIsLoading] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const [canResend, setCanResend] = useState(false);
@@ -26,47 +32,42 @@ const VerifyEmail = () => {
     
     
     const startTimer=()=>{
+          setCanResend(false);
         const expiry=Date.now()+OTP_EXPIRATION_MS;
         localStorage.setItem("otpExpiry",expiry.toString());
-        setTimeLeft(OTP_EXPIRATION_MINUTES*60);        
+        setTimeLeft(OTP_EXPIRATION_MINUTES*60); 
+             
     }
     useEffect(()=>{
-        const savedExpiry=localStorage.getItem("otpExpiry");
-        const now=Date.now();
-        if(savedExpiry){
-            if ((parseInt(savedExpiry))>now){
-                setTimeLeft (Math.floor(parseInt(savedExpiry)-now)/1000);   
-            }
-            localStorage.removeItem("otpExpiry");
-            setCanResend(true);
-        }
-        else{
-            startTimer();
-        }
+        const savedExpiry=localStorage.getItem("otpExpiry") ;
+        if(!savedExpiry) {
+           startTimer();
+        }    
     },[]);
 
-   
-    useEffect(() => {
-        
-        if (timeLeft > 0) {
-          const   interval = setInterval(() => {
+    useEffect(()=>{
+        if(timeLeft<=0){
+            setCanResend(true);
+            localStorage.removeItem("otpExpiry");            
+            return;
+        }
+        const   interval = setInterval(() => {
              setTimeLeft((prev) => prev - 1);
             }, 1000);
             return () => clearInterval(interval);
-        } 
-        else {
-            setCanResend(true);
-            localStorage.removeItem("otpExpiry");
-        }
         
-    }, [timeLeft]);
+    },[timeLeft]);
+
+   
+  
 
 
         // Helper to format 60 into 0:60 or 1:00
     const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
+        const mins = Math.floor(seconds / 60);       
         const secs = seconds % 60;
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        const formatedSecs = secs.toString().padStart(2, '0');
+        return `${mins}:${formatedSecs}`;
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +83,8 @@ const VerifyEmail = () => {
     const handleVerify = async (otpValue: string) => {
         setIsLoading(true);
         try {
-            if (!user) {
+            if (!email) {
+                toast.error("user not found");
                 return navigate ('/login');       
             }
             
@@ -91,14 +93,18 @@ const VerifyEmail = () => {
             toast.success("Verification successful!");
             setUser(userData.user);
             const userRole=userData.user.role;
-            userRole===ROLES.USER && navigate('/user/add-UserProfile');       
-            userRole===ROLES.TRAINER && navigate('/trainer/add-TrainerProfile')   ;      
+            if(userRole===ROLES.USER) navigate('/user/add-Profile');       
+            else if(userRole===ROLES.TRAINER)navigate('/trainer/add-Profile')   ; 
+            else  navigate('/update-role');     
         } 
-        catch (error: any) {
-            toast.error(error.response?.data?.message || "Invalid code");
-            setOtp(""); // Clear on error
-            inputRef.current?.focus();
-        } 
+        catch (error: unknown) {
+            if(error instanceof Error){
+                toast.error(error.message || "Invalid code");
+            }
+            else{
+                toast.error("unexpecter error occured");
+            }
+        }
         finally {
             setIsLoading(false);
         }
@@ -131,7 +137,7 @@ const VerifyEmail = () => {
 
             <div className="relative flex justify-center">
                 {/* 1. THE ACTUAL HIDDEN INPUT (Logic) */}
-                <input
+                <Input
                 ref={inputRef}
                 type="text"
                 value={otp}
@@ -157,23 +163,24 @@ const VerifyEmail = () => {
             </div>
 
             <div className="space-y-4">
-                <button 
+                <Button 
                 onClick={() => handleVerify(otp)}
                 disabled={isLoading || otp.length < 6} 
                 className="btn-primary"
                 >
                 {isLoading ? 'Verifying...' : 'Confirm Verification'}
-                </button>
+                </Button>
 
                 <div className="text-center">
                 {canResend?(
-                    <button 
+                    <Button 
+                        variant="outline"
                         type="button"
                         onClick={handleResend}
                         className="text-xs uppercase tracking-widest font-black text-primary hover:brightness-125 transition-all"
                     >
                         Resend New Code
-                    </button>):
+                    </Button>):
                     <p className="text-slate-400 text-sm">
                         Resend OTP in{' '}
                         <span className="text-primary font-bold">{formatTime(timeLeft)}</span>

@@ -10,6 +10,7 @@ export enum UserRole {
 
 export interface IUser extends Document {
   _id:Types.ObjectId,
+  name:string;
   email: string;
   password: string;
   role: UserRole;
@@ -23,6 +24,11 @@ export interface IUser extends Document {
 export type AdminIUserView=Omit<IUser, 'password'>
 const UserSchema = new mongoose.Schema(
   {
+     name: {
+      type: String,
+      required: true,
+     
+    },
     email: {
       type: String,
       required: true,

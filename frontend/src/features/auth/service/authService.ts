@@ -8,6 +8,7 @@ import type {
 } from "../types/auth.types";
 import type {
   LoginCredentials,
+  registerCredentials,  
   ResendOtpData,
   ResetPasswordData,
   verifyOTPData,
@@ -17,11 +18,12 @@ import { AUTH_ROUTES } from "./auth.api";
 
 export const authService = {
   register: async (
-    credentials: LoginCredentials,
+    credentials: registerCredentials,
   ): Promise<RegisterResponse> => {
-    const response = await api.post(AUTH_ROUTES.REGISTER, credentials);
-    console.log(response.data);
+    const response = await api.post(AUTH_ROUTES.REGISTER, credentials); 
+     
     return response.data;
+
   },
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     const response = await api.post(AUTH_ROUTES.LOGIN, credentials);
@@ -32,8 +34,16 @@ export const authService = {
   },
 
   getMe: async () => {
-    const response = await api.get(AUTH_ROUTES.GET_ME);
-    return response.data;
+    try{
+      const response = await api.get(AUTH_ROUTES.GET_ME);      
+      return response.data;
+    } catch(error:unknown){
+      // if(error instanceof Error){
+      // const message=error.status||'Authentication Error';
+        throw error;
+      // }
+        // throw new Error(error);
+    }
   },
   verify: async (verifyData: verifyOTPData): Promise<AuthResponse> => {
     const response = await api.patch(AUTH_ROUTES.VERIFY_EMAIL, verifyData);
@@ -55,8 +65,11 @@ export const authService = {
         token: idToken,
       });
       return response.data;
-    } catch (error: any) {
-      throw error.response?.data?.message || "Google Login failed";
+    } catch (error: unknown) {
+      if(error instanceof Error){
+        const message= error.message || "Google Login failed";
+        throw new Error(message);
+      }
     }
   },
   updateRole: async (email: string, selectedRole: UserRole) => {
