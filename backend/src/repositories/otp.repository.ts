@@ -1,4 +1,5 @@
-import { IOtp, OtpType } from "@/models/otp.model";
+import { IOtp } from "@/models/otp.model";
+import { OtpType } from "@/constants/enums";
 import { BaseRepository } from "./base.repository";
 import { Model } from "mongoose";
 import { IOtpRepository } from "@/interfaces/repositories/IOtp.repository";
@@ -9,16 +10,16 @@ export class OtpRepository extends BaseRepository<IOtp> implements IOtpRepositor
     }
     async createOtp(userId: string, code: string, type:OtpType): Promise<IOtp> {
             return await this.model.findOneAndUpdate(
-           { userId, type }, // 1. Find the OTP for this user and this specific purpose
+           { userId, type }, // user and type specifies purpose
             { 
                 $set: { 
                 code, 
                 expiresAt: new Date(Date.now() + 10 * 60 * 1000) 
                 } 
-            }, // 2. Explicitly set the new code and time
+            }, 
             { 
-                upsert: true, // 3. Create it if it doesn't exist
-                new: true,    // 4. Return the updated document
+                upsert: true, //  Create it if it doesn't exist
+                new: true,    
                 runValidators: true 
             }
             ) as IOtp;

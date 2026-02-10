@@ -12,18 +12,15 @@ export class ProfileRepository extends BaseRepository<IProfile> implements IProf
   }
 
 
-   // create Profile
-  // async create(profileData: Partial<IProfile>): Promise<IProfile> {
-  //   return await this.model.create(profileData);
-  // }
+ 
 
   // find by profileId
   async findById(profileId: string | Types.ObjectId): Promise<IProfile | null> {
     return await this.model.findOne({ profileId });
   }
-  // async findProfile(filter:{name:string,userId: string | Types.ObjectId}): Promise<IProfile | null> {
-  //   return await this.model.findOne(filter);
-  // }
+  async findProfile(filter:FilterQuery<IProfile>={}): Promise<IProfile | null> {
+    return await this.model.findOne(filter);
+  }
   async AllProfiles(userId:string | Types.ObjectId):Promise<IProfile[]>{
         return await this.model.find({userId});       
   }

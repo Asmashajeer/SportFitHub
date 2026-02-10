@@ -15,23 +15,64 @@ export const OTP_TYPE={
 }
 
 export const LIMIT=5;
-export const GENDER_TYPES={
-  MALE:'Male',
-  FEMALE:'Female',
-  OTHER:'Other'
-}
-export type GenderType= typeof GENDER_TYPES[keyof typeof GENDER_TYPES]
 
-export const RELATIONSHIP_TYPES = {
+export const GENDER= {
+   MALE : 'Male',
+  FEMALE : 'Female',
+  OTHER : 'Other'
+}
+export type GenderType= typeof GENDER[keyof typeof GENDER]
+
+
+
+export const RELATIONSHIP = {
   SELF: 'Self',
   SPOUSE: 'Spouse',
   SON: 'Son',
   DAUGHTER: 'Daughter',
   OTHER: 'Other'
 };
-export type RelationType = typeof RELATIONSHIP_TYPES[keyof typeof RELATIONSHIP_TYPES];
+export type RelationType = typeof RELATIONSHIP[keyof typeof RELATIONSHIP];
+
+export const TRAINER_CATEGORY={
+  SPORT:'Sports',
+  FITNESS:'Fitness'
+}
+export type categoryType=typeof TRAINER_CATEGORY[keyof typeof TRAINER_CATEGORY]
+
+export const GOVT_ID_TYPE={
+  AADHAR : 'Aadhar',
+  PASSPORT : 'Passport',
+  DRIVING_LICENSE : 'Driving License',
+  PAN : 'PAN'
+}
+
+export const DOC_VERIFY_STATUS= {
+  PENDING : 'pending',
+  VERIFIED: 'verified',
+  REJECTED : 'rejected',
+}
+export type Doc_status_type=typeof DOC_VERIFY_STATUS [keyof typeof DOC_VERIFY_STATUS]
+
+export const CURRENCY={
+  US : 'US $' ,
+EURO:	'EUR	€'	,
+BRITISH_POUND:	'GBP	£(British Pound)'	,
+INR:'	INR	₹'	,
+UAE_DIRHAM:	'AED(UAE)',
+}
+
+export const TRAINER_STATUS= {
+  SUBMITTED : 'submitted',
+  UNDER_REVIEW : 'under review',
+  APPROVED : 'approved',
+  REJECTED : 'rejected',
+  SUSPENDED : 'suspended'
+}
 
 
+export const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+export type DayName = typeof DAYS_OF_WEEK[number];
 export const userNavLinks = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/user/dashboard',},
   { label: 'Calender', icon: CalendarDays, path: '/user/calender' },

@@ -1,28 +1,9 @@
-
 import type { UserRole } from "../../../constants/constants";
-
-
 import type { StateCreator } from "zustand";
 import { adminService } from "../service/adminService";
 
-export interface Users{
-  id:string,
-  name:string,
-  email: string, 
-  role: UserRole,
-  googleId?: string,
-  isVerified:boolean,
-  isBlocked: boolean,
-  isActive: boolean,
-  createdAt: Date
-}
-export interface UserStats{
-  totalUsers:number,
-  activeUsers:number,
-  blockedUsers:number
-}
-export interface UserSlice {
 
+export interface UserSlice {
     users:Users[],
     userStats:UserStats |null,
     setUsers:(users:Users[])=>void,
@@ -33,7 +14,7 @@ export interface UserSlice {
     resetUserSlice:()=>void
 }
 
-
+//--------------------------------userSlice----------------
 export const createUserSlice:StateCreator<UserSlice>=(set)=>({
     users:[],
     userStats:{
@@ -68,8 +49,25 @@ export const createUserSlice:StateCreator<UserSlice>=(set)=>({
         users:[],
         userStats:null
 
-     })
-     
-    
-
+     })   
 })
+//--------------------------------------------------------------
+
+
+
+export interface Users{
+  id:string,
+  name:string,
+  email: string, 
+  role: UserRole,
+  googleId?: string,
+  isVerified:boolean,
+  isBlocked: boolean,
+  isActive: boolean,
+  createdAt: Date
+}
+export interface UserStats{
+  totalUsers:number,
+  activeUsers:number,
+  blockedUsers:number
+}

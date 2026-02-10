@@ -12,7 +12,6 @@ export const toUsersResponseData= (user:IUser):usersResposeDTO=>{
             isVerified:user.isVerified,
             isBlocked:user.isBlocked,
             isActive: user.isActive,
-            createdAt: user.createdAt.toString(),
-    
+            createdAt: user.createdAt.toString(),    
     }
 }

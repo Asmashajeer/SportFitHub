@@ -8,9 +8,9 @@
     "rootDir": "src",
     "esModuleInterop": true,
    
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
-   "@/*": ["./src/*"]
+      "@/*": ["./src/*"]
     },
     "forceConsistentCasingInFileNames": true,
     "strict": false,

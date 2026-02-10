@@ -13,7 +13,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL||'http://localhost:5173',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE',"OPTIONS"],
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 );
@@ -27,13 +27,15 @@ app.use(function (req, res, next) {
     next();
 });
 
-import authRoutes from './api/routes/auth.route';
+import authRoute from './api/routes/auth.route';
 import adminRoute from './api/routes/admin/admin.route';
-import profileRoutes from './api/routes/profile.route';;
-
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/profile', profileRoutes);
+import userRoute from './api/routes/user/user.route'
+import trainerRoute from './api/routes/trainer/trainer.route'
+import uploadRoute from './api/routes/upload.routes'
+app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/admin',adminRoute)
-
+app.use('/api/v1/user', userRoute);
+app.use('/api/v1/trainer', trainerRoute);
+app.use('/api/v1/upload',uploadRoute);
 app.use(errorHandler);
 export default app;

@@ -14,6 +14,7 @@ import ProfilePic from '../.ui.compo/ProfilePic';
 // import UserRoleSelector from '@/features/auth/component/UserRoleSelector';
 
 interface SidebarItemProps{
+
   label:string,
   icon:React.ReactNode,
   path:string,
@@ -21,6 +22,7 @@ interface SidebarItemProps{
   onClick?:()=>void,
 }
 const SidebarItem:React.FC<SidebarItemProps>=( {
+  
   label,
   icon,
   isActive,
@@ -92,8 +94,8 @@ const Sidebar:React.FC<SidebarProps> = ({activePage}) => {
       <div className="p-8 flex flex-col items-center">
 
         <ProfilePic/>
-        <h1 className="text-2xl font-black italic tracking-tighter text-primary">
-          {user?.role===ROLES.ADMIN ?'Admin':<span className="">{user?.name}</span>}
+        <h1 className="text-xl font-black italic tracking-tighter text-primary">
+          {user?.role===ROLES.ADMIN ?'Admin':<span className={` ${user?.role===ROLES.TRAINER}? "text-amber-900":"text-primary" `}>{user?.name}</span>}
         </h1>
       </div>
       
@@ -102,6 +104,7 @@ const Sidebar:React.FC<SidebarProps> = ({activePage}) => {
         <div>
           {navLinks.map((item)=>(
               <SidebarItem 
+                    key={item.label}
                     path={item.path}
                     icon={<item.icon className="h-5 w-5" />}
                     label={item.label}

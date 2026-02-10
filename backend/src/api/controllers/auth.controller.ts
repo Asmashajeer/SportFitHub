@@ -1,14 +1,16 @@
 import type { Request, Response, NextFunction } from 'express';
-import { UserRole } from '../../models/user.model';
+ import { UserRole ,OtpType } from '@/constants/enums';
 import AppError from '../../utils/AppError';
 import { IAuthService } from '../../interfaces/services/IAuth.service';
-import { OtpType } from '../../models/otp.model';
+
 import {
   AuthMeResponseDto,
   RegisterResponseDTO,
   UserDataDTO,
   UserResponseDTO,
 } from '../../dtos/response/auth.response.dto';
+import { IUser } from '@/models/user.model';
+
 
 export default class AuthController {
   private _authService: IAuthService;
@@ -19,7 +21,7 @@ export default class AuthController {
   register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this._authService.register(req.body);
-      console.log(result);
+    
       res.status(result.statusCode).json(result);
     } catch (error) {
       next(error);
@@ -64,7 +66,7 @@ export default class AuthController {
 
   resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      console.log(req.body);
+      
       const { email, otp, newPassword } = req.body;
 
       const result = await this._authService.resetPassword({ email, otp, newPassword });
@@ -76,7 +78,7 @@ export default class AuthController {
   // login user
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      console.log(" welcome");
+   
       const { email, password, role } = req.body;
       const result = await this._authService.login({ email, password });
       const { refreshToken, accessToken, ...data } = result; 
@@ -90,7 +92,7 @@ export default class AuthController {
   //-googleLogin
   googleLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { token } = req.body; // Token from frontend
-    console.log('token', token);
+  
     try {
       const result = await this._authService.googleLogin(token);
       const { refreshToken, accessToken, ...user } = result;
@@ -104,7 +106,7 @@ export default class AuthController {
 
   updateRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log('updating role.........');
+    
       const { email, role } = req.body;
       if (!Object.values(UserRole).includes(role)) {
         throw new AppError('Invalid role selected', 400);
@@ -124,7 +126,9 @@ export default class AuthController {
 
   authMe = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.user as any;
+       const user=req.user as IUser
+      const id=user.id;
+      
       const data: AuthMeResponseDto = await this._authService.authMe(id);
       
       res.status(200).json(data);

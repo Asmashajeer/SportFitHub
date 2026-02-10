@@ -1,4 +1,5 @@
 
+import { ROLES } from "@/constants/constants";
 import { useAuthStore } from "../../features/auth/store/useAuthStore";
 
 function ProfilePic() {
@@ -8,7 +9,7 @@ function ProfilePic() {
 
   return (
     <div className="flex items-center justify-around pb-2">
-        <div className=" flex text-4xl items-center w-18 h-18 rounded-full bg-primary text-shadow-primary justify-center font-bold">
+        <div className={` flex text-2xl items-center w-10 h-10 rounded-full ${user?.role===ROLES.TRAINER? "bg-amber-900":"bg-primary"} text-shadow-primary justify-center font-bold`}>
            {alias}       
         </div>
     </div>

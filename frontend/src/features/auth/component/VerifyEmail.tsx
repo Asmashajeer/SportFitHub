@@ -26,19 +26,20 @@ const VerifyEmail = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
-    const [canResend, setCanResend] = useState(false);
-   
+    const [canResend, setCanResend] = useState(false);   
     
     
     
     const startTimer=()=>{
-          setCanResend(false);
+        setCanResend(false);
         const expiry=Date.now()+OTP_EXPIRATION_MS;
         localStorage.setItem("otpExpiry",expiry.toString());
         setTimeLeft(OTP_EXPIRATION_MINUTES*60); 
              
     }
+
     useEffect(()=>{
+        
         const savedExpiry=localStorage.getItem("otpExpiry") ;
         if(!savedExpiry) {
            startTimer();
@@ -51,6 +52,7 @@ const VerifyEmail = () => {
             localStorage.removeItem("otpExpiry");            
             return;
         }
+        setCanResend(false);
         const   interval = setInterval(() => {
              setTimeLeft((prev) => prev - 1);
             }, 1000);

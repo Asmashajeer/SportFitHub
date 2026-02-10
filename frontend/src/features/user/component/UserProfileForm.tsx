@@ -8,10 +8,10 @@ import {
   Save,
   Phone,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  GENDER_TYPES,
-  RELATIONSHIP_TYPES,
+  GENDER,
+  RELATIONSHIP,
   type GenderType,
   type RelationType,
 } from "../../../constants/constants";
@@ -25,74 +25,65 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { userService } from "../service/userService";
+import { useNavigate } from "react-router-dom";
 
-interface Address {
+interface UserProfile {
+  userId: string;
+  fullName: string;
+  DOB: string; // Changed to string for easier input handling
+  gender: GenderType;
+  phone: string;
+  relationship: RelationType;
   street: string;
   city: string;
   zip: string;
-}
-
-interface Location {
   latitude: number;
   longitude: number;
-}
-
-interface UserProfile {
-  name: string;
-  dob: string;
-  gender: GenderType;
-  phone: string;
-  relationship: string;
-  address: Address;
-  location: Location;
   profilePic: string;
+  isPrimary: boolean;
 }
 
 const UserProfileForm: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  const setHasProfile = useAuthStore((state) => state.setHasProfile);
+  const navigate=useNavigate();
+
   const [profile, setProfile] = useState<UserProfile>({
-    name: "",
-    dob: "",
-    gender: "male",
+    userId: user ? user.id : "",
+    fullName: "",
+    DOB: "",
+    gender: GENDER.MALE,
     phone: "",
-    relationship: "",
-    address: {
-      street: "",
-      city: "",
-      zip: "",
-    },
-    location: {
-      latitude: 0,
-      longitude: 0,
-    },
+    relationship: RELATIONSHIP.SELF,
+    street: "",
+    city: "",
+    zip: "",
+    longitude: 0,
+    latitude: 0,
     profilePic: "",
+    isPrimary: false,
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // For backend
+  const [previewImage, setPreviewImage] = useState(""); // For UI
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleAddressChange = (field: keyof Address, value: string) => {
-    setProfile((prev) => ({
-      ...prev,
-      address: { ...prev.address, [field]: value },
-    }));
-  };
-
-  const handleLocationChange = (field: keyof Location, value: string) => {
-    const numValue = parseFloat(value) || 0;
-    setProfile((prev) => ({
-      ...prev,
-      location: { ...prev.location, [field]: numValue },
-    }));
-  };
+  useEffect(() => {
+    if (user) {
+      setProfile((prev) => ({ ...prev, fullName: user.name || "", userId: user.id }));
+    }
+  }, [user]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelectedFile(file); // Store binary for Multer
       const reader = new FileReader();
       reader.onloadend = () => {
-        const result = reader.result as string;
-        setPreviewImage(result);
-        setProfile((prev) => ({ ...prev, profilePic: result }));
+        setPreviewImage(reader.result as string); // Store string for preview
       };
       reader.readAsDataURL(file);
     }
@@ -108,37 +99,69 @@ const UserProfileForm: React.FC = () => {
         (position) => {
           setProfile((prev) => ({
             ...prev,
-            location: {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            },
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
           }));
+          toast.success("Location updated!");
         },
         (error) => {
           console.error("Error getting location:", error);
-          alert("Unable to get current location");
-        },
+          toast.error("Unable to get current location");
+        }
       );
     } else {
       toast.error("Geolocation is not supported by this browser");
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); 
+    if (!user) return toast.error("User not found");
+
     setIsLoading(true);
+    try {
+      const data = new FormData();
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+      // 1. Add binary file
+      if (selectedFile) {
+        data.append("profilePic", selectedFile);
+      }
 
-    console.log("Profile Data:", profile);
-    setIsLoading(false);
-    alert("Profile saved successfully!");
+      // 2. Add all other fields from state
+      Object.entries(profile).forEach(([key, value]) => {
+        if (key !== "profilePic" && value !== undefined && value !== null) {
+          data.append(key, value.toString());
+        }
+      });
+
+      const response = await userService.addProfile(data);
+      setHasProfile(true);
+      console.log("Upload Success:", response);
+      toast.success("Profile saved successfully!");
+      navigate('/user/dashboard');
+    }
+    catch (error: unknown) {      
+        if (error instanceof Error) {
+           const message =  error.message ;
+           console.log(message) ; 
+            toast.error("Failed to save profile " );
+        } else {
+            toast.error("An unexpected error occurred");
+        }
+        console.error(error)
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#0a0b0d] p-4">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-secondary border border-[#454c59] rounded-3xl shadow-2xl p-8">
+        {/* Changed div to form */}
+        <form 
+          onSubmit={handleSubmit} 
+          className="bg-secondary border border-[#454c59] rounded-3xl shadow-2xl p-8"
+        >
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-[#f8fafca9] mb-2">
@@ -153,13 +176,14 @@ const UserProfileForm: React.FC = () => {
           <div className="flex flex-col items-center mb-8">
             <div className="relative">
               <div className="w-32 h-32 rounded-full bg-secondary/60 border-2 border-[#454c59] overflow-hidden flex items-center justify-center">
-                {/* {previewImage ? (
+                {previewImage ? (
                   <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
-                ) : ( */}
-                <User className="w-16 h-16 text-slate-500" />
-                {/* )} */}
+                ) : (
+                  <User className="w-16 h-16 text-slate-500" />
+                )}
               </div>
               <button
+                type="button" // Important: prevents form submission
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute bottom-0 right-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-black hover:brightness-110 transition-all duration-200 active:scale-95"
               >
@@ -170,6 +194,7 @@ const UserProfileForm: React.FC = () => {
                 type="file"
                 accept="image/*"
                 className="hidden"
+                onChange={handleImageUpload}
               />
             </div>
             <p className="text-slate-400 text-xs mt-2">Click to upload photo</p>
@@ -185,17 +210,17 @@ const UserProfileForm: React.FC = () => {
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <Input
                   type="text"
-                  value={profile.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  required
+                  value={profile.fullName}
+                  onChange={(e) => handleInputChange("fullName", e.target.value)}
                   placeholder="Enter your full name"
-                  className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
             </div>
 
             {/* DOB and Gender Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Date of Birth */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Date of Birth
@@ -204,41 +229,36 @@ const UserProfileForm: React.FC = () => {
                   <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                   <Input
                     type="date"
-                    value={profile.dob}
-                    onChange={(e) => handleInputChange("dob", e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
+                    required
+                    value={profile.DOB}
+                    onChange={(e) => handleInputChange("DOB", e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white"
                   />
                 </div>
               </div>
 
-              {/* Gender */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Gender
                 </label>
                 <Select
                   value={profile.gender}
-                  onValueChange={(value) =>
-                    handleInputChange("gender", value as GenderType)
-                  }
+                  onValueChange={(value) => handleInputChange("gender", value as GenderType)}
                 >
-                  <SelectTrigger className="w-full ">
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.values(GENDER_TYPES).map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
+                    {Object.values(GENDER).map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            {/* phone & relationship */}
+            {/* Phone & Relationship */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* phone */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Phone
@@ -246,38 +266,34 @@ const UserProfileForm: React.FC = () => {
                 <div className="relative">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                   <Input
-                    type="text"
+                    type="tel"
+                    required
                     value={profile.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
-                    placeholder="Enter your phone Number"
-                    className=" pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
+                    placeholder="Enter phone number"
+                    className="pl-12 w-full rounded-xl bg-secondary/60 border border-[#454c59] text-white"
                   />
                 </div>
               </div>
 
-              {/* Relationship Status */}
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Relationship Status
                 </label>
                 <Select
                   value={profile.relationship}
-                  onValueChange={(value) =>
-                    handleInputChange("relationship", value as RelationType)
-                  }
+                  onValueChange={(value) => handleInputChange("relationship", value as RelationType)}
                 >
-                  <SelectTrigger className="w-full ">
-                    <SelectValue placeholder="Select RelationShip" />
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Relationship" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.values(RELATIONSHIP_TYPES).map((relation) => (
-                      <SelectItem key={relation} value={relation}>
-                        {relation}
-                      </SelectItem>
+                    {Object.values(RELATIONSHIP).map((relation) => (
+                      <SelectItem key={relation} value={relation}>{relation}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
             </div>
 
             {/* Address Section */}
@@ -286,54 +302,26 @@ const UserProfileForm: React.FC = () => {
                 <Home className="w-5 h-5 text-primary" />
                 Address
               </h3>
-
               <div className="space-y-4">
-                {/* Street */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Street Address
-                  </label>
+                <Input
+                  placeholder="Street Address"
+                  value={profile.street}
+                  onChange={(e) => handleInputChange("street", e.target.value)}
+                  className="bg-secondary/60 border-[#454c59]"
+                />
+                <div className="grid grid-cols-2 gap-4">
                   <Input
-                    type="text"
-                    value={profile.address.street}
-                    onChange={(e) =>
-                      handleAddressChange("street", e.target.value)
-                    }
-                    placeholder="Enter street address"
-                    className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
+                    placeholder="City"
+                    value={profile.city}
+                    onChange={(e) => handleInputChange("city", e.target.value)}
+                    className="bg-secondary/60 border-[#454c59]"
                   />
-                </div>
-
-                {/* City and Zip */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      City
-                    </label>
-                    <Input
-                      type="text"
-                      value={profile.address.city}
-                      onChange={(e) => {
-                        handleAddressChange("city", e.target.value);
-                      }}
-                      placeholder="Enter city"
-                      className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      ZIP Code
-                    </label>
-                    <Input
-                      type="text"
-                      value={profile.address.zip}
-                      onChange={(e) => {
-                        handleAddressChange("zip", e.target.value);
-                      }}
-                      placeholder="Enter ZIP code"
-                      className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
-                    />
-                  </div>
+                  <Input
+                    placeholder="ZIP Code"
+                    value={profile.zip}
+                    onChange={(e) => handleInputChange("zip", e.target.value)}
+                    className="bg-secondary/60 border-[#454c59]"
+                  />
                 </div>
               </div>
             </div>
@@ -343,63 +331,34 @@ const UserProfileForm: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-[#f8fafca9] flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-primary" />
-                  Location Coordinates
+                  Coordinates
                 </h3>
                 <Button
-                  variant={"outline"}
+                  type="button"
+                  variant="outline"
                   onClick={getCurrentLocation}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30ext-[#197e04] text-sm font-medium hover:bg-primary/20 transition-all duration-200"
+                  className="flex items-center gap-2 rounded-full border-primary/30 text-xs"
                 >
                   <Navigation className="w-4 h-4" />
                   Get Current
                 </Button>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Latitude
-                  </label>
-                  <Input
-                    type="number"
-                    step="any"
-                    value={profile.location.latitude}
-                    onChange={(e) =>
-                      handleLocationChange("latitude", e.target.value)
-                    }
-                    placeholder="0.000000"
-                    className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Longitude
-                  </label>
-                  <Input
-                    type="number"
-                    step="any"
-                    value={profile.location.longitude}
-                    onChange={(e) =>
-                      handleLocationChange("longitude", e.target.value)
-                    }
-                    placeholder="0.000000"
-                    className="w-full px-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
-                  />
-                </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Input readOnly placeholder="Lat" value={profile.latitude} className="bg-secondary/60 opacity-70" />
+                <Input readOnly placeholder="Lng" value={profile.longitude} className="bg-secondary/60 opacity-70" />
               </div>
             </div>
 
             {/* Submit Button */}
             <Button
-              variant={"default"}
-              onClick={handleSubmit}
+              type="submit"
               disabled={isLoading}
-              className=" w-mdflex items-center justify-end gap-2 px-6 py-3 rounded-full font-bold tracking-tight transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:grayscale  text-black hover:shadow-[0_0_20px_rgba(25,126,4,0.3)] hover:brightness-110 mt-8"
+              className="w-full flex items-center justify-center gap-2 py-6 rounded-full font-bold text-black bg-primary hover:brightness-110 transition-all mt-8"
             >
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  Saving...
+                  Saving Profile...
                 </>
               ) : (
                 <>
@@ -409,7 +368,7 @@ const UserProfileForm: React.FC = () => {
               )}
             </Button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

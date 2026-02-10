@@ -1,5 +1,6 @@
 import { IUserRepository } from '@/interfaces/repositories/IUser.repository';
-import { IUser, UserRole } from '../models/user.model';
+import { IUser } from '../models/user.model';
+import { UserRole } from '@/constants/enums';
 import { BaseRepository } from './base.repository';
 import { FilterQuery, Model, Types } from 'mongoose';
 

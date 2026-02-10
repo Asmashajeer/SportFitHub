@@ -1,11 +1,5 @@
 import mongoose, { Document ,Types} from 'mongoose';
-
-export enum UserRole {
-  ADMIN = "admin",
-  TRAINER = "trainer",
-  USER = "user",
-  PENDING = "pending", // This is the "Onboarding" state for google login
-}
+import { UserRole } from '@/constants/enums';
 
 
 export interface IUser extends Document {

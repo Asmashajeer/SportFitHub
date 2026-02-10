@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
-import { OtpType } from '../../models/otp.model';
-import { UserRole } from '../../models/user.model';
+import { OtpType } from '@/constants/enums';
+import { UserRole } from '@/constants/enums';
 
 // RegisterRequestDTO
 export const RegisterSchema = z.object({ 

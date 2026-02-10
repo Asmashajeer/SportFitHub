@@ -2,15 +2,15 @@ import bcrypt from 'bcryptjs';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { IUserRepository } from '../interfaces/repositories/IUser.repository';
 // import { ProfileRepository } from '@/repositories/profile.repository.js';
-import { UserRole } from '../models/user.model';
+import { UserRole } from '@/constants/enums';
 import AppError from '../utils/AppError';
 import authConfig from '../config/auth.config';
 import { IProfileRepository } from '../interfaces/repositories/IProfile.repository';
-import { MESSAGES, STATUS_CODE } from '../utils/constants/messages';
+import { MESSAGES, STATUS_CODE } from '../constants/messages';
 import { generateOTP } from '../utils/generateOTP';
 import { sendEmailOTP } from '../utils/sendMailOTP';
 import { IOtpRepository } from '../interfaces/repositories/IOtp.repository';
-import { OtpType } from '../models/otp.model';
+import { OtpType } from '@/constants/enums';
 import { IAuthService } from '../interfaces/services/IAuth.service';
 import { OAuth2Client } from 'google-auth-library';
 import { toRegisterData, toUserData } from '../mappers/auth.mapper';
@@ -34,7 +34,8 @@ import {
   LoginResponseDTO,
   RegisterDataDTO,
 } from '@/dtos/response/auth.response.dto.js';
-import toast from 'react-hot-toast';
+import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
+
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -42,18 +43,20 @@ export class AuthService implements IAuthService {
   private _userRepo: IUserRepository;
   private _otpRepo: IOtpRepository;
   private _profileRepo: IProfileRepository;
+  private _trainerRepo:ITrainerRepository
 
-  constructor(userRepo: IUserRepository, otpRepo: IOtpRepository, profileRepo: IProfileRepository) {
+  constructor(userRepo: IUserRepository, otpRepo: IOtpRepository, profileRepo: IProfileRepository,trainerRepo:ITrainerRepository) {
     this._userRepo = userRepo;
     this._otpRepo = otpRepo;
     this._profileRepo = profileRepo;
+    this._trainerRepo=trainerRepo;
   }
   // register
   register = async (userData: RegisterRequestDTO): Promise<RegisterResponseDTO> => {
     try {
       const existingUser = await this._userRepo.findByEmail(userData.email);
       if (existingUser) {
-        throw new AppError(MESSAGES.error.USER_EXISTS, STATUS_CODE.BAD_REQUEST);
+        throw new AppError(MESSAGES.error.USER_EXISTS, STATUS_CODE.CONFLICT);
       }
       const hashedPassword = await bcrypt.hash(userData.password!, 10);
       const newUser = await this._userRepo.create({ ...userData, password: hashedPassword });
@@ -96,7 +99,7 @@ export class AuthService implements IAuthService {
         profileCount = await this._profileRepo.count({ userId: user._id.toString() });
       }
       if (user.role === UserRole.TRAINER) {
-        // profileCount = await this._trainerProfileRepo.count({userId:user._id.toString()});
+        profileCount = await this._trainerRepo.count({userId:user._id.toString()});
       }
       const hasProfile = profileCount !== 0;
       const accessToken = this.generateAccessToken(user._id.toString(), user.role);
@@ -175,7 +178,7 @@ export class AuthService implements IAuthService {
         profileCount = await this._profileRepo.count({ userId: user._id.toString() });
       }
       if (user.role === UserRole.TRAINER) {
-        // profileCount = await this._trainerProfileRepo.count({userId:user._id.toString()});
+        profileCount = await this._trainerRepo.count({userId:user._id.toString()});
       }
       userData.hasProfile = profileCount !== 0;
       const accessToken = this.generateAccessToken(user._id.toString(), user.role);
@@ -222,7 +225,7 @@ export class AuthService implements IAuthService {
         profileCount = await this._profileRepo.count({ userId: user._id.toString() });
       }
       if (user.role === UserRole.TRAINER) {
-        // profileCount = await this._trainerProfileRepo.count({userId:user._id.toString()});
+        profileCount = await this._trainerRepo.count({userId:user._id.toString()});
       }
       userData.hasProfile = profileCount !== 0;
       const accessToken = this.generateAccessToken(user._id.toString(), user.role);
@@ -260,7 +263,7 @@ export class AuthService implements IAuthService {
         profileCount = await this._profileRepo.count({ userId: user._id.toString() });
       }
       if (user.role === UserRole.TRAINER) {
-        // profileCount = await this._trainerProfileRepo.count({userId:user._id.toString()});
+        profileCount = await this._trainerRepo.count({userId:user._id.toString()});
       }
       const hasProfile = profileCount !== 0;
       const accessToken = this.generateAccessToken(user._id.toString(), user.role);
@@ -284,7 +287,7 @@ export class AuthService implements IAuthService {
     try {
       const user = await this._userRepo.findById(userId);
       if (user.isBlocked) {
-        toast.error(MESSAGES.error.BLOCKED_USER);
+        console.log(MESSAGES.error.BLOCKED_USER);
         throw new AppError(MESSAGES.error.BLOCKED_USER, STATUS_CODE.FORBIDDEN);
       }
       let profileCount = 0;
@@ -292,7 +295,7 @@ export class AuthService implements IAuthService {
         profileCount = await this._profileRepo.count({ userId: user._id.toString() });
       }
       if (user.role === UserRole.TRAINER) {
-        // profileCount = await this._trainerProfileRepo.count({userId:user._id.toString()});
+        profileCount = await this._trainerRepo.count({userId:user._id.toString()});
       }
 
       const hasProfile = profileCount !== 0;

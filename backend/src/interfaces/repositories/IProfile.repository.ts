@@ -7,7 +7,7 @@ export interface IProfileRepository extends IBaseRepository<IProfile> {
   findById(profileId: string | Types.ObjectId): Promise<IProfile | null>;
   // findProfile(filter:{name:string,userId: string | Types.ObjectId}): Promise<IProfile | null>
   AllProfiles(userId:string | Types.ObjectId):Promise<IProfile[]>;
-  // create(profileData: Partial<IProfile>): Promise<IProfile>;
+  create(profileData: Partial<IProfile>): Promise<IProfile>;
  
   update(userId: string | Types.ObjectId, updateData: Partial<IProfile>): Promise<IProfile | null>;
   //delete profile

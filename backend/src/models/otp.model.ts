@@ -1,11 +1,9 @@
 import { timeStamp } from "console";
 import  mongoose, { Schema ,Document, Types} from "mongoose";
 import { object } from "zod";
+import { OtpType } from "@/constants/enums";
 
-export enum OtpType{
-    VERIFICATION = 'VERIFICATION',
-    PASSWORD_RESET = 'PASSWORD_RESET',
-};
+
 
 export interface IOtp extends Document{
     userId:Types.ObjectId,

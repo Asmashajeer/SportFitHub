@@ -5,8 +5,6 @@ export interface DashboardStats{
     ActiveUsers:number,
    
 }
-
-
 export interface queryParamsOptions {
   page: number;
   search?: string;

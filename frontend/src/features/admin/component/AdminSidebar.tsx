@@ -78,7 +78,7 @@ const AdminSidebar: React.FC<SidebarProps> = ({ activePage }) => {
     }
   };
   return (
-    <aside className="w-64 fixed top-0 left-0 h-full bg-gray-950">
+    <aside className="w-64 top-0 left-0 h-full bg-gray-950">
       <span className="text-xl md:text-2xl font-extrabold tracking-tighter font-sans uppercase">
         <span className="text-primary">SportFit</span>
         <span className="text-foreground">Hub</span>

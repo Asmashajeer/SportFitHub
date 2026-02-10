@@ -12,13 +12,9 @@ export interface AuthRequest extends Request {
 }
 
 export const protect = (req: Request, res: Response, next: NextFunction) => {
-  // const authHeader = req.headers.authorization;
-  // let accessToken = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
-  // 2. Fallback to Cookies (if header is missing)
-  // if (!accessToken) {
    let accessToken = req.cookies?.accessToken;
-  // }
+ 
   
   if (!accessToken) {
     return next(new AppError('Unauthorized: Access Token missing.', 401));
