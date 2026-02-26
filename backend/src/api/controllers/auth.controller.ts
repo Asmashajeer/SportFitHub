@@ -6,10 +6,13 @@ import { IAuthService } from '../../interfaces/services/IAuth.service';
 import {
   AuthMeResponseDto,
   RegisterResponseDTO,
-  UserDataDTO,
+
   UserResponseDTO,
 } from '../../dtos/response/auth.response.dto';
 import { IUser } from '@/models/user.model';
+
+import Logger from '@/utils/logger';
+import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 
 
 export default class AuthController {
@@ -19,9 +22,14 @@ export default class AuthController {
   }
   //register user
   register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    Logger.info(`User requested a for registration with ${req.body.email}`);
     try {
-      const result = await this._authService.register(req.body);
-    
+      const result = await this._authService.register(req.body);  
+     Logger.info("Account created successfully", { 
+      userId: result.user.id, 
+      action: 'registration',
+      role: result.user.role 
+    });
       res.status(result.statusCode).json(result);
     } catch (error) {
       next(error);
@@ -30,6 +38,7 @@ export default class AuthController {
 
   verifyEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+
       const result: UserResponseDTO = await this._authService.verifyEmail(req.body);
       const { refreshToken, accessToken, ...user } = result;
       this._setAuthCookies(res, accessToken, refreshToken);
@@ -79,11 +88,12 @@ export default class AuthController {
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
    
-      const { email, password, role } = req.body;
+      const { email, password } = req.body;
       const result = await this._authService.login({ email, password });
+      Logger.info(`User logged in`, { userId: result.user.id, email: email });
       const { refreshToken, accessToken, ...data } = result; 
       this._setAuthCookies(res, accessToken, refreshToken);
-      res.status(200).json(data);
+      res.status(STATUS_CODE.SUCCESS.OK).json(data);
     } catch (error) {
       next(error);
     }
@@ -95,9 +105,10 @@ export default class AuthController {
   
     try {
       const result = await this._authService.googleLogin(token);
+       Logger.info(`User logged in via google login`, { userId: result.user.id, email: result.user.email });
       const { refreshToken, accessToken, ...user } = result;
       this._setAuthCookies(res, accessToken, refreshToken);
-      res.status(200).json(user);
+      res.status(STATUS_CODE.SUCCESS.OK).json(user);
     } catch (error) {
       console.error('Google Auth Error:', error.message);
       next(error);
@@ -106,19 +117,21 @@ export default class AuthController {
 
   updateRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
-    
+           const CurrUser=req.user as IUser
+          const id=CurrUser.id;
       const { email, role } = req.body;
       if (!Object.values(UserRole).includes(role)) {
-        throw new AppError('Invalid role selected', 400);
+        throw new AppError(ERROR_MESSAGES.AUTH.ROLE_INVALID,STATUS_CODE.ERROR.BAD_REQUEST);
       }
       const chosenRole = role as UserRole.TRAINER | UserRole.USER;
       const data: UserResponseDTO = await this._authService.updateRole({
         email: email,
         role: chosenRole,
       });
+      Logger.warn(`Role updated for user`, { targetEmail: email, newRole: role, updatedBy: id });
       const { refreshToken, accessToken, ...user } = data;
       this._setAuthCookies(res, accessToken, refreshToken);
-      res.status(200).json( user);
+      res.status(STATUS_CODE.SUCCESS.OK).json( user);
     } catch (error) {
       next(error);
     }
@@ -131,7 +144,7 @@ export default class AuthController {
       
       const data: AuthMeResponseDto = await this._authService.authMe(id);
       
-      res.status(200).json(data);
+      res.status(STATUS_CODE.SUCCESS.OK).json(data);
     } catch (error) {
       next(error);
     }
@@ -142,20 +155,22 @@ export default class AuthController {
     try {
       const refreshTokenExisted = req.cookies.refreshToken;
       if (!refreshTokenExisted)
-             throw new AppError('No refreshToken provided', 401);
+             throw new AppError(ERROR_MESSAGES.AUTH.REFRESH_TOKEN_INVALID, STATUS_CODE.ERROR.UNAUTHORIZED);
 
       const {accessToken,refreshToken} = await this._authService.refreshAccessToken(refreshTokenExisted);
      
       this._setAuthCookies(res, accessToken, refreshToken);
 
-      res.status(200).json({ success: true });
+      res.status(STATUS_CODE.SUCCESS.OK).json({ success: true });
     } catch (error) {
       next(error);
     }
   };
 
   //Logout user
-  logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  logout = async (req: Request, res: Response): Promise<void> => {
+    const user=req.user as IUser
+      const id=user.id;
     res.cookie('accessToken', '', {
       httpOnly: true,
       expires: new Date(0),
@@ -164,7 +179,8 @@ export default class AuthController {
       httpOnly: true,
       expires: new Date(0),
     });
-    res.status(200).json({ success: true, message: 'Logged out successfully' });
+     Logger.info(`User logged out`, { userId: id });
+    res.status(STATUS_CODE.SUCCESS.OK).json({ success: true, message:SUCCESS_MESSAGES.GENERAL.LOGGED_OUT});
   };
 
   private _setAuthCookies(res: Response, accessToken: string, refreshToken?: string) {

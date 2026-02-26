@@ -1,8 +1,10 @@
 import { IProfileService } from '@/interfaces/services/user/IProfile.service';
-import { uploadToCloudinary } from '@/utils/cloudinary';
-import { MESSAGES, STATUS_CODE } from '@/constants/messages';
+
+import {  STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import type { Request, Response, NextFunction } from 'express';
 import { IUser } from '@/models/user.model';
+import Logger from '@/utils/logger';
+
 
 
 export class ProfileController {
@@ -14,17 +16,13 @@ export class ProfileController {
   addProfile=async (req: Request, res: Response, next: NextFunction): Promise<void>=> {
     try {
       const user=req.user as IUser
-      const userId=user.id;
-      let profilePicUrl=req.body.profilePic
-      if (req.file) {
-        const uploadResult = await uploadToCloudinary(req.file);
-        profilePicUrl = uploadResult.secure_url;
-      }
-      console.log(userId);
-      const profileData = await this._profileService.addProfile({userId,profilePic: profilePicUrl,...req.body});
-      res.status(STATUS_CODE.CREATED).json({      
-        message: MESSAGES.success.PROFILE_CREATED,
-        data: profileData,
+      const userId=user.id;  
+      console.log(userId);      
+     const profileData = await this._profileService.addProfile({userId,...req.body});    
+      Logger.info("User completed the profile",{"user id":userId})
+      res.status(STATUS_CODE.SUCCESS.CREATED).json({      
+        message: SUCCESS_MESSAGES.USER. PROFILE_CREATED,
+        profileData,
       });
     } catch (error) {
       next(error);
@@ -34,24 +32,39 @@ export class ProfileController {
     try{
        const user=req.user as IUser
       const userId=user.id;
-      const profiles = await this._profileService.getProfiles(userId);
-      res.status(200).json({
-        status: 'success',
-        data: profiles,
+      const profiles = await this._profileService.getProfiles(userId);      
+      res.status(STATUS_CODE.SUCCESS.OK).json({
+       success: true,
+       profiles,
       });
     } catch (error) {
       next(error);
     }   
 
   }
- getMyProfile=async (req: Request, res: Response, next: NextFunction): Promise<void>=>{
+ getProfilePic=async (req: Request, res: Response, next: NextFunction): Promise<void>=>{
     try {
        const user=req.user as IUser
             const userId=user.id;
-      const profile = await this._profileService.getProfile(userId);
-      res.status(200).json({
-        status: 'success',
-        data: profile,
+      const profile = await this._profileService.getPrimaryProfile(userId);
+      const profilePic=profile.profilePic;
+      res.status(STATUS_CODE.SUCCESS.OK).json({
+       success: true,
+        profilePic
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+   getProfile=async (req: Request, res: Response, next: NextFunction): Promise<void>=>{
+    try {
+       const user=req.user as IUser
+            const userId=user.id;
+      const profile = await this._profileService.getPrimaryProfile(userId);
+      
+      res.status(STATUS_CODE.SUCCESS.OK).json({
+        success: true,
+        profile
       });
     } catch (error) {
       next(error);
@@ -63,9 +76,9 @@ export class ProfileController {
            const user=req.user as IUser
             const userId=user.id;
           const profileData= await this._profileService.updateProfile(userId,req.body)
-          res.status(200).json({
-            status: 'success',
-            data: profileData,
+          res.status(STATUS_CODE.SUCCESS.OK).json({
+           success: true,
+            profileData,
           });
         } catch (error) {
           next(error);

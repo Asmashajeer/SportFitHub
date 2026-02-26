@@ -1,14 +1,40 @@
-import { TRAINER_STATUS } from "@/constants/enums";
-import { TrainerProfileResponseDTO } from "@/dtos/response/trainer/trainer.response.dto";
-import { PendingTrainersBasicDTO, TrainerProfileDTO } from "@/dtos/response/trainer/trainerApprovals.response";
-import { ITrainerProfile } from "@/models/trainerProfile.model";
-import { Types } from "mongoose";
+import { TRAINER_STATUS } from '@/constants/enums';
+import {
+  AvailabiltyPricingReqDTO,
+  idVerificationReqDTO,
+  PaymentInfoReqDTO,
+} from '@/dtos/request/trainer/trainer.profile.request.dto';
+import { TrainerProfileResponseDTO } from '@/dtos/response/trainer/trainer.response.dto';
+import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
+import { ICertification, ITrainerProfile } from '@/models/trainerProfile.model';
+import { Types } from 'mongoose';
 
-export interface ITrainerService{
-    checkExistingProfile(userId:Types.ObjectId):Promise<void>
-    addProfile(profileData:Partial<ITrainerProfile>):Promise<TrainerProfileResponseDTO>
-    getPendingTrainers():Promise<PendingTrainersBasicDTO[]>
-    getTrainer(id:string):Promise<TrainerProfileDTO>
-    updateFileStatus(id:string|Types.ObjectId,targetField:'certificationInfo' | 'idVerification',status:string,reason:string):Promise<TrainerProfileDTO>
-     updateTrainerStatus(id:string|Types.ObjectId,status:TRAINER_STATUS,reason:string):Promise<TrainerProfileDTO>
+export interface ITrainerService {
+  checkExistingProfile(userId: Types.ObjectId): Promise<void>;
+  addProfile(profileData: Partial<ITrainerProfile>): Promise<TrainerProfileResponseDTO>;
+
+    // by trainer and admin
+  getTrainer(id: string): Promise<TrainerProfileDTO>;
+  getTrainerByUserId(userId: string | Types.ObjectId): Promise<TrainerProfileDTO>;
+
+  updateCertificate(
+    id: string | Types.ObjectId,
+    section: string,
+    documents: ICertification
+  ): Promise<TrainerProfileDTO>;
+  updateIdVerification(
+    id: string | Types.ObjectId,
+    data: idVerificationReqDTO
+  ): Promise<TrainerProfileDTO>;
+  updateAvailabilityPricing(
+    id: string | Types.ObjectId,
+    data: AvailabiltyPricingReqDTO
+  ): Promise<TrainerProfileDTO>;
+  updatePaymentInfo(
+    id: string | Types.ObjectId,
+    data: PaymentInfoReqDTO
+  ): Promise<TrainerProfileDTO>;
+
+   resubmitApplicaion(id:string|Types.ObjectId,status:TRAINER_STATUS,reason:string):Promise<TrainerProfileDTO>
+
 }

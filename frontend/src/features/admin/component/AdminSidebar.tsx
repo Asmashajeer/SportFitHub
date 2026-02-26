@@ -6,6 +6,7 @@ import {
   Ticket,
   CalendarDays,
   ShieldCheck,
+  Layers,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../auth/store/useAuthStore";
@@ -14,7 +15,7 @@ import { ROLES } from "../../../constants/constants";
 import { authService } from "../../auth/service/authService";
 import toast from "react-hot-toast";
 import { UseAdminStore } from "../store/useAdminStore";
-import ProfilePic from "../../../components/.ui.compo/ProfilePic";
+import ProfilePic from "../../../components/reusable/ProfilePic";
 
 interface SidebarItemProps {
   label: string;
@@ -70,12 +71,9 @@ const AdminSidebar: React.FC<SidebarProps> = ({ activePage }) => {
       clearStore();
       navigate("/login");
       toast.success("Logging out.....");
-    } catch (error: unknown) {
-      if(error instanceof Error){
-        toast.error(error.message);
-      }
-      else toast.error("unexpected error occured")
-    }
+    }catch (error) {
+        toast.error(error?.toString() || "Something went wrong");
+    } 
   };
   return (
     <aside className="w-64 top-0 left-0 h-full bg-gray-950">
@@ -123,11 +121,11 @@ const AdminSidebar: React.FC<SidebarProps> = ({ activePage }) => {
             onClick={() => navigate("/admin/camp-management")}
           />
           <SidebarItem
-            path="/admin/approvals"
+            path="/admin/trainer-management"
             icon={<ShieldCheck className="h-5 w-5" />}
-            label="Approvals"
-            isActive={activePage === "Approvals"}
-            onClick={() => navigate("/admin/approvals")}
+            label="Trainers"
+            isActive={activePage === "Trainers"}
+            onClick={() => navigate("/admin/trainer-management")}
           />
           <SidebarItem
             path="/admin/coupons"
@@ -135,6 +133,13 @@ const AdminSidebar: React.FC<SidebarProps> = ({ activePage }) => {
             label="Coupons"
             isActive={activePage === "Coupons"}
             onClick={() => navigate("/admin/coupons")}
+          />
+           <SidebarItem
+            path="/admin/category-management"
+            icon={<Layers className="h-5 w-5" />}
+            label="Categories"
+            isActive={activePage === "Categories"}
+            onClick={() => navigate("/admin/category-management")}
           />
           <SidebarItem
             path="/admin/settings"

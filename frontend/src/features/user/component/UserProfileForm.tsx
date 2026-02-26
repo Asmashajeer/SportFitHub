@@ -28,6 +28,9 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { userService } from "../service/userService";
 import { useNavigate } from "react-router-dom";
+import { uploadService } from "@/service/upload.service";
+import { CreateProfileSchema } from "../types/user.schema";
+
 
 interface UserProfile {
   userId: string;
@@ -119,36 +122,35 @@ const UserProfileForm: React.FC = () => {
     if (!user) return toast.error("User not found");
 
     setIsLoading(true);
-    try {
-      const data = new FormData();
-
-      // 1. Add binary file
-      if (selectedFile) {
-        data.append("profilePic", selectedFile);
+    
+    try { 
+      let   profilePicUrl=profile.profilePic;
+     
+      if (selectedFile) { 
+         const userId=user?.id;
+         const folderPath = `users/${userId}`;
+        //  profilePicUrl=await uploadService.upload(selectedFile, `${folderPath}_profiles`);
+           profilePicUrl=await uploadService.upload(selectedFile, `${folderPath}_profiles`,userId,"profile_pic");     
+       
       }
-
-      // 2. Add all other fields from state
-      Object.entries(profile).forEach(([key, value]) => {
-        if (key !== "profilePic" && value !== undefined && value !== null) {
-          data.append(key, value.toString());
-        }
-      });
-
-      const response = await userService.addProfile(data);
+      const profilePayload = {
+      ...profile,
+      profilePic: profilePicUrl, // new URL
+    };
+      
+      const validation=CreateProfileSchema.safeParse(profilePayload);
+      if (!validation.success) {       
+          const errorMessage = validation.error.issues[0].message;
+          return toast.error(errorMessage);
+      }
+      const response = await userService.addProfile(validation.data);
       setHasProfile(true);
       console.log("Upload Success:", response);
       toast.success("Profile saved successfully!");
-      navigate('/user/dashboard');
+      navigate('/user/dashboard',{ replace: true });
     }
-    catch (error: unknown) {      
-        if (error instanceof Error) {
-           const message =  error.message ;
-           console.log(message) ; 
-            toast.error("Failed to save profile " );
-        } else {
-            toast.error("An unexpected error occurred");
-        }
-        console.error(error)
+    catch (error) {
+        toast.error(error?.toString() || "Something went wrong");
     } finally {
       setIsLoading(false);
     }

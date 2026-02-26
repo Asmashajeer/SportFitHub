@@ -1,5 +1,5 @@
-import StatCard from "../../../../components/.ui.compo/StatCard";
-import { adminService } from "../../service/adminService";
+import StatCard from "../../../../components/reusable/StatCard";
+import { userManagementService } from "../../service/userManagementService";
 import { useEffect ,useState } from "react";
 import { ArrowRight, Ban, CheckCircle,Loader2, Users, X } from "lucide-react";
 import  Search from '../../../../components/ui/Search'
@@ -64,7 +64,7 @@ const UserManagement = () => {
     const loadUsers = async () => {  
       setIsLoading(true) 
       try{        ;
-          const [data] =await Promise.all([ adminService.getUsers({
+          const [data] =await Promise.all([ userManagementService.getUsers({
             page:currentPage,
             search:debouncedSearch,
             status:statusFilter,
@@ -72,7 +72,7 @@ const UserManagement = () => {
           }),
           fetchStats()]);
           setUsers(data.users);  
-          console.log(data.users);
+         
           setTotalPages(data.totalPages);
          
       }
@@ -94,10 +94,8 @@ const UserManagement = () => {
 
   const handleToggleBlock = async (id: string) => {
     try{
-      const {userData} = await adminService.toggleBlock(id);    
-      console.log('updated Data',userData);
-      updateUser(userData);    
-      console.log('users:',users);
+      const {userData} = await userManagementService.toggleBlock(id);  
+       updateUser(userData);       
       await fetchStats(); 
     }          
     catch (error: unknown) {
@@ -111,18 +109,12 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (id: string) => {
     try{
-      const{userData} = await adminService.deleteUser(id);
-      console.log(userData);
-      removeUser(userData.id);
-      console.log("user stats",userStats);
+      const{userData} = await userManagementService.deleteUser(id);      
+      removeUser(userData.id);      
       await fetchStats();
     }
-    catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error("Failed to delete right now,try again");
-      } else {
-        toast.error('An unexpected error occurred:');
-      }
+    catch (error) {
+        toast.error(error?.toString() || "Something went wrong");
     } 
 
   };
@@ -132,9 +124,9 @@ const UserManagement = () => {
   return (
     <>
       {/* main content  */}
-      <div>
-        <div className="mb-2">
-          <h1 className="text-2xl font-bold mb-1">User Management</h1>
+      <div className="px-10 py-5 mt-0 bg-card">
+        <div className="mb-1 ">
+          <h1 className="text-2xl font-bold ">User Management</h1>
           <p className="text-gray-600">
             Manage users, view their details, and control account status.
           </p>
@@ -167,7 +159,7 @@ const UserManagement = () => {
           />
         </div>
         {/* Search and filters */}
-        <div className="bg-secondary rounded-lg shadow-sm p-2 my-4">
+        <div className="bg-card rounded-lg shadow-sm mt-3 p-2">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             {/* SEARCH */}
             <div className="w-full md:w-auto flex-1">
@@ -226,7 +218,7 @@ const UserManagement = () => {
             <div className="absolute top-0 left-0 right-0 h-1 bg-green-600 animate-pulse z-10" />
           ) :
           (
-            <div className="bg-secondary rounded-lg shadow-md overflow-hidden  ">
+            <div className=" pt-1 bg-secondary shadow-md overflow-hidden  ">
               <div className="overflow-x-auto ">
                 <table className="min-w-full divide-y divide-gray-600  bg-secondary">
                   <thead className="bg-green-950">
@@ -377,12 +369,7 @@ const UserManagement = () => {
                                         </AlertDialogFooter>
                                       </AlertDialogContent>
                                     </AlertDialog>
-                                  {/* <button
-                                    className="p-1 rounded-full text-red-600 hover:bg-gray-600 cursor-pointer"
-                                    onClick={() => handleDeleteUser(user.id)}
-                                  >
-                                    <X className="h-5 w-5" />
-                                  </button> */}
+                                 
                                 </div>
                               )}
                             </td>

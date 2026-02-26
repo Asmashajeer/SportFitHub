@@ -22,13 +22,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select"
-import { TRAINER_CATEGORY, type categoryType } from "@/constants/constants";
+import { TRAINER_CATEGORY } from "@/constants/constants";
 
 interface BasicInfoFormProps {
+  setPreviewUrl: React.Dispatch<React.SetStateAction<string | null>>;
+  previewUrl:string|null,
   onNext: (fields: any[]) => void;
+
 }
 
-const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ onNext }) => {
+const BasicInfoForm: React.FC<BasicInfoFormProps> = ({previewUrl, setPreviewUrl, onNext }) => {
   const form = useFormContext<TrainerOnboardingFormValues>();
   const {
     register,
@@ -37,17 +40,18 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ onNext }) => {
     formState: { errors },
   } = form;
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const profilePicFile = watch("profilePic");
 
   useEffect(() => {
     if (profilePicFile && profilePicFile[0]) {
       const url = URL.createObjectURL(profilePicFile[0]);
       setPreviewUrl(url);
+   
       return () => URL.revokeObjectURL(url); // Cleanup
     }
     setPreviewUrl(null);
-  }, [profilePicFile]);
+  }, [profilePicFile,setPreviewUrl]);
 
   const currentFields = [
     "displayName",
@@ -67,17 +71,25 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ onNext }) => {
         <div className="flex flex-col items-center gap-4">
           <Label htmlFor="picture" className="cursor-pointer">
             <Avatar className="h-24 w-24">
-              <AvatarImage src={previewUrl || ""} />
+            
+              <AvatarImage src={previewUrl||'' } />
+            
               <AvatarFallback>
                 <Camera />
-              </AvatarFallback>
+              </AvatarFallback>            
             </Avatar>
+            {/* {previewUrl && (
+              <div className="absolute -bottom-1 -right-1 bg-trainer-primary text-white p-1 rounded-full shadow-sm">
+                <Camera size={14} />
+              </div>
+            )} */}
+
           </Label>
           <Input
             id="picture"
             type="file"
             className=" hidden max-w-xs"
-            {...register("profilePic", { required: "Photo is required" })}
+            {...register("profilePic", { required:previewUrl ? false : "Photo is required"})}
           />
           {errors.profilePic && (
             <p className="text-destructive text-sm">
@@ -90,8 +102,17 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ onNext }) => {
         <div className="space-y-2">
           <Label>Display Name</Label>
           <Input
-            {...register("displayName", { required: "Name is required" })}
-            placeholder="Coach Name.. (Eg:Head Coach John)"
+            {...register("displayName", { required: "Name is required",
+              minLength: {
+                value: 3,
+                message: "Name must be at least 3 characters"
+              },
+              pattern: {
+                value: /^[A-Za-z][A-Za-z\s]*$/,
+                message: "Name can only contain letters"
+              }
+             })}
+            placeholder="Coach Name.. (Eg: Coach John)"
             className={errors.displayName ? "border-destructive" : ""}
           />
           {errors.displayName && (
@@ -131,7 +152,12 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ onNext }) => {
         <div className="space-y-2">
           <Label>Core Discipline</Label>
           <Input
-            {...register("coreDiscipline", { required: "CoreDiscipline is required" })}
+            {...register("coreDiscipline", { required: "CoreDiscipline is required",
+              pattern: {
+              value: /^[A-Za-z\s]+$/,
+              message: "Discipline should only contain letters"
+            }
+             })}
             placeholder="eg: Football, Yoga"
             className={errors.coreDiscipline ? "border-destructive" : ""}
           />

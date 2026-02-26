@@ -5,10 +5,12 @@ const UPLOAD_ROUTES={
     UPLOAD:'/upload/uploadfile'
 }
 export const uploadService={
-        upload:async (file: File, folder:string): Promise<string> => {
+        upload:async (file: File, folder:string,userId: string, uploadType: string): Promise<string> => {
            
             const formData = new FormData();
             formData.append("folder", folder); 
+            formData.append('userId', userId);
+            formData.append('uploadType', uploadType);
             formData.append("file", file);
            
 

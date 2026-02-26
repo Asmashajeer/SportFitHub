@@ -11,9 +11,7 @@ function CompleteProfilePage() {
   )
 }
 
-CompleteProfilePage.propTypes = {
 
-}
 
 export default CompleteProfilePage
 

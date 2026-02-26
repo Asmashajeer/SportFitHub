@@ -1,7 +1,8 @@
 import { TrainerProfileResponseDTO } from "@/dtos/response/trainer/trainer.response.dto";
-import {  PendingTrainersBasicDTO, TrainerProfileDTO } from "@/dtos/response/trainer/trainerApprovals.response";
+import {  PendingTrainersBasicDTO } from "@/dtos/response/trainer/trainerApprovals.response";
+import { TrainerProfileDTO } from "@/dtos/response/trainer/trainer.response.dto";
 import { ITrainerProfile,ICertification, } from "@/models/trainerProfile.model";
-import { Document } from "mongoose";
+
 
 export const toTrainerProfileData=(profile:Partial<ITrainerProfile>):TrainerProfileResponseDTO=>{
        {
@@ -32,7 +33,7 @@ export const toTrainerProfileData=(profile:Partial<ITrainerProfile>):TrainerProf
 }
 }
 
-//trainer Approvals Basic Data
+//trainerManagement admin Approvals Basic Data
 export const toPendingTrainersBasicData=(profile:Partial<ITrainerProfile>):PendingTrainersBasicDTO=>{
     return{
         id: profile._id.toString(),
@@ -60,7 +61,7 @@ export const toPendingTrainersBasicData=(profile:Partial<ITrainerProfile>):Pendi
 
 export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO => {
 
-    const data = trainer instanceof Document ? trainer.toObject() : trainer;
+    // const data = trainer instanceof Document ? trainer.toObject() : trainer;
 
   return {
     id: trainer._id.toString(),
@@ -84,7 +85,7 @@ export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO
     },
 
     certificationInfo: {
-      ...trainer.certificationInfo,
+      
       documents: (trainer.certificationInfo?.documents || []).map((doc:ICertification) => ({
         name: doc.name,
         url: doc.url,
@@ -92,6 +93,12 @@ export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO
         issuedAt: doc.issuedAt?.toString(),
         
       })),
+
+      status: trainer.certificationInfo?.status,
+    verified: trainer.certificationInfo?.verified ?? false,
+    rejectReason: trainer.certificationInfo?.rejectReason || "",
+
+
       verifiedAt: trainer.certificationInfo?.verifiedAt?.toISOString()
     },
 

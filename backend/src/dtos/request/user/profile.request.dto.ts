@@ -20,7 +20,7 @@ export const CreateUserProfileSchema = z.object({
   zip: z.string().optional(),
   longitude: z.number().optional(),
   latitude: z.number().optional(),
-  profilePic: z.string().url(),
+  profilePic: z.url(),
   isPrimary: z.boolean(),
 });
 export type CreateUserProfileDTO = z.infer<typeof CreateUserProfileSchema>;

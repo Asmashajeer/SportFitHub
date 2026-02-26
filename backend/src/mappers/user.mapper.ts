@@ -1,5 +1,5 @@
 import { usersResposeDTO } from "@/dtos/response/admin/user.dto";
-import { AdminIUserView, IUser } from "@/models/user.model";
+import { IUser } from "@/models/user.model";
 
 export const toUsersResponseData= (user:IUser):usersResposeDTO=>{
     return{

@@ -1,11 +1,20 @@
-import express, { Router } from 'express';
+import  { Router } from 'express';
 import { profileController } from '../../../container';
 import { protect } from '../../../middleware/auth.middleware';
-import { uploadUser } from '@/middleware/multer';
-const router = Router();
 
-router.post('/add-Profile', protect,uploadUser, profileController.addProfile);
-router.get('/getAllProfile', protect, profileController.getAllProfile);
-router.get('/getProfile', protect, profileController.getMyProfile);
-router.put('/updateProfile', protect, profileController.updateProfile);
+import { uploadMiddleware  } from '@/middleware/upload.middleware';
+import { restrictTo } from '@/middleware/role.middleware';
+import { UserRole } from '@/constants/enums';
+
+const upload=uploadMiddleware();  // folder name as argument;
+
+const router = Router();
+router.use(protect);
+router.use(restrictTo([UserRole.USER]));
+router.get('/getAllProfile', profileController.getAllProfile);
+router.post('/add-Profile', upload.single('profilePic'), profileController.addProfile);
+router.get('/getProfile',  profileController.getProfile);
+router.get ('/profile_pic/:userId',profileController.getProfilePic)
+router.put('/updateProfile',profileController.updateProfile);
+
 export default router;

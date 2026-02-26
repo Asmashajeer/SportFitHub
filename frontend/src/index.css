@@ -6,7 +6,8 @@
 @theme {
   /* Defining your Fitness App Brand Colors */
   /* #00608f */
-  --color-primary: #197e04;    
+  --color-primary:  #197e04;
+  --color-trainer-primary:  #a25401; 
   --color-secondary: #212222;  
   --color-accent: #dc2626;     
 

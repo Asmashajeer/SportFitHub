@@ -1,8 +1,9 @@
-import { DOC_VERIFY_STATUS } from "@/constants/enums";
-import { MESSAGES, STATUS_CODE } from "@/constants/messages";
+
+import { STATUS_CODE, SUCCESS_MESSAGES } from "@/constants/messages";
 import { ITrainerService } from "@/interfaces/services/trainer/Itrainer.service";
 import { IUser } from "@/models/user.model";
-import { uploadToCloudinary } from "@/utils/cloudinary";
+import Logger from "@/utils/logger";
+
 import {Request,Response, NextFunction } from "express";
 
 export class TrainerController{
@@ -24,9 +25,10 @@ export class TrainerController{
                     ...req.body
                 }
              const result=await this._trainerService.addProfile(profile);
-             res.status(STATUS_CODE.CREATED).json({
+             Logger.info("Trainer created an application",{id:user.id})
+             res.status(STATUS_CODE.SUCCESS.CREATED).json({
                 success:true,
-                message:MESSAGES.success.PROFILE_CREATED,
+                message:SUCCESS_MESSAGES.USER.PROFILE_CREATED,
                 profileData:result
              })
         }
@@ -34,5 +36,89 @@ export class TrainerController{
             next(error);
         }    
     }
-   
+    getProfilePic=async (req: Request, res: Response, next: NextFunction): Promise<void>=>{
+    try {
+       const user=req.user as IUser
+            const userId=user.id;
+      const profile = await this._trainerService.getTrainerByUserId(userId);
+      const profilePic=profile.profilePic;
+      res.status(STATUS_CODE.SUCCESS.OK).json({
+       success: true,
+        profilePic
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  getProfile=async  (req: Request, res: Response, next: NextFunction): Promise<void>=>{
+    try{
+        const user=req.user as IUser
+        const userId=user.id;
+        const profile = await this._trainerService.getTrainerByUserId(userId);
+    
+    res.status(STATUS_CODE.SUCCESS.OK).json({
+        success: true,
+        profile
+      });
+    } 
+    catch (error) {
+      next(error);
+    }
+  };
+  updateCertificates=async(req: Request, res: Response, next: NextFunction): Promise<void>=>{
+    try{
+        const {id,section}=req.params;
+        const documents=req.body;
+        const profile= await this._trainerService.updateCertificate(id,section,documents);
+        res.status(STATUS_CODE.SUCCESS.OK).json({
+        success: true,
+        profile
+      });
+    } catch (error) {
+      next(error);
+    }
+
+  }
+  updateIdverification=async(req: Request, res: Response, next: NextFunction): Promise<void>=>{
+    try{
+        const {id}=req.params;
+        const data=req.body;
+        const profile= await this._trainerService.updateIdVerification(id,data);
+        res.status(STATUS_CODE.SUCCESS.OK).json({
+        success: true,
+        profile
+      });
+    } catch (error) {
+      next(error);
+    }
+
+  }
+   updateAvailabilityPricing=async(req: Request, res: Response, next: NextFunction): Promise<void>=>{
+    try{
+        const {id}=req.params;
+        const data=req.body;
+        const profile= await this._trainerService. updateAvailabilityPricing(id,data);
+        res.status(STATUS_CODE.SUCCESS.OK).json({
+        success: true,
+        profile
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  updatePaymentInfo=async(req: Request, res: Response, next: NextFunction): Promise<void>=>{
+    try{
+        const {id}=req.params;
+        const data=req.body;
+        const profile= await this._trainerService.  updatePaymentInfo(id,data);
+        res.status(STATUS_CODE.SUCCESS.OK).json({
+        success: true,
+        profile
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
 }

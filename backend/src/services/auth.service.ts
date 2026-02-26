@@ -1,12 +1,11 @@
 import bcrypt from 'bcryptjs';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { IUserRepository } from '../interfaces/repositories/IUser.repository';
-// import { ProfileRepository } from '@/repositories/profile.repository.js';
 import { UserRole } from '@/constants/enums';
 import AppError from '../utils/AppError';
 import authConfig from '../config/auth.config';
 import { IProfileRepository } from '../interfaces/repositories/IProfile.repository';
-import { MESSAGES, STATUS_CODE } from '../constants/messages';
+import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '../constants/messages';
 import { generateOTP } from '../utils/generateOTP';
 import { sendEmailOTP } from '../utils/sendMailOTP';
 import { IOtpRepository } from '../interfaces/repositories/IOtp.repository';
@@ -21,13 +20,13 @@ import {
   VerifyEmailDTO,
   VerifyOtpDTO,
   ResetPasswordDTO,
-  GoolgleLoginDTO,
+ 
 } from '@/dtos/request/auth.request.dto';
 import {
   RegisterResponseDTO,
   UserResponseDTO,
   BaseResponseDTO,
-  // RegisterDataDTO,
+ 
   UserDataDTO,
   RefreshTokensResponse,
   AuthMeResponseDto,
@@ -53,10 +52,10 @@ export class AuthService implements IAuthService {
   }
   // register
   register = async (userData: RegisterRequestDTO): Promise<RegisterResponseDTO> => {
-    try {
+   
       const existingUser = await this._userRepo.findByEmail(userData.email);
       if (existingUser) {
-        throw new AppError(MESSAGES.error.USER_EXISTS, STATUS_CODE.CONFLICT);
+        throw new AppError(ERROR_MESSAGES.AUTH.USER_EXISTS, STATUS_CODE.ERROR.CONFLICT);
       }
       const hashedPassword = await bcrypt.hash(userData.password!, 10);
       const newUser = await this._userRepo.create({ ...userData, password: hashedPassword });
@@ -67,28 +66,26 @@ export class AuthService implements IAuthService {
       console.log('Registration successful. ');
       return {
         success: true,
-        message: MESSAGES.success.REGISTER_SUCCESS,
-        statusCode: STATUS_CODE.CREATED,
+        message: SUCCESS_MESSAGES.AUTH.REGISTER_SUCCESS,
+        statusCode: STATUS_CODE.SUCCESS.CREATED,
         user: RegisterData,
         emailSent: !!isEmailSent,
       };
-    } catch (error) {
-      throw error;
-    }
+   
   };
 
   //Verify email with otp
   verifyEmail = async (data: VerifyEmailDTO): Promise<UserResponseDTO> => {
-    try {
+   
       const user = await this._userRepo.findByEmail(data.email);
-      if (!user) throw new AppError(MESSAGES.error.USER_NOT_FOUND, 404);
+      if (!user) throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
       const userId = user._id.toString();
       const otp = data.otp;
       const otpContext = OtpType.VERIFICATION;
       console.log(otp, -'otp');
       const result = await this.verifyOTPInternal({ userId, otp, otpContext });
       if (!result.valid) {
-        throw new AppError(result.message, 400);
+        throw new AppError(result.message, STATUS_CODE.ERROR.BAD_REQUEST);
       }
 
       const verifiedUser = await this._userRepo.updateVerificationStatus(user._id.toString(), true);
@@ -101,21 +98,21 @@ export class AuthService implements IAuthService {
       if (user.role === UserRole.TRAINER) {
         profileCount = await this._trainerRepo.count({userId:user._id.toString()});
       }
+      
       const hasProfile = profileCount !== 0;
+      userData.hasProfile=hasProfile;
       const accessToken = this.generateAccessToken(user._id.toString(), user.role);
       const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
 
       return {
         success: true,
-        message: MESSAGES.success.EMAIL_VERIFIED,
-        statusCode: STATUS_CODE.OK,
+        message: SUCCESS_MESSAGES.AUTH.EMAIL_VERIFIED,
+        statusCode: STATUS_CODE.SUCCESS.OK,
         user: userData,
         accessToken,
         refreshToken,
       };
-    } catch (error) {
-      throw error;
-    }
+   
   };
 
   // resend otp
@@ -126,8 +123,8 @@ export class AuthService implements IAuthService {
       const userData: RegisterDataDTO = toRegisterData(user);
       return {
         success: true,
-        message: MESSAGES.success.OTP_SENT,
-        statusCode: STATUS_CODE.CREATED,
+        message:SUCCESS_MESSAGES.AUTH.OTP_SENT,
+        statusCode: STATUS_CODE.SUCCESS.CREATED,
         user: userData,
         emailSent: !!isEmailSent,
       };
@@ -137,7 +134,7 @@ export class AuthService implements IAuthService {
   // reset Password
   resetPassword = async (data: ResetPasswordDTO): Promise<BaseResponseDTO> => {
     const user = await this._userRepo.findByEmail(data.email);
-    if (!user) throw new AppError(MESSAGES.error.USER_NOT_FOUND, STATUS_CODE.NOT_FOUND);
+    if (!user) throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     const userId = user._id.toString();
     const otp = data.otp;
     const otpContext = OtpType.PASSWORD_RESET;
@@ -151,21 +148,21 @@ export class AuthService implements IAuthService {
     console.log('password updated');
     return {
       success: true,
-      message: MESSAGES.success.PASSWORD_UPDATED,
-      statusCode: STATUS_CODE.CREATED,
+      message: SUCCESS_MESSAGES.AUTH.PASSWORD_UPDATED,
+      statusCode: STATUS_CODE.SUCCESS.CREATED,
     };
   };
 
   //Login
   login = async (data: LoginDTO): Promise<LoginResponseDTO> => {
-    try {
+   
       const user = await this._userRepo.findByEmail(data.email);
       if (!user || !user.password)
-        throw new AppError(MESSAGES.error.USER_NOT_FOUND, STATUS_CODE.NOT_FOUND);
+        throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
       const isMatch = await bcrypt.compare(data.password, user.password);
-      if (user.isBlocked) throw new AppError(MESSAGES.error.BLOCKED_USER, STATUS_CODE.FORBIDDEN);
+      if (user.isBlocked) throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
       if (!isMatch)
-        throw new AppError(MESSAGES.error.INVALID_CREDENTIALS, STATUS_CODE.UNAUTHORIZED);
+        throw new AppError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, STATUS_CODE.ERROR.UNAUTHORIZED);
       const userData: UserDataDTO = toUserData(user);
       
      
@@ -183,29 +180,27 @@ export class AuthService implements IAuthService {
       userData.hasProfile = profileCount !== 0;
       const accessToken = this.generateAccessToken(user._id.toString(), user.role);
       const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
-      
+      console.log("user logged in");
       return {
         success: true,
-        message: MESSAGES.success.LOGIN_SUCCESS,
-        statusCode: STATUS_CODE.OK,
+        message: SUCCESS_MESSAGES.AUTH.LOGIN_SUCCESS,
+        statusCode: STATUS_CODE.SUCCESS.OK,
         user: userData,
         isVerified: user.isVerified,
         accessToken,
         refreshToken,
       };
-    } catch (error) {
-      throw error;
-    }
+   
   };
 
   //Google Login
   googleLogin = async (token: string): Promise<LoginResponseDTO> => {
-    try {
+    
       const ticket = await client.verifyIdToken({
         idToken: token,
         audience: process.env.GOOGLE_CLIENT_ID,
       });
-      const { email, sub, name, picture } = ticket.getPayload();
+      const { email, sub, name} = ticket.getPayload();
 
       let user = await this._userRepo.findByEmail(email);
       if (!user) {
@@ -218,7 +213,7 @@ export class AuthService implements IAuthService {
           isVerified: true,
         });
       }
-      if (user.isBlocked) throw new AppError(MESSAGES.error.BLOCKED_USER, STATUS_CODE.FORBIDDEN);
+      if (user.isBlocked) throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
       const userData: UserDataDTO = toUserData(user);
       let profileCount = 0;
       if (user.role === UserRole.USER) {
@@ -232,31 +227,29 @@ export class AuthService implements IAuthService {
       const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
       return {
         success: true,
-        message: MESSAGES.success.LOGIN_SUCCESS,
-        statusCode: STATUS_CODE.OK,
+        message:SUCCESS_MESSAGES.AUTH.LOGIN_SUCCESS,
+        statusCode: STATUS_CODE.SUCCESS.OK,
         user: userData,
         isVerified: true,
         accessToken,
         refreshToken,
       };
-    } catch (error) {
-      throw error;
-    }
+    
   };
 
   //add role of user
   updateRole = async (data: UpdateRoleDTO): Promise<UserResponseDTO> => {
-    try {
+   
       const Data = await this._userRepo.findByEmail(data.email);
       if (!Data) {
         console.log('No user Data');
-        throw new AppError(MESSAGES.error.USER_NOT_FOUND, STATUS_CODE.NOT_FOUND);
+        throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
       }
 
       const userId = Data._id.toString();
       const user = await this._userRepo.findOneAndUpdate(userId, { role: data.role });
 
-      if (!user) throw new AppError(MESSAGES.error.USER_NOT_FOUND, STATUS_CODE.NOT_FOUND);
+      if (!user) throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
       const userData: UserDataDTO = toUserData(user);
       let profileCount = 0;
       if (user.role === UserRole.USER) {
@@ -266,29 +259,28 @@ export class AuthService implements IAuthService {
         profileCount = await this._trainerRepo.count({userId:user._id.toString()});
       }
       const hasProfile = profileCount !== 0;
+      userData.hasProfile=hasProfile;
       const accessToken = this.generateAccessToken(user._id.toString(), user.role);
       const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
 
       return {
         success: true,
-        message: MESSAGES.success.ROLE_UPDATED,
-        statusCode: STATUS_CODE.OK,
+        message: SUCCESS_MESSAGES.AUTH.ROLE_UPDATED,
+        statusCode: STATUS_CODE.SUCCESS.OK,
         user: userData,
         accessToken,
         refreshToken,
       };
-    } catch (error) {
-      throw error;
-    }
+    
   };
 
   //authentication check
   authMe = async (userId: string): Promise<AuthMeResponseDto> => {
-    try {
+   
       const user = await this._userRepo.findById(userId);
       if (user.isBlocked) {
-        console.log(MESSAGES.error.BLOCKED_USER);
-        throw new AppError(MESSAGES.error.BLOCKED_USER, STATUS_CODE.FORBIDDEN);
+        console.log(ERROR_MESSAGES.AUTH.BLOCKED_USER);
+        throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
       }
       let profileCount = 0;
       if (user.role === UserRole.USER) {
@@ -304,39 +296,36 @@ export class AuthService implements IAuthService {
       return {
         success: true,
         message: 'in session ',
-        statusCode: STATUS_CODE.OK,
+        statusCode: STATUS_CODE.SUCCESS.OK,
         user: userData,
       };
-    } catch (error) {
-      throw new AppError(' invalid Session', 401);
-    }
+    
   };
 
   // refresh access token with refresh token
   refreshAccessToken = async (refreshToken: string): Promise<RefreshTokensResponse> => {
-    try {
+    
       const decoded = jwt.verify(refreshToken, authConfig.refresh_secret) as {
         id: string;
         role: string;
       };
+      if(!decoded) throw new AppError(ERROR_MESSAGES.AUTH.REFRESH_TOKEN_INVALID, STATUS_CODE.ERROR.UNAUTHORIZED);
 
       const accessToken = this.generateAccessToken(decoded.id, decoded.role) as string;
       refreshToken = this.generateRefreshToken(decoded.id, decoded.role) as string;
       return { accessToken, refreshToken };
-    } catch (error) {
-      throw new AppError(MESSAGES.error.REFRESH_TOKEN_INVALID, STATUS_CODE.UNAUTHORIZED);
-    }
+   
   };
 
   verifyOTPInternal = async (data: VerifyOtpDTO) => {
     const savedOtp = await this._otpRepo.findOtp(data.userId, data.otpContext);
     if (!savedOtp)
-      return { valid: false, message: ' OTP expired or Not found,please request new one' };
+      return { valid: false, message: ERROR_MESSAGES.AUTH.OTP_INVALID };
 
     console.log('saved otp', savedOtp.code);
     const isMatch = await bcrypt.compare(data.otp, savedOtp.code);
     console.log('isMatch', isMatch);
-    if (!isMatch) return { valid: false, message: MESSAGES.error.OTP_INVALID };
+    if (!isMatch) return { valid: false, message: ERROR_MESSAGES.AUTH.OTP_INVALID };
 
     await this._otpRepo.deleteOtp(savedOtp.userId.toString(), data.otpContext);
     return { valid: true, userId: savedOtp.userId };
@@ -358,20 +347,19 @@ export class AuthService implements IAuthService {
 
   // generate OTP and send mail to user
   generateOtpAndSendMail = async (userId: string, email: string, otpContext: OtpType) => {
-    try {
+   
       const OTP = generateOTP();
       console.log(OTP);
       const hashedOTP = await bcrypt.hash(OTP, 10);
       // 3. Save the HASHED version
       await this._otpRepo.createOtp(userId, hashedOTP, otpContext);
       const isEmailSent = sendEmailOTP(email, OTP);
+      if(!isEmailSent) throw new AppError(
+        ERROR_MESSAGES.AUTH.SEND_VERIFICATION_CODE_FAILED,
+        STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR
+      );
       console.log('verification code sent to your mail. Please verify your email.');
       return isEmailSent;
-    } catch (error) {
-      throw new AppError(
-        MESSAGES.error.SEND_VERIFICATION_CODE_FAILED,
-        STATUS_CODE.INTERNAL_SERVER_ERROR
-      );
-    }
+    
   };
 }

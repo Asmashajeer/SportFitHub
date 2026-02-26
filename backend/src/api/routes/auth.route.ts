@@ -1,9 +1,11 @@
-import express, { Router } from 'express';
+import { Router } from 'express';
 import { authController } from '../../container';
 import { protect } from '../../middleware/auth.middleware';
 
 import { validate } from '../../middleware/validate.middleware';
-import { GoogleLoginSchema, LoginSchema, RegisterSchema, updateRoleSchema, VerifyEmailSchema, VerifyOtpSchema } from '../../dtos/request/auth.request.dto'
+import {  LoginSchema, RegisterSchema, updateRoleSchema, VerifyEmailSchema} from '../../dtos/request/auth.request.dto'
+import { restrictTo } from '@/middleware/role.middleware';
+import { UserRole } from '@/constants/enums';
 
 const router = Router();
 
@@ -15,10 +17,11 @@ router.post('/forgotPassword',authController.forgotPassword);
 router.patch('/resetPassword',authController.resetPassword);
 router.post('/login',validate(LoginSchema) ,authController.login);
 
-router.patch('/updateRole',validate(updateRoleSchema),authController.updateRole);
+router.patch('/updateRole',protect,validate(updateRoleSchema),authController.updateRole);
 
 router.post('/refresh', authController.refresh);
-router.post('/logout', authController.logout);
+
+
 
 
 router.post('/google-login', authController.googleLogin);
@@ -28,7 +31,7 @@ router.patch('/updateRole', protect,validate(updateRoleSchema) ,authController.u
 router.get('/authMe',protect,authController.authMe);
 
 
-
+router.post('/logout', protect,restrictTo([UserRole.ADMIN,UserRole.USER,UserRole.TRAINER]), authController.logout);
 
 
 export default router;

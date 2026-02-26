@@ -1,6 +1,6 @@
 import type { UserRole } from "../../../constants/constants";
 import type { StateCreator } from "zustand";
-import { adminService } from "../service/adminService";
+import { userManagementService } from "../service/userManagementService";
 
 
 export interface UserSlice {
@@ -27,7 +27,7 @@ export const createUserSlice:StateCreator<UserSlice>=(set)=>({
     setUserStats:(userStats:UserStats)=>set({userStats}),
     fetchStats: async () => {
         try {
-            const stats = await adminService.getStats();           
+            const stats = await userManagementService.getStats();           
             set({ userStats: stats.userStats });       
             
         } catch (error) {

@@ -19,3 +19,5 @@ export const getAllusersSchema = z.object({
   role: z.string().default('all'),
 });
 export type getAllUsersRequestDTO = z.infer<typeof getAllusersSchema>;
+
+

@@ -4,7 +4,7 @@ import {Toaster} from 'react-hot-toast'
 import './App.css'
 import AppRouter from "./routes/AppRouter"
 import { useAuth } from './features/auth/hook/useAuth';
-import { LoadingScreen } from './components/.ui.compo/LoadingScreen';
+import { LoadingScreen } from './components/reusable/LoadingScreen';
 
 function App() {
  

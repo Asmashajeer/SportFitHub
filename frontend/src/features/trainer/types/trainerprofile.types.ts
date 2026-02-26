@@ -1,14 +1,8 @@
 import { GOVT_ID_TYPE,TRAINER_STATUS,TRAINER_CATEGORY,DOC_VERIFY_STATUS,CURRENCY } from "@/constants/constants";
-export interface documents{
-  name:string,
-  file: FileList | null;
-  validUpto:string,
-  issuedAt:string,
-}
-interface dayAvailability  {
+export interface dayAvailability  {
   available:boolean;
-  startTime:string;
-  endTime:string,
+  startTime?:string;
+  endTime?:string,
 };
 // Trainer form values
 export interface TrainerOnboardingFormValues {
@@ -70,9 +64,62 @@ export interface TrainerOnboardingFormValues {
 }
 
 
+
+
+export interface documents{
+  name:string,
+  file: FileList | null;
+  validUpto:string,
+  issuedAt:string,
+}
+export interface  idVerification {
+    idType: typeof GOVT_ID_TYPE[keyof typeof GOVT_ID_TYPE];
+    idNumber: string;
+    idAttachment: FileList| null;
+  };
+  
+  export interface  idVerificationwithUrl {
+      idType: typeof GOVT_ID_TYPE[keyof typeof GOVT_ID_TYPE];
+      idNumber: string;
+      idAttachment: string;
+ };
+
+
+export interface AvailabiltyPricing{
+    pricing:{
+      sessionCharge:number          
+        currency: typeof CURRENCY [keyof typeof CURRENCY]
+    },
+    availability :{ 
+
+      isAvailable: boolean;
+      Monday:    dayAvailability;
+      Tuesday:   dayAvailability;
+      Wednesday: dayAvailability;
+      Thursday:  dayAvailability;
+      Friday:    dayAvailability;
+      Saturday:  dayAvailability;
+      Sunday:dayAvailability;
+    };
+}
+
+export interface paymentInfoData{
+  bankAccount?: {
+    accountName?: string;
+    accountNumber?: string;
+    bankName?: string;
+    ifscCode?: string;
+  };
+  upiId?: string;
+};
+
 export interface DocumentValues{
   name:string,file:FileList,validUpto:Date,issuedAt:Date
 }
+
+
+
+
 //profile response data
 interface BasicResponse{
   success:boolean,

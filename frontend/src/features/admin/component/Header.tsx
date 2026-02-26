@@ -20,17 +20,15 @@ const Header = () => {
   
     <header className="fixed top-0  left-64 w-full px-.5 border-b border-border bg-background/80 backdrop-blur-md transition-all">
       
-      <div className="section-container flex items-center justify-around h-16 md:h-20   "> 
-        <div className=" md:flex  place-items-end me-20 ">
-          <button className="p-2 rounded-full hover:bg-muted transition-colors group">
+      <div className="section-container flex items-center justify-end  h-16 md:h-20   "> 
+        <div className=" md:flex   items-start  ">
+          {/* <button className="p-2 rounded-full hover:bg-muted transition-colors group">
             <Bell className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-          </button>
-          {!isAuthenticated ?(
+          </button> */}
+          {!isAuthenticated &&(
           <button  onClick={()=>navigate('/login')} className="p-2 rounded-full hover:bg-muted transition-colors group" >
             <User className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
           </button>
-          ):(       
-            <Avatar/>
           )}         
         </div>
         

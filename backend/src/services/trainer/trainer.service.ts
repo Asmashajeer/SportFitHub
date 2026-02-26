@@ -1,12 +1,13 @@
 import { DOC_VERIFY_STATUS, TRAINER_STATUS } from "@/constants/enums";
-import { MESSAGES, STATUS_CODE } from "@/constants/messages";
-import { trainerStatusDTO } from "@/dtos/request/admin/admin.trainer.dto";
+import { ERROR_MESSAGES, STATUS_CODE } from "@/constants/messages";
+import {  trainerStatusDTO } from "@/dtos/request/admin/admin.trainer.dto";
+import { AvailabiltyPricingReqDTO,  idVerificationReqDTO, PaymentInfoReqDTO } from "@/dtos/request/trainer/trainer.profile.request.dto";
 import { TrainerProfileResponseDTO } from "@/dtos/response/trainer/trainer.response.dto";
-import { PendingTrainersBasicDTO, TrainerProfileDTO } from "@/dtos/response/trainer/trainerApprovals.response";
+import { TrainerProfileDTO } from "@/dtos/response/trainer/trainer.response.dto";
 import { ITrainerRepository } from "@/interfaces/repositories/ITrainer.repository";
 import { ITrainerService } from "@/interfaces/services/trainer/Itrainer.service";
-import { toPendingTrainersBasicData, toTrainerProfileData, ToTrainerProfileDTO } from "@/mappers/trainer/trainer.mapper";
-import { ITrainerProfile } from "@/models/trainerProfile.model";
+import {  toTrainerProfileData, ToTrainerProfileDTO } from "@/mappers/trainer/trainer.mapper";
+import { ICertification, ITrainerProfile } from "@/models/trainerProfile.model";
 import AppError from "@/utils/AppError";
 import { Types } from "mongoose";
 
@@ -18,7 +19,7 @@ export class TrainerService implements ITrainerService{
 
     async checkExistingProfile(userId:Types.ObjectId):Promise<void>{
          const existingProfile=await this._trainerRepo.findByUserId(userId) 
-        if(existingProfile)  throw new AppError(MESSAGES.error.PROFILE_EXISTS,STATUS_CODE.CONFLICT)  ;
+        if(existingProfile)  throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_EXISTS,STATUS_CODE.ERROR.CONFLICT)  ;
     }
 
     async addProfile(profileData: Partial<ITrainerProfile>): Promise<TrainerProfileResponseDTO> {   
@@ -28,68 +29,119 @@ export class TrainerService implements ITrainerService{
         const profile:TrainerProfileResponseDTO=toTrainerProfileData(data);
         return profile;
     }
-    async getPendingTrainers():Promise<PendingTrainersBasicDTO[]>{
-        const pendingTrainers=await this._trainerRepo.find({status:{$in:[TRAINER_STATUS.SUBMITTED,TRAINER_STATUS.UNDER_REVIEW]}})
-        // const certCount=pendingTrainers
-        const pendingTrainersBasicData:PendingTrainersBasicDTO[]=pendingTrainers.map(trainer=>(toPendingTrainersBasicData(trainer)));
-        return pendingTrainersBasicData;
-    }
+    
     async getTrainer(id:string|Types.ObjectId):Promise<TrainerProfileDTO>{
            const trainer= await this._trainerRepo.findById(id);
-           if(!trainer) throw new AppError(MESSAGES.trainer.error.TRAINER_NOT_FOUND,STATUS_CODE.NOT_FOUND);
+           if(!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND,STATUS_CODE.ERROR.NOT_FOUND);
            const trainerData:TrainerProfileDTO=ToTrainerProfileDTO(trainer);
            return  trainerData;
     }
-    async updateFileStatus(id:string|Types.ObjectId,targetField:'certificationInfo' | 'idVerification',status:string,reason:string):Promise<TrainerProfileDTO>{
-        const trainer=await this._trainerRepo.findById(id);
-        if(!trainer) throw new AppError(MESSAGES.trainer.error.TRAINER_NOT_FOUND,STATUS_CODE.NOT_FOUND);
-      
-        const updateData: any = {
-            [`${targetField}.status`]: status,
-            [`${targetField}.rejectReason`]: status === DOC_VERIFY_STATUS.REJECTED ? reason : "",
-        };
+    async getTrainerByUserId(userId:string|Types.ObjectId):Promise<TrainerProfileDTO>{
+           const trainer= await this._trainerRepo.findOne({userId:userId});
+           if(!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND,STATUS_CODE.ERROR.NOT_FOUND);
+           const trainerData:TrainerProfileDTO=ToTrainerProfileDTO(trainer);
+           return  trainerData;
+    }
+    
 
- 
-        if (status === 'verified') {
-            updateData[`${targetField}.verified`] = true;
-            updateData[`${targetField}.verifiedAt`] = new Date().toISOString();
-        } else {
-            updateData[`${targetField}.verified`] = false;
-        }
-        
-        const updatedData =await this._trainerRepo.findOneAndUpdate(id,{$set:updateData})
-         const trainerData:TrainerProfileDTO=ToTrainerProfileDTO(updatedData);
-        return trainerData;
+
+//update certificates verification status        
+    async updateCertificate(id:string|Types.ObjectId,section:string,documents:ICertification):Promise<TrainerProfileDTO>{
+            const trainer=await this._trainerRepo.findById(id);
+            if(!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND,STATUS_CODE.ERROR.NOT_FOUND);
+            const updatedDoc = await this._trainerRepo.findOneAndUpdate(
+            id, 
+            { $set:{[`${section}.documents` ]: documents,[`${section}.status`]:DOC_VERIFY_STATUS.PENDING,[`${section}.rejectReason`]:""} }        
+            );
+
+            if (!updatedDoc) {
+                throw new AppError(ERROR_MESSAGES.GENERAL.UPLOAD_FAILED, STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
+            }
+            const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(updatedDoc);
+            return trainerData;
     }
 
 
-    async updateTrainerStatus(id:string|Types.ObjectId,status:TRAINER_STATUS,reason:string):Promise<TrainerProfileDTO>{
-        const trainer=await this._trainerRepo.findById(id);
-        if(!trainer) throw new AppError(MESSAGES.trainer.error.TRAINER_NOT_FOUND,STATUS_CODE.NOT_FOUND);
-      
-       const updateData:trainerStatusDTO = {
-            status: status,
-        };
-
-        
-        if (status === TRAINER_STATUS.REJECTED) {
-            updateData.rejectionReason = reason || ""; 
-            updateData.rejectedAt = new Date();      
-          
-        }
-
-        
-        const updatedDoc = await this._trainerRepo.findOneAndUpdate(
+//update id documents verification status
+    async updateIdVerification(id:string|Types.ObjectId,data:idVerificationReqDTO):Promise<TrainerProfileDTO>{
+            const trainer=await this._trainerRepo.findById(id);
+            if(!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND,STATUS_CODE.ERROR.NOT_FOUND);
+            const updatedDoc = await this._trainerRepo.findOneAndUpdate(
             id, 
-            { $set: updateData }        
+            { $set:{[`idVerification.idType`]: data.idType,[`idVerification.idNumber`]:data.idNumber,[`idVerification.idAttachment`]:data.idAttachment,
+                [`idVerification.status`]:DOC_VERIFY_STATUS.PENDING,[`idVerification.rejectReason`]:"" } }        
+            );
+
+            if (!updatedDoc) {
+                throw new AppError("Update failed", STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
+            }
+
+            const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(updatedDoc);
+            return trainerData;
+    }
+
+
+ //update availability and pricing   
+    async  updateAvailabilityPricing(id:string|Types.ObjectId,data: AvailabiltyPricingReqDTO):Promise<TrainerProfileDTO>{
+        const trainer=await this._trainerRepo.findById(id);
+        if(!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND,STATUS_CODE.ERROR.NOT_FOUND);
+        const updatedDoc = await this._trainerRepo.findOneAndUpdate(
+        id, 
+        { $set:{[`availability`]: data.availability,['pricing']:data.pricing} }        
         );
 
         if (!updatedDoc) {
-            throw new AppError("Update failed", STATUS_CODE.INTERNAL_SERVER_ERROR);
+            throw new AppError("Update failed", STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
         }
 
         const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(updatedDoc);
         return trainerData;
-
-        }
     }
+
+
+// update payment info
+     async updatePaymentInfo(id:string|Types.ObjectId,data:PaymentInfoReqDTO):Promise<TrainerProfileDTO>{
+        const trainer=await this._trainerRepo.findById(id);
+        if(!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND,STATUS_CODE.ERROR.NOT_FOUND);
+        const updatedDoc = await this._trainerRepo.findOneAndUpdate(
+        id, 
+        { $set:{[`paymentInfo`]: data.paymentInfo} }        
+        );
+
+        if (!updatedDoc) {
+            throw new AppError("Update failed", STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
+        }
+
+        const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(updatedDoc);
+        return trainerData;
+    }
+
+    async resubmitApplicaion(id:string|Types.ObjectId,status:TRAINER_STATUS,reason:string):Promise<TrainerProfileDTO>{
+            const trainer=await this._trainerRepo.findById(id);
+            if(!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND,STATUS_CODE.ERROR.NOT_FOUND);
+            
+            const updateData:trainerStatusDTO = {
+                status: status,
+            };
+
+            
+            if (status === TRAINER_STATUS.REJECTED) {
+                updateData.rejectionReason = reason || ""; 
+                updateData.rejectedAt = new Date();      
+                
+            }
+
+            
+            const updatedDoc = await this._trainerRepo.findOneAndUpdate(
+                id, 
+                { $set: updateData }        
+            );
+
+            if (!updatedDoc) {
+                throw new AppError("Update failed", STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
+            }
+
+            const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(updatedDoc);
+            return trainerData;
+        }
+}

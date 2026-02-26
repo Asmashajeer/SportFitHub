@@ -1,4 +1,4 @@
-// src/components/layout/Sidebar.tsx
+
 import { LogOut} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
@@ -9,9 +9,9 @@ import toast from 'react-hot-toast';
 import { UseAdminStore } from '../../features/admin/store/useAdminStore';
 import { userNavLinks } from '../../constants/constants';
 import { trainerNavLinks } from '../../constants/constants';
-import Avatar from './Avatar';
-import ProfilePic from '../.ui.compo/ProfilePic';
-// import UserRoleSelector from '@/features/auth/component/UserRoleSelector';
+
+import ProfilePic from '../reusable/ProfilePic';
+
 
 interface SidebarItemProps{
 

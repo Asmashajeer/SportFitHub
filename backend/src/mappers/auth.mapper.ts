@@ -1,4 +1,4 @@
-import { RegisterDataDTO, RegisterResponseDTO, UserDataDTO, UserResponseDTO } from "@/dtos/response/auth.response.dto";
+import { RegisterDataDTO,  UserDataDTO } from "@/dtos/response/auth.response.dto";
 import { IUser } from "@/models/user.model";
 
 export const toRegisterData = (user: IUser): RegisterDataDTO=> {

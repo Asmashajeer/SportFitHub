@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Target } from "lucide-react";
 import { CURRENCY, DAYS_OF_WEEK, type DayName } from "@/constants/constants";
 import { Select,SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 
 interface Rates_ScheduleFormProps{ 
@@ -15,11 +16,12 @@ interface Rates_ScheduleFormProps{
     onBack: () => void
 }
 
-// const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
 
 const Rates_ScheduleForm:React.FC<Rates_ScheduleFormProps> = ({ onNext,onBack }) => {
 const form= useFormContext<TrainerOnboardingFormValues>();
 const { register, watch, setValue, formState:{errors},setError,clearErrors}=form
+const [loading,setLoading]=useState(false);
 
   const location = watch("currentLocation.coordinates");
   const availability = watch("availability");
@@ -29,15 +31,17 @@ const { register, watch, setValue, formState:{errors},setError,clearErrors}=form
     setValue(name, value, { shouldValidate: true });
   };
   const handleGetLocation = () => {
+    setLoading(true);
     clearErrors("currentLocation.coordinates");
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition((position) => {
-        // Mongoose 2dsphere index expects [longitude, latitude]
-        setValue("currentLocation.coordinates", [position.coords.latitude,position.coords.longitude ], { shouldValidate: true });
+      //  [longitude, latitude]
+        setValue("currentLocation.coordinates", [position.coords.longitude,position.coords.latitude ], { shouldValidate: true });
       }, (error) => {
         console.error("Location access denied", error);
       });
     }
+    setLoading(false);
   };
   return (
     <div className="space-y-6">
@@ -109,40 +113,7 @@ const { register, watch, setValue, formState:{errors},setError,clearErrors}=form
           <CardTitle>Weekly Schedule</CardTitle>
           <CardDescription>Select your available days and working hours.</CardDescription>
         </CardHeader>
-        {/* <CardContent className="space-y-4">
-          <Switch 
-                  id={`isAvailable`}
-                  checked={availability?.isAvailable}
-                  onCheckedChange={(checked) => setValue(`availability.isAvailable`, checked)}
-          />
-          {availability.isAvailable && DAYS_OF_WEEK.map((day) => {
-               const dayKey = day as DayName;
-               return(
-              <div key={dayKey} className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                <div className="flex items-center space-x-4 mb-2 sm:mb-0">
-                  <Switch 
-                    id={`available-${day}`}
-                    checked={availability[day]?.available}
-                    onCheckedChange={(checked) => setValue(`availability.${day}.available`, checked)}
-                  />
-                  <Label htmlFor={`available-${day}`} className="font-semibold w-20">{day}</Label>
-                </div>
-
-                {availability[dayKey]?.available ? (
-                  <div className="flex items-center space-x-2">
-                    <Input type="time" className="w-32" {...register(`availability.${dayKey}.startTime`)} />
-                    <span className="text-muted-foreground">to</span>
-                    <Input type="time" className="w-32" {...register(`availability.${dayKey}.endTime`)} />
-                  </div>
-                ) : (
-                  <span className="text-sm text-muted-foreground italic">Unavailable for bookings</span>
-                )}
-              </div>
-
-            )})}
-
-
-        </CardContent> */}
+       
         
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
@@ -198,7 +169,7 @@ const { register, watch, setValue, formState:{errors},setError,clearErrors}=form
 
         <CardFooter>
              <Button variant="outline" onClick={onBack}>Back</Button>
-             <Button className="flex-1"onClick={() =>{
+             <Button disabled={loading} className="flex-1"onClick={() =>{
               if(!location||location[0]===0) {
                 setError("currentLocation.coordinates",{
                   message:" Location not Set"

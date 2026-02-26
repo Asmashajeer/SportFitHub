@@ -1,9 +1,10 @@
-import type { Request, Response, NextFunction } from 'express';
+import type {  Response, NextFunction } from 'express';
 import AppError from '../utils/AppError';
 import type { AuthRequest } from './auth.middleware.ts';
+import { user_role_onRoute} from '@/constants/enums';
 
-type Role = 'user' | 'trainer' | 'admin';
-export const roleMiddleware = (allowedRoles: Role[]) => {
+type Role = user_role_onRoute;
+export const restrictTo = (allowedRoles: Role[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       next(

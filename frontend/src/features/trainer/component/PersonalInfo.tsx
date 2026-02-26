@@ -44,7 +44,7 @@ const PersonalInfoForm:React.FC<PersonalInfoFormProps> = ({ onNext, onBack }) =>
     "idVerification.idType",
     "idVerification.idNumber"
   ];
-
+  const selectedIDType=watch("idVerification.idType")
   return (
     <Card className="w-full">
       <CardHeader>
@@ -56,7 +56,12 @@ const PersonalInfoForm:React.FC<PersonalInfoFormProps> = ({ onNext, onBack }) =>
         <div className="space-y-2">
           <Label> Full Name</Label>
           <Input 
-            {...register("personalInfo.fullName", { required: "Full name is required" })}
+            {...register("personalInfo.fullName", { required: "Full name is required",
+              pattern:{
+                value: /^[A-Za-z][A-Za-z\s]+$/,
+                message: "Discipline should only contain letters"
+              }
+            })}
             placeholder="As per your ID"
           />
           {errors?.personalInfo?.fullName && (
@@ -87,7 +92,16 @@ const PersonalInfoForm:React.FC<PersonalInfoFormProps> = ({ onNext, onBack }) =>
           <div className="space-y-2">
             <Label>Phone Number</Label>
             <Input 
-              {...register("personalInfo.phone", { required: "Phone is required" })}
+              {...register("personalInfo.phone", { required: "Phone is required",
+                pattern:{
+                  value:/^\+?[0-9]{10,15}$/,
+                  message:"Please enter a valid phone number (e.g., +1234567890)"
+                },
+                minLength:{
+                  value:10,
+                  message:"Phone number is too short"
+                }
+               })}
               placeholder="+91 00000 00000"
             />
             {errors?.personalInfo?.phone && (
@@ -121,7 +135,7 @@ const PersonalInfoForm:React.FC<PersonalInfoFormProps> = ({ onNext, onBack }) =>
         {/* Address Row: Street */}
         <div className="space-y-2">
           <Label>Street Address</Label>
-          <Input {...register("personalInfo.address.street", { required: "Required" })} placeholder="123 Workout St." />
+          <Input {...register("personalInfo.address.street", { required: "Required" })} placeholder="123 BA St." />
           {errors?.personalInfo?.address?.street && (
             <p className="text-xs text-red-500">{errors.personalInfo.address.street.message}</p>
           )}
@@ -131,14 +145,19 @@ const PersonalInfoForm:React.FC<PersonalInfoFormProps> = ({ onNext, onBack }) =>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>City</Label>
-            <Input {...register("personalInfo.address.city", { required: "Required" })} placeholder="City" />
+            <Input {...register("personalInfo.address.city", { required: "Required",minLength: { value: 2, message: "Too short" } })} placeholder="City" />
             {errors?.personalInfo?.address?.city && (
             <p className="text-xs text-red-500">{errors.personalInfo.address.city.message}</p>
           )}
           </div>
           <div className="space-y-2">
             <Label>Zip Code</Label>
-            <Input {...register("personalInfo.address.zip", { required: "Required" })} placeholder="Zip" />
+            <Input {...register("personalInfo.address.zip", { required: "Required" ,
+            pattern: {
+              value: /^[0-9\s-]{5,10}$/,
+              message: "Invalid zip code format"
+           }})} 
+           placeholder="Zip eg: 000000" />
             {errors?.personalInfo?.address?.zip && (
             <p className="text-xs text-red-500">{errors.personalInfo.address.zip.message}</p>
           )}
@@ -154,7 +173,7 @@ const PersonalInfoForm:React.FC<PersonalInfoFormProps> = ({ onNext, onBack }) =>
             <div className="space-y-2">
               <Label>ID Type</Label>
               <Select 
-                value={watch("idVerification.idType")}
+                value={selectedIDType}
                 onValueChange={(val) => handleSelectChange("idVerification.idType", val)}
               >
                 <SelectTrigger>
@@ -169,9 +188,26 @@ const PersonalInfoForm:React.FC<PersonalInfoFormProps> = ({ onNext, onBack }) =>
             </div>
 
             <div className="space-y-2">
+              
               <Label>ID Number</Label>
               <Input 
-                {...register("idVerification.idNumber", { required: "ID number is required" })}
+                {...register("idVerification.idNumber", { required: "ID number is required",
+                  validate: (value) => {
+                    if (selectedIDType === GOVT_ID_TYPE.AADHAR) {
+                      return /^\d{12}$/.test(value) || "Aadhaar must be exactly 12 digits";
+                    }
+                    if (selectedIDType === GOVT_ID_TYPE.PAN) {
+                      return /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(value) || "Invalid PAN format (ABCDE1234F)";
+                    }
+                    if (selectedIDType === GOVT_ID_TYPE.PASSPORT) {
+                      return value.length === 8 || "Passport must be 8 characters";
+                    }
+                    if (selectedIDType === GOVT_ID_TYPE.DRIVING_LICENSE) {
+                      return value.length === 15 || "Driving License must be 15 characters";
+                    }
+                    return true;
+                  }
+                 })}
                 placeholder="Enter ID Number"
               />
               {errors?.idVerification?.idNumber && (

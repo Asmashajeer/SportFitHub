@@ -10,6 +10,7 @@ export interface User {
   role: UserRole;
   hasProfile: boolean;
   isVerified:boolean;
+  profilePic?:string;
 }
 
 export interface AuthState {
@@ -35,6 +36,7 @@ export const useAuthStore = create<AuthState>()(
           user,
           isAuthenticated: true,
           isLoading: false,
+          
         }),
 
       clearAuth: () =>

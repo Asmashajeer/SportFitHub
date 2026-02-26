@@ -72,7 +72,10 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({ onNext, onB
           <Input 
             id="experience"
             type="number"
-            {...register("experience", { valueAsNumber: true, required: "Required" })}
+            {...register("experience", { valueAsNumber: true, required: "Required" ,
+              min: { value: 0, message: "Cannot be negative" },
+              max: { value: 60, message: "Enter a valid range" }
+            })}
             placeholder="e.g. 5"
           />
           {errors.experience && <p className="text-destructive text-sm">{errors.experience.message}</p>}
@@ -139,17 +142,7 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({ onNext, onB
           </div>
         </div>
 
-        {/* Certification */}
-        {/* <div className="space-y-2">
-            <Label>Certifications (PDF or Images)</Label>
-            <Input 
-                type="file" 
-                multiple 
-                accept=".pdf,image/*"
-                {...form.register("certifications")} // Capture multiple files
-            />
-            <p className="text-xs text-muted-foreground">Upload your coaching licenses or degrees.</p>
-        </div> */}
+        
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <Label>Certifications & Licenses</Label>
@@ -177,9 +170,7 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({ onNext, onB
                     placeholder="e.g. CPR Certification" 
                     {...register(`certificationInfo.documents.${index}.name` as FieldPath<TrainerOnboardingFormValues>, { required: "Name is required" })} 
                     />
-                    {/* {errors.certificationInfo?.documents?.[index]?.name && (
-                      <p className="text-xs text-red-500 mt-1">{errors.certificationInfo.documents[index].name?.message}</p>
-                    )} */}
+                   
                     <Button 
                         variant="ghost" 
                         size="icon" 

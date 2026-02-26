@@ -22,23 +22,17 @@ const ForgotPassword: React.FC = () => {
     if (!result.success) {
       const errorMessage = result?.error?.issues[0].message || "check mail";
       setError(errorMessage);
-       setIsLoading(false);
+      setIsLoading(false);
       return;
     }
 
     try {
-      await authService.forgotPassword(email);     
+      await authService.forgotPassword(email);
       toast.success("Please check your mail for verification code.");
       navigate("/reset-Password", { state: { email: email } });
-      
-    } catch(error:unknown){
-        if (error instanceof Error) {
-            toast.error("Invalid Code " + error.message);
-        } else {
-            toast.error("An unexpected error occurred");
-        }
-        console.error(error)
-     }    
+    } catch (error) {
+        toast.error(error?.toString() || "Something went wrong");
+    } 
   };
 
   const handleBackToLogin = () => {

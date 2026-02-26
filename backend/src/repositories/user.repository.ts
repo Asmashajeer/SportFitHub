@@ -29,7 +29,7 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
     return await this.model.findOne(query).exec();
   }
 
-  async findByRole(role: string, isActive: boolean): Promise<IUser[]> {
+  async findByRole(role: string): Promise<IUser[]> {
     const query: FilterQuery<IUser> = {
       role,
       isActive: true,
@@ -77,4 +77,11 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
       .findByIdAndUpdate(id, { $set: { isActive: false } }, { new: true })
       .exec();
   }
+
 }
+
+
+
+
+
+

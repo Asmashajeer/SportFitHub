@@ -1,4 +1,4 @@
-import { UserRole } from "@/models/user.model";
+import { UserRole } from "@/constants/enums"
 
 export interface BaseResponseDTO {
   success: boolean;

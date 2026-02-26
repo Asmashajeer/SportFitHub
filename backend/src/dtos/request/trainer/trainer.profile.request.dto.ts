@@ -46,8 +46,12 @@ const daySchema = z.object({
   endTime: z.string().optional(),
 });
 
-export const step4Schema = z.object({
-  pricePerHour: z.coerce.number().positive("Price must be greater than 0"),
+export const AvailabilityPricingSchema = z.object({
+  pricing:z.object({   
+    sessionCharge: z.number(),   
+    currency:z.string(),  
+  }),
+ 
   availability: z.object({
     isAvailable: z.boolean().default(true),
     Monday: daySchema,
@@ -60,9 +64,9 @@ export const step4Schema = z.object({
   }),
   // currentLocation coordinates usually handled by a Map picker
 });
+export type AvailabiltyPricingReqDTO=z.infer<typeof AvailabilityPricingSchema>
 
-
-export const step5Schema = z.object({
+export const PaymentInfoSchema = z.object({
   paymentInfo: z.object({
     bankAccount: z.object({
       accountName: z.string().min(1, "Account holder name is required"),
@@ -73,6 +77,16 @@ export const step5Schema = z.object({
     upiId: z.string().optional(),
   })
 });
+ export type  PaymentInfoReqDTO=z.infer<typeof PaymentInfoSchema>
+
+ 
+export interface idVerificationReqDTO{
+   idType: GOVT_ID_TYPE,
+    idNumber: string,
+    idAttachment: string,
+}
+
+
 
 
 

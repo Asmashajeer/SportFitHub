@@ -1,4 +1,5 @@
-import { IUser, UserRole } from '@/models/user.model';
+import { UserRole } from '@/constants/enums';
+import { IUser} from '@/models/user.model';
 import { BaseRepository } from '@/repositories/base.repository';
 import { FilterQuery, Types } from 'mongoose';
 
@@ -7,7 +8,7 @@ export interface IUserRepository extends BaseRepository<IUser> {
 
   findByEmail(email: string, isActive?: boolean, isBlocked?: boolean): Promise<IUser | null>;
   findById(id: string, isActive?: boolean): Promise<IUser | null>;
-  findByRole(role: string, isActive: boolean): Promise<IUser[]>;
+  findByRole(role: string): Promise<IUser[]>;
   findAll(filter:FilterQuery<IUser>,options: { skip: number; limit: number }): Promise<IUser[]>
   countOfUsers(FilterQuery?: object): Promise<number>;
   updateVerificationStatus(id: string | Types.ObjectId, status: boolean): Promise<IUser | null>;

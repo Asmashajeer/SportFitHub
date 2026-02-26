@@ -13,7 +13,7 @@ export interface AuthRequest extends Request {
 
 export const protect = (req: Request, res: Response, next: NextFunction) => {
 
-   let accessToken = req.cookies?.accessToken;
+   const accessToken = req.cookies?.accessToken;
  
   
   if (!accessToken) {

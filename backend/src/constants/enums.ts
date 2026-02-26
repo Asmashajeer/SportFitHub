@@ -4,6 +4,7 @@ export enum UserRole {
   USER = 'user',
   PENDING = 'pending', // This is the "Onboarding" state for google login
 }
+export type user_role_onRoute=Exclude<UserRole,UserRole.PENDING>
 
 export enum TRAINER_CATEGORY{
   SPORT='Sports',

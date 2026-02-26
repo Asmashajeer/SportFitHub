@@ -1,5 +1,3 @@
-
-
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -7,9 +5,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select"
-import { Button } from "../../../components/ui/button"; 
-import { useNavigate} from "react-router-dom";
+} from "../../../components/ui/select";
+import { Button } from "../../../components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 import { ROLES } from "../../../constants/constants";
 import type { UserRole } from "../../../constants/constants";
@@ -25,72 +23,34 @@ import GoogleLoginButton from "./GoogleLoginButton";
 const Register = () => {
   const navigate = useNavigate();
   const setUser = useAuthStore((state) => state.setUser);
- 
+
   // const setHasProfile = useAuthStore((state) => state.setHasProfile);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name:"",
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
     role: ROLES.USER as UserRole,
   });
 
-  // const handleSuccess = async (credentialResponse: CredentialResponse ) => {
-  //   try {
-  //     // credentialResponse.credential is the "ID Token" your backend wants
-  //     const idToken = credentialResponse.credential;
-  //     if (!idToken) {
-  //       console.log(" google login failed");
-  //       toast.error("google login failed");
-  //       return;
-  //     }
-      
-  //     const userData = await authService.googleLogin(idToken);   
-  //     setUser(userData.user);
-   
-  //     if (Object.values(ROLES).includes(userData.role) === false) {      
-  //       return navigate("/update-role");
-  //     }
-  //     if (!userData.hasProfile) {
-  //       if (userData.role === ROLES.TRAINER) {
-  //         return navigate("/trainer/add-Profile");
-  //       } else if (userData.role === ROLES.USER) {
-  //         return navigate("/user/add-Profile");
-  //       }
-  //     } else {
-  //       setHasProfile(userData.hasProfile);
-  //       navigate(`/${userData.role}/dashboard`);
-  //     }
-  //   } catch (error:unknown) {
-  //     if(error instanceof Error){
-  //       const message =error.message;
-  //       toast.error(message);
-  //     }
-  //     else{
-  //       toast.error("An unexpected error occurred")
-  //     }
-  //     console.error("google verification failed:", error);     
-       
-  //   }
-  // };
 
   const handleFocus = () => {
     if (error) setError("");
   };
 
-  const handleLogin=()=>{
-    navigate('/login');
-  }
+  const handleLogin = () => {
+    navigate("/login");
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
-    const result =  RegisterSchema.safeParse(formData);
+    const result = RegisterSchema.safeParse(formData);
     if (!result.success) {
       const errorMessage = result.error.issues[0].message;
       setError(errorMessage);
@@ -98,28 +58,17 @@ const Register = () => {
       return;
     }
 
-    const { name,email, password, role } = result.data;
+    const { name, email, password, role } = result.data;
 
-    try {      
-        const data = await authService.register({name, email, password, role });
-        console.log(data.user);
-        const userData=data.user;
-        setUser({...userData,hasProfile:false});
-        toast.success(data.message);
-        navigate("/verifyEmail", { state: data.user });
-      }
-    catch (error: unknown) {
-      
-        if (error instanceof Error) {
-           const message =  error.message ;
-           console.log(message) ; 
-            toast.error("Registration Failed " );
-        } else {
-            toast.error("An unexpected error occurred");
-        }
-        console.error(error)
-     
-      
+    try {
+      const data = await authService.register({ name, email, password, role });
+      console.log(data.user);
+      const userData = data.user;
+      setUser({ ...userData, hasProfile: false });
+      toast.success(data.message);
+      navigate("/verifyEmail", { state: data.user });
+    } catch (error) {
+        toast.error(error?.toString() || "Something went wrong");
     } finally {
       setIsSubmitting(false);
     }
@@ -136,7 +85,7 @@ const Register = () => {
             <span className="text-primary">SportFit</span>Hub
           </h1>
           <p className="text-muted-foreground mt-2 text-sm font-bold tracking-widest uppercase">
-             Registration
+            Registration
           </p>
         </div>
 
@@ -149,77 +98,72 @@ const Register = () => {
               </div>
             )}
             <fieldset className="relative text-left rounded-md py-1  focus-visible:border-ring-0 ">
-      
-            {/* The legend sits on the border line */}
-            <legend className=" text-[10px] font-medium  tracking-wider text-foreground bg-transparent ">
-              Name
-            </legend>
-            <Input
-              type="text"              
-              placeholder="Name"
-              value={formData.name}
-              onFocus={handleFocus}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-            />
-            </fieldset>
-            <fieldset className="relative text-left rounded-md py-1  focus-visible:border-ring-0 ">
-      
-            {/* The legend sits on the border line */}
-            <legend className=" text-[10px] font-medium  tracking-wider text-foreground bg-transparent ">
-              Email
-            </legend>
-            <Input
-              type="email"              
-              placeholder="Email Address"
-              value={formData.email}
-              onFocus={handleFocus}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-            />
-            </fieldset>
-            <div className="space-y-2 relative w-full">
-            <fieldset className="relative text-left rounded-md py-1  focus-visible:border-ring-0 ">
-      
-            {/* The legend sits on the border line */}
+              {/* The legend sits on the border line */}
               <legend className=" text-[10px] font-medium  tracking-wider text-foreground bg-transparent ">
-                Password
+                Name
               </legend>
               <Input
-                // label={'Email'}
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={formData.password}
+                type="text"
+                placeholder="Name"
+                value={formData.name}
                 onFocus={handleFocus}
                 onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
+                  setFormData({ ...formData, name: e.target.value })
                 }
               />
-              {/* show password button */}
-              <Button
-                type="button"
-                variant="ghost"
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 p-0 flex items-center justify-center min-w-0"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeIcon className="h-4 w-4 text-green-700" />
-                ) : (
-                  <EyeOffIcon className="h-4 w-4  text-green-700" />
-                )}
-              </Button>
+            </fieldset>
+            <fieldset className="relative text-left rounded-md py-1  focus-visible:border-ring-0 ">
+              {/* The legend sits on the border line */}
+              <legend className=" text-[10px] font-medium  tracking-wider text-foreground bg-transparent ">
+                Email
+              </legend>
+              <Input
+                type="email"
+                placeholder="Email Address"
+                value={formData.email}
+                onFocus={handleFocus}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+              />
+            </fieldset>
+            <div className="space-y-2 relative w-full">
+              <fieldset className="relative text-left rounded-md py-1  focus-visible:border-ring-0 ">
+                {/* The legend sits on the border line */}
+                <legend className=" text-[10px] font-medium  tracking-wider text-foreground bg-transparent ">
+                  Password
+                </legend>
+                <Input
+                  // label={'Email'}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={formData.password}
+                  onFocus={handleFocus}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                />
+                {/* show password button */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 p-0 flex items-center justify-center min-w-0"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeIcon className="h-4 w-4 text-green-700" />
+                  ) : (
+                    <EyeOffIcon className="h-4 w-4  text-green-700" />
+                  )}
+                </Button>
               </fieldset>
             </div>
-            
-              <div className="animate-in slide-in-from-top-2 fade-in duration-300 relative w-full">
-                <fieldset className="relative text-left rounded-md py-1  focus-visible:border-ring-0 ">
-      
-               
-                  <legend className=" text-[10px] font-medium  tracking-wider text-foreground bg-transparent ">
-                    Confirm Password
-                  </legend>
+
+            <div className="animate-in slide-in-from-top-2 fade-in duration-300 relative w-full">
+              <fieldset className="relative text-left rounded-md py-1  focus-visible:border-ring-0 ">
+                <legend className=" text-[10px] font-medium  tracking-wider text-foreground bg-transparent ">
+                  Confirm Password
+                </legend>
                 <Input
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm Password"
@@ -233,59 +177,55 @@ const Register = () => {
                   }
                 />
                 <Button
-                type="button"
-                variant="ghost"
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 p-0 flex items-center justify-center min-w-0"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? (
-                  <EyeIcon className="h-4 w-4 text-green-700" />
-                ) : (
-                  <EyeOffIcon className="h-4 w-4  text-green-700" />
-                )}
-              </Button>
-                </fieldset>
-              </div>              
-              {/*user role  */}
-              <div className="relative">
-                <fieldset className="relative text-left rounded-md py-1  focus-visible:border-ring-0 ">
-      
-                
-                  <legend className=" text-[10px] font-medium  tracking-wider text-foreground bg-transparent ">
-                    Role
-                  </legend>
-                  <Select
-                    value={formData.role}
-                    onValueChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        role: value as UserRole,
-                      })
-                    }
-                  >
-                   
-                    <SelectTrigger className="w-full border-input bg-transparent px-3 h-9 focus:ring-0 focus:outline-none shadow-none font-medium">
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
+                  type="button"
+                  variant="ghost"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 p-0 flex items-center justify-center min-w-0"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeIcon className="h-4 w-4 text-green-700" />
+                  ) : (
+                    <EyeOffIcon className="h-4 w-4  text-green-700" />
+                  )}
+                </Button>
+              </fieldset>
+            </div>
+            {/*user role  */}
+            <div className="relative">
+              <fieldset className="relative text-left rounded-md py-1  focus-visible:border-ring-0 ">
+                <legend className=" text-[10px] font-medium  tracking-wider text-foreground bg-transparent ">
+                  Role
+                </legend>
+                <Select
+                  value={formData.role}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      role: value as UserRole,
+                    })
+                  }
+                >
+                  <SelectTrigger className="w-full border-input bg-transparent px-3 h-9 focus:ring-0 focus:outline-none shadow-none font-medium">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
 
                   {/* user roles */}
-                    <SelectContent className="bg-secondary border-border rounded-xl">
-                      {Object.values(ROLES)
-                        .filter((role) => role !== ROLES.ADMIN)
-                        .map((role) => (
-                          <SelectItem 
-                            key={role} 
-                            value={role} 
-                            className="cursor-pointer focus:bg-[#197e04] focus:text-white"
-                          >
-                            {role.charAt(0).toUpperCase() + role.slice(1)}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </fieldset>
-              </div>       
-                      
+                  <SelectContent className="bg-secondary border-border rounded-xl">
+                    {Object.values(ROLES)
+                      .filter((role) => role !== ROLES.ADMIN)
+                      .map((role) => (
+                        <SelectItem
+                          key={role}
+                          value={role}
+                          className="cursor-pointer focus:bg-[#197e04] focus:text-white"
+                        >
+                          {role.charAt(0).toUpperCase() + role.slice(1)}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </fieldset>
+            </div>
 
             <Button
               disabled={isSubmitting}
@@ -294,9 +234,7 @@ const Register = () => {
               size="lg"
               className="w-full  shadow-lg shadow-primary/10"
             >
-              {isSubmitting?      
-                  "Creating Account..."
-                                  : "Create Account"}
+              {isSubmitting ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
 
@@ -307,16 +245,12 @@ const Register = () => {
             </div>
           </div>
 
-         <GoogleLoginButton/>
+          <GoogleLoginButton />
 
           {/* Footer Link */}
           <p className="mt-8 text-center text-xs text-shadow-muted-foreground font-medium uppercase tracking-widest">
-             Already a memeber
-            <Button
-             onClick={handleLogin}             
-            >
-             Login Now"
-            </Button>
+            Already a memeber
+            <Button onClick={handleLogin}>Login Now"</Button>
           </p>
         </div>
       </div>

@@ -1,14 +1,14 @@
 import { Link } from 'react-router-dom';
-import  Button  from "../../components/.ui.compo/Button";
-// import { useAuthStore } from "../../store/useAuthStore";
+import { Button } from '@/components/ui/button';
+
 
 const HeroSection = () => {
-  // const { isAuthenticated } = useAuthStore();
+
 
   return (
     <section 
       id="home" 
-      /* Using your app-bg variable from :root */
+     
       className="relative min-h-screen bg-app-bg text-app-text flex items-center pt-20 overflow-hidden"
     >
       {/* Glow Blobs - Using your primary color variable */}

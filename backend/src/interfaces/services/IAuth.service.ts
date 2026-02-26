@@ -1,6 +1,6 @@
-import { LoginDTO, RegisterRequestDTO ,UpdateRoleDTO , VerifyEmailDTO, VerifyOtpDTO,ResetPasswordDTO,GoolgleLoginDTO} from '@/dtos/request/auth.request.dto';
-import {   RegisterResponseDTO, UserResponseDTO, BaseResponseDTO, RegisterDataDTO, UserDataDTO, AuthMeResponseDto } from '@/dtos/response/auth.response.dto.js';
-import { OtpType } from "@/models/otp.model";
+import { LoginDTO, RegisterRequestDTO ,UpdateRoleDTO , VerifyEmailDTO, VerifyOtpDTO,ResetPasswordDTO} from '@/dtos/request/auth.request.dto';
+import {   RegisterResponseDTO, UserResponseDTO, BaseResponseDTO,  AuthMeResponseDto } from '@/dtos/response/auth.response.dto.js';
+import { OtpType } from '@/constants/enums';
 
 export interface IAuthService {
     register(userData: RegisterRequestDTO): Promise<RegisterResponseDTO> ;

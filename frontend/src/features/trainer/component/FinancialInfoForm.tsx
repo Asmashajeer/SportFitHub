@@ -7,8 +7,8 @@ import { Landmark,  Wallet } from "lucide-react";
 import type { TrainerOnboardingFormValues } from "../types/trainerprofile.types";
 
 const FinancialInfoForm = ({ onBack, isSubmitting }: { onBack: () => void; isSubmitting: boolean }) => {
-  const form = useFormContext<TrainerOnboardingFormValues>();
-
+ const form= useFormContext<TrainerOnboardingFormValues>();
+   const { register, formState:{errors}}=form
   return (
     <Card className="w-full">
       <CardHeader>
@@ -27,16 +27,33 @@ const FinancialInfoForm = ({ onBack, isSubmitting }: { onBack: () => void; isSub
             <div className="space-y-2">
               <Label>Account Holder Name</Label>
               <Input 
-                {...form.register("paymentInfo.bankAccount.accountName",)}
+                {...register("paymentInfo.bankAccount.accountName",
+                 { pattern: {
+                    value: /^[a-zA-Z\s]*$/,
+                    message: "Name should only contain letters"
+                  }}
+                )}
                 placeholder="Name as per bank records"
               />
             </div>
             <div className="space-y-2">
               <Label>Bank Name</Label>
               <Input 
-                {...form.register("paymentInfo.bankAccount.bankName", )}
+                {...register("paymentInfo.bankAccount.bankName", 
+                  {pattern:{
+                    value:/^[A-Za-z][A-Za-z\s.]+$/,
+                   message: "Bank name should only contain letters"
+                  },
+                  minLength: {
+                    value: 3,
+                    message: "Please enter a valid bank name (min 3 chars)"
+                  },}
+                )}
                 placeholder="e.g. HDFC, SBI, Chase"
               />
+              {errors?.paymentInfo?.bankAccount?.bankName && (
+                    <p className="text-xs text-red-500">{errors.paymentInfo.bankAccount.bankName.message}</p>
+                  )}
             </div>
           </div>
 
@@ -45,16 +62,32 @@ const FinancialInfoForm = ({ onBack, isSubmitting }: { onBack: () => void; isSub
               <Label>Account Number</Label>
               <Input 
                 type="password" // Keep it masked initially for privacy
-                {...form.register("paymentInfo.bankAccount.accountNumber", )}
+                {...form.register("paymentInfo.bankAccount.accountNumber",{
+                  pattern: {
+                    value: /^\d+$/,
+                    message: "Must be digits only"
+                  },
+                  minLength: { value: 9, message: "Too short (min 9 digits)" }
+                } )}
                 placeholder="0000 0000 0000"
               />
+              {errors?.paymentInfo?.bankAccount?.accountNumber && (
+                    <p className="text-xs text-red-500">{errors.paymentInfo.bankAccount.accountNumber.message}</p>
+                  )}
             </div>
             <div className="space-y-2">
               <Label>IFSC / SWIFT Code</Label>
               <Input 
-                {...form.register("paymentInfo.bankAccount.ifscCode", )}
+                {...form.register("paymentInfo.bankAccount.ifscCode",{
+                pattern: {
+                  value: /^[A-Z0-9]{8,11}$/i,
+                  message: "Invalid format eg:HDFC0001234"
+                },} )}
                 placeholder="HDFC0001234"
               />
+              {errors?.paymentInfo?.bankAccount?.ifscCode && (
+                    <p className="text-xs text-red-500">{errors.paymentInfo.bankAccount.ifscCode.message}</p>
+                  )}
             </div>
           </div>
         </div>
@@ -70,9 +103,17 @@ const FinancialInfoForm = ({ onBack, isSubmitting }: { onBack: () => void; isSub
           <div className="space-y-2">
             <Label>UPI ID (Optional)</Label>
             <Input 
-              {...form.register("paymentInfo.upiId")}
+              {...form.register("paymentInfo.upiId",{
+                pattern:{
+                  value: /^[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+$/,
+                  message: "Invalid UPI format (e.g., username@bankname)"
+                }})
+              }
               placeholder="username@bank"
             />
+            {errors?.paymentInfo?.bankAccount?.ifscCode && (
+                    <p className="text-xs text-red-500">{errors.paymentInfo.bankAccount.ifscCode.message}</p>
+                  )}
           </div>
         </div>
 

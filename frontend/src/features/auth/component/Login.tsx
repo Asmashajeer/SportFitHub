@@ -87,18 +87,8 @@ const handleRegister = () => {
           navigate(`/${user_Role}/dashboard`, { replace: true });
         }
       
-    } catch (error: unknown) {
-      
-        if (error instanceof Error) {
-           const message =  error.message ;
-           console.log(message) ; 
-            toast.error("Invalid username and password " );
-        } else {
-            toast.error("An unexpected error occurred");
-        }
-        console.error(error)
-     
-      
+    } catch (error) {
+        toast.error(error?.toString() || "Something went wrong");
     } finally {
       setIsSubmitting(false);
     }

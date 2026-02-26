@@ -14,3 +14,20 @@ export interface queryParamsOptions {
 export interface getAllusersParams extends queryParamsOptions{
   limit:number
 }
+
+export interface SportData{  
+    id: string,
+    sportName:string,    
+    slug :string,        
+    icon?:string,
+    description:string,
+    isActive?:boolean,
+}
+
+export interface FitnessData{  
+    id: string,
+    programName:string,    
+    slug :string,
+    description:string,
+    isActive?:boolean,
+}

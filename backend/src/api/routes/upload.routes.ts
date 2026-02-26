@@ -1,10 +1,7 @@
 import { Router } from 'express';
-import multer from 'multer';
-import { storage } from '@/middleware/multer';
-
+import { uploadMiddleware  } from '@/middleware/upload.middleware';
 const router = Router();
-const upload = multer({ storage });
-
+const upload=uploadMiddleware();
 
 router.post('/uploadFile', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'Upload failed' });

@@ -1,4 +1,4 @@
-import Profile from '../models/profile.model';
+
 import { IProfileRepository } from '@/interfaces/repositories/IProfile.repository';
 import { IProfile } from '../models/profile.model';
 import { FilterQuery, Model, Types } from 'mongoose';

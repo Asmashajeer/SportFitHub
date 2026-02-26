@@ -1,7 +1,7 @@
 import { useForm, FormProvider } from "react-hook-form";
 
 import { useState } from "react";
-import { GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY } from "@/constants/constants";
+import { GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY, UPLOAD_TYPE } from "@/constants/constants";
 import type { DocumentValues, TrainerOnboardingFormValues} from "../types/trainerprofile.types";
 import toast from "react-hot-toast";
 
@@ -14,15 +14,17 @@ import { trainerService } from "../service/trainerService";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { AddTrainerProfileSchema} from "../types/trainer.profile.schema";
 import { uploadService } from "@/service/upload.service";
-import axios from "axios";
+
 import { useNavigate } from "react-router-dom";
 
 
 const TrainerOnboarding = () => {
   const navigate=useNavigate()
   const user=useAuthStore(state=>state.user);
+  const setHasProfile=useAuthStore(state=>state.setHasProfile);
   const [step, setStep] = useState(1);
   const [isSubmitting,setIsSubmitting]=useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const form = useForm< TrainerOnboardingFormValues>({
   
     defaultValues: {
@@ -105,26 +107,31 @@ const TrainerOnboarding = () => {
   const prevStep = () => setStep((prev) => prev - 1);
 
   const onSubmit = async (data: TrainerOnboardingFormValues) => {
+
     setIsSubmitting(true);
     try {
       const userId=user?.id;
+      if (!userId) {
+        toast.error("User session expired. Please log in again.");
+        return;
+      }
        const folderPath = `trainers/${userId}/${data.category}`;
       // 1. Upload Profile Picture
       let profilePicUrl="";
       if(data.profilePic?.[0]){
-        profilePicUrl=await uploadService.upload(data.profilePic[0], `${folderPath}/profiles`);
+        profilePicUrl=await uploadService.upload(data.profilePic[0], `${folderPath}/profiles`,userId!,UPLOAD_TYPE.PROFILE_PIC);
       }
 
       // 2. Upload ID Attachment
       let idAttachmentUrl="";
       if(data.idVerification.idAttachment?.[0]){
-        idAttachmentUrl=await uploadService.upload(data.idVerification.idAttachment?.[0],`${folderPath}/idAttachment`);
+        idAttachmentUrl=await uploadService.upload(data.idVerification.idAttachment?.[0],`${folderPath}/idAttachment`,userId!,UPLOAD_TYPE.ID_ATTACHMENT);
       }
 
       // 3. Upload Certifications Array
       const uploadedCerts=await Promise.all (data.certificationInfo.documents.map(async (doc:DocumentValues)=>{
         if(doc.file?.[0]){
-            const url=await uploadService.upload(doc.file[0],`${folderPath}/certifications`);
+            const url=await uploadService.upload(doc.file[0],`${folderPath}/certifications`,userId!,UPLOAD_TYPE.CERTIFICATES);
             return{name:doc.name,url,validUpto:doc.validUpto,issuedAt:doc.issuedAt}
         }
         return null;
@@ -159,24 +166,14 @@ const TrainerOnboarding = () => {
       console.log("Final Payload:", finalPayload.data);
       const result=await trainerService.addProfile(finalPayload.data);     
       if(result.success ){
-         toast.success("Application submitted successfully!")
+         toast.success("Application submitted successfully!");
+         setHasProfile(true);
         navigate('/trainer/dashboard');
       }
     } 
-    catch (error: unknown) {      
-        if (axios.isAxiosError(error)) {       
-            const serverMessage = error.response?.data?.message || "Server upload failed";
-            console.error("Axios Error Status:", error.response?.status);
-            console.error("Server says:", serverMessage);
-              console.error("Server says:",  error.response);
-           toast.error(error.message);
-        } else if (error instanceof Error) {          
-          toast.error(error.message);
-        } else {
-          toast.error("An unexpected error occurred");
-        }
-        console.error(error);
-    }
+    catch (error) {
+        toast.error(error?.toString() || "Something went wrong");
+    } 
     finally {
       setIsSubmitting(false);
     }
@@ -203,7 +200,8 @@ const TrainerOnboarding = () => {
              />
           </div>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            {step === 1 && <BasicInfoForm onNext={nextStep} />}
+            {step === 1 && <BasicInfoForm previewUrl={previewUrl} 
+          setPreviewUrl={setPreviewUrl} onNext={nextStep} />}
             {step === 2 && <ProfessionalInfoForm onNext={nextStep} onBack={prevStep} />}
             {step === 3 && <PersonalInfoForm onNext={nextStep} onBack={prevStep} />}
             {step === 4 && <Rates_ScheduleForm onNext={nextStep} onBack={prevStep} />}

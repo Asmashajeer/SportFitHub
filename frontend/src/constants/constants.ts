@@ -46,7 +46,7 @@ export const GOVT_ID_TYPE={
   DRIVING_LICENSE : 'Driving License',
   PAN : 'PAN'
 }
-
+export type Govt_Id_type=typeof GOVT_ID_TYPE [keyof typeof GOVT_ID_TYPE]
 export const DOC_VERIFY_STATUS= {
   PENDING : 'pending',
   VERIFIED: 'verified',
@@ -69,7 +69,11 @@ export const TRAINER_STATUS= {
   REJECTED : 'rejected',
   SUSPENDED : 'suspended'
 }
-
+  export const UPLOAD_TYPE={
+    PROFILE_PIC:"profile_pic",
+    ID_ATTACHMENT :"id_attachment",
+    CERTIFICATES:"certificates"
+  }
 
 export const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
 export type DayName = typeof DAYS_OF_WEEK[number];

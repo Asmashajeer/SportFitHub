@@ -1,4 +1,4 @@
-import { BaseRepository } from '@/repositories/base.repository';
+
 import { IBaseRepository } from './IBase.repository';
 import { IProfile } from '@/models/profile.model';
 import { Types } from 'mongoose';

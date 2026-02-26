@@ -29,5 +29,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "../server/src/utils/constants/messages.ts", "src/components/.ui.compo"]
+  "include": ["src", "../server/src/utils/constants/messages.ts", "src/components/reusable"]
 }

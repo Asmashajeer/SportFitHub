@@ -1,6 +1,7 @@
 import { IUserManagementService } from '../../../interfaces/services/admin/IUserManagement.service';
-import { MESSAGES, STATUS_CODE } from '../../../constants/messages';
+import {  STATUS_CODE, SUCCESS_MESSAGES } from '../../../constants/messages';
 import { Request, Response, NextFunction } from 'express';
+import Logger from '@/utils/logger';
 
 export class UserManagementController {
   private _userManagementService: IUserManagementService;
@@ -24,7 +25,7 @@ export class UserManagementController {
         status,
         role,
       });
-      res.status(STATUS_CODE.OK).json(usersData);
+      res.status(STATUS_CODE.SUCCESS.OK).json(usersData);
     } catch (error) {
       next(error);
     }
@@ -33,7 +34,7 @@ export class UserManagementController {
   getStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userStats = await this._userManagementService.getStats();
-      res.status(STATUS_CODE.OK).json({ userStats });
+      res.status(STATUS_CODE.SUCCESS.OK).json({ userStats });
     } catch (error) {
       next(error);
     }
@@ -43,9 +44,14 @@ export class UserManagementController {
     try {
       const id = req.body.id;
       const user = await this._userManagementService.toggleBlock(id);
-      res.status(STATUS_CODE.OK).json({
+      if(user.isBlocked)
+        Logger.warn(`admin Blocked the user${user.email} `);
+      else{
+         Logger.info(`Admin released the block successfully for user ${user.email} status `, { "Blocked": user.isBlocked });
+      }
+      res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
-        message: MESSAGES.success.USER_BLOCKED,
+        message: SUCCESS_MESSAGES.USER. USER_BLOCKED,
         userData: user,
       });
     } catch (error) {
@@ -58,9 +64,14 @@ export class UserManagementController {
     try {
       const id = req.params.id;
       const user = await this._userManagementService.deleteUser(id);
-      res.status(STATUS_CODE.OK).json({
+      Logger.info(`Admin deleted the  user ${user.role} `, {
+        userId: id,
+        name: user.name,
+        email: user.email,
+      });
+      res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
-        message: MESSAGES.success.USER_DELETED,
+        message: SUCCESS_MESSAGES.USER.USER_DELETED,
         userData: user,
       });
     } catch (error) {
@@ -72,9 +83,9 @@ export class UserManagementController {
       const { id, selectedRole } = req.body;
       console.log(id, selectedRole);
       const user = await this._userManagementService.updateRole(id, selectedRole);
-      res.status(STATUS_CODE.OK).json({
+      res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
-        message: MESSAGES.success.ROLE_UPDATED,
+        message: SUCCESS_MESSAGES.AUTH.ROLE_UPDATED,
         userData: user,
       });
     } catch (error) {

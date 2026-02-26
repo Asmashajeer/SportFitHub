@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../service/authService";
 import {
-  AlertCircle, 
+  AlertCircle,
   ArrowRight,
   CheckCircle,
   EyeIcon,
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { OTP_TYPE } from "@/constants/constants";
 
+
 // import { ResetPasswordSchema } from "../types/auth.schema";
 // import z from "zod";
 
@@ -27,7 +28,7 @@ function ResetPassword() {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showPassword,setShowPassword]=useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -40,7 +41,7 @@ function ResetPassword() {
 
     setError("");
     try {
-       await authService.resetPassword({
+      await authService.resetPassword({
         email,
         otp,
         newPassword,
@@ -48,14 +49,9 @@ function ResetPassword() {
       toast.success("Password updated! please login");
       setIsLoading(false);
       navigate("/login");
-    } catch (error: unknown) {
-      if(error instanceof Error){
-        toast.error(error.message || "Invalid code");
-      }
-      else{
-        toast.error("unexpecter error occured");
-      }
-      
+    } catch (error) {
+        toast.error(error?.toString() || "Something went wrong");
+    
       setOtp("");
     } finally {
       setIsLoading(false);
@@ -66,27 +62,28 @@ function ResetPassword() {
     navigate("/login");
   };
 
-  const handleResendCode = async() => {
-    try{
-     const data= await authService.resendOtp({email,otpContext:OTP_TYPE.PASSWORD_RESET});
-      if(data.emailSent)
+  const handleResendCode = async () => {
+    try {
+      const data = await authService.resendOtp({
+        email,
+        otpContext: OTP_TYPE.PASSWORD_RESET,
+      });
+      if (data.emailSent)
         toast.success("A new code has been sent to your email");
-    }
-    catch(error:unknown){
-        toast.error("Failed to resend code");
-    }
+    } catch (error) {
+        toast.error(error?.toString() || "Something went wrong");
+    } 
     setError("");
   };
   return (
     <>
       <div className="min-h-screen  flex items-center justify-center p-4">
-         
         <div className="w-full max-w-md card-base ">
           <button
             onClick={handleBackToLogin}
             className="flex right-0 items-center gap-1 text-slate-400  hover:text-white transition-colors duration-200 "
           >
-            <X className="w-5 h-5" />            
+            <X className="w-5 h-5" />
           </button>
           <div className="text-center">
             <div className="w-12 h-12  rounded-full flex items-center justify-center mx-auto mb-2 border border-primary/20">
@@ -100,7 +97,6 @@ function ResetPassword() {
               <span className="block text-white font-medium mt-1">{email}</span>
             </p>
 
-           
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6 text-left">
               {/* 1. Verification Code Field */}
@@ -139,7 +135,7 @@ function ResetPassword() {
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                   <Input
                     id="password"
-                    type={showPassword?"text":"password"}
+                    type={showPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••"
@@ -147,7 +143,7 @@ function ResetPassword() {
                     required
                     disabled={isLoading}
                   />
-                   <Button
+                  <Button
                     type="button"
                     variant="ghost"
                     className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 p-0 flex items-center justify-center min-w-0"

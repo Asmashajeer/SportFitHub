@@ -1,15 +1,17 @@
 
 import React from 'react';
-import { Menu, X, User, Bell, LogOut, LogIn } from 'lucide-react';
+import { Menu, X, User, LogOut, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import Avatar from './Avatar';
 import { authService } from '@/features/auth/service/authService';
+import { Button } from '../ui/button';
+import { ROLES } from '@/constants/constants';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const navigate=useNavigate();
-  const {isAuthenticated,isLoading,clearAuth}=useAuthStore();
+  const {user,isAuthenticated,isLoading,clearAuth}=useAuthStore();
   if(isLoading) return <div className="w-10 h-10" />;
   
   const handleLogout=async()=>{
@@ -28,7 +30,7 @@ const Header = () => {
           </span>
         </div>
         
-      
+      {user?.role!==ROLES.TRAINER &&(
         <nav className="hidden md:flex items-center space-x-10 justify-evenly">
           {['Sports', 'Fitness', 'Trainer'].map((item) => (
             <a 
@@ -40,17 +42,18 @@ const Header = () => {
             </a>
           ))}
         </nav>
-        
+      )}  
+      
        
         <div className="hidden md:flex place-items-left me-20 ">
-          <button className="p-2 rounded-full hover:bg-muted transition-colors group">
-            <Bell className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-          </button>
+          
           {!isAuthenticated ?(
-          <button  onClick={()=>navigate('/login')} className="p-2 rounded-full hover:bg-muted transition-colors group" >
+          <Button  variant ="outline" onClick={()=>navigate('/login')} className="p-2 rounded-full hover:bg-muted transition-colors group" >
             <User className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-          </button>
-          ):(       
+            Login
+          </Button>
+          ):(  
+            
             <Avatar/>
           )}         
         </div>

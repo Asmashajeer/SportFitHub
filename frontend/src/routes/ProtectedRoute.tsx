@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { LoadingScreen } from "../components/.ui.compo/LoadingScreen";
+import { LoadingScreen } from "../components/reusable/LoadingScreen";
 import { useAuthStore } from "../features/auth/store/useAuthStore";
 import { ROLES, type UserRole } from "../constants/constants";
 import { useLocation } from "react-router-dom";

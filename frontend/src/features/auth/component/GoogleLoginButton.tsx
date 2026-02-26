@@ -8,6 +8,7 @@ import { useAuthStore } from "../store/useAuthStore";
 
 
 
+
 const GoogleLoginButton=()=>{
 
     const navigate=useNavigate();
@@ -39,17 +40,9 @@ const GoogleLoginButton=()=>{
         setHasProfile(userData.hasProfile);
         navigate(`/${userData.role}/dashboard`);
       }
-    } catch (error:unknown) {
-      if(error instanceof Error){
-        const message =error.message;
-        toast.error(message);
-      }
-      else{
-        toast.error("An unexpected error occurred")
-      }
-      console.error("google verification failed:", error);     
-       
-    }
+    }catch (error) {
+        toast.error(error?.toString() || "Something went wrong");
+    } 
   };
   return(
     <>    

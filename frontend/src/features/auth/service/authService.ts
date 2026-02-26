@@ -38,11 +38,8 @@ export const authService = {
       const response = await api.get(AUTH_ROUTES.GET_ME);      
       return response.data;
     } catch(error:unknown){
-      // if(error instanceof Error){
-      // const message=error.status||'Authentication Error';
         throw error;
-      // }
-        // throw new Error(error);
+      
     }
   },
   verify: async (verifyData: verifyOTPData): Promise<AuthResponse> => {

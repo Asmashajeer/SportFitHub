@@ -11,13 +11,14 @@ import TrainerRoutes from "./TrainerRoutes";
 import ForgotPassword from "../features/auth/component/ForgotPassword";
 import ResetPassword from "../features/auth/component/ResetPassword";
 import UserRoleSelector from "../features/auth/component/UserRoleSelector";
-import { Home } from "lucide-react";
+
 import VerifyEmail from "../features/auth/component/VerifyEmail";
 import MainLayout from "../components/layout/MainLayout";
 import AdminRoutes from "./AdminRoutes";
 import { useAuthStore } from "../features/auth/store/useAuthStore";
 import { UnauthorizedPage } from "@/pages/UnauthorizedPage";
 import Register from "@/features/auth/component/Register";
+import NotFound from "@/pages/NotFound";
 function AppRouter() {
   const isAuthenticated=useAuthStore(state=>state.isAuthenticated);
   const user =useAuthStore(state=>state.user);
@@ -43,6 +44,7 @@ function AppRouter() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/update-role" element={<UserRoleSelector />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
+          
           
           <Route element={<MainLayout />}>
             {/* user Routes */}
@@ -74,6 +76,7 @@ function AppRouter() {
               </ProtectedRoute>
             }
           />
+           <Route path="/*" element={<NotFound />} />
         </Routes>
       </Router>
     </>

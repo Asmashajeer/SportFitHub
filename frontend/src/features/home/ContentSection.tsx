@@ -1,5 +1,4 @@
-import Button from "../../components/.ui.compo/Button"; 
-
+import { Button } from "@/components/ui/button";
 interface ContentSectionProps {
   id: string;
   title: string;
@@ -42,7 +41,7 @@ const ContentSection = ({
             </p>
             
            
-            <Button variant="primary" size='md'>
+            <Button  >
               {buttonText}
             </Button>
           </div>

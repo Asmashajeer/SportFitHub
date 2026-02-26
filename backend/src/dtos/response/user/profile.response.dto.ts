@@ -1,5 +1,5 @@
 import { GENDER,RELATIONSHIP } from "@/constants/enums"
-import { Types } from "mongoose"
+
 
 
 
@@ -51,9 +51,6 @@ export interface ProfileListItemDTO {
   isPrimary:boolean,
 };
 
-//Allprofiles response
-export interface AllProfilesResponseDTO {
-  profiles:ProfileResponseDataDTO[] 
-};
+
 
     

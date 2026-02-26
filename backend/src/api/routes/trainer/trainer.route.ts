@@ -1,14 +1,25 @@
+import { UserRole } from "@/constants/enums";
 import { trainerController } from "@/container";
 import { protect } from "@/middleware/auth.middleware";
-
+import { restrictTo } from "@/middleware/role.middleware";
+import { uploadMiddleware } from "@/middleware/upload.middleware";
+const upload=uploadMiddleware();
 import { Router } from "express";
 
 const router=Router();
-
-router.post('/add-profile',protect,trainerController.addProfile);
-
-
-
+router.use(protect);
+router.use(restrictTo([UserRole.TRAINER]));
+router.post('/add-profile',upload.fields([
+    { name: 'profilePic', maxCount: 1 },
+    { name: 'idAttachment', maxCount: 1 },
+    { name: 'certificates', maxCount: 10 }
+  ]),trainerController.addProfile);
+ router.get ('/profile_pic',trainerController.getProfilePic);
+router.patch('/profile/:id/:section', trainerController.updateCertificates);
+router.patch('/profile/:id/idVerification', trainerController. updateIdverification);
+router.patch('/profile/:id/availability_pricing', trainerController. updateAvailabilityPricing);
+router.patch('/profile/:id/paymentInfo', trainerController. updatePaymentInfo);
+ router.get ('/profile',trainerController.getProfile);
 
 
 

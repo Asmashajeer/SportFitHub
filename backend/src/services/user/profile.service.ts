@@ -7,6 +7,7 @@ import { IUserRepository } from '@/interfaces/repositories/IUser.repository';
 import { IProfileRepository } from '@/interfaces/repositories/IProfile.repository';
 import { CreateUserProfileDTO } from '@/dtos/request/user/profile.request.dto';
 import { toProfileResponseData } from '@/mappers/profile.mapper';
+import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 
 
 export class ProfileService {
@@ -19,12 +20,12 @@ export class ProfileService {
 
   //-------------Create a profile
   async addProfile( data: CreateUserProfileDTO): Promise<ProfileResponseDataDTO> {
-    let {userId:inputUserId}=data;
+    const {userId:inputUserId}=data;
     const profileCount = await this._profileRepo.count({userId:inputUserId});   
     
     const isPrimary = profileCount === 0;
     const existing = await this._profileRepo.findOne({fullName:data.fullName,userId:inputUserId});
-    if (existing) throw new AppError('Profile with this name already exists for this user.', 400);
+    if (existing) throw new AppError(ERROR_MESSAGES.USER.PROFILE_EXISTS, STATUS_CODE.ERROR.CONFLICT);
 
     //the Location Object (GeoJSON format)
     let location=null;
@@ -54,7 +55,7 @@ export class ProfileService {
     };
 
     const result=await this._profileRepo.create(profile);
-    if (!result) throw new AppError('Failed to create profile', 500);
+    if (!result) throw new AppError(ERROR_MESSAGES.GENERAL.FAILED, STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
    
     const profileData:ProfileResponseDataDTO=toProfileResponseData(result);
     return profileData
@@ -62,25 +63,32 @@ export class ProfileService {
    }
   
 
-  // ----------------to get a profile by profileId
-  async getProfile(profileId: string): Promise <ProfileResponseDataDTO | null>{
+  // ----------------to get a primary profile by userId
+  async getPrimaryProfile(userId: string,isPrimary:boolean=true): Promise <ProfileResponseDataDTO | null>{
+    const result=await this._profileRepo.findOne({userId,isPrimary});
+    const profileData:ProfileResponseDataDTO=toProfileResponseData(result);
+    return profileData    
+          
+  }
+  // ----------------to get a  profile by profileId
+async getProfile(profileId: string): Promise <ProfileResponseDataDTO | null>{
     const result=await this._profileRepo.findById(profileId);
     const profileData:ProfileResponseDataDTO=toProfileResponseData(result);
     return profileData    
           
   }
-
   //------------- to get All profile by userId
   async getProfiles(userId:string):Promise< ProfileResponseDataDTO[]>{  
         const profiles= await this._profileRepo.AllProfiles(userId); 
         const allProfiles:ProfileResponseDataDTO[] = profiles.map(profile => toProfileResponseData(profile));
+         if (!allProfiles) throw new Error(ERROR_MESSAGES.GENERAL.NOT_FOUND);
         return  allProfiles; 
   }
 
   //---------------- Update Profile
   async updateProfile(profileId: string, updateData: Partial<IProfile>): Promise<ProfileResponseDataDTO> {
     const updated = await this._profileRepo.update(profileId, updateData);
-    if (!updated) throw new Error('Profile not found.');
+    if (!updated) throw new Error(ERROR_MESSAGES.USER.PROFILE_NOT_FOUND);
     const profileData:ProfileResponseDataDTO=toProfileResponseData(updated);
     return profileData ;
     

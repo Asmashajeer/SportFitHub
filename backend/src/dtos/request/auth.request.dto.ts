@@ -70,12 +70,7 @@ export const LoginSchema = z.object({
 export type LoginDTO = z.infer<typeof LoginSchema>;
 
 
-//GoogleLoginDTO
-export const GoogleLoginSchema=z.object({
-  token:z.string(),
 
-});
-export type  GoolgleLoginDTO =z.infer<typeof GoogleLoginSchema>;
 
 
    
