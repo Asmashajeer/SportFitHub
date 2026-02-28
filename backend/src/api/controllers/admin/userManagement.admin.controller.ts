@@ -1,5 +1,5 @@
 import { IUserManagementService } from '../../../interfaces/services/admin/IUserManagement.service';
-import {  STATUS_CODE, SUCCESS_MESSAGES } from '../../../constants/messages';
+import { STATUS_CODE, SUCCESS_MESSAGES } from '../../../constants/messages';
 import { Request, Response, NextFunction } from 'express';
 import Logger from '@/utils/logger';
 
@@ -44,14 +44,15 @@ export class UserManagementController {
     try {
       const id = req.body.id;
       const user = await this._userManagementService.toggleBlock(id);
-      if(user.isBlocked)
-        Logger.warn(`admin Blocked the user${user.email} `);
-      else{
-         Logger.info(`Admin released the block successfully for user ${user.email} status `, { "Blocked": user.isBlocked });
+      if (user.isBlocked) Logger.warn(`admin Blocked the user${user.email} `);
+      else {
+        Logger.info(`Admin released the block successfully for user ${user.email} status `, {
+          Blocked: user.isBlocked,
+        });
       }
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
-        message: SUCCESS_MESSAGES.USER. USER_BLOCKED,
+        message: SUCCESS_MESSAGES.USER.USER_BLOCKED,
         userData: user,
       });
     } catch (error) {

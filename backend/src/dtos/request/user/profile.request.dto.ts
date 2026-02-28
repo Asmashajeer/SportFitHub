@@ -24,5 +24,3 @@ export const CreateUserProfileSchema = z.object({
   isPrimary: z.boolean(),
 });
 export type CreateUserProfileDTO = z.infer<typeof CreateUserProfileSchema>;
-
-

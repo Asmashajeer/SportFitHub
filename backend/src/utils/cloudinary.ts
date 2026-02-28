@@ -1,16 +1,10 @@
-
-
 import cloudinary from '../config/cloudinaryConfig';
 
-
-
-
 export interface CloudinaryUploadResult {
-  public_id: string;    
-  secure_url: string;    
+  public_id: string;
+  secure_url: string;
   resource_type: string; // 'image' or 'raw' (for PDFs)
-  format?: string;       // jpg, png, pdf, etc.
-  
+  format?: string; // jpg, png, pdf, etc.
 }
 export const uploadToCloudinary = async (
   file: Express.Multer.File,
@@ -21,7 +15,7 @@ export const uploadToCloudinary = async (
       {
         folder: folder,
         resource_type: 'auto', //  Images, PDFs, and Videos automatically
-        transformation: [{ width: 500, height: 500, crop: 'limit' }]
+        transformation: [{ width: 500, height: 500, crop: 'limit' }],
       },
       (error, result) => {
         if (error) return reject(error);

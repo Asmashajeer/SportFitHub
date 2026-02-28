@@ -37,14 +37,19 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
     return await this.model.find(query).exec();
   }
 
-  async findAll(filter:FilterQuery<IUser>={},options: { skip: number; limit: number }): Promise<IUser[]> {     
-    return await this.model.find(filter).sort({ createdAt: -1 })
-    .skip(options.skip)  
-    .limit(options.limit) 
-    .exec();;
+  async findAll(
+    filter: FilterQuery<IUser> = {},
+    options: { skip: number; limit: number }
+  ): Promise<IUser[]> {
+    return await this.model
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip(options.skip)
+      .limit(options.limit)
+      .exec();
   }
-  async countOfUsers(FilterQuery:object={}):Promise<number>{
-    const query: FilterQuery<IUser> = {...FilterQuery,role: { $ne: 'admin' } };
+  async countOfUsers(FilterQuery: object = {}): Promise<number> {
+    const query: FilterQuery<IUser> = { ...FilterQuery, role: { $ne: 'admin' } };
     return await this.model.countDocuments(query);
   }
 
@@ -68,20 +73,11 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
       .exec();
   }
   async updateRole(id: string | Types.ObjectId, role: UserRole): Promise<IUser | null> {
-    return await this.model
-      .findByIdAndUpdate(id, { $set: { role: role } }, { new: true })
-      .exec();
+    return await this.model.findByIdAndUpdate(id, { $set: { role: role } }, { new: true }).exec();
   }
   async softDeleteUser(id: string | Types.ObjectId): Promise<IUser | null> {
     return await this.model
       .findByIdAndUpdate(id, { $set: { isActive: false } }, { new: true })
       .exec();
   }
-
 }
-
-
-
-
-
-

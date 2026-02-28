@@ -1,27 +1,25 @@
-import mongoose, { Document ,Types} from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { UserRole } from '@/constants/enums';
 
-
 export interface IUser extends Document {
-  _id:Types.ObjectId,
-  name:string;
+  _id: Types.ObjectId;
+  name: string;
   email: string;
   password: string;
   role: UserRole;
   googleId?: string;
-  isVerified:boolean;
+  isVerified: boolean;
   isBlocked: boolean;
   isActive: boolean;
   createdAt: Date;
 }
 
-export type AdminIUserView=Omit<IUser, 'password'>
+export type AdminIUserView = Omit<IUser, 'password'>;
 const UserSchema = new mongoose.Schema(
   {
-     name: {
+    name: {
       type: String,
       required: true,
-     
     },
     email: {
       type: String,
@@ -35,11 +33,11 @@ const UserSchema = new mongoose.Schema(
       default: 'user',
     },
     googleId: { type: String },
-    isVerified:{type:Boolean,default:false},
+    isVerified: { type: Boolean, default: false },
     isBlocked: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 export default mongoose.model<IUser>('User', UserSchema);

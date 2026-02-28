@@ -3,7 +3,7 @@ import React from 'react';
 import { Menu, X, User, Bell, LogOut, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
-import Avatar from '@/components/layout/Avatar';
+import Avatar from '@/components/reusable/Avatar';
 import { authService } from '@/features/auth/service/authService';
 
 const Header = () => {

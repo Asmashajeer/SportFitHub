@@ -59,7 +59,7 @@ export class SportsManagementService implements ISportsManagementService {
     const updatedSport = toSportsResponseDTO(data);
     return updatedSport;
   }
-  
+
   async updateSport(
     id: string | Types.ObjectId,
     sportData: SportRequestDTO

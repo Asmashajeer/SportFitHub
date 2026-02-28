@@ -1,7 +1,7 @@
-import type {  Response, NextFunction } from 'express';
+import type { Response, NextFunction } from 'express';
 import AppError from '../utils/AppError';
 import type { AuthRequest } from './auth.middleware.ts';
-import { user_role_onRoute} from '@/constants/enums';
+import { user_role_onRoute } from '@/constants/enums';
 
 type Role = user_role_onRoute;
 export const restrictTo = (allowedRoles: Role[]) => {
@@ -10,8 +10,8 @@ export const restrictTo = (allowedRoles: Role[]) => {
       next(
         new AppError(
           'Access Denied: User not authenticated (Missing Token or Failed Verification',
-          401,
-        ),
+          401
+        )
       );
     } else {
       const userRole: string = req.user.role;

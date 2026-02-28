@@ -1,5 +1,9 @@
 import { UserRole } from '@/constants/enums';
-import { getAllusersResponseDTO, usersResposeDTO, userStatsResponseDTO } from '../../dtos/response/admin/user.dto';
+import {
+  getAllusersResponseDTO,
+  usersResposeDTO,
+  userStatsResponseDTO,
+} from '../../dtos/response/admin/user.dto';
 import { IUserRepository } from '../../interfaces/repositories/IUser.repository';
 import { IUserManagementService } from '../../interfaces/services/admin/IUserManagement.service';
 import { toUsersResponseData } from '../../mappers/user.mapper';
@@ -18,13 +22,12 @@ export class UserManagementService implements IUserManagementService {
     const { page, limit, search, status, role } = filters;
 
     const skip = (page - 1) * limit;
-    const query:  FilterQuery<IUser> = {};
+    const query: FilterQuery<IUser> = {};
     if (search) {
-      query.$or=[
-       { email : { $regex: search, $options: 'i' }},
-       { name:{ $regex: search, $options: 'i' }}
+      query.$or = [
+        { email: { $regex: search, $options: 'i' } },
+        { name: { $regex: search, $options: 'i' } },
       ];
-      
     }
     if (status === 'blocked') {
       query.isBlocked = true;
@@ -41,33 +44,30 @@ export class UserManagementService implements IUserManagementService {
     } else {
       query.role = role;
     }
-   
-      const [usersData, totalCount] = await Promise.all([
-        this._userRepo.findAll(query, { skip, limit }),
-        this._userRepo.countOfUsers(query) 
+
+    const [usersData, totalCount] = await Promise.all([
+      this._userRepo.findAll(query, { skip, limit }),
+      this._userRepo.countOfUsers(query),
     ]);
 
-      const users: usersResposeDTO[] = usersData.map(user => toUsersResponseData(user));     
+    const users: usersResposeDTO[] = usersData.map(user => toUsersResponseData(user));
 
-        return {
-            users,
-            total:totalCount,
-            totalPages: Math.ceil(totalCount / limit),
-            currentPage: page
-        };    
-   
+    return {
+      users,
+      total: totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+      currentPage: page,
+    };
   };
   getStats = async (): Promise<userStatsResponseDTO> => {
- 
-      const [totalUsers, activeUsers, blockedUsers] = await Promise.all([
-        this._userRepo.countOfUsers(),
-        this._userRepo.countOfUsers({isActive: true, isBlocked: false }),
-        this._userRepo.countOfUsers({isBlocked: true }),
-      ]);
+    const [totalUsers, activeUsers, blockedUsers] = await Promise.all([
+      this._userRepo.countOfUsers(),
+      this._userRepo.countOfUsers({ isActive: true, isBlocked: false }),
+      this._userRepo.countOfUsers({ isBlocked: true }),
+    ]);
 
-      const userStats: userStatsResponseDTO = { totalUsers, activeUsers, blockedUsers };
-      return userStats;
-   
+    const userStats: userStatsResponseDTO = { totalUsers, activeUsers, blockedUsers };
+    return userStats;
   };
 
   toggleBlock = async (id: string): Promise<usersResposeDTO> => {

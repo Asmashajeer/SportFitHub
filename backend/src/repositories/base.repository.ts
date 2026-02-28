@@ -2,7 +2,6 @@ import { IBaseRepository } from '@/interfaces/repositories/IBase.repository';
 import { Document, Model, Types, UpdateQuery, FilterQuery } from 'mongoose';
 
 export abstract class BaseRepository<T extends Document> implements IBaseRepository<T> {
-  
   protected constructor(protected readonly model: Model<T>) {}
 
   async create(data: Partial<T>): Promise<T> {
@@ -23,7 +22,7 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
   }
 
   async findOneAndUpdate(id: string | Types.ObjectId, data: UpdateQuery<T>): Promise<T | null> {
-    return await this.model.findByIdAndUpdate(id, data, { new: true }).exec();
+    return await this.model.findByIdAndUpdate(id, data, { new: true, runValidators: true }).exec();
   }
 
   async delete(id: string | Types.ObjectId): Promise<boolean> {

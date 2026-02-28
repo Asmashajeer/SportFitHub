@@ -23,13 +23,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { userService } from "../service/userService";
 import { useNavigate } from "react-router-dom";
 import { uploadService } from "@/service/upload.service";
 import { CreateProfileSchema } from "../types/user.schema";
+import { Button } from "@/components/ui/Button";
 
 
 interface UserProfile {
@@ -129,7 +130,7 @@ const UserProfileForm: React.FC = () => {
       if (selectedFile) { 
          const userId=user?.id;
          const folderPath = `users/${userId}`;
-        //  profilePicUrl=await uploadService.upload(selectedFile, `${folderPath}_profiles`);
+
            profilePicUrl=await uploadService.upload(selectedFile, `${folderPath}_profiles`,userId,"profile_pic");     
        
       }
@@ -276,26 +277,7 @@ const UserProfileForm: React.FC = () => {
                     className="pl-12 w-full rounded-xl bg-secondary/60 border border-[#454c59] text-white"
                   />
                 </div>
-              </div>
-
-              {/* <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Relationship Status
-                </label>
-                <Select
-                  value={profile.relationship}
-                  onValueChange={(value) => handleInputChange("relationship", value as RelationType)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Relationship" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.values(RELATIONSHIP).map((relation) => (
-                      <SelectItem key={relation} value={relation}>{relation}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div> */}
+              </div>              
             </div>
 
             {/* Address Section */}

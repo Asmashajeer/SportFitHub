@@ -1,21 +1,16 @@
 import { v2 as cloudinary } from 'cloudinary';
 
-
- cloudinary.config({
+cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_SECRET,
 });
 
-
 export default cloudinary;
-
-
-
 
 // export const storage = new CloudinaryStorage({
 //   cloudinary: cloudinary,
-//   params: async (req, file) => {    
+//   params: async (req, file) => {
 //     const folderName = req.body.folder || ',misc_assets';
 //     const sanitizedFolder = folderName.trim().replace(/\s+/g, '_');
 //     return {

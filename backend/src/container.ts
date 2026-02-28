@@ -1,9 +1,9 @@
-import User from './models/user.model'
+import User from './models/user.model';
 import Profile from './models/profile.model';
 
-import { UserRepository } from "./repositories/user.repository";
-import { AuthService } from "./services/auth.service";
-import AuthController from "./api/controllers/auth.controller";
+import { UserRepository } from './repositories/user.repository';
+import { AuthService } from './services/auth.service';
+import AuthController from './api/controllers/auth.controller';
 import { ProfileRepository } from './repositories/profile.repository';
 import { ProfileService } from './services/user/profile.service';
 import { ProfileController } from './api/controllers/user/profile.controller';
@@ -29,43 +29,45 @@ import { FitnessRepository } from './repositories/fitness.repository';
 import { FitnessManagementService } from './services/admin/fitnessManagement.service';
 import { FitnessManagementController } from './api/controllers/admin/fitnessManagement.controller';
 
-const userRepository= new UserRepository(User);
-const userManagementService=new UserManagementService(userRepository);
-const userManagementController=new UserManagementController(userManagementService);
+const userRepository = new UserRepository(User);
+const userManagementService = new UserManagementService(userRepository);
+const userManagementController = new UserManagementController(userManagementService);
 
+const profileRepository = new ProfileRepository(Profile);
+const profileService = new ProfileService(profileRepository, userRepository);
+const profileController = new ProfileController(profileService);
 
-const profileRepository =new ProfileRepository(Profile);
-const profileService=new ProfileService( profileRepository,userRepository);
-const profileController=new ProfileController(profileService);
+const otpRepository = new OtpRepository(otpModel);
 
-const otpRepository =new OtpRepository(otpModel);
+const trainerRepository = new TrainerRepository(TrainerProfile);
+const trainerService = new TrainerService(trainerRepository);
+const trainerManagementService = new TrainerManagementService(trainerRepository);
 
-const trainerRepository=new TrainerRepository(TrainerProfile);
-const trainerService=new TrainerService(trainerRepository)
-const trainerManagementService= new TrainerManagementService(trainerRepository);
+const trainerController = new TrainerController(trainerService);
+const trainerManagementController = new TrainerManagementController(trainerManagementService);
 
-const trainerController=new TrainerController(trainerService);
-const trainerManagementController=new TrainerManagementController(trainerManagementService);
+const authService = new AuthService(
+  userRepository,
+  otpRepository,
+  profileRepository,
+  trainerRepository
+);
+const authController = new AuthController(authService);
 
-const authService=new AuthService(userRepository,otpRepository,profileRepository,trainerRepository);
-const authController=new AuthController(authService);
+const sportsRepository = new SportsRepository(SportsModel);
+const sportsManagementService = new SportsManagementService(sportsRepository);
+const sportManagementController = new SportsManagementController(sportsManagementService);
 
-const sportsRepository= new SportsRepository(SportsModel);
-const sportsManagementService=new SportsManagementService(sportsRepository)
-const sportManagementController= new SportsManagementController(sportsManagementService);
-
-const fitnessRepository= new FitnessRepository(fitnessProgramModel);
-const fitnessManagementService=new FitnessManagementService(fitnessRepository)
-const fitnessManagementController= new FitnessManagementController(fitnessManagementService);
-
+const fitnessRepository = new FitnessRepository(fitnessProgramModel);
+const fitnessManagementService = new FitnessManagementService(fitnessRepository);
+const fitnessManagementController = new FitnessManagementController(fitnessManagementService);
 
 export {
-    authController,
-    profileController,
-    trainerController,
-    userManagementController,
-    trainerManagementController,
-    sportManagementController,
-    fitnessManagementController
-   
+  authController,
+  profileController,
+  trainerController,
+  userManagementController,
+  trainerManagementController,
+  sportManagementController,
+  fitnessManagementController,
 };

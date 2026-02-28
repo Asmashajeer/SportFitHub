@@ -8,8 +8,10 @@ import { ROLES } from "@/constants/constants";
 import { Bell, UserCog } from "lucide-react";
 
 import { userService } from "@/features/user/service/userService";
-import { Button } from "../ui/button";
+
 import { trainerService } from "@/features/trainer/service/trainerService";
+import { Button } from "../ui/Button";
+
 
 
 

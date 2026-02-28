@@ -13,13 +13,12 @@ export interface ITrainerService {
   checkExistingProfile(userId: Types.ObjectId): Promise<void>;
   addProfile(profileData: Partial<ITrainerProfile>): Promise<TrainerProfileResponseDTO>;
 
-    // by trainer and admin
+  // by trainer and admin
   getTrainer(id: string): Promise<TrainerProfileDTO>;
   getTrainerByUserId(userId: string | Types.ObjectId): Promise<TrainerProfileDTO>;
 
   updateCertificate(
     id: string | Types.ObjectId,
-    section: string,
     documents: ICertification
   ): Promise<TrainerProfileDTO>;
   updateIdVerification(
@@ -35,6 +34,8 @@ export interface ITrainerService {
     data: PaymentInfoReqDTO
   ): Promise<TrainerProfileDTO>;
 
-   resubmitApplicaion(id:string|Types.ObjectId,status:TRAINER_STATUS,reason:string):Promise<TrainerProfileDTO>
-
+  resubmitApplicaion(
+    id: string | Types.ObjectId,
+    status: TRAINER_STATUS
+  ): Promise<TrainerProfileDTO>;
 }

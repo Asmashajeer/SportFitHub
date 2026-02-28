@@ -1,17 +1,16 @@
-
-import  sgMail from '@sendgrid/mail';
+import sgMail from '@sendgrid/mail';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-export const  sendEmailOTP= async (email:string,otp:string)=>{
-        console.log(`🔧 Attempting to send OTP to: ${email}`);
-         console.log(otp);
-        const msg = {
-            to: email, // Recipient email address
-            from: 'sportfit.hub@gmail.com', // Verified sender email address
-            subject: 'Email Verification',
-            text: `Your OTP Code is ${otp}. It will expire in 5 minutes.`,
-            html: `<div class="bg-gray-100 p-0 m-0">
+export const sendEmailOTP = async (email: string, otp: string) => {
+  console.log(`🔧 Attempting to send OTP to: ${email}`);
+  console.log(otp);
+  const msg = {
+    to: email, // Recipient email address
+    from: 'sportfit.hub@gmail.com', // Verified sender email address
+    subject: 'Email Verification',
+    text: `Your OTP Code is ${otp}. It will expire in 5 minutes.`,
+    html: `<div class="bg-gray-100 p-0 m-0">
                     <div class="bg-gray-100 py-10 sm:py-16">
                         <div class="max-w-xl mx-auto bg-white p-6 sm:p-10 rounded-lg shadow-xl">
                             
@@ -48,18 +47,17 @@ export const  sendEmailOTP= async (email:string,otp:string)=>{
                             </div>
                         </div>
                     </div>
-                </div>`
-            };
+                </div>`,
+  };
 
-
-        try {
-            const result= await sgMail.send(msg);            
-            console.log(`OTP sent successfully! to ${email}`);
-            return result;
-        } catch (error) {
-             console.error(`❌ SendGrid email failed for ${email}:`, error);
-            if (error.response) {
-            return error.response.body;
-            }
-        }
-    };
+  try {
+    const result = await sgMail.send(msg);
+    console.log(`OTP sent successfully! to ${email}`);
+    return result;
+  } catch (error) {
+    console.error(`❌ SendGrid email failed for ${email}:`, error);
+    if (error.response) {
+      return error.response.body;
+    }
+  }
+};

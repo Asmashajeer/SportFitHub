@@ -18,11 +18,11 @@ const levels = {
 
 // Define colors for each level
 const colors = {
-  error: "red",
-  warn: "yellow",
-  info: "green",
-  http: "magenta",
-  debug: "white",
+  error: 'red',
+  warn: 'yellow',
+  info: 'green',
+  http: 'magenta',
+  debug: 'white',
 };
 
 // Add colors to winston
@@ -30,9 +30,9 @@ winston.addColors(colors);
 
 const consoleFormat = winston.format.combine(
   winston.format.colorize({ all: true }),
-  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
+  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.errors({ stack: true }),
-  winston.format.printf((info) => {
+  winston.format.printf(info => {
     const { timestamp, level, message, stack, ...meta } = info;
 
     let log = `${timestamp} [${level}]: ${message}`;
@@ -60,68 +60,73 @@ const fileFormat = winston.format.combine(
 // Define which transports to use
 const transports = [
   // Console transport
-  new winston.transports.Console({    
-     format: consoleFormat  
+  new winston.transports.Console({
+    format: consoleFormat,
   }),
 
   // Daily rotate file for errors
   new DailyRotateFile({
-    filename: path.join("logs", "error-%DATE%.log"),
-    datePattern: "YYYY-MM-DD",
+    filename: path.join('logs', 'error-%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
     zippedArchive: true,
-    maxSize: "20m",
-    maxFiles: "14d",
-    level: "error",
+    maxSize: '20m',
+    maxFiles: '14d',
+    level: 'error',
     format: fileFormat,
   }),
 
   // Daily rotate file for all logs
   new DailyRotateFile({
-    filename: path.join("logs", "combined-%DATE%.log"),
-    datePattern: "YYYY-MM-DD",
+    filename: path.join('logs', 'combined-%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
     zippedArchive: true,
-    maxSize: "20m",
-    maxFiles: "14d",
+    maxSize: '20m',
+    maxFiles: '14d',
     format: fileFormat,
   }),
 
   // HTTP specific logs
   new DailyRotateFile({
-    filename: path.join("logs", "http-%DATE%.log"),
-    datePattern: "YYYY-MM-DD",
+    filename: path.join('logs', 'http-%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
     zippedArchive: true,
-    maxSize: "20m",
-    maxFiles: "14d",
-    level: "http",
-    format:fileFormat,
+    maxSize: '20m',
+    maxFiles: '14d',
+    level: 'http',
+    format: fileFormat,
   }),
 ];
 
 // Create the logger instance
 const Logger = winston.createLogger({
   level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
-  levels, 
+  levels,
   transports,
   exceptionHandlers: [
     new winston.transports.Console({ format: consoleFormat }),
-    new DailyRotateFile({ filename: path.join("logs", "exceptions-%DATE%.log"),datePattern: "YYYY-MM-DD",
+    new DailyRotateFile({
+      filename: path.join('logs', 'exceptions-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
-      maxSize: "20m",
-      maxFiles: "14d",
-      format: fileFormat, })
+      maxSize: '20m',
+      maxFiles: '14d',
+      format: fileFormat,
+    }),
   ],
   rejectionHandlers: [
     new winston.transports.Console({ format: consoleFormat }),
-    new DailyRotateFile({ filename: path.join("logs", "rejections-%DATE%.log"),datePattern: "YYYY-MM-DD",
+    new DailyRotateFile({
+      filename: path.join('logs', 'rejections-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
-      maxSize: "20m",
-      maxFiles: "14d",
-      format: fileFormat, })
+      maxSize: '20m',
+      maxFiles: '14d',
+      format: fileFormat,
+    }),
   ],
   // Do not exit on handled exceptions
   // exitOnError: false,
 });
-
 
 // Create the stream for Morgan
 export const stream = {

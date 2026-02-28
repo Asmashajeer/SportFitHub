@@ -1,9 +1,8 @@
 export interface SportsResponseDTO {
-     id:string,
-    sportName:string,    
-    slug :string,        
-    icon:string,
-    description:string,
-    isActive:boolean,
-        
+  id: string;
+  sportName: string;
+  slug: string;
+  icon: string;
+  description: string;
+  isActive: boolean;
 }

@@ -1,24 +1,22 @@
-import { RegisterDataDTO,  UserDataDTO } from "@/dtos/response/auth.response.dto";
-import { IUser } from "@/models/user.model";
+import { RegisterDataDTO, UserDataDTO } from '@/dtos/response/auth.response.dto';
+import { IUser } from '@/models/user.model';
 
-export const toRegisterData = (user: IUser): RegisterDataDTO=> {
+export const toRegisterData = (user: IUser): RegisterDataDTO => {
   return {
-    id: user._id.toString(), 
-    name:user.name,  
-    email: user.email || '',    
-    role: user.role, 
-    isVerified:user.isVerified,   
-    
-  }   
+    id: user._id.toString(),
+    name: user.name,
+    email: user.email || '',
+    role: user.role,
+    isVerified: user.isVerified,
+  };
 };
 
-export const toUserData=(user:IUser):UserDataDTO=>{
-   return{ 
-    id:user._id.toString(),
-    name:user.name,
-    email:user.email,
+export const toUserData = (user: IUser): UserDataDTO => {
+  return {
+    id: user._id.toString(),
+    name: user.name,
+    email: user.email,
     role: user.role,
-    isVerified:user.isVerified,   
-
-   }  
-}
+    isVerified: user.isVerified,
+  };
+};

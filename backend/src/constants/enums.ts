@@ -4,11 +4,11 @@ export enum UserRole {
   USER = 'user',
   PENDING = 'pending', // This is the "Onboarding" state for google login
 }
-export type user_role_onRoute=Exclude<UserRole,UserRole.PENDING>
+export type user_role_onRoute = Exclude<UserRole, UserRole.PENDING>;
 
-export enum TRAINER_CATEGORY{
-  SPORT='Sports',
-  FITNESS='Fitness'
+export enum TRAINER_CATEGORY {
+  SPORT = 'Sports',
+  FITNESS = 'Fitness',
 }
 export enum OtpType {
   VERIFICATION = 'VERIFICATION',
@@ -28,12 +28,11 @@ export enum RELATIONSHIP {
   OTHER = 'Other',
 }
 
-
 export enum GOVT_ID_TYPE {
   AADHAR = 'Aadhar',
   PASSPORT = 'Passport',
-   DRIVING_LICENSE = 'Driving License',
-  PAN = 'PAN'
+  DRIVING_LICENSE = 'Driving License',
+  PAN = 'PAN',
 }
 
 export enum DOC_VERIFY_STATUS {
@@ -42,20 +41,18 @@ export enum DOC_VERIFY_STATUS {
   REJECTED = 'rejected',
 }
 
-
-
 export enum TRAINER_STATUS {
   SUBMITTED = 'submitted',
   UNDER_REVIEW = 'under review',
   APPROVED = 'approved',
   REJECTED = 'rejected',
-  SUSPENDED = 'suspended'
+  SUSPENDED = 'suspended',
 }
 
-export enum CURRENCY{
-  US = 'US Dollar' ,
-EURO=	'EUR	€'	,
-BRITISH_POUND=	'GBP	£(British Pound)'	,
-INR='	INR	₹'	,
-UAE_DIRHAM=	'AED(UAE)',
+export enum CURRENCY {
+  US = 'US Dollar',
+  EURO = 'EUR	€',
+  BRITISH_POUND = 'GBP	£(British Pound)',
+  INR = '	INR	₹',
+  UAE_DIRHAM = 'AED(UAE)',
 }

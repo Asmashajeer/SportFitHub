@@ -5,7 +5,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import {
   ExternalLink,
   CreditCard,
@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Award,
   Edit2,
+  VerifiedIcon,
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
@@ -27,7 +28,7 @@ import CertificatesForm from "./profileEditForm/CertificatesForm";
 import { trainerService } from "../service/trainerService";
 import toast from "react-hot-toast";
 import IdVerificationFormEdit from "./profileEditForm/IdVerificationFormEdit";
-import AvailabilityFormEdit from "./profileEditForm/availabiltyFormEdit";
+import AvailabilityFormEdit from "./profileEditForm/AvailabiltyFormEdit";
 import PaymentInfoFormEdit from "./profileEditForm/PaymentInfoEdit";
 
 const ProfileView = () => {
@@ -50,17 +51,18 @@ const ProfileView = () => {
         toast.custom('Please update your rejected documents,then submit');
         return;
       }
-      const updatedProfile=await trainerService.updateTrainerStatus(profile?.id,DOC_VERIFY_STATUS.PENDING);
-      setProfile(updatedProfile);    
+      const data=await trainerService.updateTrainerStatus(profile?.id,TRAINER_STATUS.SUBMITTED);
+      setProfile(data.profile);    
     }
     
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+    <div className=" bg-card grid grid-cols-1 lg:grid-cols-1 gap-6">
       <div className="w-full py-6 z-50 font-bold">
         <h1>Profile Overview</h1>
         <p>{profile?.status===TRAINER_STATUS.REJECTED && (<Badge variant="destructive"> {profile?.status}</Badge>)}</p>
+        <span className="text-xs font-normal text-amber-200">{profile?.status===TRAINER_STATUS.APPROVED? <VerifiedIcon className="text-primary"/>:`status: ${profile?.status}`}</span>
       </div>
       {profile && Object.keys(profile).length > 0 ? (
         <>
@@ -84,11 +86,12 @@ const ProfileView = () => {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="   relative pb-4 bg-[#1e1e1f] border-t pt-4 rounded-lg">
-
-                  <Button className=" absolute right-0"
-                variant="ghost">
-                  <Edit2 className=" text-trainer-primary"/>
-              </Button>
+                 {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&
+                      <Button className=" absolute right-0"
+                    variant="ghost">
+                      <Edit2 className=" text-trainer-primary"/>
+                  </Button>
+                }
                   <div className=" grid grid-cols-2 gap-y-4 justify-items-start text-left px-3">
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
@@ -150,7 +153,14 @@ const ProfileView = () => {
                     </span>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="pb-4 bg-[#1e1e1f] border-t pt-4">
+
+                <AccordionContent className=" relative pb-4 bg-[#1e1e1f] border-t pt-4">
+                  {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&
+                      <Button className=" absolute right-0"
+                    variant="ghost">
+                      <Edit2 className=" text-trainer-primary"/>
+                  </Button>
+                  }
                   <div className="grid grid-cols-2 gap-y-4 justify-items-start text-left px-3">
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
@@ -215,11 +225,11 @@ const ProfileView = () => {
                 </AccordionTrigger>
                 <AccordionContent className="relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3">
                   <div className=" grid grid-cols-2 gap-y-4">
-                   
-                    <Button variant="outline"className=" absolute right-0"
-                    onClick={()=>setEditingSection("certificationInfo")}>{profile?.certificationInfo?.status !==
-                    DOC_VERIFY_STATUS.REJECTED ? <Edit2 className=" text-trainer-primary"/>:"Change"}</Button>
-                  
+                    {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&    
+                      <Button variant="outline"className=" absolute right-0"
+                      onClick={()=>setEditingSection("certificationInfo")}>{profile?.certificationInfo?.status !==
+                      DOC_VERIFY_STATUS.REJECTED ? <Edit2 className=" text-trainer-primary"/>:"Change"}</Button>
+                    }
                     {profile?.certificationInfo.documents.map(
                       (cert: ICertification, i: number) => (
                         <div
@@ -296,9 +306,10 @@ const ProfileView = () => {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className=" relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3">
-                    <Button variant="outline"className=" absolute right-0"
-                    onClick={()=>setEditingSection("idVerification")}>{profile?.idVerification?.status !==
-                    DOC_VERIFY_STATUS.REJECTED ? <Edit2 className=" text-trainer-primary"/>:"Change"}</Button>
+                    {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&
+                      <Button variant="outline"className=" absolute right-0"
+                      onClick={()=>setEditingSection("idVerification")}>{profile?.idVerification?.status !== DOC_VERIFY_STATUS.REJECTED ? <Edit2 className=" text-trainer-primary"/>:"Change"}</Button>
+                    }
                   <div className="flex flex-col md:flex-row gap-4 items-start">
                     <div className="flex-1 space-y-3">
                       <p className="text-sm">
@@ -375,8 +386,10 @@ const ProfileView = () => {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3 ">
-                  <Button variant="ghost"className=" absolute right-0"
+                  {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&
+                    <Button variant="ghost"className=" absolute right-0"
                     onClick={()=>setEditingSection("availability")}> <Edit2 className=" text-trainer-primary"/></Button>
+                  }
                   <div className="grid grid-cols-2 gap-y-4">
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
@@ -446,8 +459,10 @@ const ProfileView = () => {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className=" relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3">
-                  <Button variant="ghost"className=" absolute right-0"
+                  {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&
+                    <Button variant="ghost"className=" absolute right-0"
                     onClick={()=>setEditingSection("paymentInfo")}> <Edit2 className=" text-trainer-primary"/></Button>
+                  }
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-3 bg-secondary/20 rounded">
                       <p className="text-xs text-muted-foreground uppercase font-bold">
@@ -496,12 +511,7 @@ const ProfileView = () => {
                   submit for Re review
                   </Button>
                 )}
-                 <Button
-                  className="w-full bg-secondary hover:bg-secondary/2 0 h-12"
-                  // onClick=""
-                >
-                Back
-                </Button>
+               
                 
               </div>
             )}

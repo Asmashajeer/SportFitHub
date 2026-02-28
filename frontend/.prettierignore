@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build Output
+dist/
+build/
+out/
+.next/
+.vercel/
+
+# Static Assets (Don't format binary files or SVGs)
+public/
+src/assets/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+
+# Vite / Build Tools
+vite.config.ts.timestamp-*
+*.config.js
+*.config.cjs
+
+# Testing
+coverage/
+__snapshots__/
+
+# System/IDE
+.vscode/
+.idea/
+.DS_Store

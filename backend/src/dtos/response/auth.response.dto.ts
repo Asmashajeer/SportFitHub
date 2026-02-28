@@ -1,4 +1,4 @@
-import { UserRole } from "@/constants/enums"
+import { UserRole } from '@/constants/enums';
 
 export interface BaseResponseDTO {
   success: boolean;
@@ -6,48 +6,39 @@ export interface BaseResponseDTO {
   statusCode: number;
 }
 
-export interface  RegisterDataDTO{   
-    id: string,
-    name:string,
-    email: string,
-    role: UserRole, 
-    isVerified:boolean,
+export interface RegisterDataDTO {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  isVerified: boolean;
 }
 
-export interface RegisterResponseDTO extends BaseResponseDTO{
-  user: RegisterDataDTO,
-  emailSent: boolean,  
+export interface RegisterResponseDTO extends BaseResponseDTO {
+  user: RegisterDataDTO;
+  emailSent: boolean;
 }
 //UserResponseDTO
-export interface UserDataDTO extends RegisterDataDTO{       
-      hasProfile?: boolean,
+export interface UserDataDTO extends RegisterDataDTO {
+  hasProfile?: boolean;
 }
 
-export interface UserResponseDTO extends BaseResponseDTO{
-  user:UserDataDTO,  
-  accessToken: string,
-  refreshToken:string 
-};
-export interface LoginResponseDTO extends UserResponseDTO{
-  isVerified:boolean
+export interface UserResponseDTO extends BaseResponseDTO {
+  user: UserDataDTO;
+  accessToken: string;
+  refreshToken: string;
 }
-
+export interface LoginResponseDTO extends UserResponseDTO {
+  isVerified: boolean;
+}
 
 //  authMe
-export interface AuthMeResponseDto extends BaseResponseDTO{ 
-  user:UserDataDTO
-};
+export interface AuthMeResponseDto extends BaseResponseDTO {
+  user: UserDataDTO;
+}
 
 // refresh  tokens
 export interface RefreshTokensResponse {
-  accessToken:string,
-  refreshToken:string
-};
-
-
-
-
-
-
- 
-
+  accessToken: string;
+  refreshToken: string;
+}

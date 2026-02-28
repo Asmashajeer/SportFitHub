@@ -1,15 +1,7 @@
+import { userManagementController } from '../../../container';
+import { Router } from 'express';
 
-
-
-import {  userManagementController } from "../../../container";
-import { Router } from "express";
-
-
-
-const router=Router();
-
-
-
+const router = Router();
 
 router.get('/allUsers', userManagementController.getAllusers);
 router.get('/getStats', userManagementController.getStats);

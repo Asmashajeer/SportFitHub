@@ -1,4 +1,4 @@
-import Sidebar  from "./Sidebar"
+import Sidebar from "../reusable/Sidebar"
 import Header from "./Header"
 import Footer from "./Footer"
 import { Outlet } from "react-router-dom"
@@ -11,7 +11,7 @@ function MainLayout() {
       <Header/>  
       <div className="flex flex-1">
         {user?.hasProfile&& (
-          <Sidebar activePage="dashboard" />    )}    
+          <Sidebar />  )}    
         <main className="flex-1 overflow-y-auto p-8">
           <div className="flex-1 ">
             <Outlet/>   

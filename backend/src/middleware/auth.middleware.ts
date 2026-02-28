@@ -12,10 +12,8 @@ export interface AuthRequest extends Request {
 }
 
 export const protect = (req: Request, res: Response, next: NextFunction) => {
+  const accessToken = req.cookies?.accessToken;
 
-   const accessToken = req.cookies?.accessToken;
- 
-  
   if (!accessToken) {
     return next(new AppError('Unauthorized: Access Token missing.', 401));
   }

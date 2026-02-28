@@ -69,6 +69,8 @@ export const TRAINER_STATUS= {
   REJECTED : 'rejected',
   SUSPENDED : 'suspended'
 }
+export type Trainer_status_type=typeof TRAINER_STATUS [keyof typeof TRAINER_STATUS]
+
   export const UPLOAD_TYPE={
     PROFILE_PIC:"profile_pic",
     ID_ATTACHMENT :"id_attachment",

@@ -1,6 +1,6 @@
 import api from "@/api/axiosInstance"
 import { USER_ROUTES } from "./user.api"
-import type { ProfilePicResponse } from "../types/user.types";
+import type { ProfilePicResponse, ProfileResponse } from "../types/user.types";
 import type { CreateProfileData } from "../types/user.schema";
 
 
@@ -11,6 +11,14 @@ export const userService={
    },
    getProfilePic:async(userId:string):Promise<ProfilePicResponse>=>{
       const response=await api.get(USER_ROUTES.GET_PROFILE_PIC+`/${userId}`)
+      return response.data;
+   },
+   getProfile:async()=>{
+      const response=await api.get(USER_ROUTES.GET_PROFILE)
+      return response.data;
+   },
+   updateProfile:async(id:string,profile:CreateProfileData)=>{     
+      const response=await api.put(USER_ROUTES.UPDATE_PROFILE+id,{profile});
       return response.data;
    }
 }

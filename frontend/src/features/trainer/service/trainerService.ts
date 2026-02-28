@@ -4,7 +4,8 @@ import type { AvailabiltyPricing, idVerificationwithUrl, paymentInfoData, Traine
 import { TRAINER_ROUTES } from "./trainer.api";
 import type { ProfilePicResponse } from "@/features/user/types/user.types";
 import type { ICertification } from "../store/useTrainerStore";
-import type { Doc_status_type } from "@/constants/constants";
+import type { Trainer_status_type } from "@/constants/constants";
+
 
 
 export const trainerService={
@@ -21,14 +22,11 @@ export const trainerService={
             const response=await api.get(TRAINER_ROUTES.GET_PROFILE);
             return response.data;
         },
-        updateCertificationInfo:async(id:string,section:string, documents:ICertification[])=>{
-            const response=await api.patch(TRAINER_ROUTES.UPDATE_PROFILE.BY_ID(id)+'/'+section,documents);
+        updateCertificationInfo:async(id:string,documents:ICertification[])=>{
+            const response=await api.patch(TRAINER_ROUTES.UPDATE_PROFILE.BY_ID(id)+'/certificationInfo',documents);
             return response.data;
         },
-        updateTrainerStatus:async(id:string,status:Doc_status_type)=>{
-            const response=await api.patch(TRAINER_ROUTES.UPDATE_PROFILE.BY_ID(id)+`/trainer-status`,status);
-            return response.data;
-        } ,
+      
         updateIdverification:async(id:string,data:idVerificationwithUrl)=>{          
             const response=await api.patch(TRAINER_ROUTES.UPDATE_PROFILE.BY_ID(id) + '/idVerification', data);
              return response.data;
@@ -40,5 +38,10 @@ export const trainerService={
         updatePaymentInfo:async(id:string,data:paymentInfoData)=>{
             const response=await api.patch(TRAINER_ROUTES.UPDATE_PROFILE.BY_ID(id) + '/paymentInfo', data);
              return response.data;
-        }
+        },
+          updateTrainerStatus:async(id:string,newStatus:Trainer_status_type)=>{
+            const response=await api.patch(TRAINER_ROUTES.UPDATE_PROFILE.BY_ID(id)+`/trainer-status`,{status:newStatus});
+            return response.data;
+        } ,
+
 }

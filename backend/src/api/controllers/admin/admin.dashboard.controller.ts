@@ -1,10 +1,1 @@
-
-
-
-
-export class AdminDashboardController{
-    
-   
-
-    
-}
+export class AdminDashboardController {}

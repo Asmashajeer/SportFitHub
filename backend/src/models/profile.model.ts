@@ -1,7 +1,5 @@
 import mongoose, { Document, Types } from 'mongoose';
-import { GENDER,RELATIONSHIP } from '@/constants/enums';
-
-
+import { GENDER, RELATIONSHIP } from '@/constants/enums';
 
 export interface IProfile extends Document {
   userId: Types.ObjectId;
@@ -16,28 +14,28 @@ export interface IProfile extends Document {
     zip?: string;
   };
   location?: {
-    type:'Point';
+    type: 'Point';
     coordinates: [number, number];
   };
   profilePic: string;
   isPrimary: boolean;
-  createdAt:Date;
-  updatedAt:Date
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const ProfileSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    fullName: { type: String, required: true,trim:true },
+    fullName: { type: String, required: true, trim: true },
     DOB: { type: Date, required: true },
-    gender: { type: String, enum: Object.values(GENDER),required:true },
-    phone:{type:String,default:""},
-    relationship: { type: String, enum: Object.values(RELATIONSHIP),default:RELATIONSHIP.SELF },
+    gender: { type: String, enum: Object.values(GENDER), required: true },
+    phone: { type: String, default: '' },
+    relationship: { type: String, enum: Object.values(RELATIONSHIP), default: RELATIONSHIP.SELF },
 
     address: {
-      street: { type: String,trim:true },
-      city: { type: String,trim: true },
-      zip: { type: String,trim:true },
+      street: { type: String, trim: true },
+      city: { type: String, trim: true },
+      zip: { type: String, trim: true },
     },
 
     location: {
@@ -51,8 +49,8 @@ const ProfileSchema = new mongoose.Schema(
         type: [Number],
         validate: {
           validator: (val: number[]) => val === undefined || val.length === 2,
-          message: 'Coordinates must be [longitude, latitude]'
-        }
+          message: 'Coordinates must be [longitude, latitude]',
+        },
       },
     },
     profilePic: { type: String, default: '' },
