@@ -1,19 +1,16 @@
 import express from 'express';
-import connectDB from './config/db';
-import dotenv from 'dotenv';
+
+
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import errorHandler from './middleware/errorHandler';
 import morgan from 'morgan';
 import { stream } from './utils/logger';
+import rootRouter from './api/routes';
+import webhookRoutes from './api/routes/booking/webhook.route'
+
 
 const app = express();
-dotenv.config();
-connectDB();
-app.use((req, res, next) => {
-  console.log(`Incoming: ${req.method} ${req.url}`);
-  next();
-});
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -23,15 +20,12 @@ app.use(
   })
 );
 
+app.use('/api/v1/webhook', webhookRoutes);
+
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json({ limit: '50mb' }));
 app.use(cookieParser());
-app.use((req, res, next) => {
-  if (req.method === 'PATCH') {
-    console.log('PATCH Request Body:', JSON.stringify(req.body, null, 2));
-  }
-  next();
-});
+
 app.use(function (req, res, next) {
   res.set(
     'Cache-Control',
@@ -41,16 +35,8 @@ app.use(function (req, res, next) {
 });
 app.use(morgan('combined', { stream }));
 
-import authRoute from './api/routes/auth.route';
-import adminRoute from './api/routes/admin/admin.route';
-import userRoute from './api/routes/user/user.route';
-import trainerRoute from './api/routes/trainer/trainer.route';
-import uploadRoute from './api/routes/upload.routes';
-app.use('/api/v1/auth', authRoute);
-app.use('/api/v1/admin', adminRoute);
-app.use('/api/v1/user', userRoute);
-app.use('/api/v1/trainer', trainerRoute);
-app.use('/api/v1/upload', uploadRoute);
+
+app.use('/api/v1', rootRouter);
 app.use(errorHandler);
 
 export default app;

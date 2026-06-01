@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config();
+
 const authConfig = {
   secret: process.env.JWT_SECRET as string,
   secret_expires_in: process.env.JWT_SECRET_EXPIRES_IN as string,

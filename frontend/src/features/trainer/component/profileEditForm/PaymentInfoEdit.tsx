@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm } from 'react-hook-form';
 import {
   Form,
   FormControl,
@@ -6,12 +6,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useTrainerStore } from "../../store/useTrainerStore";
-import { trainerService } from "../../service/trainerService";
-import toast from "react-hot-toast";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useTrainerStore } from '../../store/useTrainerStore';
+import { trainerService } from '../../service/trainerService';
+import toast from 'react-hot-toast';
 
 interface PaymentFormValues {
   bankAccount?: {
@@ -44,18 +44,18 @@ const PaymentInfoFormEdit = ({
       !data.bankAccount?.accountName?.trim();
 
     if (isUpiEmpty && isBankEmpty) {
-      toast.error("Please provide either Bank Details or a UPI ID.");
+      toast.error('Please provide either Bank Details or a UPI ID.');
       return;
     }
     try {
       const updatedProfile = await trainerService.updatePaymentInfo(
         profile.id,
-        data,
+        data
       );
       setProfile(updatedProfile);
       onCancel();
     } catch (error) {
-      console.error("Failed to update payment info", error);
+      console.error('Failed to update payment info', error);
     }
   };
 

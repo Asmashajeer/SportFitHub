@@ -1,6 +1,6 @@
 import mongoose, { Document, Types } from 'mongoose';
 import {
-  CURRENCY,
+
   DOC_VERIFY_STATUS,
   GENDER,
   GOVT_ID_TYPE,
@@ -42,8 +42,7 @@ export interface ITrainerProfile extends Document {
   languages: string[];
   profilePic: string;
   pricing: {
-    sessionCharge: number;
-    currency: string;
+    sessionCharge: number;    
   };
 
   // rating
@@ -138,8 +137,7 @@ const TrainerProfileSchema = new mongoose.Schema(
     profilePic: { type: String, required: true },
 
     pricing: {
-      sessionCharge: { type: Number, default: 0, min: 1 },
-      currency: { type: String, enum: Object.values(CURRENCY), default: CURRENCY.INR },
+      sessionCharge: { type: Number, default: 0, min: 1 },     
     },
     // --- Rating ---
     averageRating: {
@@ -221,6 +219,7 @@ const TrainerProfileSchema = new mongoose.Schema(
         available: { type: Boolean, default: false },
         startTime: String,
         endTime: String,
+        
       },
       Sunday: { available: { type: Boolean, default: false }, startTime: String, endTime: String },
     },
@@ -228,12 +227,12 @@ const TrainerProfileSchema = new mongoose.Schema(
     // --- Payment Data ---
     paymentInfo: {
       bankAccount: {
-        accountName: { type: String, select: false },
-        accountNumber: { type: String, select: false },
-        bankName: { type: String, select: false },
-        ifscCode: { type: String, select: false },
+        accountName: { type: String },
+        accountNumber: { type: String },
+        bankName: { type: String },
+        ifscCode: { type: String },
       },
-      upiId: { type: String, select: false },
+      upiId: { type: String },
     },
 
     // --- Administrative State ---

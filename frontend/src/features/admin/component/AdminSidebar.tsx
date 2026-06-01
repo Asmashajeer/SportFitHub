@@ -7,15 +7,15 @@ import {
   CalendarDays,
   ShieldCheck,
   Layers,
-} from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../auth/store/useAuthStore";
+} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../auth/store/useAuthStore';
 
-import { ROLES } from "../../../constants/constants";
-import { authService } from "../../auth/service/authService";
-import toast from "react-hot-toast";
-import { UseAdminStore } from "../store/useAdminStore";
-import ProfilePic from "../../../components/reusable/ProfilePic";
+import { ROLES } from '../../../constants/constants';
+import { authService } from '../../auth/service/authService';
+import toast from 'react-hot-toast';
+import { UseAdminStore } from '../store/useAdminStore';
+import ProfilePic from '../../../components/reusable/ProfilePic';
 
 interface SidebarItemProps {
   label: string;
@@ -36,7 +36,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
       <Link
         key={path}
         to={path}
-        className={`nav-item ${isActive ? "nav-item-active" : "nav-item-inactive"}`}
+        className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
       >
         {icon}
         <span>{label}</span>
@@ -47,7 +47,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`nav-item ${isActive ? "nav-item-active" : "nav-item-inactive"}`}
+      className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
     >
       {icon}
       <span>{label}</span>
@@ -69,99 +69,56 @@ const AdminSidebar: React.FC<SidebarProps> = ({ activePage }) => {
       await authService.logout();
       clearAuth();
       clearStore();
-      navigate("/login");
-      toast.success("Logging out.....");
-    }catch (error) {
-        toast.error(error?.toString() || "Something went wrong");
-    } 
+      navigate('/login');
+      toast.success('Logging out.....');
+    } catch (error) {
+      toast.error(error?.toString() || 'Something went wrong');
+    }
   };
-  return (
-    <aside className="w-64 top-0 left-0 h-full bg-gray-950">
-      <span className="text-xl md:text-2xl font-extrabold tracking-tighter font-sans uppercase">
-        <span className="text-primary">SportFit</span>
-        <span className="text-foreground">Hub</span>
-      </span>
-      <div className="  mx-auto  p-5">
-        <ProfilePic />
-        <h1 className="text-2xl font-black m-auto tracking-tighter text-primary">
-          {user?.role === ROLES.ADMIN &&(
-            "Admin"
-          ) }
-        </h1>
-      </div>
+ 
+return (
+  <div className="flex flex-col  gap-2">
 
-      {/* Navigation Links */}
-      <nav>
-        <div>
-          <SidebarItem
-            path="/admin/dashboard"
-            icon={<LayoutDashboard className="h-5 w-5" />}
-            label="Dashboard"
-            isActive={activePage === "Dashboard"}
-          />
-          <SidebarItem
-            path="/admin/user-management"
-            icon={<Users className="h-5 w-5" />}
-            label="Users"
-            isActive={activePage === "Users"}
-            onClick={() => navigate("/admin/user-management")}
-          />
-          <SidebarItem
-            path="/admin/session-management"
-            icon={<Ticket className="h-5 w-5" />}
-            label="Sessions"
-            isActive={activePage === "Sessions"}
-            onClick={() => navigate("/admin/session-management")}
-          />
-          <SidebarItem
-            path="/admin/camp-management"
-            icon={<CalendarDays className="h-5 w-5" />}
-            label="Camps"
-            isActive={activePage === "Camps"}
-            onClick={() => navigate("/admin/camp-management")}
-          />
-          <SidebarItem
-            path="/admin/trainer-management"
-            icon={<ShieldCheck className="h-5 w-5" />}
-            label="Trainers"
-            isActive={activePage === "Trainers"}
-            onClick={() => navigate("/admin/trainer-management")}
-          />
-          <SidebarItem
-            path="/admin/coupons"
-            icon={<Ticket className="h-5 w-5" />}
-            label="Coupons"
-            isActive={activePage === "Coupons"}
-            onClick={() => navigate("/admin/coupons")}
-          />
-           <SidebarItem
-            path="/admin/category-management"
-            icon={<Layers className="h-5 w-5" />}
-            label="Categories"
-            isActive={activePage === "Categories"}
-            onClick={() => navigate("/admin/category-management")}
-          />
-          <SidebarItem
-            path="/admin/settings"
-            icon={<Settings className="h-5 w-5" />}
-            label="settings"
-            isActive={activePage === "Settings"}
-            onClick={() => navigate("/admin/settings")}
-          />
-        </div>
-      </nav>
+    {/* Logo */}
+    <span className="text-xl font-extrabold tracking-tighter uppercase">
+      <span className="text-primary">SportFit</span>
+      <span className="text-foreground">Hub</span>
+    </span>
 
-      {/* Logout Bottom Section */}
-      <div className="p-4 border-t border-border/50">
-        <button
-          onClick={handleLogout}
-          className="nav-item nav-item-inactive w-full"
-        >
-          <LogOut size={20} />
-          <span>Logout</span>
-        </button>
-      </div>
-    </aside>
-  );
+    {/* Profile */}
+    <div className="flex flex-col items-center py-4 border-b border-zinc-800">
+      <ProfilePic />
+      <h1 className="text-sm font-bold mt-2 text-primary">
+        {user?.role === ROLES.ADMIN && 'Admin'}
+      </h1>
+    </div>
+
+    
+    <nav className="flex flex-col gap-1 flex-1 overflow-y-auto">
+      <div>    
+
+        <SidebarItem path="/admin/dashboard"          icon={<LayoutDashboard className="h-5 w-5" />} label="Dashboard"  isActive={activePage === 'Dashboard'} />
+        <SidebarItem path="/admin/category-management"icon={<Layers className="h-5 w-5" />}          label="Categories"  isActive={activePage === 'Categories'} />
+        <SidebarItem path="/admin/user-management"    icon={<Users className="h-5 w-5" />}           label="Users"       isActive={activePage === 'Users'} />
+        <SidebarItem path="/admin/trainer-management" icon={<ShieldCheck className="h-5 w-5" />}     label="Trainers"    isActive={activePage === 'Trainers'} />
+        <SidebarItem path="/admin/session-management" icon={<Ticket className="h-5 w-5" />}          label="Sessions"    isActive={activePage === 'Sessions'} />
+        <SidebarItem path="/admin/bookings-management"    icon={<CalendarDays className="h-5 w-5" />}    label="Bookings"       isActive={activePage === 'Bookings'} />
+        <SidebarItem path="/admin/payment-management"    icon={<CalendarDays className="h-5 w-5" />}    label="Payments"       isActive={activePage === 'Payments'} />
+        
+        <SidebarItem path="/admin/camp-management"    icon={<CalendarDays className="h-5 w-5" />}    label="Camps"       isActive={activePage === 'Camps'} />
+        <SidebarItem path="/admin/coupons"            icon={<Ticket className="h-5 w-5" />}          label="Coupons"     isActive={activePage === 'Coupons'} />
+        <SidebarItem path="/admin/settings"           icon={<Settings className="h-5 w-5" />}        label="Settings"    isActive={activePage === 'Settings'} />
+      </div>  
+    </nav>
+
+    <div className="border-t border-zinc-800 pt-1">
+      <button onClick={handleLogout} className="nav-item nav-item-inactive w-full">
+        <LogOut size={20} />
+        <span>Logout</span>
+      </button>
+    </div>
+
+  </div>
+);
 };
 export default AdminSidebar;

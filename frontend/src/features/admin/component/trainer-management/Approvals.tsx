@@ -1,31 +1,26 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  CalendarDays,
-  Briefcase,
-  Award,
-  
-} from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CalendarDays, Briefcase, Award } from 'lucide-react';
 
-import { useEffect, useState } from "react";
-import {trainerManagementService } from "../../service/trainerManagementService";
-import { UseAdminStore } from "../../store/useAdminStore";
-import toast from "react-hot-toast";
-import { formatDistanceToNow } from "date-fns";
-import type { TrainerOverView } from "../../store/trainerSlice";
+import { useEffect, useState } from 'react';
+import { trainerManagementService } from '../../service/trainerManagementService';
+import { UseAdminStore } from '../../store/useAdminStore';
+import toast from 'react-hot-toast';
+import { formatDistanceToNow } from 'date-fns';
+import type { TrainerOverView } from '../../store/trainerSlice';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
-import { TrainerApprovalView } from "./TrainerApprovalView";
+} from '@/components/ui/sheet';
+import { TrainerApprovalView } from './TrainerApprovalView';
 
 const Approvals = () => {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [activeTrainer, setActiveTrainer] = useState<TrainerOverView | null>(
-    null,
+    null
   );
 
   const setPendingTrainers = UseAdminStore((state) => state.setPendingTrainers);
@@ -37,11 +32,11 @@ const Approvals = () => {
       setTrainerLoading(true);
       try {
         const Data = await trainerManagementService.getPendingTrainers();
-       
+
         setPendingTrainers(Data.pendingTrainers);
       } catch (error) {
-        toast.error(error?.toString() || "Something went wrong");
-    }  finally {
+        toast.error(error?.toString() || 'Something went wrong');
+      } finally {
         setTrainerLoading(false);
       }
     };
@@ -52,26 +47,27 @@ const Approvals = () => {
     setActiveTrainer(trainer);
     setIsReviewOpen(true);
   };
-
+  if(pendingTrainers?.length===0) return;
   return (
     <>
-      <div className="p-6 max-w-6xl mx-auto bg-card">
-        <div className="mb-8 bg-card   shadow-sm rounded-xl">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Trainer Approvals
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Review and verify trainer applications to maintain platform quality.
-          </p>
-        </div>
-        {pendingTrainers?.length ? (
-          pendingTrainers.map((trainer, index) => (
+      <div className="p-2 mb-4 max-w-6xl mx-auto bg-card border ">       
+       
+          <div className="bg-card text-start  shadow-sm rounded-xl">
+            <h3 className="text-xl  tracking-tight">
+              Approvals
+            </h3>
+            <p className="text-muted-foreground mt-1">
+              Review and verify trainer applications to maintain platform quality.
+            </p>
+          </div>
+          {pendingTrainers?.length &&
+            pendingTrainers.map((trainer, index) => (
             <div key={index} className="space-y-4">
               {/* We use a single outer container for the list */}
               <Card className="border-none shadow-none bg-transparent">
                 <CardContent className="p-0 space-y-4">
                   {/* Individual Trainer Approval Card */}
-                  <Card className="w-full transition-all hover:shadow-md">
+                  <Card className="w-full transition-all hover:shadow-md border  border-amber-800">
                     <div className="flex flex-col md:flex-row items-center pl-4 gap-4">
                       {/* 1. Identity Section */}
                       <div className="flex-1 min-w-50">
@@ -89,7 +85,7 @@ const Approvals = () => {
 
                         <div className="flex items-center text-sm  text-muted-foreground">
                           <CalendarDays className="mr-1 h-3 w-3" />
-                          Applied:{" "}
+                          Applied:{' '}
                           {formatDistanceToNow(new Date(trainer.createdAt))} ago
                         </div>
                       </div>
@@ -101,7 +97,7 @@ const Approvals = () => {
                             Experience
                           </span>
                           <div className="flex items-center gap-1 text-sm font-medium">
-                            <Briefcase className="h-3 w-3" />{" "}
+                            <Briefcase className="h-3 w-3" />{' '}
                             {trainer?.experience} Years
                           </div>
                         </div>
@@ -128,7 +124,7 @@ const Approvals = () => {
                             Documents
                           </span>
                           <div className="flex items-center gap-1 text-sm font-medium text-blue-600">
-                            <Award className="h-3 w-3" /> {trainer?.certCount}{" "}
+                            <Award className="h-3 w-3" /> {trainer?.certCount}{' '}
                             Files
                           </div>
                         </div>
@@ -162,12 +158,9 @@ const Approvals = () => {
                 </CardContent>
               </Card>
             </div>
-          ))
-        ) : (
-          <div className="space-y-4">
-            <p>No Pending Trainers</p>
-          </div>
-        )}
+          ))}
+        
+      
       </div>
 
       <Sheet open={isReviewOpen} onOpenChange={setIsReviewOpen}>

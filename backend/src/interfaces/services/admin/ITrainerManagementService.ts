@@ -1,10 +1,14 @@
 import { TRAINER_STATUS } from '@/constants/enums';
+import { TrainerFilterRequestDTO } from '@/dtos/request/admin/admin.trainer.dto';
+import { AdminTrainersDTOWithPagination } from '@/dtos/response/admin/trainer.response.dto';
 import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { PendingTrainersBasicDTO } from '@/dtos/response/trainer/trainerApprovals.response';
 
 import { Types } from 'mongoose';
 
 export interface ITrainerManagementService {
+
+  getTrainers(filter:TrainerFilterRequestDTO):Promise<AdminTrainersDTOWithPagination>
   getPendingTrainers(): Promise<PendingTrainersBasicDTO[]>;
   trainerDetailsById(id: string | Types.ObjectId): Promise<TrainerProfileDTO>;
   trainerDetailsByUserId(userId: string | Types.ObjectId): Promise<TrainerProfileDTO>;

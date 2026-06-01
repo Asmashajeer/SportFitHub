@@ -3,10 +3,10 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { trainerManagementService } from "../../service/trainerManagementService";
+} from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { trainerManagementService } from '../../service/trainerManagementService';
 
 import {
   ExternalLink,
@@ -14,17 +14,18 @@ import {
   Building2,
   ShieldCheck,
   Award,
-} from "lucide-react";
-import { UseAdminStore } from "../../store/useAdminStore";
-import { useEffect, useState } from "react";
-import type { ICertification, TrainerOverView } from "../../store/trainerSlice";
+} from 'lucide-react';
+import { UseAdminStore } from '../../store/useAdminStore';
+import { useEffect, useState } from 'react';
+import type { ICertification, TrainerOverView } from '../../store/trainerSlice';
 import {
   DOC_VERIFY_STATUS,
   TRAINER_STATUS,
   type Doc_status_type,
-} from "@/constants/constants";
-import toast from "react-hot-toast";
+} from '@/constants/constants';
+import toast from 'react-hot-toast';
 import { parseISO } from 'date-fns';
+import { formatTo12Hour } from '@/utils/formatDate';
 export const TrainerApprovalView = ({
   trainer,
   onClose,
@@ -35,11 +36,13 @@ export const TrainerApprovalView = ({
   const selectedTrainer = UseAdminStore((state) => state.selectedTrainer);
   const setSelectedTrainer = UseAdminStore((state) => state.setSelectedTrainer);
   const [rejectionTarget, setRejectionTarget] = useState<string | null>(null); // e.g., 'certificationInfo'
-const [rejectionReason, setRejectionReason] = useState("");
+  const [rejectionReason, setRejectionReason] = useState('');
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
-      const { trainerData } = await trainerManagementService.getTrainer(trainer.id);
+      const { trainerData } = await trainerManagementService.getTrainer(
+        trainer.id
+      );
 
       setSelectedTrainer(trainerData);
     };
@@ -50,26 +53,25 @@ const [rejectionReason, setRejectionReason] = useState("");
   //update cerificates/id status
   const updateStatus = async (
     id: string,
-    targetField: "certificationInfo" | "idVerification",
+    targetField: 'certificationInfo' | 'idVerification',
     status: Doc_status_type,
-    reason?: string,
+    reason?: string
   ) => {
-    
     try {
       const data = await trainerManagementService.updateFileStatus(
         id,
         targetField,
         status,
-        reason,
+        reason
       );
 
       if (data.success) {
         toast.success(`certificationInfo updated to ${status}`);
         setSelectedTrainer(data.trainerData);
       }
-    }catch (error) {
-        toast.error(error?.toString() || "Something went wrong");
-    } 
+    } catch (error) {
+      toast.error(error?.toString() || 'Something went wrong');
+    }
   };
 
   //update Trainer application Status
@@ -77,12 +79,14 @@ const [rejectionReason, setRejectionReason] = useState("");
   const trainerApplicationStatus = async (
     id: string,
     status: Doc_status_type,
-    reason?: string,
+    reason?: string
   ) => {
-    
-    
     try {
-      const data = await trainerManagementService.updateTrainerStatus(id, status, reason);
+      const data = await trainerManagementService.updateTrainerStatus(
+        id,
+        status,
+        reason
+      );
 
       if (data.success) {
         toast.success(`Trainer ${status}`);
@@ -90,16 +94,15 @@ const [rejectionReason, setRejectionReason] = useState("");
         onClose();
       }
     } catch (error) {
-        toast.error(error?.toString() || "Something went wrong");
-    } 
+      toast.error(error?.toString() || 'Something went wrong');
+    }
   };
   return (
     <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-     
       <div className="lg:col-span-2 space-y-4">
         <Accordion
           type="multiple"
-          defaultValue={["personal", "id"]}
+          defaultValue={['personal', 'id']}
           className="w-full"
         >
           {/* Basic info */}
@@ -122,30 +125,32 @@ const [rejectionReason, setRejectionReason] = useState("");
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
-                    Core Discipline{" "}
+                    Core Discipline{' '}
                   </p>
                   <p className="text-sm font-medium">
-                    {selectedTrainer?.category}: (
-                    {selectedTrainer?.coreDiscipline})
+                    {selectedTrainer?.category} -  {selectedTrainer?.coreDiscipline}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
-                    Expertise{" "}
+                    Expertise{' '}
                   </p>
                   <p className="text-sm font-medium">
-                    {selectedTrainer?.specialties}{" "}
+                    {selectedTrainer?.specialties.join(", ")}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-muted-foreground uppercase">
-                    Experience : </p> <span className="text-sm font-medium">
-                    {selectedTrainer?.experience} 
+                    Experience :{' '}
+                  </p>{' '}
+                  <span className="text-sm font-medium">
+                    {selectedTrainer?.experience}
                   </span>
                   <hr />
-                 
-                  <p className="text-sm font-semibold text-muted-foreground uppercase">Language{" "}</p>   
-                  <p>{selectedTrainer?.languages}</p>
+                  <p className="text-sm font-semibold text-muted-foreground uppercase">
+                    Language{' '}
+                  </p>
+                  <p>{selectedTrainer?.languages.join(", ")}</p>
                 </div>
 
                 <div className="col-span-2">
@@ -179,25 +184,24 @@ const [rejectionReason, setRejectionReason] = useState("");
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
-                    DOB 
+                    DOB
                   </p>
                   <p className="text-sm font-medium">
-                    {parseISO(selectedTrainer?.personalInfo.DOB ??'').toLocaleDateString()}
+                    {parseISO(
+                      selectedTrainer?.personalInfo.DOB ?? ''
+                    ).toLocaleDateString()}
                     {}
-                  </p>               
-                
+                  </p>
                 </div>
-                      <div>
-                          <p className="text-xs  font-semibold text-muted-foreground uppercase">
-                    Gender{" "}
+                <div>
+                  <p className="text-xs  font-semibold text-muted-foreground uppercase">
+                    Gender{' '}
                   </p>
-                  <p>
-                    {selectedTrainer?.personalInfo.gender}
-                  </p>
-                      </div>
+                  <p>{selectedTrainer?.personalInfo.gender}</p>
+                </div>
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
-                    Phone{" "}
+                    Phone{' '}
                   </p>
                   <p className="text-sm font-medium">
                     {selectedTrainer?.personalInfo.phone}
@@ -209,9 +213,9 @@ const [rejectionReason, setRejectionReason] = useState("");
                     Address
                   </p>
                   <p className="text-sm">
-                    {selectedTrainer?.personalInfo.address.street},{" "}
-                    {selectedTrainer?.personalInfo.address.city},{" "}
-                    {selectedTrainer?.personalInfo.address.state} -{" "}
+                    {selectedTrainer?.personalInfo.address.street},{' '}
+                    {selectedTrainer?.personalInfo.address.city},{' '}
+                    {selectedTrainer?.personalInfo.address.state} -{' '}
                     {selectedTrainer?.personalInfo.address.zip}
                   </p>
                 </div>
@@ -238,7 +242,7 @@ const [rejectionReason, setRejectionReason] = useState("");
                       className="text-sm p-3 border rounded-md hover:bg-muted/30"
                     >
                       <p className="font-normal text-primary">
-                        Name:{cert.name}
+                        Name:   {cert.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Issued: {new Date(cert.issuedAt).toLocaleDateString()}
@@ -261,83 +265,86 @@ const [rejectionReason, setRejectionReason] = useState("");
                         </a>
                       </Button>
                     </div>
-                  ),
+                  )
                 )}
               </div>
               {selectedTrainer?.certificationInfo.documents.length && (
                 <div className="flex items-end right-0 justify-around">
                   <p>
-                    Certificates verificaton status:{" "}
+                    Certificates verificaton status:{' '}
                     {selectedTrainer?.certificationInfo?.status.toUpperCase()}
                   </p>
                   {selectedTrainer?.certificationInfo?.status ===
-                    DOC_VERIFY_STATUS.PENDING &&  rejectionTarget !== "certificationInfo" &&(
-                    <div className="flex items-center gap-2 ">
-                      <Button
-                        onClick={() =>
-                          updateStatus(
-                            selectedTrainer?.id,
-                            "certificationInfo",
-                            DOC_VERIFY_STATUS.VERIFIED,
-                          )
-                        }
-                      >
-                        Verify
-                      </Button>
-                      <Button
-                        variant={"destructive"}
-                         onClick={()=>setRejectionTarget("certificationInfo")}
-                      
-                      >
-                        Reject
-                      </Button>
-                    </div>            
-
-                  )}
+                    DOC_VERIFY_STATUS.PENDING &&
+                    rejectionTarget !== 'certificationInfo' && (
+                      <div className="flex items-center gap-2 ">
+                        <Button
+                          onClick={() =>
+                            updateStatus(
+                              selectedTrainer?.id,
+                              'certificationInfo',
+                              DOC_VERIFY_STATUS.VERIFIED
+                            )
+                          }
+                        >
+                          Verify
+                        </Button>
+                        <Button
+                          variant={'destructive'}
+                          onClick={() =>
+                            setRejectionTarget('certificationInfo')
+                          }
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    )}
                   {/* REJECTION INPUT FIELD: Appears when Reject is clicked */}
 
-                {rejectionTarget === "certificationInfo" && (
-                  <div className="bg-destructive/5 border border-destructive/20 p-4 rounded-lg space-y-3 animate-in fade-in slide-in-from-top-1">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-destructive uppercase">Rejection Reason</label>
-                      <textarea
-                        className="w-full p-2 text-sm bg-background border rounded-md focus:ring-1 focus:ring-destructive outline-none min-h-20"
-                        placeholder="Tell the trainer why their certificates were rejected..."
-                        value={rejectionReason}
-                        onChange={(e) => setRejectionReason(e.target.value)}
-                      />
+                  {rejectionTarget === 'certificationInfo' && (
+                    <div className="bg-destructive/5 border border-destructive/20 p-4 rounded-lg space-y-3 animate-in fade-in slide-in-from-top-1">
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-destructive uppercase">
+                          Rejection Reason
+                        </label>
+                        <textarea
+                          className="w-full p-2 text-sm bg-background border rounded-md focus:ring-1 focus:ring-destructive outline-none min-h-20"
+                          placeholder="Tell the trainer why their certificates were rejected..."
+                          value={rejectionReason}
+                          onChange={(e) => setRejectionReason(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setRejectionTarget(null);
+                            setRejectionReason('');
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          disabled={!rejectionReason.trim()}
+                          onClick={() => {
+                            updateStatus(
+                              selectedTrainer?.id,
+                              'certificationInfo',
+                              DOC_VERIFY_STATUS.REJECTED,
+                              rejectionReason
+                            );
+                            setRejectionTarget(null);
+                            setRejectionReason('');
+                          }}
+                        >
+                          Confirm & Send Rejection
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => {
-                          setRejectionTarget(null);
-                          setRejectionReason("");
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button 
-                        variant="destructive" 
-                        size="sm"
-                        disabled={!rejectionReason.trim()}
-                        onClick={() => {
-                          updateStatus(
-                            selectedTrainer?.id, 
-                            "certificationInfo", 
-                            DOC_VERIFY_STATUS.REJECTED, 
-                            rejectionReason
-                          );
-                          setRejectionTarget(null);
-                          setRejectionReason("");
-                        }}
-                      >
-                        Confirm & Send Rejection
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                  )}
                 </div>
               )}
             </AccordionContent>
@@ -355,21 +362,22 @@ const [rejectionReason, setRejectionReason] = useState("");
               <div className="flex flex-col md:flex-row gap-4 items-start">
                 <div className="flex-1 space-y-3">
                   <p className="text-sm">
-                    Type:{" "}
+                    Type:{' '}
                     <strong>{selectedTrainer?.idVerification.idType}</strong>
                   </p>
                   <p className="text-sm">
-                    Number:{" "}
+                    Number:{' '}
                     <strong>{selectedTrainer?.idVerification.idNumber}</strong>
                   </p>
                   <Badge
                     variant={
                       selectedTrainer?.idVerification.verified
-                        ? "default"
-                        : "destructive"
+                        ? 'default'
+                        : 'destructive'
                     }
                   >
-                    verification Status: {selectedTrainer?.idVerification.status}
+                    verification Status:{' '}
+                    {selectedTrainer?.idVerification.status}
                   </Badge>
                 </div>
 
@@ -387,35 +395,36 @@ const [rejectionReason, setRejectionReason] = useState("");
                     </a>
                   </Button>
                 </div>
-             
-                  
+
                 {selectedTrainer?.idVerification.status ===
-                  DOC_VERIFY_STATUS.PENDING && rejectionTarget !== "idVerification"  && (
-                  <div className="flex items-center gap-2 ">
-                    <Button
-                      onClick={() =>
-                        updateStatus(
-                          selectedTrainer?.id,
-                          "idVerification",
-                          DOC_VERIFY_STATUS.VERIFIED,
-                        )
-                      }
-                    >
-                      Verify
-                    </Button>
-                    <Button
-                      variant={"destructive"}
-                      onClick={()=>setRejectionTarget("idVerification")}
-                     
-                    >
-                      Reject
-                    </Button>
-                  </div>
-                )}
-                {rejectionTarget === "idVerification" && (
+                  DOC_VERIFY_STATUS.PENDING &&
+                  rejectionTarget !== 'idVerification' && (
+                    <div className="flex items-center gap-2 ">
+                      <Button
+                        onClick={() =>
+                          updateStatus(
+                            selectedTrainer?.id,
+                            'idVerification',
+                            DOC_VERIFY_STATUS.VERIFIED
+                          )
+                        }
+                      >
+                        Verify
+                      </Button>
+                      <Button
+                        variant={'destructive'}
+                        onClick={() => setRejectionTarget('idVerification')}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  )}
+                {rejectionTarget === 'idVerification' && (
                   <div className="bg-destructive/5 border border-destructive/20 p-4 rounded-lg space-y-3 animate-in fade-in slide-in-from-top-1">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-destructive uppercase">Rejection Reason</label>
+                      <label className="text-xs font-bold text-destructive uppercase">
+                        Rejection Reason
+                      </label>
                       <textarea
                         className="w-full p-2 text-sm bg-background border rounded-md focus:ring-1 focus:ring-destructive outline-none min-h-20"
                         placeholder="Tell the trainer why their certificates were rejected..."
@@ -424,30 +433,30 @@ const [rejectionReason, setRejectionReason] = useState("");
                       />
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => {
                           setRejectionTarget(null);
-                          setRejectionReason("");
+                          setRejectionReason('');
                         }}
                       >
                         Cancel
                       </Button>
-                      <Button 
-                        variant="destructive" 
+                      <Button
+                        variant="destructive"
                         size="sm"
                         disabled={!rejectionReason.trim()}
                         onClick={() => {
                           if (!selectedTrainer?.id) return;
-                          updateStatus(                            
+                          updateStatus(
                             selectedTrainer?.id,
-                           "idVerification", 
-                            DOC_VERIFY_STATUS.REJECTED, 
+                            'idVerification',
+                            DOC_VERIFY_STATUS.REJECTED,
                             rejectionReason
                           );
                           setRejectionTarget(null);
-                          setRejectionReason("");
+                          setRejectionReason('');
                         }}
                       >
                         Confirm & Send Rejection
@@ -455,7 +464,6 @@ const [rejectionReason, setRejectionReason] = useState("");
                     </div>
                   </div>
                 )}
-              
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -474,17 +482,17 @@ const [rejectionReason, setRejectionReason] = useState("");
                     SessionCharge
                   </p>
                   <p className="text-sm font-medium">
-                    {selectedTrainer?.pricing.sessionCharge}{" "}
-                    {selectedTrainer?.pricing.currency}
+                    ₹ {selectedTrainer?.pricing.sessionCharge}{' '}
+                    
                   </p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
-                    Availabilty:{" "}
+                    Availabilty:{' '}
                     <span className="text-sm font-medium">
                       {selectedTrainer?.availability.isAvailable
-                        ? "Active"
-                        : "Not Available"}{" "}
+                        ? 'Active'
+                        : 'Not Available'}{' '}
                     </span>
                   </p>
                   <div className="space-y-2">
@@ -492,9 +500,9 @@ const [rejectionReason, setRejectionReason] = useState("");
                       Object.entries(selectedTrainer.availability)
                         .filter(
                           ([key, value]) =>
-                            key !== "isAvailable" &&
-                            typeof value === "object" &&
-                            value.available,
+                            key !== 'isAvailable' &&
+                            typeof value === 'object' &&
+                            value.available
                         )
                         .map(([day, info]: [string, any]) => (
                           <div
@@ -505,7 +513,7 @@ const [rejectionReason, setRejectionReason] = useState("");
                               {day}
                             </span>
                             <span className="text-muted-foreground">
-                              {info.startTime} - {info.endTime}
+                              {formatTo12Hour(info.startTime)} - {formatTo12Hour(info.endTime)}
                             </span>
                           </div>
                         ))}
@@ -535,7 +543,8 @@ const [rejectionReason, setRejectionReason] = useState("");
                     Name:{selectedTrainer?.paymentInfo.bankAccount?.accountName}
                   </p>
                   <p className="text-sm">
-                    A/C:{selectedTrainer?.paymentInfo.bankAccount?.accountNumber}
+                    A/C:
+                    {selectedTrainer?.paymentInfo.bankAccount?.accountNumber}
                   </p>
                   <p className="text-sm">
                     IFSC: {selectedTrainer?.paymentInfo.bankAccount?.ifscCode}
@@ -546,7 +555,7 @@ const [rejectionReason, setRejectionReason] = useState("");
                     UPI ID
                   </p>
                   <p className="text-sm font-mono mt-2">
-                    {selectedTrainer?.paymentInfo.upiId || "Not Provided"}
+                    {selectedTrainer?.paymentInfo.upiId || 'Not Provided'}
                   </p>
                 </div>
               </div>
@@ -566,7 +575,7 @@ const [rejectionReason, setRejectionReason] = useState("");
                 onClick={() =>
                   trainerApplicationStatus(
                     selectedTrainer?.id,
-                    TRAINER_STATUS.APPROVED,
+                    TRAINER_STATUS.APPROVED
                   )
                 }
               >
@@ -576,7 +585,7 @@ const [rejectionReason, setRejectionReason] = useState("");
                 <Button
                   variant="outline"
                   className=" h-12 border-destructive text-destructive hover:bg-destructive/5"
-                  onClick={()=>setRejectionTarget("trainerStatus")}
+                  onClick={() => setRejectionTarget('trainerStatus')}
                   // onClick={() =>
                   //   trainerApplicationStatus(
                   //     selectedTrainer?.id,
@@ -586,10 +595,12 @@ const [rejectionReason, setRejectionReason] = useState("");
                 >
                   Reject Application
                 </Button>
-                 {rejectionTarget === "trainerStatus" && (
+                {rejectionTarget === 'trainerStatus' && (
                   <div className="bg-destructive/5 border border-destructive/20 p-4 rounded-lg space-y-3 animate-in fade-in slide-in-from-top-1">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-destructive uppercase">Rejection Reason</label>
+                      <label className="text-xs font-bold text-destructive uppercase">
+                        Rejection Reason
+                      </label>
                       <textarea
                         className="w-full p-2 text-sm bg-background border rounded-md focus:ring-1 focus:ring-destructive outline-none min-h-20"
                         placeholder="Tell the trainer why their certificates were rejected..."
@@ -598,29 +609,29 @@ const [rejectionReason, setRejectionReason] = useState("");
                       />
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => {
                           setRejectionTarget(null);
-                          setRejectionReason("");
+                          setRejectionReason('');
                         }}
                       >
                         Cancel
                       </Button>
-                      <Button 
-                        variant="destructive" 
+                      <Button
+                        variant="destructive"
                         size="sm"
                         disabled={!rejectionReason.trim()}
                         onClick={() => {
-                          if (!selectedTrainer?.id) return;                                                  
-                            trainerApplicationStatus(
-                              selectedTrainer?.id,
-                              TRAINER_STATUS.REJECTED,                            
-                              rejectionReason
-                            );
+                          if (!selectedTrainer?.id) return;
+                          trainerApplicationStatus(
+                            selectedTrainer?.id,
+                            TRAINER_STATUS.REJECTED,
+                            rejectionReason
+                          );
                           setRejectionTarget(null);
-                          setRejectionReason("");
+                          setRejectionReason('');
                         }}
                       >
                         Confirm & Send Rejection
@@ -635,7 +646,7 @@ const [rejectionReason, setRejectionReason] = useState("");
                 onClick={() =>
                   trainerApplicationStatus(
                     selectedTrainer?.id,
-                    TRAINER_STATUS.UNDER_REVIEW,
+                    TRAINER_STATUS.UNDER_REVIEW
                   )
                 }
               >

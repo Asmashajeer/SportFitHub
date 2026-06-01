@@ -1,18 +1,18 @@
-import React, { useState } from "react";
-import { ArrowRight, User } from "lucide-react";
-import { ROLES, type UserRole } from "../../../constants/constants";
-import { authService } from "../service/authService";
-import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../store/useAuthStore";
-import toast from "react-hot-toast";
-import { Button } from "@/components/ui/button";
+import React, { useState } from 'react';
+import { ArrowRight, User } from 'lucide-react';
+import { ROLES, type UserRole } from '../../../constants/constants';
+import { authService } from '../service/authService';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
+import toast from 'react-hot-toast';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from '@/components/ui/select';
 const UserRoleSelector: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>(ROLES.USER);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +22,7 @@ const UserRoleSelector: React.FC = () => {
 
   const handleContinue = async () => {
     if (!user) {
-      console.log("no user");
+      console.log('no user');
       return;
     }
 
@@ -38,24 +38,21 @@ const UserRoleSelector: React.FC = () => {
       } else if (role) {
         navigate(`/${role}/dashboard`);
       }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message || 'Invalid code');
+      } else {
+        toast.error('unexpecter error occured');
+      }
+      setIsLoading(false);
     }
-    catch (error: unknown) {
-        if(error instanceof Error){
-          toast.error(error.message || "Invalid code");
-        }
-        else{
-          toast.error("unexpecter error occured");
-        }     
-        setIsLoading(false);
-    };
-  }
+  };
   const selectedRoleData = selectedRole;
 
   return (
-    <div className="min-h-screen bg-[#0a0b0d] flex items-center justify-center p-4">   
-      <div className=" w-full max-w-xs mx-auto  shadow-sm shadow-emerald-900 border  border-border rounded-4xl">          
+    <div className="min-h-screen bg-[#0a0b0d] flex items-center justify-center p-4">
+      <div className=" w-full max-w-xs mx-auto  shadow-sm shadow-emerald-900 border  border-border rounded-4xl">
         <div className="  border-[#393f4a]   p-5">
-         
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
@@ -76,31 +73,29 @@ const UserRoleSelector: React.FC = () => {
             </label>
             <div className="relative">
               <Select
-                    value={selectedRole}
-                    onValueChange={(value) =>
-                      setSelectedRole(value  as UserRole )
-                    }
-                  >
-                    {/* We remove the default shadcn border/ring here because the fieldset handles it */}
-                    <SelectTrigger className="w-full border-input bg-transparent px-3 h-9 focus:ring-0 focus:outline-none shadow-none font-medium">
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
+                value={selectedRole}
+                onValueChange={(value) => setSelectedRole(value as UserRole)}
+              >
+                {/* We remove the default shadcn border/ring here because the fieldset handles it */}
+                <SelectTrigger className="w-full border-input bg-transparent px-3 h-9 focus:ring-0 focus:outline-none shadow-none font-medium">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
 
-                    {/* This is the dropdown menu part */}
-                    <SelectContent className="bg-secondary border-border rounded-xl">
-                      {Object.values(ROLES)
-                        .filter((role) => role !== ROLES.ADMIN)
-                        .map((role) => (
-                          <SelectItem 
-                            key={role} 
-                            value={role} 
-                            className="cursor-pointer focus:bg-[#197e04] focus:text-white"
-                          >
-                            {role.charAt(0).toUpperCase() + role.slice(1)}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                {/* This is the dropdown menu part */}
+                <SelectContent className="bg-secondary border-border rounded-xl">
+                  {Object.values(ROLES)
+                    .filter((role) => role !== ROLES.ADMIN)
+                    .map((role) => (
+                      <SelectItem
+                        key={role}
+                        value={role}
+                        className="cursor-pointer focus:bg-[#197e04] focus:text-white"
+                      >
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
               {/* <select
                 value={selectedRole}
                 onChange={(e) => setSelectedRole(e.target.value as UserRole)}
@@ -121,10 +116,10 @@ const UserRoleSelector: React.FC = () => {
           {/* Selected Role Info */}
           {selectedRoleData && (
             <div className="mb-2 p-2">
-              <div className="flex items-centerj justify-center ">              
-                  <h2 className="text-primary  font-bold text-lg">
-                    {selectedRole.toUpperCase()}
-                  </h2>                
+              <div className="flex items-centerj justify-center ">
+                <h2 className="text-primary  font-bold text-lg">
+                  {selectedRole.toUpperCase()}
+                </h2>
               </div>
             </div>
           )}

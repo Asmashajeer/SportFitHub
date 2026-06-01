@@ -1,53 +1,58 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import HomePage from "../pages/HomePage";
-import Login from "../features/auth/component/Login";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import HomePage from '../pages/HomePage';
+import Login from '../features/auth/component/Login';
 
-import { ROLES } from "../constants/constants";
+import { ROLES } from '../constants/constants';
 // import { LoadingScreen } from '../components/ui/LoadingScreen';
 
-import ProtectedRoute from "./ProtectedRoute";
-import UserRoutes from "./UserRoutes";
-import TrainerRoutes from "./TrainerRoutes";
-import ForgotPassword from "../features/auth/component/ForgotPassword";
-import ResetPassword from "../features/auth/component/ResetPassword";
-import UserRoleSelector from "../features/auth/component/UserRoleSelector";
+import ProtectedRoute from './ProtectedRoute';
+import UserRoutes from './UserRoutes';
+import TrainerRoutes from './TrainerRoutes';
+import ForgotPassword from '../features/auth/component/ForgotPassword';
+import ResetPassword from '../features/auth/component/ResetPassword';
+import UserRoleSelector from '../features/auth/component/UserRoleSelector';
 
-import VerifyEmail from "../features/auth/component/VerifyEmail";
-import MainLayout from "../components/layout/MainLayout";
-import AdminRoutes from "./AdminRoutes";
-import { useAuthStore } from "../features/auth/store/useAuthStore";
+import VerifyEmail from '../features/auth/component/VerifyEmail';
+import MainLayout from '../components/layout/MainLayout';
+import AdminRoutes from './AdminRoutes';
 
+import Register from '@/features/auth/component/Register';
+import NotFound from '@/pages/NotFound';
+import { UnauthorizedPage } from '@/pages/UnauthorizedPage';
+import SportsPage from '@/pages/SportsPage';
+import SessionDetailPage from '@/pages/SessionDetailPage';
+import FitnessPage from '@/pages/FitnessPage';
+import FitnessSessionDetailPage from '@/pages/FitnessSessionDetailPage';
 
-import Register from "@/features/auth/component/Register";
-import NotFound from "@/pages/NotFound";
-import { UnauthorizedPage } from "@/pages/UnauthorizedPage";
+import BookingRoutes from './BookingRoutes';
 function AppRouter() {
-  const isAuthenticated=useAuthStore(state=>state.isAuthenticated);
-  const user =useAuthStore(state=>state.user);
-
   return (
     <>
       <Router>
         <Routes>
           {/* public Routes */}
           <Route path="/" element={<HomePage />} />
-          <Route path="/register" element={<Register/>} />
-         
-          <Route path="/login" element={
-              isAuthenticated && user &&user.isVerified 
-                ? <Navigate to={Object.values(ROLES).includes(user.role) ? `/${user.role}/dashboard` : "/update-role"} replace />
-                : <Login />
-            } />
-         
-          
+          <Route path="/sports" element={<SportsPage />} />
+          <Route path="/fitness" element={<FitnessPage />} />
+          <Route
+            path="/sports/sessions/:sessionId"
+            element={<SessionDetailPage />}
+          />
+          <Route
+            path="/fitness/sessions/:sessionId"
+            element={<FitnessSessionDetailPage />}
+          />
+
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+
           <Route path="/logout" element={<HomePage />} />
           <Route path="/verifyEmail" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/update-role" element={<UserRoleSelector />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
-          
-          
+
           <Route element={<MainLayout />}>
             {/* user Routes */}
             <Route
@@ -70,6 +75,17 @@ function AppRouter() {
             />
           </Route>
 
+          {/* BookingRoute */}
+          <Route
+            path="/checkout/*"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.USER]}>
+                <BookingRoutes />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin Route */}
           <Route
             path="/admin/*"
             element={
@@ -78,7 +94,7 @@ function AppRouter() {
               </ProtectedRoute>
             }
           />
-           <Route path="/*" element={<NotFound />} />
+          <Route path="/*" element={<NotFound />} />
         </Routes>
       </Router>
     </>

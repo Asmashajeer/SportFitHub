@@ -8,10 +8,12 @@ import {
   RegisterResponseDTO,
   UserResponseDTO,
 } from '../../dtos/response/auth.response.dto';
-import { IUser } from '@/models/user.model';
+
 
 import Logger from '@/utils/logger';
 import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
+import { AuthRequest } from '@/middleware/auth.middleware';
+import { userInfo } from 'node:os';
 
 export default class AuthController {
   private _authService: IAuthService;
@@ -27,6 +29,7 @@ export default class AuthController {
         userId: result.user.id,
         action: 'registration',
         role: result.user.role,
+
       });
       res.status(result.statusCode).json(result);
     } catch (error) {
@@ -79,15 +82,17 @@ export default class AuthController {
       next(error);
     }
   };
-  // login user
+  //---------------- login user-----------------
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { email, password } = req.body;
-      const result = await this._authService.login({ email, password });
-      Logger.info(`User logged in`, { userId: result.user.id, email: email });
+      const { email, password,timezone } = req.body;
+      const result = await this._authService.login({ email, password,timezone });
+      Logger.info(`User logged in`, { userId: result.user.id, email: email,timezone:timezone });
       const { refreshToken, accessToken, ...data } = result;
       this._setAuthCookies(res, accessToken, refreshToken);
+      
       res.status(STATUS_CODE.SUCCESS.OK).json(data);
+
     } catch (error) {
       next(error);
     }
@@ -114,7 +119,9 @@ export default class AuthController {
 
   updateRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const CurrUser = req.user as IUser;
+      const authReq = req as AuthRequest;
+      const CurrUser = authReq.user
+                    
       const id = CurrUser.id;
       const { email, role } = req.body;
       if (!Object.values(UserRole).includes(role)) {
@@ -136,10 +143,10 @@ export default class AuthController {
 
   authMe = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = req.user as IUser;
-      const id = user.id;
+     const authReq = req as AuthRequest;
+     const userId = authReq.user.id;
 
-      const data: AuthMeResponseDto = await this._authService.authMe(id);
+      const data: AuthMeResponseDto = await this._authService.authMe(userId);
 
       res.status(STATUS_CODE.SUCCESS.OK).json(data);
     } catch (error) {
@@ -170,8 +177,9 @@ export default class AuthController {
 
   //Logout user
   logout = async (req: Request, res: Response): Promise<void> => {
-    const user = req.user as IUser;
-    const id = user.id;
+    const authReq = req as AuthRequest;
+    const userId = authReq.user.id;
+
     res.cookie('accessToken', '', {
       httpOnly: true,
       expires: new Date(0),
@@ -180,7 +188,7 @@ export default class AuthController {
       httpOnly: true,
       expires: new Date(0),
     });
-    Logger.info(`User logged out`, { userId: id });
+    Logger.info(`User logged out`, { userId:userId });
     res
       .status(STATUS_CODE.SUCCESS.OK)
       .json({ success: true, message: SUCCESS_MESSAGES.GENERAL.LOGGED_OUT });

@@ -1,6 +1,6 @@
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { MoveLeft, Home, Search } from "lucide-react";
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { MoveLeft, Home, Search } from 'lucide-react';
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -22,13 +22,13 @@ const NotFound = () => {
       {/* Content */}
       <div className="max-w-md text-center space-y-6">
         <p className="text-muted-foreground">
-          Oops! The page you are looking for doesn&apos;t exist or has been moved. 
-          Let&apos;s get you back on track.
+          Oops! The page you are looking for doesn&apos;t exist or has been
+          moved. Let&apos;s get you back on track.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => navigate(-1)}
             className="w-full sm:w-auto flex gap-2 items-center"
           >
@@ -47,7 +47,7 @@ const NotFound = () => {
 
       {/* Subtle Footer branding */}
       <p className="mt-12 text-xs text-muted-foreground/50 uppercase tracking-widest">
-        Trainer Profile Management System
+        SportfitHub
       </p>
     </div>
   );

@@ -7,7 +7,7 @@ import authConfig from '../config/auth.config';
 import { IProfileRepository } from '../interfaces/repositories/IProfile.repository';
 import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '../constants/messages';
 import { generateOTP } from '../utils/generateOTP';
-import { sendEmailOTP } from '../utils/sendMailOTP';
+import { sendEmailOTP } from '@/utils/sendMailOTP';
 import { IOtpRepository } from '../interfaces/repositories/IOtp.repository';
 import { OtpType } from '@/constants/enums';
 import { IAuthService } from '../interfaces/services/IAuth.service';
@@ -104,7 +104,7 @@ export class AuthService implements IAuthService {
 
     const hasProfile = profileCount !== 0;
     userData.hasProfile = hasProfile;
-    const accessToken = this.generateAccessToken(user._id.toString(), user.role);
+    const accessToken = this.generateAccessToken(user._id.toString(), user.role,user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
 
     return {
@@ -155,7 +155,7 @@ export class AuthService implements IAuthService {
     };
   };
 
-  //Login
+  //------------------------Login
   login = async (data: LoginDTO): Promise<LoginResponseDTO> => {
     const user = await this._userRepo.findByEmail(data.email);
     if (!user || !user.password)
@@ -164,9 +164,9 @@ export class AuthService implements IAuthService {
     if (user.isBlocked)
       throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
     if (!isMatch)
-      throw new AppError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, STATUS_CODE.ERROR.UNAUTHORIZED);
-    const userData: UserDataDTO = toUserData(user);
-
+      throw new AppError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, STATUS_CODE.ERROR.UNAUTHORIZED);  
+     const userWithTimezone = await this._userRepo.findOneAndUpdate(user._id, { timezone:data.timezone } );
+     const userData: UserDataDTO = toUserData(userWithTimezone);
     if (!user.isVerified)
       this.generateOtpAndSendMail(user._id.toString(), user.email, OtpType.VERIFICATION);
 
@@ -179,7 +179,7 @@ export class AuthService implements IAuthService {
       profileCount = await this._trainerRepo.count({ userId: user._id.toString() });
     }
     userData.hasProfile = profileCount !== 0;
-    const accessToken = this.generateAccessToken(user._id.toString(), user.role);
+    const accessToken = this.generateAccessToken(user._id.toString(), user.role,user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
     console.log('user logged in');
     return {
@@ -223,7 +223,7 @@ export class AuthService implements IAuthService {
       profileCount = await this._trainerRepo.count({ userId: user._id.toString() });
     }
     userData.hasProfile = profileCount !== 0;
-    const accessToken = this.generateAccessToken(user._id.toString(), user.role);
+    const accessToken = this.generateAccessToken(user._id.toString(), user.role,user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
     return {
       success: true,
@@ -258,7 +258,7 @@ export class AuthService implements IAuthService {
     }
     const hasProfile = profileCount !== 0;
     userData.hasProfile = hasProfile;
-    const accessToken = this.generateAccessToken(user._id.toString(), user.role);
+    const accessToken = this.generateAccessToken(user._id.toString(), user.role,user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
 
     return {
@@ -302,11 +302,12 @@ export class AuthService implements IAuthService {
     const decoded = jwt.verify(refreshToken, authConfig.refresh_secret) as {
       id: string;
       role: string;
+      timezone:string
     };
     if (!decoded)
       throw new AppError(ERROR_MESSAGES.AUTH.REFRESH_TOKEN_INVALID, STATUS_CODE.ERROR.UNAUTHORIZED);
 
-    const accessToken = this.generateAccessToken(decoded.id, decoded.role) as string;
+    const accessToken = this.generateAccessToken(decoded.id, decoded.role,decoded.timezone) as string;
     refreshToken = this.generateRefreshToken(decoded.id, decoded.role) as string;
     return { accessToken, refreshToken };
   };
@@ -325,8 +326,8 @@ export class AuthService implements IAuthService {
   };
 
   //access Token
-  private generateAccessToken(id: string, role: string): string {
-    return jwt.sign({ id, role }, authConfig.secret!, {
+  private generateAccessToken(id: string, role: string,timezone:string): string {
+    return jwt.sign({ id, role,timezone }, authConfig.secret!, {
       expiresIn: authConfig.secret_expires_in,
     } as SignOptions);
   }
@@ -345,13 +346,16 @@ export class AuthService implements IAuthService {
     const hashedOTP = await bcrypt.hash(OTP, 10);
     // 3. Save the HASHED version
     await this._otpRepo.createOtp(userId, hashedOTP, otpContext);
-    const isEmailSent = sendEmailOTP(email, OTP);
-    if (!isEmailSent)
-      throw new AppError(
-        ERROR_MESSAGES.AUTH.SEND_VERIFICATION_CODE_FAILED,
-        STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR
-      );
+    try {
+      await sendEmailOTP(email, OTP);
+      console.log('Verification code sent to:', email);
+    } catch (error) {
+          
+      throw new AppError("Failed to send verification email", STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
+    }
+    
+    
     console.log('verification code sent to your mail. Please verify your email.');
-    return isEmailSent;
+    return true;
   };
 }

@@ -16,4 +16,4 @@ const FitnessProgramSchema = new Schema<IFitnessProgram>({
   isActive: { type: Boolean, default: true },
 });
 
-export default mongoose.model('FitnessProgramModal', FitnessProgramSchema);
+export default mongoose.model<IFitnessProgram>('FitnessProgramModal', FitnessProgramSchema);

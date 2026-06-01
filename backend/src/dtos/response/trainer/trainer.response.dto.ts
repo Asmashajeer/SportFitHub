@@ -40,7 +40,7 @@ export interface TrainerProfileDTO {
   profilePic: string;
   pricing: {
     sessionCharge: number;
-    currency: string;
+    
   };
 
   // Personal Info

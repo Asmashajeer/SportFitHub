@@ -1,13 +1,16 @@
 import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
 import { ITrainerManagementService } from '@/interfaces/services/admin/ITrainerManagementService';
 import AppError from '@/utils/AppError';
-import { Types } from 'mongoose';
+import { FilterQuery, Types } from 'mongoose';
 import { DOC_VERIFY_STATUS, TRAINER_STATUS } from '@/constants/enums';
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 import { PendingTrainersBasicDTO } from '@/dtos/response/trainer/trainerApprovals.response';
-import { DocumentUpdateDTO, trainerStatusDTO } from '@/dtos/request/admin/admin.trainer.dto';
+import { DocumentUpdateDTO, TrainerFilterRequestDTO, trainerStatusDTO } from '@/dtos/request/admin/admin.trainer.dto';
 import { toPendingTrainersBasicData, ToTrainerProfileDTO } from '@/mappers/trainer/trainer.mapper';
 import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
+import { ITrainerProfile } from '@/models/trainerProfile.model';
+import { AdminTrainersDTOWithPagination, AdminTrainersResponseDTO } from '@/dtos/response/admin/trainer.response.dto';
+import { toAdminTrainersResponseDTO } from '@/mappers/admin/admin.trainers.mappers';
 
 export class TrainerManagementService implements ITrainerManagementService {
   private _trainerRepo: ITrainerRepository;
@@ -15,6 +18,43 @@ export class TrainerManagementService implements ITrainerManagementService {
     this._trainerRepo = trainerRepo;
   }
 
+//--------------all ltrainers-----------
+  async getTrainers(filter:TrainerFilterRequestDTO):Promise<AdminTrainersDTOWithPagination> {
+    const {page,limit,search,status,category}=filter;
+     const skip = (page - 1) * limit;
+    
+    const query: FilterQuery<ITrainerProfile> = {  };
+
+     if (search) {
+        query.$or = [
+          { displayName: { $regex: search, $options: 'i' } },
+          { specialities: { $regex: search, $options: 'i' } },
+          { coreDiscipline: { $regex: search, $options: 'i' } },
+        ];
+      }
+      if (status && status !== "all") {      
+            query.status = status;  
+      }  
+      if (category && category !== "all") {      
+            query.category = category;  
+      }  
+    
+      const [trainers, totalCount] = await Promise.all([
+              await this._trainerRepo.findAll(query, { skip, limit }), 
+              await this._trainerRepo.count(query),
+            ]);
+      const trainersData=trainers.map((t) => toAdminTrainersResponseDTO(t));
+      return {
+        trainers: trainersData,      
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        page,                         
+      };
+   
+  }
+
+
+  //-------------get approval pending trainers-----------
   async getPendingTrainers(): Promise<PendingTrainersBasicDTO[]> {
     const pendingTrainers = await this._trainerRepo.find({
       status: { $in: [TRAINER_STATUS.SUBMITTED, TRAINER_STATUS.UNDER_REVIEW] },

@@ -1,6 +1,6 @@
 import { DOC_VERIFY_STATUS, TRAINER_STATUS } from '@/constants/enums';
-import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
-import { trainerStatusDTO } from '@/dtos/request/admin/admin.trainer.dto';
+import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
+
 import {
   AvailabiltyPricingReqDTO,
   idVerificationReqDTO,
@@ -21,7 +21,7 @@ export class TrainerService implements ITrainerService {
     this._trainerRepo = trainerRepo;
   }
 
-  async checkExistingProfile(userId: Types.ObjectId): Promise<void> {
+  async checkExistingProfile(userId: Types.ObjectId|string): Promise<void> {
     const existingProfile = await this._trainerRepo.findByUserId(userId);
     if (existingProfile)
       throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_EXISTS, STATUS_CODE.ERROR.CONFLICT);
@@ -37,6 +37,7 @@ export class TrainerService implements ITrainerService {
 
   async getTrainer(id: string | Types.ObjectId): Promise<TrainerProfileDTO> {
     const trainer = await this._trainerRepo.findById(id);
+    
     if (!trainer)
       throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(trainer);
@@ -44,6 +45,7 @@ export class TrainerService implements ITrainerService {
   }
   async getTrainerByUserId(userId: string | Types.ObjectId): Promise<TrainerProfileDTO> {
     const trainer = await this._trainerRepo.findOne({ userId: userId });
+    console.log(trainer);
     if (!trainer)
       throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(trainer);

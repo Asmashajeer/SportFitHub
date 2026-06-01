@@ -18,6 +18,7 @@ export class ProfileService {
 
   //-------------Create a profile
   async addProfile(data: CreateUserProfileDTO): Promise<ProfileResponseDataDTO> {
+    
     const { userId: inputUserId } = data;
     const profileCount = await this._profileRepo.count({ userId: inputUserId });
 

@@ -1,16 +1,16 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
   /* Defining your Fitness App Brand Colors */
   /* #00608f */
-  --color-primary:  #197e04;
-  --color-trainer-primary:  #a25401; 
-  --color-secondary: #212222;  
-  --color-accent: #dc2626;     
-
+  --color-primary: #197e04;
+  --color-trainer-primary: #a25401;
+  --color-secondary: #212222;
+  --color-accent: #dc2626;
+  --color-primary-hover: #115f02;
   /* Custom spacing or shadows if needed */
   --shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 
@@ -24,11 +24,11 @@
 @layer base {
   :root {
     /* DEFAULT THEME (DARK) */
-    --bg-main: #0a0b0d; 
-         /* Deepest Black/Grey */
-    --bg-card: #191C24;      /* Your Secondary Color */
-    --text-main: #f8fafca9;    /* Off-white text */
-    --border-main: #454c59;  /* Slightly lighter than secondary */
+    --bg-main: #0a0b0d;
+    /* Deepest Black/Grey */
+    --bg-card: #191c24; /* Your Secondary Color */
+    --text-main: #f8fafca9; /* Off-white text */
+    --border-main: #454c59; /* Slightly lighter than secondary */
   }
 
   /* LIGHT THEME OVERRIDES (Optional for later) */
@@ -64,11 +64,11 @@
   .btn-secondary {
     @apply bg-gray-700 text-white border border-border hover:border-primary;
   }
-  .btn-outline{
-    @apply  text-primary border-2 focus:ring-[color-primary];
+  .btn-outline {
+    @apply text-primary border-2 focus:ring-[color-primary];
   }
   .btn-ghost {
-       @apply bg-transparent text-sm text-white w-0.5 ;
+    @apply bg-transparent text-sm text-white w-0.5;
   }
   .card-base {
     @apply bg-secondary/40 border border-border/50 rounded-2xl 
@@ -89,16 +89,42 @@
     /* Browser-native animation */
     animation: modal-zoom 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3f3f46 transparent;
+}
 
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #3f3f46;
+  border-radius: 999px;
+}
   /* Define the keyframes manually at the bottom of the layer */
   @keyframes modal-fade {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes modal-zoom {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
   .sidebar-container {
@@ -173,7 +199,7 @@
 }
 
 :root {
-   --radius: 0.5rem;
+  --radius: 0.5rem;
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(89.378% 0.00325 15.5);
   --card: oklch(0.21 0.006 285.885);
@@ -248,5 +274,15 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

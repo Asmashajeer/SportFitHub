@@ -7,31 +7,32 @@ import {
   Camera,
   Save,
   Phone,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import {
   GENDER,
   RELATIONSHIP,
   type GenderType,
   type RelationType,
-} from "../../../constants/constants";
-import { Input } from "@/components/ui/input";
+} from '../../../constants/constants';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
-import toast from "react-hot-toast";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
-import { userService } from "../service/userService";
-import { useNavigate } from "react-router-dom";
-import { uploadService } from "@/service/upload.service";
-import { CreateProfileSchema } from "../types/user.schema";
-import { Button } from "@/components/ui/Button";
-
+import toast from 'react-hot-toast';
+import { useAuthStore } from '@/features/auth/store/useAuthStore';
+import { userService } from '../service/userService';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { uploadService } from '@/service/upload.service';
+import { CreateProfileSchema } from '../types/user.schema';
+import { Button } from '@/components/ui/button';
+import PaymentService from '@/features/booking/service/bookingService';
+import { useBookingStore } from '@/features/booking/store/useBookingStore';
 
 interface UserProfile {
   userId: string;
@@ -52,32 +53,38 @@ interface UserProfile {
 const UserProfileForm: React.FC = () => {
   const user = useAuthStore((state) => state.user);
   const setHasProfile = useAuthStore((state) => state.setHasProfile);
-  const navigate=useNavigate();
-
+  const navigate = useNavigate();
+  const location = useLocation();
   const [profile, setProfile] = useState<UserProfile>({
-    userId: user ? user.id : "",
-    fullName: "",
-    DOB: "",
+    userId: user ? user.id : '',
+    fullName: '',
+    DOB: '',
     gender: GENDER.MALE,
-    phone: "",
+    phone: '',
     relationship: RELATIONSHIP.SELF,
-    street: "",
-    city: "",
-    zip: "",
+    street: '',
+    city: '',
+    zip: '',
     longitude: 0,
     latitude: 0,
-    profilePic: "",
+    profilePic: '',
     isPrimary: false,
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // For backend
-  const [previewImage, setPreviewImage] = useState(""); // For UI
+  const [previewImage, setPreviewImage] = useState(''); // For UI
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { payload } = useBookingStore(); //for user to redirect to checkout
+  const from = location.state?.from || '';
 
   useEffect(() => {
     if (user) {
-      setProfile((prev) => ({ ...prev, fullName: user.name || "", userId: user.id }));
+      setProfile((prev) => ({
+        ...prev,
+        fullName: user.name || '',
+        userId: user.id,
+      }));
     }
   }, [user]);
 
@@ -106,52 +113,61 @@ const UserProfileForm: React.FC = () => {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           }));
-          toast.success("Location updated!");
+          toast.success('Location updated!');
         },
         (error) => {
-          console.error("Error getting location:", error);
-          toast.error("Unable to get current location");
+          console.error('Error getting location:', error);
+          toast.error('Unable to get current location');
         }
       );
     } else {
-      toast.error("Geolocation is not supported by this browser");
+      toast.error('Geolocation is not supported by this browser');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); 
-    if (!user) return toast.error("User not found");
+    e.preventDefault();
+    if (!user) return toast.error('User not found');
 
     setIsLoading(true);
-    
-    try { 
-      let   profilePicUrl=profile.profilePic;
-     
-      if (selectedFile) { 
-         const userId=user?.id;
-         const folderPath = `users/${userId}`;
 
-           profilePicUrl=await uploadService.upload(selectedFile, `${folderPath}_profiles`,userId,"profile_pic");     
-       
+    try {
+      let profilePicUrl = profile.profilePic;
+
+      if (selectedFile) {
+        const userId = user?.id;
+        const folderPath = `users/${userId}`;
+
+        [profilePicUrl] = await uploadService.upload(
+          selectedFile,
+          `${folderPath}_profiles`,
+          userId,
+          'profile_pic'
+        );
       }
       const profilePayload = {
-      ...profile,
-      profilePic: profilePicUrl, // new URL
-    };
-      
-      const validation=CreateProfileSchema.safeParse(profilePayload);
-      if (!validation.success) {       
-          const errorMessage = validation.error.issues[0].message;
-          return toast.error(errorMessage);
+        ...profile,
+        profilePic: profilePicUrl, // new URL
+      };
+
+      const validation = CreateProfileSchema.safeParse(profilePayload);
+      if (!validation.success) {
+        const errorMessage = validation.error.issues[0].message;
+        return toast.error(errorMessage);
       }
       const response = await userService.addProfile(validation.data);
       setHasProfile(true);
-      console.log("Upload Success:", response);
-      toast.success("Profile saved successfully!");
-      navigate('/user/dashboard',{ replace: true });
-    }
-    catch (error) {
-        toast.error(error?.toString() || "Something went wrong");
+      console.log('Upload Success:', response);
+      toast.success('Profile saved successfully!');
+      if (from && payload) {
+        // User was trying to book! Finish the process for them.
+        navigate('/checkout');
+        return;
+      } else {
+        navigate('/user/dashboard', { replace: true });
+      }
+    } catch (error) {
+      toast.error(error?.toString() || 'Something went wrong');
     } finally {
       setIsLoading(false);
     }
@@ -161,8 +177,8 @@ const UserProfileForm: React.FC = () => {
     <div className="min-h-screen bg-[#0a0b0d] p-4">
       <div className="max-w-3xl mx-auto">
         {/* Changed div to form */}
-        <form 
-          onSubmit={handleSubmit} 
+        <form
+          onSubmit={handleSubmit}
           className="bg-secondary border border-[#454c59] rounded-3xl shadow-2xl p-8"
         >
           {/* Header */}
@@ -180,7 +196,11 @@ const UserProfileForm: React.FC = () => {
             <div className="relative">
               <div className="w-32 h-32 rounded-full bg-secondary/60 border-2 border-[#454c59] overflow-hidden flex items-center justify-center">
                 {previewImage ? (
-                  <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
+                  <img
+                    src={previewImage}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <User className="w-16 h-16 text-slate-500" />
                 )}
@@ -215,7 +235,9 @@ const UserProfileForm: React.FC = () => {
                   type="text"
                   required
                   value={profile.fullName}
-                  onChange={(e) => handleInputChange("fullName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('fullName', e.target.value)
+                  }
                   placeholder="Enter your full name"
                   className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white focus:ring-2 focus:ring-primary outline-none"
                 />
@@ -234,7 +256,7 @@ const UserProfileForm: React.FC = () => {
                     type="date"
                     required
                     value={profile.DOB}
-                    onChange={(e) => handleInputChange("DOB", e.target.value)}
+                    onChange={(e) => handleInputChange('DOB', e.target.value)}
                     className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white"
                   />
                 </div>
@@ -246,14 +268,18 @@ const UserProfileForm: React.FC = () => {
                 </label>
                 <Select
                   value={profile.gender}
-                  onValueChange={(value) => handleInputChange("gender", value as GenderType)}
+                  onValueChange={(value) =>
+                    handleInputChange('gender', value as GenderType)
+                  }
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.values(GENDER).map((type) => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -272,12 +298,12 @@ const UserProfileForm: React.FC = () => {
                     type="tel"
                     required
                     value={profile.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
                     placeholder="Enter phone number"
                     className="pl-12 w-full rounded-xl bg-secondary/60 border border-[#454c59] text-white"
                   />
                 </div>
-              </div>              
+              </div>
             </div>
 
             {/* Address Section */}
@@ -290,20 +316,20 @@ const UserProfileForm: React.FC = () => {
                 <Input
                   placeholder="Street Address"
                   value={profile.street}
-                  onChange={(e) => handleInputChange("street", e.target.value)}
+                  onChange={(e) => handleInputChange('street', e.target.value)}
                   className="bg-secondary/60 border-[#454c59]"
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <Input
                     placeholder="City"
                     value={profile.city}
-                    onChange={(e) => handleInputChange("city", e.target.value)}
+                    onChange={(e) => handleInputChange('city', e.target.value)}
                     className="bg-secondary/60 border-[#454c59]"
                   />
                   <Input
                     placeholder="ZIP Code"
                     value={profile.zip}
-                    onChange={(e) => handleInputChange("zip", e.target.value)}
+                    onChange={(e) => handleInputChange('zip', e.target.value)}
                     className="bg-secondary/60 border-[#454c59]"
                   />
                 </div>
@@ -315,7 +341,7 @@ const UserProfileForm: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-[#f8fafca9] flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-primary" />
-                  Coordinates
+                  current Location
                 </h3>
                 <Button
                   type="button"
@@ -324,12 +350,22 @@ const UserProfileForm: React.FC = () => {
                   className="flex items-center gap-2 rounded-full border-primary/30 text-xs"
                 >
                   <Navigation className="w-4 h-4" />
-                  Get Current
+                  Get Current Location
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Input readOnly placeholder="Lat" value={profile.latitude} className="bg-secondary/60 opacity-70" />
-                <Input readOnly placeholder="Lng" value={profile.longitude} className="bg-secondary/60 opacity-70" />
+                <Input
+                  readOnly
+                  placeholder="Lat"
+                  value={profile.latitude}
+                  className="bg-secondary/60 opacity-70"
+                />
+                <Input
+                  readOnly
+                  placeholder="Lng"
+                  value={profile.longitude}
+                  className="bg-secondary/60 opacity-70"
+                />
               </div>
             </div>
 

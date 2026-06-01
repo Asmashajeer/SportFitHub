@@ -10,7 +10,7 @@ import { ICertification, ITrainerProfile } from '@/models/trainerProfile.model';
 import { Types } from 'mongoose';
 
 export interface ITrainerService {
-  checkExistingProfile(userId: Types.ObjectId): Promise<void>;
+  checkExistingProfile(userId: Types.ObjectId|string): Promise<void>;
   addProfile(profileData: Partial<ITrainerProfile>): Promise<TrainerProfileResponseDTO>;
 
   // by trainer and admin

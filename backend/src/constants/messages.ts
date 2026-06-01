@@ -29,7 +29,16 @@ export const SUCCESS_MESSAGES = {
     TRAINER_FETCH_SUCCESS: 'Trainer details fetched successfully',
     TRAINER_DOC_STATUS_UPDATED: 'Trainer Documents status updated',
   },
+  SESSION:{
+    SESSION_CREATED:'New session created',
+    SESSION_UPDATED:' session Updated',
+    SESSION_DELETED:' session Updated'
+  },
+  BOOKING:{
+    CHECKOUT_SESSION_CREATED:"Checkout session created successfully",
+  },
   GENERAL: {
+    CREATED:'CREATED sUCCESSFULLY',
     FETCHED: ' Data fetched successfully',
     LOGGED_OUT: 'logged out successfully',
     DELETED: ' deleted successfully',
@@ -68,6 +77,15 @@ export const ERROR_MESSAGES = {
     TRAINER_NOT_FOUND: 'trainer not found',
     TRAINER_EXISTS: 'Profile for this TRAINER already exists',
   },
+  SESSION: {
+        CREATE_FAILED: "We couldn't schedule your  session. Please  try again.",
+         UPDATE_FAILED: "We couldn't update your  session. Please  try again.",
+        NOT_FOUND:"Session not found"
+    },
+  BOOKING:{
+      NOT_FOUND:"Booking not found"
+
+  }
 } as const;
 
 // ---------------------STATUS CODE--------------

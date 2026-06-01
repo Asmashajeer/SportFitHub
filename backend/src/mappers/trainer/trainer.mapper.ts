@@ -2,21 +2,19 @@ import { TrainerProfileResponseDTO } from '@/dtos/response/trainer/trainer.respo
 import { PendingTrainersBasicDTO } from '@/dtos/response/trainer/trainerApprovals.response';
 import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { ITrainerProfile, ICertification } from '@/models/trainerProfile.model';
+import { formatInTimeZone } from 'date-fns-tz';
+import { getTimezone } from "@/context/timezone.context";
 
 export const toTrainerProfileData = (
   profile: Partial<ITrainerProfile>
 ): TrainerProfileResponseDTO => {
   {
+    const timezone = getTimezone();
     return {
       basicInfo: {
         displayName: profile.displayName,
         profilePic: profile.profilePic,
-        // category :profile.category ,
-        // coreDiscipline : profile.coreDiscipline ,
-        // bio :profile.bio,
-        // specialties :profile.specialties,
-        // experience :profile.experience.toString(),
-        // languages :profile.languages
+       
       },
       verification: {
         overallStatus: profile.status,
@@ -38,6 +36,7 @@ export const toTrainerProfileData = (
 export const toPendingTrainersBasicData = (
   profile: Partial<ITrainerProfile>
 ): PendingTrainersBasicDTO => {
+  const timezone = getTimezone();
   return {
     id: profile._id.toString(),
     userId: profile.userId.toString(),
@@ -63,8 +62,8 @@ export const toPendingTrainersBasicData = (
 };
 
 export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO => {
-  // const data = trainer instanceof Document ? trainer.toObject() : trainer;
-
+ 
+  const timezone = getTimezone();
   return {
     id: trainer._id.toString(),
     userId: trainer.userId.toString(),
@@ -108,9 +107,10 @@ export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO
 
     currentLocation: trainer.currentLocation ? { ...trainer.currentLocation } : undefined,
     availability: trainer.availability ? { ...trainer.availability } : undefined,
-
+   
     paymentInfo: {
       bankAccount: trainer.paymentInfo?.bankAccount ? { ...trainer.paymentInfo.bankAccount } : {},
+       
       upiId: trainer.paymentInfo?.upiId,
     },
 
@@ -121,8 +121,8 @@ export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO
     rejectedAt: trainer.rejectedAt?.toISOString(),
     applicationCount: trainer.applicationCount || 0,
 
-    createdAt: trainer.createdAt?.toISOString(),
+    createdAt: formatInTimeZone(trainer.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
 
-    updatedAt: trainer.updatedAt?.toISOString(),
+    updatedAt: formatInTimeZone(trainer.updatedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
   };
 };

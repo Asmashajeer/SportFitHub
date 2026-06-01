@@ -1,29 +1,27 @@
-import api from "../../../api/axiosInstance";
+import api from '../../../api/axiosInstance';
 import type {
   AuthResponse,
   BaseResponse,
   LoginResponse,
   RegisterResponse,
   ResendOtpResponse,
-} from "../types/auth.types";
+} from '../types/auth.types';
 import type {
   LoginCredentials,
-  registerCredentials,  
+  registerCredentials,
   ResendOtpData,
   ResetPasswordData,
   verifyOTPData,
-} from "../types/auth.schema";
-import type { UserRole } from "../../../constants/constants";
-import { AUTH_ROUTES } from "./auth.api";
+} from '../types/auth.schema';
+import type { UserRole } from '../../../constants/constants';
+import { AUTH_ROUTES } from './auth.api';
 
 export const authService = {
   register: async (
-    credentials: registerCredentials,
+    credentials: registerCredentials
   ): Promise<RegisterResponse> => {
-    const response = await api.post(AUTH_ROUTES.REGISTER, credentials); 
-     
+    const response = await api.post(AUTH_ROUTES.REGISTER, credentials);
     return response.data;
-
   },
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     const response = await api.post(AUTH_ROUTES.LOGIN, credentials);
@@ -34,12 +32,11 @@ export const authService = {
   },
 
   getMe: async () => {
-    try{
-      const response = await api.get(AUTH_ROUTES.GET_ME);      
+    try {
+      const response = await api.get(AUTH_ROUTES.GET_ME);
       return response.data;
-    } catch(error:unknown){
-        throw error;
-      
+    } catch (error: unknown) {
+      throw error;
     }
   },
   verify: async (verifyData: verifyOTPData): Promise<AuthResponse> => {
@@ -63,8 +60,8 @@ export const authService = {
       });
       return response.data;
     } catch (error: unknown) {
-      if(error instanceof Error){
-        const message= error.message || "Google Login failed";
+      if (error instanceof Error) {
+        const message = error.message || 'Google Login failed';
         throw new Error(message);
       }
     }

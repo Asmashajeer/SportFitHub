@@ -2,7 +2,7 @@ import { trainerManagementController } from '@/container';
 
 import { Router } from 'express';
 const router = Router();
-
+router.get('/', trainerManagementController.allTrainers);
 router.patch('/:id/file-status', trainerManagementController.updateFileStatus);
 router.patch('/:id/trainer-status', trainerManagementController.updateTrainerStatus);
 router.get('/get_pending_trainers', trainerManagementController.getAllPendingTrainers);

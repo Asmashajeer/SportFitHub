@@ -1,16 +1,17 @@
-import { create } from "zustand";
-import { devtools, persist} from "zustand/middleware";
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 
-import type { UserRole } from "../../../constants/constants";
+import type { UserRole } from '../../../constants/constants';
 
 export interface User {
   id: string;
-  name:string;
+  name: string;
   email: string;
   role: UserRole;
+  timezone:string;
   hasProfile: boolean;
-  isVerified:boolean;
-  profilePic?:string;
+  isVerified: boolean;
+  profilePic?: string;
 }
 
 export interface AuthState {
@@ -26,39 +27,39 @@ export interface AuthState {
 export const useAuthStore = create<AuthState>()(
   devtools(
     persist(
-    (set) => ({
-      user: null,
-      isAuthenticated: false,
-      isLoading: true, 
+      (set) => ({
+        user: null,
+        isAuthenticated: false,
+        isLoading: true,
 
-      setUser: (user) =>
-        set({
-          user,
-          isAuthenticated: true,
-          isLoading: false,
-          
-        }),
+        setUser: (user) =>
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          }),
 
-      clearAuth: () =>
-        set({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-        }),
+        clearAuth: () =>
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          }),
 
-      setHasProfile: (status) =>
-        set((state) => ({
-          user: state.user ? { ...state.user, hasProfile: status } : null,
-        })),
+        setHasProfile: (status) =>
+          set((state) => ({
+            user: state.user ? { ...state.user, hasProfile: status } : null,
+          })),
 
-      setLoading: (loading) => set({ isLoading: loading }),
-    }),
-    {
-      name: "auth-storage",      
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
+        setLoading: (loading) => set({ isLoading: loading }),
       }),
-    }
-  ))
+      {
+        name: 'auth-storage',
+        partialize: (state) => ({
+          user: state.user,
+          isAuthenticated: state.isAuthenticated,
+        }),
+      }
+    )
+  )
 );

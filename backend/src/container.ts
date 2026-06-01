@@ -28,7 +28,47 @@ import fitnessProgramModel from './models/fitnessProgram.model';
 import { FitnessRepository } from './repositories/fitness.repository';
 import { FitnessManagementService } from './services/admin/fitnessManagement.service';
 import { FitnessManagementController } from './api/controllers/admin/fitnessManagement.controller';
+import { SportsSessionRepository } from './repositories/sports.session.repository';
 
+
+
+import sportsSessionModel from './models/sportsSession.model';
+import {  SportsSessionService } from './services/session/sports.session.service';
+import fitnessSessionModel from './models/fitnessSession.model';
+import { FitnessSessionRepository } from './repositories/fitness.session.repository';
+import { FitnessSessionService } from './services/session/fitness.session.service';
+import { SportsSessionController } from './api/controllers/session/sports.session.controller';
+import { SportsService } from './services/sports.service';
+import { SportsController } from './api/controllers/sport.controller';
+import { FitnessSessionController } from './api/controllers/session/fitness.session.controller';
+import { FitnessController } from './api/controllers/fitness.controller';
+import { FitnessService } from './services/fitness.service ';
+import { SessionController } from './api/controllers/session/session.controller';
+import { BookingService } from './services/booking/booking.service';
+import { PaymentRepository } from './repositories/payment.repository';
+
+import PaymentService from './services/booking/payment.service';
+import { PaymentController } from './api/controllers/booking/payment.controller';
+import { BookingRepository } from './repositories/booking.repository';
+import { WebhookController } from './api/controllers/booking/webhookController';
+import bookingModel from './models/booking.model';
+import bookingSessionModel from './models/booking.session.model';
+import paymentModel from './models/payment.model';
+import { BookingController } from './api/controllers/booking/booking.controller';
+import RedisClientService from './services/redis/redisClient.service';
+import SlotLockService from './services/redis/slotLock.service';
+import { BookingSessionRepository } from './repositories/booking.session.repository';
+import { WalletRepository } from './repositories/wallet.repository';
+import walletModel from './models/wallet.model';
+import { WalletTransactionRepository } from './repositories/wallet.transaction.repository';
+import walletTransactionModel from './models/wallet.transaction.model';
+import { WalletTransactionService } from './services/wallet/wallet.transaction.service';
+import { WalletService } from './services/wallet/wallet.service';
+import { WalletController } from './api/controllers/user/wallet.controller';
+import { SessionManagementService } from './services/admin/sessionManagement.service';
+import { SessionManagementController } from './api/controllers/admin/session.management.controller';
+import { BookingsManagementService } from './services/admin/bookingsManagement.service';
+import { BookingsManagementController } from './api/controllers/admin/bookingsManagement.controller';
 const userRepository = new UserRepository(User);
 const userManagementService = new UserManagementService(userRepository);
 const userManagementController = new UserManagementController(userManagementService);
@@ -55,19 +95,72 @@ const authService = new AuthService(
 const authController = new AuthController(authService);
 
 const sportsRepository = new SportsRepository(SportsModel);
+const sportsService=new SportsService(sportsRepository);
+const sportsController=new SportsController (sportsService);
+
 const sportsManagementService = new SportsManagementService(sportsRepository);
 const sportManagementController = new SportsManagementController(sportsManagementService);
 
 const fitnessRepository = new FitnessRepository(fitnessProgramModel);
+const fitnessService=new FitnessService(fitnessRepository);
+const fitnessController=new FitnessController (fitnessService);
+
 const fitnessManagementService = new FitnessManagementService(fitnessRepository);
 const fitnessManagementController = new FitnessManagementController(fitnessManagementService);
 
+
+
+const sportsSessionRepository=new SportsSessionRepository(sportsSessionModel);
+const sportsSessionService= new SportsSessionService(sportsSessionRepository,trainerRepository);
+const sportsSessionController=new SportsSessionController (sportsSessionService);
+
+const fitnessSessionRepository=new FitnessSessionRepository(fitnessSessionModel);
+const fitnessSessionService= new FitnessSessionService(fitnessSessionRepository,trainerRepository);
+const fitnessSessionController=new FitnessSessionController (fitnessSessionService);
+const sessionController=new SessionController(sportsSessionService,fitnessSessionService);
+const sessionManagementService= new SessionManagementService(sportsSessionRepository,fitnessSessionRepository);
+const sessionManagementController=new SessionManagementController(sessionManagementService);
+
+
+const paymentRepository=new PaymentRepository(paymentModel);
+const paymentService=new PaymentService(paymentRepository,userRepository,sportsSessionRepository,fitnessSessionRepository);
+const redisClientService=new RedisClientService();
+const slotLockService=new SlotLockService(redisClientService);
+
+const walletRepository=new WalletRepository(walletModel);
+const walletService=new WalletService(walletRepository);
+const walletTransactionRepository=new WalletTransactionRepository(walletTransactionModel);
+const walletTransactionService=new WalletTransactionService(walletRepository,walletTransactionRepository);
+const walletController=new WalletController(walletService,walletTransactionService);
+
+const bookingRepository=new BookingRepository(bookingModel);
+const bookingSessionRepository=new BookingSessionRepository(bookingSessionModel);
+const bookingService=new BookingService(bookingRepository,bookingSessionRepository,paymentRepository,sportsSessionRepository,fitnessSessionRepository,slotLockService,walletService,walletTransactionService);
+const paymentController=new PaymentController(paymentService,bookingService);
+const bookingController=new BookingController(bookingService);
+const webhookController=new WebhookController(bookingService,slotLockService);
+
+const bookingsManagementService=new BookingsManagementService(bookingRepository,bookingSessionRepository);
+const bookingsManagementController=new BookingsManagementController(bookingsManagementService);
 export {
   authController,
   profileController,
   trainerController,
   userManagementController,
   trainerManagementController,
+  sportsController,
+  fitnessController,
   sportManagementController,
   fitnessManagementController,
+  sportsSessionController,
+  fitnessSessionController,
+  sessionController,
+  sessionManagementController,
+  paymentController,
+   webhookController,
+   bookingController,
+   redisClientService,
+  slotLockService,
+  walletController,
+  bookingsManagementController
 };

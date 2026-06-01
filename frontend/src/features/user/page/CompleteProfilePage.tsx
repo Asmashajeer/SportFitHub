@@ -1,23 +1,11 @@
-
-import UserProfileForm from "../component/UserProfileForm"
+import UserProfileForm from '../component/UserProfileForm';
 
 function CompleteProfilePage() {
   return (
-    <>      
-        <UserProfileForm/>
-        
-
+    <>
+      <UserProfileForm />
     </>
-  )
+  );
 }
 
-
-
-export default CompleteProfilePage
-
-
-
-
-
-
-
+export default CompleteProfilePage;
