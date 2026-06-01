@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { authService } from "../service/authService";
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { authService } from '../service/authService';
 import {
   AlertCircle,
   ArrowRight,
@@ -10,12 +10,11 @@ import {
   KeyRound,
   Lock,
   X,
-} from "lucide-react";
-import toast from "react-hot-toast";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { OTP_TYPE } from "@/constants/constants";
-
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { OTP_TYPE } from '@/constants/constants';
 
 // import { ResetPasswordSchema } from "../types/auth.schema";
 // import z from "zod";
@@ -24,10 +23,10 @@ function ResetPassword() {
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
-  const [newPassword, setNewPassword] = useState("");
-  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState('');
+  const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,27 +38,27 @@ function ResetPassword() {
     //   return;
     // }
 
-    setError("");
+    setError('');
     try {
       await authService.resetPassword({
         email,
         otp,
         newPassword,
       });
-      toast.success("Password updated! please login");
+      toast.success('Password updated! please login');
       setIsLoading(false);
-      navigate("/login");
+      navigate('/login');
     } catch (error) {
-        toast.error(error?.toString() || "Something went wrong");
-    
-      setOtp("");
+      toast.error(error?.toString() || 'Something went wrong');
+
+      setOtp('');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleBackToLogin = () => {
-    navigate("/login");
+    navigate('/login');
   };
 
   const handleResendCode = async () => {
@@ -69,11 +68,11 @@ function ResetPassword() {
         otpContext: OTP_TYPE.PASSWORD_RESET,
       });
       if (data.emailSent)
-        toast.success("A new code has been sent to your email");
+        toast.success('A new code has been sent to your email');
     } catch (error) {
-        toast.error(error?.toString() || "Something went wrong");
-    } 
-    setError("");
+      toast.error(error?.toString() || 'Something went wrong');
+    }
+    setError('');
   };
   return (
     <>
@@ -114,7 +113,7 @@ function ResetPassword() {
                     type="text"
                     maxLength={6}
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                     placeholder="Enter 6-digit code"
                     className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
                     required
@@ -135,7 +134,7 @@ function ResetPassword() {
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                   <Input
                     id="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••"
@@ -186,7 +185,7 @@ function ResetPassword() {
               </Button>
             </form>
             <p className="text-slate-400 text-sm">
-              Didn't receive the email?{" "}
+              Didn't receive the email?{' '}
               <button
                 onClick={handleResendCode}
                 className="text-primary font-medium hover:underline"

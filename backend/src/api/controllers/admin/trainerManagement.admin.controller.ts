@@ -9,6 +9,30 @@ export class TrainerManagementController {
   constructor(trainerManagementService: ITrainerManagementService) {
     this._trainerManagementService = trainerManagementService;
   }
+
+   allTrainers = async (    req: Request,    res: Response,    next: NextFunction  ): Promise<void> => {
+    const page=parseInt(req.query.page as string)
+    const limit=parseInt(req.query.limit as string)
+    const search=req.query.search as string;
+    const status=req.query.status as string;
+    const category=req.query.category as string;    
+
+    try {
+      const trainers = await this._trainerManagementService.getTrainers({page,limit,search,status,category});
+      if (!trainers) {
+        res.status(STATUS_CODE.SUCCESS.OK).json({ success: true, message: 'No  trainers found',
+          trainers: [],
+        });
+        return;
+      }
+      res.status(STATUS_CODE.SUCCESS.OK).json(trainers);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+
+
   getAllPendingTrainers = async (
     req: Request,
     res: Response,

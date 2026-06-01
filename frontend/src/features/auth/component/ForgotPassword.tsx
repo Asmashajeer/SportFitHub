@@ -1,26 +1,25 @@
-import React, { useState } from "react";
-import { Mail, ArrowRight, ArrowLeft, AlertCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { authService } from "../service/authService";
-import toast from "react-hot-toast";
-import { EmailSchema } from "../types/auth.schema";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-
+import React, { useState } from 'react';
+import { Mail, ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { authService } from '../service/authService';
+import toast from 'react-hot-toast';
+import { EmailSchema } from '../types/auth.schema';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
+    setError('');
     const result = EmailSchema.safeParse(email);
     if (!result.success) {
-      const errorMessage = result?.error?.issues[0].message || "check mail";
+      const errorMessage = result?.error?.issues[0].message || 'check mail';
       setError(errorMessage);
       setIsLoading(false);
       return;
@@ -28,19 +27,20 @@ const ForgotPassword: React.FC = () => {
 
     try {
       await authService.forgotPassword(email);
-      toast.success("Please check your mail for verification code.");
-      navigate("/reset-Password", { state: { email: email } });
+      toast.success('Please check your mail for verification code.');
+      navigate('/reset-Password', { state: { email: email } });
     } catch (error) {
-        toast.error(error?.toString() || "Something went wrong");
-    } 
+      console.log(error);
+      toast.error('Something went wrong');
+    }
   };
 
   const handleBackToLogin = () => {
-    navigate("/login");
+    navigate('/login');
   };
 
   const handleFocus = () => {
-    if (error) setError("");
+    if (error) setError('');
   };
 
   return (
@@ -89,7 +89,7 @@ const ForgotPassword: React.FC = () => {
                     onFocus={handleFocus}
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      setError("");
+                      setError('');
                     }}
                     placeholder="Enter your email"
                     className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary outline-none transition-all duration-200"
@@ -128,7 +128,7 @@ const ForgotPassword: React.FC = () => {
 
         {/* Footer Text */}
         <p className="text-center text-slate-500 text-sm mt-3">
-          Remember your password?{" "}
+          Remember your password?{' '}
           <button
             onClick={handleBackToLogin}
             className="text-primary font-medium hover:underline"

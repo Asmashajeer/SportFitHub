@@ -16,4 +16,4 @@ const SportsSchema = new Schema<ISports>({
   isActive: { type: Boolean, default: true },
 });
 
-export default mongoose.model('SportsModel', SportsSchema);
+export default mongoose.model<ISports>('SportsModel', SportsSchema);

@@ -1,9 +1,8 @@
-import { Navigate } from "react-router-dom";
-import { LoadingScreen } from "../components/reusable/LoadingScreen";
-import { useAuthStore } from "../features/auth/store/useAuthStore";
-import { ROLES, type UserRole } from "../constants/constants";
-import { useLocation } from "react-router-dom";
-
+import { Navigate } from 'react-router-dom';
+import { LoadingScreen } from '../components/reusable/LoadingScreen';
+import { useAuthStore } from '../features/auth/store/useAuthStore';
+import { ROLES, type UserRole } from '../constants/constants';
+import { useLocation } from 'react-router-dom';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -13,9 +12,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   allowedRoles,
 }) => {
-
   const { isAuthenticated, user, isLoading } = useAuthStore();
-  
+
   const location = useLocation();
 
   if (isLoading)
@@ -25,12 +23,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       </div>
     );
 
-  if (!isAuthenticated ) return <Navigate to="/login" />;
+  if (!isAuthenticated) return <Navigate to="/login" />;
 
   const userRole = user?.role?.toLowerCase();
   if (
-    user && user.role!==ROLES.ADMIN &&
-    !user.hasProfile && user.isVerified &&
+    user &&
+    user.role !== ROLES.ADMIN &&
+    !user.hasProfile &&
+    user.isVerified &&
     location.pathname !== `/${userRole}/add-Profile`
   ) {
     return <Navigate to={`/${user.role}/add-Profile`} replace />;
@@ -38,7 +38,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   //  Role-based check
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-    <Navigate to='/unathorized'/> 
+    <Navigate to="/unathorized" />;
   }
 
   return children;

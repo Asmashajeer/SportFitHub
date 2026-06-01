@@ -1,7 +1,10 @@
 import { usersResposeDTO } from '@/dtos/response/admin/user.dto';
 import { IUser } from '@/models/user.model';
+import { formatInTimeZone } from 'date-fns-tz';
+import { getTimezone } from "@/context/timezone.context";
 
 export const toUsersResponseData = (user: IUser): usersResposeDTO => {
+  const timezone = getTimezone();
   return {
     id: user._id.toString(),
     name: user.name,
@@ -12,6 +15,7 @@ export const toUsersResponseData = (user: IUser): usersResposeDTO => {
     isVerified: user.isVerified,
     isBlocked: user.isBlocked,
     isActive: user.isActive,
-    createdAt: user.createdAt.toString(),
+    createdAt: formatInTimeZone(user.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
+           
   };
 };

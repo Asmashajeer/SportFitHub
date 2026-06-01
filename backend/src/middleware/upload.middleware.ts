@@ -15,10 +15,18 @@ export const uploadMiddleware = () => {
       if (uploadType === 'profile_pic') {
         publicId = `profile_${userId}_main`;
         overwrite = true; //ONE main profile pic
-      } else if (uploadType === 'id_attachment') {
+      } 
+      else if (uploadType === 'id_attachment') {
         publicId = `ID_${userId}_main`;
         overwrite = true; //one ID
-      } else {
+      }
+      else if (uploadType === 'session_gallery') {
+       
+        const orderNumber = Math.floor(Math.random() * 1000) + 1;
+        publicId = `session_${userId}_${Date.now()}_${orderNumber}`;
+        overwrite = false;       }
+
+       else {
         // Certificates need to be unique so they don't delete each other
         publicId = `cert_${Date.now()}_${file.originalname.split('.')[0]}`;
         overwrite = false;

@@ -1,8 +1,9 @@
 export interface getQueryDTO {
   page: number;
   search: string;
-  status: string;
+  status?: string;
 }
+
 export interface SportRequestDTO {
   id: string;
   sportName: string;

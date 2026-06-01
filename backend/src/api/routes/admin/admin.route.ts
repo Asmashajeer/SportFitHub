@@ -1,15 +1,22 @@
 import { Router } from 'express';
 import { protect } from '../../../middleware/auth.middleware';
+import { timezoneMiddleware } from '@/middleware/timezone.middleware';
 import { restrictTo } from '../../../middleware/role.middleware';
 import userRoutes from './userManagment.route';
 import trainerRoutes from './trainerManagement.route';
 import { UserRole } from '@/constants/enums';
 import categoryRoute from './categoryManagement.route';
+import sessionRoute from './sessionManagement.route'
+import  bookingRoute from './bookingManagement.route'
+
+
 const adminRouter = Router();
 adminRouter.use(protect);
+adminRouter.use(timezoneMiddleware);
 adminRouter.use(restrictTo([UserRole.ADMIN]));
 adminRouter.use('/trainers', trainerRoutes);
 adminRouter.use('/users', userRoutes);
 adminRouter.use('/category', categoryRoute);
-
+adminRouter.use('/sessions', sessionRoute);
+adminRouter.use('/bookings', bookingRoute);
 export default adminRouter;

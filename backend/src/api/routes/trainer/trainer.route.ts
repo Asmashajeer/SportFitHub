@@ -1,14 +1,22 @@
 import { UserRole } from '@/constants/enums';
 import { trainerController } from '@/container';
 import { protect } from '@/middleware/auth.middleware';
+import { timezoneMiddleware } from '@/middleware/timezone.middleware';
 import { restrictTo } from '@/middleware/role.middleware';
 import { uploadMiddleware } from '@/middleware/upload.middleware';
+import sessionRoute from '../trainer/session.route';
+import bookingsRoute from './bookings.route'
 const upload = uploadMiddleware();
 import { Router } from 'express';
 
+
 const router = Router();
 router.use(protect);
+router.use(timezoneMiddleware); 
 router.use(restrictTo([UserRole.TRAINER]));
+router.use('/sessions', sessionRoute);
+router.use('/bookings', bookingsRoute);
+
 router.post(
   '/add-profile',
   upload.fields([

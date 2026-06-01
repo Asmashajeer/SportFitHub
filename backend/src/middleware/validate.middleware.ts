@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import type { ZodObject } from 'zod';
 
-export const validate =
+export const validateBody =
   (schema: ZodObject) => async (req: Request, res: Response, next: NextFunction) => {
     try {
       //  Validate
@@ -23,7 +23,7 @@ export const validate =
           message: e.message,
         }));
 
-        return next(new AppError('Validation Failed', 400, mappedErrors));
+        return next(new AppError(`${mappedErrors[0]?.message} :(${mappedErrors[0]?.field.toString()})`, 400));
       }
       next(error);
     }

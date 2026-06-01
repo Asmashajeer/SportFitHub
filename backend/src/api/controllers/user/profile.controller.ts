@@ -4,6 +4,7 @@ import { STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import type { Request, Response, NextFunction } from 'express';
 import { IUser } from '@/models/user.model';
 import Logger from '@/utils/logger';
+import { AuthRequest } from '@/middleware/auth.middleware';
 
 export class ProfileController {
   private _profileService: IProfileService;
@@ -13,7 +14,8 @@ export class ProfileController {
 
   addProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = req.user as IUser;
+      const authReq=req as AuthRequest
+      const user = authReq.user ;
       const userId = user.id;
       console.log(userId);
       const profileData = await this._profileService.addProfile({ userId, ...req.body });
@@ -28,7 +30,8 @@ export class ProfileController {
   };
   getAllProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = req.user as IUser;
+      const authReq=req as AuthRequest
+      const user = authReq.user ;
       const userId = user.id;
       const profiles = await this._profileService.getProfiles(userId);
       res.status(STATUS_CODE.SUCCESS.OK).json({
@@ -41,7 +44,8 @@ export class ProfileController {
   };
   getProfilePic = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = req.user as IUser;
+      const authReq=req as AuthRequest
+      const user = authReq.user ;
       const userId = user.id;
       const profile = await this._profileService.getPrimaryProfile(userId);
       const profilePic = profile.profilePic;
@@ -53,9 +57,9 @@ export class ProfileController {
       next(error);
     }
   };
-  getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getProfile = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = req.user as IUser;
+      const user = req.user 
       const userId = user.id;
       const profile = await this._profileService.getPrimaryProfile(userId);
 

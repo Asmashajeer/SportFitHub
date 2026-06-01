@@ -1,24 +1,23 @@
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select";
-import { Button } from "../../../components/ui/button";
-import { useNavigate } from "react-router-dom";
+} from '../../../components/ui/select';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
-import { ROLES } from "../../../constants/constants";
-import type { UserRole } from "../../../constants/constants";
-import { authService } from "../service/authService";
-import { useAuthStore } from "../store/useAuthStore";
-import { RegisterSchema } from "../types/auth.schema";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
-import toast from "react-hot-toast";
-import { useState } from "react";
-import GoogleLoginButton from "./GoogleLoginButton";
-
+import { ROLES } from '../../../constants/constants';
+import type { UserRole } from '../../../constants/constants';
+import { authService } from '../service/authService';
+import { useAuthStore } from '../store/useAuthStore';
+import { RegisterSchema } from '../types/auth.schema';
+import { ArrowBigLeft, EyeIcon, EyeOffIcon } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useState } from 'react';
+import GoogleLoginButton from './GoogleLoginButton';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -27,29 +26,30 @@ const Register = () => {
   // const setHasProfile = useAuthStore((state) => state.setHasProfile);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
     role: ROLES.USER as UserRole,
+    timezone:'UTC',
   });
 
-
   const handleFocus = () => {
-    if (error) setError("");
+    if (error) setError('');
   };
 
   const handleLogin = () => {
-    navigate("/login");
+    navigate('/login');
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError("");
+    setError('');
+    formData.timezone= Intl.DateTimeFormat().resolvedOptions().timeZone;
     const result = RegisterSchema.safeParse(formData);
     if (!result.success) {
       const errorMessage = result.error.issues[0].message;
@@ -58,17 +58,16 @@ const Register = () => {
       return;
     }
 
-    const { name, email, password, role } = result.data;
+    const { name, email, password, role,timezone } = result.data;
 
     try {
-      const data = await authService.register({ name, email, password, role });
-      console.log(data.user);
+      const data = await authService.register({ name, email, password, role ,timezone});
       const userData = data.user;
       setUser({ ...userData, hasProfile: false });
       toast.success(data.message);
-      navigate("/verifyEmail", { state: data.user });
+      navigate('/verifyEmail', { state: data.user });
     } catch (error) {
-        toast.error(error?.toString() || "Something went wrong");
+      toast.error(error as string);
     } finally {
       setIsSubmitting(false);
     }
@@ -77,20 +76,25 @@ const Register = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6 bg-gradient-hero">
       <div className="w-full max-w-sm">
-        <div
-          className="text-center mb-10 cursor-pointer group"
-          onClick={() => navigate("/")}
+         <div className=" flex justify-start">
+          <Button variant="ghost" className='justify-start left-0'  onClick={() => navigate('/')}> <ArrowBigLeft/>Home</Button>
+       </div>
+          <div   
+          className="flex justify-center mb-6 cursor-pointer group"
+          onClick={() => navigate('/')}
         >
-          <h1 className="text-4xl font-black tracking-tighter uppercase transition-transform group-hover:scale-105">
-            <span className="text-primary">SportFit</span>Hub
-          </h1>
-          <p className="text-muted-foreground mt-2 text-sm font-bold tracking-widest uppercase">
-            Registration
-          </p>
+          <img 
+              src="/sportfithub_logo.png" 
+              alt="SportFitHub" 
+              className="h-10 w-auto   object-contain transition-transform group-hover:scale-105"
+          />         
         </div>
 
         {/* Auth Card */}
-        <div className="--color-card border border-border p-8 rounded-3xl shadow-2xl backdrop-blur-sm bg-card/90">
+        <div className="--color-card border pt-4 border-border p-8 rounded-3xl shadow-2xl backdrop-blur-sm bg-card/90">
+          <p className="text-muted-foreground mt-2 text-sm font-bold tracking-widest uppercase">
+              Registration
+            </p>
           <form onSubmit={handleSubmit} className="space-y-1">
             {error && (
               <div className="mb-4 p-3 rounded-xl  text-red-500 text-xs font-bold  tracking-widest text-center ">
@@ -135,7 +139,7 @@ const Register = () => {
                 </legend>
                 <Input
                   // label={'Email'}
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Password"
                   value={formData.password}
                   onFocus={handleFocus}
@@ -165,7 +169,7 @@ const Register = () => {
                   Confirm Password
                 </legend>
                 <Input
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Confirm Password"
                   value={formData.confirmPassword}
                   onFocus={handleFocus}
@@ -234,7 +238,7 @@ const Register = () => {
               size="lg"
               className="w-full  shadow-lg shadow-primary/10"
             >
-              {isSubmitting ? "Creating Account..." : "Create Account"}
+              {isSubmitting ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
 

@@ -1,16 +1,16 @@
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Trash2, Plus } from "lucide-react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Trash2, Plus } from 'lucide-react';
+import { useForm, useFieldArray } from 'react-hook-form';
 import {
   useTrainerStore,
   type ICertification,
-} from "../../store/useTrainerStore";
-import { uploadService } from "@/service/upload.service";
-import { UPLOAD_TYPE } from "@/constants/constants";
-import { trainerService } from "../../service/trainerService";
-import toast from "react-hot-toast";
+} from '../../store/useTrainerStore';
+import { uploadService } from '@/service/upload.service';
+import { UPLOAD_TYPE } from '@/constants/constants';
+import { trainerService } from '../../service/trainerService';
+import toast from 'react-hot-toast';
 interface CertificatesFormValues {
   documents: ICertificate[];
 }
@@ -42,7 +42,7 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "documents",
+    name: 'documents',
   });
 
   const onSubmit = async (data: CertificatesFormValues) => {
@@ -54,12 +54,12 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
           const newFile =
             doc.file?.[0] || (doc.file instanceof File ? doc.file : null);
           if (newFile) {
-            console.log("New file detected for:", doc.name);
-            const url = await uploadService.upload(
+            console.log('New file detected for:', doc.name);
+            const [url] = await uploadService.upload(
               newFile,
               `${folderPath}/certifications`,
               userId,
-              UPLOAD_TYPE.CERTIFICATES,
+              UPLOAD_TYPE.CERTIFICATES
             );
             return {
               name: doc.name,
@@ -77,11 +77,11 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
             };
           }
           return null;
-        }),
+        })
       );
       console.log(uploadedCerts);
       if (uploadedCerts === null) {
-        toast.custom("please add atleast  oneCertificate");
+        toast.custom('please add atleast  oneCertificate');
         return;
       } else {
         const cleanCerts: ICertification[] = uploadedCerts.map((cert) => ({
@@ -95,14 +95,14 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
           if (profile) {
             const updatedProfile = await trainerService.updateCertificationInfo(
               profile?.id,
-              cleanCerts,
+              cleanCerts
             );
-            toast.success("Certificates updated ");
+            toast.success('Certificates updated ');
             setProfile(updatedProfile);
             onSuccess();
           }
         } catch (error) {
-          toast.error(error?.toString() || "Something went wrong");
+          toast.error(error?.toString() || 'Something went wrong');
         }
       }
     }
@@ -170,7 +170,7 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
           type="button"
           variant="outline"
           onClick={() =>
-            append({ name: "", issuedAt: "", validUpto: "", url: "" })
+            append({ name: '', issuedAt: '', validUpto: '', url: '' })
           }
         >
           <Plus size={16} className="mr-2" /> Add Certificate

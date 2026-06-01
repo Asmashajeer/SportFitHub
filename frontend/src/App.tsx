@@ -1,81 +1,66 @@
-
-
-import {Toaster} from 'react-hot-toast'
-import './App.css'
-import AppRouter from "./routes/AppRouter"
+import { Toaster } from 'react-hot-toast';
+import './App.css';
+import AppRouter from './routes/AppRouter';
 import { useAuth } from './features/auth/hook/useAuth';
 import { LoadingScreen } from './components/reusable/LoadingScreen';
 
 function App() {
- 
-   const { isLoading } = useAuth(); // Initialize here
+  const { isLoading } = useAuth(); // Initialize here
 
-    if (isLoading) {
-      return (
-      <div>Loading Session...
-        <LoadingScreen/>
+  if (isLoading) {
+    return (
+      <div>
+        Loading Session...
+        <LoadingScreen />
       </div>
-    )}
-      
+    );
+  }
+
   return (
     <>
-     <Toaster 
-        position="bottom-center"       
-        
+     <Toaster
+        position="bottom-center"
         toastOptions={{
-          // Define default options
-          className: '',
-          duration: 3000,
-          removeDelay: 1000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-            borderRadius: '8px',
+           style: {
+            zIndex: 99999,             
           },
-
-          // Default options for specific types
+          duration: 3000,
           success: {
-            duration: 3000,
-            style: {
-            background: '#000',
-            color: '#22c55e',
-            },
             icon: '✅',
-            iconTheme: {
-            primary: '#000',   
-            secondary: '#22c55e', 
-      },
+            style: {
+              background: '#baf2a7',
+              color: '#227008',
+              boxShadow: '0 0 0 0.5px #166534',  // ← acts as border, always visible
+              borderRadius: '8px',
+               zIndex: 99999,
+            },
           },
           error: {
-             duration: 3000,
-             style: {
-              background: '#ef4444',
-              color: '#fff',
+            icon: '❌',
+            style: {
+              background: '#f5aec2',
+              color: '#99062f',
+              boxShadow: '0 0 0 0.5px #991b1b',
+              borderRadius: '8px',
+               zIndex: 99999,
             },
-             icon: '❌',
-            iconTheme: {
-              primary: '#fff',    // White circle
-              secondary: '#ef4444',
-            }
+            duration: 6000,
           },
-          custom: {
-              duration: 3000,
-              style: {
-              background: '#3b82f6',
-              color: '#fff',
-             },
-               icon: 'ℹ️',
-            iconTheme: {
-              primary: '#fff',
-              secondary: '#3b82f6',
-            }
-          }
-        }} 
-      /> 
-      {isLoading?( <LoadingScreen />):  (<AppRouter/>)}
-      
+          custom: {           
+            style: {
+              background: '#f5aec2',
+              color: '#227008',
+              boxShadow: '0 0 0 0.5px #991b1b',
+              borderRadius: '8px',
+               zIndex: 99999,
+            },
+          },
+          
+        }}
+      />
+      {isLoading ? <LoadingScreen /> : <AppRouter />}
     </>
-  )
+  );
 }
 
-export default App
+export default App;

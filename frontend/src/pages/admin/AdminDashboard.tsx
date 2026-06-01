@@ -1,16 +1,13 @@
-import Dashboard from "../../features/admin/component/dashboard"
+import Dashboard from '../../features/admin/component/dashboard';
 
 function AdminDashboard() {
   return (
     <div>
-      <Dashboard/>
+      <Dashboard />
     </div>
-  )
+  );
 }
 
-AdminDashboard.propTypes = {
+AdminDashboard.propTypes = {};
 
-}
-
-export default AdminDashboard
-
+export default AdminDashboard;

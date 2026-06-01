@@ -11,6 +11,7 @@ export interface RegisterDataDTO {
   name: string;
   email: string;
   role: UserRole;
+  timezone:string;
   isVerified: boolean;
 }
 

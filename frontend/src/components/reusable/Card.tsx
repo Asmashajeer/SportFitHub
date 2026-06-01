@@ -1,5 +1,4 @@
-
-import type{ ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface CardProps {
   children: ReactNode;
@@ -8,9 +7,14 @@ interface CardProps {
   hoverable?: boolean;
 }
 
-export const Card = ({ children, className = "", onClick, hoverable = false }: CardProps) => {
+export const Card = ({
+  children,
+  className = '',
+  onClick,
+  hoverable = false,
+}: CardProps) => {
   return (
-    <div 
+    <div
       onClick={onClick}
       className={`
         card-base p-6

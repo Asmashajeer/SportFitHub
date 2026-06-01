@@ -3,9 +3,9 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/Button";
+} from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   ExternalLink,
   CreditCard,
@@ -14,55 +14,70 @@ import {
   Award,
   Edit2,
   VerifiedIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { DOC_VERIFY_STATUS, TRAINER_STATUS } from "@/constants/constants";
+import { DOC_VERIFY_STATUS, TRAINER_STATUS } from '@/constants/constants';
 
-import { parseISO } from "date-fns";
+import { parseISO } from 'date-fns';
 
-import { useTrainerStore, type ICertification } from "../store/useTrainerStore";
-import CertificatesForm from "./profileEditForm/CertificatesForm";
+import { useTrainerStore, type ICertification } from '../store/useTrainerStore';
+import CertificatesForm from './profileEditForm/CertificatesForm';
 
-import { trainerService } from "../service/trainerService";
-import toast from "react-hot-toast";
-import IdVerificationFormEdit from "./profileEditForm/IdVerificationFormEdit";
-import AvailabilityFormEdit from "./profileEditForm/AvailabiltyFormEdit";
-import PaymentInfoFormEdit from "./profileEditForm/PaymentInfoEdit";
+import { trainerService } from '../service/trainerService';
+import toast from 'react-hot-toast';
+import IdVerificationFormEdit from './profileEditForm/IdVerificationFormEdit';
+import AvailabilityFormEdit from './profileEditForm/AvailabiltyFormEdit';
+import PaymentInfoFormEdit from './profileEditForm/PaymentInfoEdit';
+import { formatTo12Hour } from '@/utils/formatDate';
 
 const ProfileView = () => {
   const fetchProfile = useTrainerStore((state) => state.fetchProfile);
   const profile = useTrainerStore((state) => state.profile);
-  const setProfile=useTrainerStore((state)=>state.setProfile);
+  const setProfile = useTrainerStore((state) => state.setProfile);
   const [editingSection, setEditingSection] = useState<string | null>(null);
   // const {user}=useAuthStore();
 
   useEffect(() => {
     fetchProfile();
+    
   }, []);
 
-  const handleClose=()=>setEditingSection(null);
-  const reSubmit=async()=>{
-    if(profile){
-
-      if(profile?.certificationInfo.status===DOC_VERIFY_STATUS.REJECTED ||
-        profile?.idVerification.status===DOC_VERIFY_STATUS.REJECTED){
+  const handleClose = () => setEditingSection(null);
+  const reSubmit = async () => {
+    if (profile) {
+      if (
+        profile?.certificationInfo.status === DOC_VERIFY_STATUS.REJECTED ||
+        profile?.idVerification.status === DOC_VERIFY_STATUS.REJECTED
+      ) {
         toast.custom('Please update your rejected documents,then submit');
         return;
       }
-      const data=await trainerService.updateTrainerStatus(profile?.id,TRAINER_STATUS.SUBMITTED);
-      setProfile(data.profile);    
+      const data = await trainerService.updateTrainerStatus(
+        profile?.id,
+        TRAINER_STATUS.SUBMITTED
+      );
+      setProfile(data.profile);
     }
-    
-  }
-
+  };
+console.log(profile);
   return (
     <div className=" bg-card grid grid-cols-1 lg:grid-cols-1 gap-6">
       <div className="w-full py-6 z-50 font-bold">
         <h1>Profile Overview</h1>
-        <p>{profile?.status===TRAINER_STATUS.REJECTED && (<Badge variant="destructive"> {profile?.status}</Badge>)}</p>
-        <span className="text-xs font-normal text-amber-200">{profile?.status===TRAINER_STATUS.APPROVED? <VerifiedIcon className="text-primary"/>:`status: ${profile?.status}`}</span>
+        <p>
+          {profile?.status === TRAINER_STATUS.REJECTED && (
+            <Badge variant="destructive"> {profile?.status}</Badge>
+          )}
+        </p>
+        <span className="text-xs font-normal text-amber-200">
+          {profile?.status === TRAINER_STATUS.APPROVED ? (
+            <VerifiedIcon className="text-primary" />
+          ) : (
+            `status: ${profile?.status}`
+          )}
+        </span>
       </div>
       {profile && Object.keys(profile).length > 0 ? (
         <>
@@ -71,7 +86,7 @@ const ProfileView = () => {
           <div className="lg:col-span-2 space-y-4">
             <Accordion
               type="multiple"
-              defaultValue={["personal", "id"]}
+              defaultValue={['personal', 'id']}
               className="w-full"
             >
               {/* Basic info */}
@@ -86,12 +101,11 @@ const ProfileView = () => {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="   relative pb-4 bg-[#1e1e1f] border-t pt-4 rounded-lg">
-                 {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&
-                      <Button className=" absolute right-0"
-                    variant="ghost">
-                      <Edit2 className=" text-trainer-primary"/>
-                  </Button>
-                }
+                  {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
+                    <Button className=" absolute right-0" variant="ghost">
+                      <Edit2 className=" text-trainer-primary" />
+                    </Button>
+                  )}
                   <div className=" grid grid-cols-2 gap-y-4 justify-items-start text-left px-3">
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
@@ -103,32 +117,32 @@ const ProfileView = () => {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        Core Discipline{" "}
+                        Core Discipline{' '}
                       </p>
                       <p className="text-sm font-medium">
-                        {profile?.category}: ({profile?.coreDiscipline})
+                        {profile?.category} -{profile?.coreDiscipline}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        Expertise{" "}
+                        Expertise{' '}
                       </p>
                       <p className="text-sm font-medium">
-                        {profile?.specialties}{" "}
+                        {profile?.specialties.join(', ')}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-muted-foreground uppercase">
-                        Experience :{" "}
-                      </p>{" "}
+                        Experience :{' '}
+                      </p>{' '}
                       <span className="text-sm font-medium">
-                        {profile?.experience}
+                        {profile?.experience} year
                       </span>
                       <hr />
                       <p className="text-sm font-semibold text-muted-foreground uppercase">
-                        Language{" "}
+                        Language{' '}
                       </p>
-                      <p>{profile?.languages}</p>
+                      <p>{profile?.languages.join(", ")}</p>
                     </div>
 
                     <div className="col-span-2">
@@ -155,12 +169,11 @@ const ProfileView = () => {
                 </AccordionTrigger>
 
                 <AccordionContent className=" relative pb-4 bg-[#1e1e1f] border-t pt-4">
-                  {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&
-                      <Button className=" absolute right-0"
-                    variant="ghost">
-                      <Edit2 className=" text-trainer-primary"/>
-                  </Button>
-                  }
+                  {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
+                    <Button className=" absolute right-0" variant="ghost">
+                      <Edit2 className=" text-trainer-primary" />
+                    </Button>
+                  )}
                   <div className="grid grid-cols-2 gap-y-4 justify-items-start text-left px-3">
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
@@ -176,20 +189,20 @@ const ProfileView = () => {
                       </p>
                       <p className="text-sm font-medium">
                         {parseISO(
-                          profile?.personalInfo.DOB ?? "",
+                          profile?.personalInfo.DOB ?? ''
                         ).toLocaleDateString()}
                         {}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs  font-semibold text-muted-foreground uppercase">
-                        Gender{" "}
+                        Gender{' '}
                       </p>
                       <p>{profile?.personalInfo.gender}</p>
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        Phone{" "}
+                        Phone{' '}
                       </p>
                       <p className="text-sm font-medium">
                         {profile?.personalInfo.phone}
@@ -201,9 +214,9 @@ const ProfileView = () => {
                         Address
                       </p>
                       <p className="text-sm">
-                        {profile?.personalInfo.address.street},{" "}
-                        {profile?.personalInfo.address.city},{" "}
-                        {profile?.personalInfo.address.state} -{" "}
+                        {profile?.personalInfo.address.street},{' '}
+                        {profile?.personalInfo.address.city},{' '}
+                        {profile?.personalInfo.address.state} -{' '}
                         {profile?.personalInfo.address.zip}
                       </p>
                     </div>
@@ -219,17 +232,26 @@ const ProfileView = () => {
                   <div className="flex items-center gap-3">
                     <Award className="text-green-600 h-5 w-5" />
                     <span className="font-bold">
-                      Professional Certificates{" "}
+                      Professional Certificates{' '}
                     </span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3">
                   <div className=" grid grid-cols-2 gap-y-4">
-                    {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&    
-                      <Button variant="outline"className=" absolute right-0"
-                      onClick={()=>setEditingSection("certificationInfo")}>{profile?.certificationInfo?.status !==
-                      DOC_VERIFY_STATUS.REJECTED ? <Edit2 className=" text-trainer-primary"/>:"Change"}</Button>
-                    }
+                    {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
+                      <Button
+                        variant="outline"
+                        className=" absolute right-0"
+                        onClick={() => setEditingSection('certificationInfo')}
+                      >
+                        {profile?.certificationInfo?.status !==
+                        DOC_VERIFY_STATUS.REJECTED ? (
+                          <Edit2 className=" text-trainer-primary" />
+                        ) : (
+                          'Change'
+                        )}
+                      </Button>
+                    )}
                     {profile?.certificationInfo.documents.map(
                       (cert: ICertification, i: number) => (
                         <div
@@ -240,11 +262,11 @@ const ProfileView = () => {
                             Name:{cert.name}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Issued:{" "}
+                            Issued:{' '}
                             {new Date(cert.issuedAt).toLocaleDateString()}
                           </p>
                           <p className="text-xs text-muted-foreground mb-2">
-                            Expires:{" "}
+                            Expires:{' '}
                             {new Date(cert.validUpto).toLocaleDateString()}
                           </p>
 
@@ -262,36 +284,40 @@ const ProfileView = () => {
                             </a>
                           </Button>
                         </div>
-                      ),
+                      )
                     )}
-                     {profile?.certificationInfo.documents.length && (
-                        <div className=" flex items-left right-0 justify-around gap-5 px-2">  
-                          <div>                  
-                            <p
-                              className={`text-sm ${profile?.certificationInfo?.status === DOC_VERIFY_STATUS.REJECTED
-                                  ? "text-red-600"
-                                  : "text-white"
-                              }`}> verification Status : 
-                              {profile?.certificationInfo?.status.toUpperCase()} 
-                              {profile.certificationInfo.status=== DOC_VERIFY_STATUS.REJECTED &&(` with Reason : " ${ profile?.certificationInfo?.rejectReason} "` )}
-                            </p>           
-                            
-                          </div>   
-                        </div> 
-                      )}    
+                    {profile?.certificationInfo.documents.length && (
+                      <div className=" flex items-left right-0 justify-around gap-5 px-2">
+                        <div>
+                          <p
+                            className={`text-sm ${
+                              profile?.certificationInfo?.status ===
+                              DOC_VERIFY_STATUS.REJECTED
+                                ? 'text-red-600'
+                                : 'text-white'
+                            }`}
+                          >
+                            {' '}
+                            verification Status :
+                            {profile?.certificationInfo?.status.toUpperCase()}
+                            {profile.certificationInfo.status ===
+                              DOC_VERIFY_STATUS.REJECTED &&
+                              ` with Reason : " ${profile?.certificationInfo?.rejectReason} "`}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {/* edit section */}
-                  <div>                        
-                           {editingSection === "certificationInfo" &&(                          
-                            <CertificatesForm
-                            initialData={profile?.certificationInfo.documents || []}
-                              onCancel={handleClose}
-                            
-                              onSuccess={handleClose}
-                            />   
-                         
-                          )}                           
-                  </div>  
+                  <div>
+                    {editingSection === 'certificationInfo' && (
+                      <CertificatesForm
+                        initialData={profile?.certificationInfo.documents || []}
+                        onCancel={handleClose}
+                        onSuccess={handleClose}
+                      />
+                    )}
+                  </div>
                 </AccordionContent>
               </AccordionItem>
 
@@ -306,27 +332,37 @@ const ProfileView = () => {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className=" relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3">
-                    {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&
-                      <Button variant="outline"className=" absolute right-0"
-                      onClick={()=>setEditingSection("idVerification")}>{profile?.idVerification?.status !== DOC_VERIFY_STATUS.REJECTED ? <Edit2 className=" text-trainer-primary"/>:"Change"}</Button>
-                    }
+                  {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
+                    <Button
+                      variant="outline"
+                      className=" absolute right-0"
+                      onClick={() => setEditingSection('idVerification')}
+                    >
+                      {profile?.idVerification?.status !==
+                      DOC_VERIFY_STATUS.REJECTED ? (
+                        <Edit2 className=" text-trainer-primary" />
+                      ) : (
+                        'Change'
+                      )}
+                    </Button>
+                  )}
                   <div className="flex flex-col md:flex-row gap-4 items-start">
                     <div className="flex-1 space-y-3">
                       <p className="text-sm">
                         Type: <strong>{profile?.idVerification.idType}</strong>
                       </p>
                       <p className="text-sm">
-                        Number:{" "}
+                        Number:{' '}
                         <strong>{profile?.idVerification.idNumber}</strong>
                       </p>
                       <Badge
                         variant={
                           profile?.idVerification.verified
-                            ? "default"
-                            : "destructive"
+                            ? 'default'
+                            : 'destructive'
                         }
                       >
-                         {profile?.idVerification.status}
+                        {profile?.idVerification.status}
                       </Badge>
                     </div>
 
@@ -344,14 +380,14 @@ const ProfileView = () => {
                         </a>
                       </Button>
                     </div>
-                     {profile?.idVerification?.status && (
-                      <div className="flex items-end right-0 justify-around">                      
-                        
+                    {profile?.idVerification?.status && (
+                      <div className="flex items-end right-0 justify-around">
                         {profile?.idVerification?.status ===
                           DOC_VERIFY_STATUS.REJECTED && (
                           <div className="flex items-center gap-2 ">
-                            
-                            <Button variant="ghost"><Edit2 className=" text-trainer-primary"/></Button>
+                            <Button variant="ghost">
+                              <Edit2 className=" text-trainer-primary" />
+                            </Button>
                           </div>
                         )}
                       </div>
@@ -359,17 +395,19 @@ const ProfileView = () => {
                     {profile?.idVerification.status ===
                       DOC_VERIFY_STATUS.REJECTED && (
                       <div className="flex items-center gap-2 ">
-                        <Button variant="ghost"><Edit2 className=" text-trainer-primary"/></Button>
+                        <Button variant="ghost">
+                          <Edit2 className=" text-trainer-primary" />
+                        </Button>
                       </div>
                     )}
                   </div>
-                  {profile &&editingSection==='idVerification'&& (
+                  {profile && editingSection === 'idVerification' && (
                     <IdVerificationFormEdit
-                    initialData={{idType: profile.idVerification?.idType,
-                                  idNumber: profile.idVerification?.idNumber,
-                    }}
+                      initialData={{
+                        idType: profile.idVerification?.idType,
+                        idNumber: profile.idVerification?.idNumber,
+                      }}
                       onCancel={handleClose}
-                  
                     />
                   )}
                 </AccordionContent>
@@ -386,27 +424,33 @@ const ProfileView = () => {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3 ">
-                  {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&
-                    <Button variant="ghost"className=" absolute right-0"
-                    onClick={()=>setEditingSection("availability")}> <Edit2 className=" text-trainer-primary"/></Button>
-                  }
+                  {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
+                    <Button
+                      variant="ghost"
+                      className=" absolute right-0"
+                      onClick={() => setEditingSection('availability')}
+                    >
+                      {' '}
+                      <Edit2 className=" text-trainer-primary" />
+                    </Button>
+                  )}
                   <div className="grid grid-cols-2 gap-y-4">
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
                         SessionCharge
                       </p>
                       <p className="text-sm font-medium">
-                        {profile?.pricing.sessionCharge}{" "}
-                        {profile?.pricing.currency}
+                       ₹ {profile?.pricing.sessionCharge}{' '}
+                        
                       </p>
                     </div>
                     <div className="">
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        Availabilty:{" "}
+                        Availabilty:{' '}
                         <span className="px-2 text-sm font-bold text-primary">
                           {profile?.availability.isAvailable
-                            ? "Active"
-                            : "Not Available"}{" "}
+                            ? 'Active'
+                            : 'Not Available'}{' '}
                         </span>
                       </p>
                       <div className="space-y-2 ">
@@ -414,9 +458,9 @@ const ProfileView = () => {
                           Object.entries(profile.availability)
                             .filter(
                               ([key, value]) =>
-                                key !== "isAvailable" &&
-                                typeof value === "object" &&
-                                value.available,
+                                key !== 'isAvailable' &&
+                                typeof value === 'object' &&
+                                value.available
                             )
                             .map(([day, info]: [string, any]) => (
                               <div
@@ -427,21 +471,19 @@ const ProfileView = () => {
                                   {day}:
                                 </span>
                                 <span className="px-10 text-muted-foreground">
-                                  {info.startTime} - {info.endTime}
+                                  {formatTo12Hour(info.startTime)} - {formatTo12Hour(info.endTime)}
                                 </span>
                               </div>
                             ))}
                       </div>
                     </div>
                   </div>
-                  {editingSection === "availability" && (
-                    <AvailabilityFormEdit 
-                      initialData=
-                      {{ 
+                  {editingSection === 'availability' && (
+                    <AvailabilityFormEdit
+                      initialData={{
                         pricing: profile.pricing,
-                        availability:profile?.availability,
-                      
-                      }}                      
+                        availability: profile?.availability,
+                      }}
                       onCancel={() => setEditingSection(null)}
                     />
                   )}
@@ -459,20 +501,26 @@ const ProfileView = () => {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className=" relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3">
-                  {profile.status!==TRAINER_STATUS.UNDER_REVIEW &&
-                    <Button variant="ghost"className=" absolute right-0"
-                    onClick={()=>setEditingSection("paymentInfo")}> <Edit2 className=" text-trainer-primary"/></Button>
-                  }
+                  {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
+                    <Button
+                      variant="ghost"
+                      className=" absolute right-0"
+                      onClick={() => setEditingSection('paymentInfo')}
+                    >
+                      {' '}
+                      <Edit2 className=" text-trainer-primary" />
+                    </Button>
+                  )}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-3 bg-secondary/20 rounded">
                       <p className="text-xs text-muted-foreground uppercase font-bold">
                         Bank Account
                       </p>
                       <p className="text-sm">
-                        Name:{profile?.paymentInfo.bankAccount?.accountName}
+                        Name: {profile?.paymentInfo.bankAccount?.accountName}
                       </p>
                       <p className="text-sm">
-                        A/C:{profile?.paymentInfo.bankAccount?.accountNumber}
+                        A/C : {profile?.paymentInfo.bankAccount?.accountNumber}
                       </p>
                       <p className="text-sm">
                         IFSC: {profile?.paymentInfo.bankAccount?.ifscCode}
@@ -483,14 +531,14 @@ const ProfileView = () => {
                         UPI ID
                       </p>
                       <p className="text-sm font-mono mt-2">
-                        {profile?.paymentInfo.upiId || "Not Provided"}
+                        {profile?.paymentInfo.upiId || 'Not Provided'}
                       </p>
                     </div>
                   </div>
-                  {editingSection === "paymentInfo" && (
-                    <PaymentInfoFormEdit 
-                      initialData={profile?.paymentInfo} 
-                      onCancel={() => setEditingSection(null)} 
+                  {editingSection === 'paymentInfo' && (
+                    <PaymentInfoFormEdit
+                      initialData={profile?.paymentInfo}
+                      onCancel={() => setEditingSection(null)}
                     />
                   )}
                 </AccordionContent>
@@ -502,19 +550,17 @@ const ProfileView = () => {
             {/* ADMIN ACTION BOX */}
             <div className="border rounded-lg bg-secondary/10 p-4 sticky top-4">
               {profile && (
-              <div className="space-y-2">
-                {profile.status===TRAINER_STATUS.REJECTED &&(
-                  <Button
-                    className="w-full bg-green-600 hover:bg-green-700 h-12"
-                    onClick={reSubmit}
-                  >
-                  submit for Re review
-                  </Button>
-                )}
-               
-                
-              </div>
-            )}
+                <div className="space-y-2">
+                  {profile.status === TRAINER_STATUS.REJECTED && (
+                    <Button
+                      className="w-full bg-green-600 hover:bg-green-700 h-12"
+                      onClick={reSubmit}
+                    >
+                      submit for Re review
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </>

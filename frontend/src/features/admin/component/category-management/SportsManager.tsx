@@ -1,7 +1,6 @@
-;
-import { Search, Filter, Edit, Trash2, Trash } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Search, Filter, Trash2 } from 'lucide-react';
+
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -9,76 +8,70 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { useEffect, useState } from "react";
-import { CategoryMangementService } from "../../service/categoryManagementService";
-import { UseAdminStore } from "../../store/useAdminStore";
-import {  SportModal } from "./Sport.modal";
-import { useDebounce } from "@/hooks/useDebounce";
-import toast from "react-hot-toast";
-import ConfirmDialog from "@/components/reusable/ConfirmDialog";
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { useEffect, useState } from 'react';
+import { CategoryMangementService } from '../../service/categoryManagementService';
+import { UseAdminStore } from '../../store/useAdminStore';
+import { SportModal } from './Sport.modal';
+import { useDebounce } from '@/hooks/useDebounce';
+import toast from 'react-hot-toast';
+import ConfirmDialog from '@/components/reusable/ConfirmDialog';
 
 const SportsManager = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all"); 
+  const { sports, setSports, updateSport, deleteSport } = UseAdminStore();
 
-  const {sports,setSports,updateSport,deleteSport}=UseAdminStore();
-  
-  const debouncedSearch=useDebounce(searchQuery,500);
+  const debouncedSearch = useDebounce(searchQuery, 500);
 
- 
-    
- 
+  useEffect(() => {
+    const fetchSports = async () => {
+      try {
+        const data = await CategoryMangementService.getSports({
+          page: 1,
+          search: debouncedSearch,
+          status: statusFilter,
+        });
+        setSports(data.sports);
+      } catch (error) {
+        toast.error(error?.toString() || 'Something went wrong');
+        setSports([]);
+      }
+    };
+    fetchSports();
+  }, [debouncedSearch, statusFilter]);
 
-  useEffect(()=>{
-    const fetchSports=async()=>{
-          try{
-            const data=await CategoryMangementService.getSports({
-              page:1,
-              search:debouncedSearch,
-              status:statusFilter,
-            });             
-            setSports(data.sports);            
-          }
-          catch(error){
-            toast.error(error?.toString() || "Something went wrong");
-            setSports([]);
-          }
-    }
-      fetchSports(); 
-    },[debouncedSearch,statusFilter]);
-  
-    const handleToggleStatus= async(id:string)=>{
-        const data=await CategoryMangementService.toggleSportStatus(id);
-        updateSport(data.sport);
-    }
+  const handleToggleStatus = async (id: string) => {
+    const data = await CategoryMangementService.toggleSportStatus(id);
+    updateSport(data.sport);
+  };
 
-    const handleDeleteSport=async(id:string)=>{
-      const data=await CategoryMangementService.deleteSport(id);
-      deleteSport(data.id);
-    }
+  const handleDeleteSport = async (id: string) => {
+    const data = await CategoryMangementService.deleteSport(id);
+    deleteSport(data.id);
+  };
   return (
     <div className="bg-card space-y-6 mx-5 justify-center">
-      
       <div className="  flex-row  items-center ">
         <div>
-          <h2 className="text-xl font-bold tracking-tight ">Sports Management</h2>
+          <h2 className="text-xl font-bold tracking-tight ">
+            Sports Management
+          </h2>
           <p className="text-sm text-muted-foreground">
             Create and manage the sports available for trainers.
           </p>
-        </div>       
+        </div>
       </div>
-      
 
       {/* MIDDLE ROW: Search and Filter */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-card p-4 rounded-lg border">
@@ -104,11 +97,11 @@ const SportsManager = () => {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex justify-end">         
-           <SportModal isEdit={false} />        
+        <div className="flex justify-end">
+          <SportModal isEdit={false} />
+        </div>
       </div>
-      </div>
-      
+
       {/* MAIN AREA: Data Table */}
       <div className="rounded-md border bg-card">
         <Table>
@@ -122,54 +115,51 @@ const SportsManager = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sports?.length ?(
-              sports?.map((sport) =>(
+            {sports?.length ? (
+              sports?.map((sport) => (
                 <TableRow key={sport?.id}>
                   <TableCell className="text-2xl">{sport.icon}</TableCell>
-                  <TableCell className="font-medium">{sport.sportName}</TableCell>
-                  <TableCell className="text-muted-foreground">/{sport.slug}</TableCell>
+                  <TableCell className="font-medium">
+                    {sport.sportName}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    /{sport.slug}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Switch 
-                        checked={sport.isActive} 
+                      <Switch
+                        checked={sport.isActive}
                         onCheckedChange={() => handleToggleStatus(sport.id)}
                       />
-                      <Badge variant={sport.isActive ? "default" : "secondary"}>
-                      {sport.isActive ? "Active" : "Not Active"}
+                      <Badge variant={sport.isActive ? 'default' : 'secondary'}>
+                        {sport.isActive ? 'Active' : 'Not Active'}
                       </Badge>
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                          <SportModal
-                             isEdit={true} 
-                             currentSport={sport} /> 
-                          {/* <Button variant="ghost" size="icon" onClick={()=>setIsEditing(true)}><Edit className="h-4 w-4"/></Button> */}
-                          <ConfirmDialog
-                            icon={<Trash2 className="h-4 w-4 text-red-400"/>}
-                            title={`Delete ${sport.sportName} ?`}  
-                            description={`this will remove ${sport.sportName} from sports list `}
-                            onConfirm={()=>handleDeleteSport(sport.id)}
-                          />
-                      </div>
+                    <div className="flex justify-end gap-2">
+                      <SportModal isEdit={true} currentSport={sport} />
+                      {/* <Button variant="ghost" size="icon" onClick={()=>setIsEditing(true)}><Edit className="h-4 w-4"/></Button> */}
+                      <ConfirmDialog
+                        icon={<Trash2 className="h-4 w-4 text-red-400" />}
+                        title={`Delete ${sport.sportName} ?`}
+                        description={`this will remove ${sport.sportName} from sports list `}
+                        onConfirm={() => handleDeleteSport(sport.id)}
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
-              ))):(
-                <TableRow>
-                  <TableCell  className="text-center">
+              ))
+            ) : (
+              <TableRow>
+                <TableCell className="text-center">
                   <div>No sports to list</div>
-                  </TableCell>
-                </TableRow>
-                
-              )}
-
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
-      
-       
-    
-      
     </div>
   );
 };

@@ -1,20 +1,25 @@
-import api from "../../../api/axiosInstance";
-import { LIMIT, type UserRole } from "../../../constants/constants";
-import type { getAllusersParams, queryParamsOptions } from "../store/types";
-import { ADMIN_ROUTES } from "./admin.api";
-
+import api from '../../../api/axiosInstance';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  type UserRole,
+} from '../../../constants/constants';
+import type { getAllusersParams, queryParamsOptions } from '../store/types';
+import { ADMIN_ROUTES } from './admin.api';
 
 export const userManagementService = {
   getUsers: async (queryParams: queryParamsOptions) => {
-    const params: getAllusersParams = { page: queryParams.page, limit: LIMIT };
+    const params: getAllusersParams = {
+      page: queryParams.page,
+      limit: PAGINATION_DEFAULT_LIMIT,
+    };
 
     if (queryParams.search) {
       params.search = queryParams.search;
     }
-    if (queryParams.status && queryParams.status !== "all") {
+    if (queryParams.status && queryParams.status !== 'all') {
       params.status = queryParams.status;
     }
-    if (queryParams.role && queryParams.role !== "all") {
+    if (queryParams.role && queryParams.role !== 'all') {
       params.role = queryParams.role;
     }
     const response = await api.get(ADMIN_ROUTES.GET_USERS, { params });

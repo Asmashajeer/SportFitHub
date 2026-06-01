@@ -1,4 +1,4 @@
-import { CURRENCY, GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY } from '@/constants/enums';
+import {  GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY } from '@/constants/enums';
 import z from 'zod';
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 // 1.
@@ -48,7 +48,7 @@ const daySchema = z.object({
 export const AvailabilityPricingSchema = z.object({
   pricing: z.object({
     sessionCharge: z.number(),
-    currency: z.string(),
+   
   }),
 
   availability: z.object({
@@ -61,7 +61,7 @@ export const AvailabilityPricingSchema = z.object({
     Saturday: daySchema,
     Sunday: daySchema,
   }),
-  // currentLocation coordinates usually handled by a Map picker
+  
 });
 export type AvailabiltyPricingReqDTO = z.infer<typeof AvailabilityPricingSchema>;
 
@@ -169,7 +169,7 @@ export const AddTrainerProfileSchema = z.object({
       .number()
       .min(1, 'Price must be at least 1')
       .max(10000, 'Price seems too high'),
-    currency: z.enum(CURRENCY),
+   
   }),
 
   paymentInfo: z

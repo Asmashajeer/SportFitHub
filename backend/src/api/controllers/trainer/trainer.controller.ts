@@ -1,7 +1,8 @@
-import { TRAINER_STATUS } from '@/constants/enums';
+
 import { STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import { ITrainerService } from '@/interfaces/services/trainer/Itrainer.service';
-import { IUser } from '@/models/user.model';
+import { AuthRequest } from '@/middleware/auth.middleware';
+
 import Logger from '@/utils/logger';
 
 import { Request, Response, NextFunction } from 'express';
@@ -15,8 +16,9 @@ export class TrainerController {
 
   addProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = req.user as IUser;
-      const userId = user.id;
+        const authReq = req as AuthRequest;
+              const userId = authReq.user.id;
+     
       await this._trainerService.checkExistingProfile(userId);
 
       const profile = {
@@ -24,7 +26,7 @@ export class TrainerController {
         ...req.body,
       };
       const result = await this._trainerService.addProfile(profile);
-      Logger.info('Trainer created an application', { id: user.id });
+      Logger.info('Trainer created an application', { id: userId });
       res.status(STATUS_CODE.SUCCESS.CREATED).json({
         success: true,
         message: SUCCESS_MESSAGES.USER.PROFILE_CREATED,
@@ -36,8 +38,8 @@ export class TrainerController {
   };
   getProfilePic = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = req.user as IUser;
-      const userId = user.id;
+      const authReq = req as AuthRequest;
+              const userId = authReq.user.id;
       const profile = await this._trainerService.getTrainerByUserId(userId);
       const profilePic = profile.profilePic;
       res.status(STATUS_CODE.SUCCESS.OK).json({
@@ -50,8 +52,8 @@ export class TrainerController {
   };
   getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = req.user as IUser;
-      const userId = user.id;
+     const authReq = req as AuthRequest;
+              const userId = authReq.user.id;
       const profile = await this._trainerService.getTrainerByUserId(userId);
 
       res.status(STATUS_CODE.SUCCESS.OK).json({
@@ -121,13 +123,11 @@ export class TrainerController {
   };
 
   updateStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log(
-      'HELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO'
-    );
+   
     const { id } = req.params;
-    console.log(id);
+    
     const { status } = req.body;
-    console.log(status);
+   
     try {
       const profile = await this._trainerService.resubmitApplicaion(id, status);
       Logger.info(`Resubmitted the application  for ID: ${id}`, {

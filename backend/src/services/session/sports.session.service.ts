@@ -1,0 +1,232 @@
+
+import { PAGINATION_LIMIT } from '@/constants/enums';
+
+import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
+import {
+  GetSessionsResponseDTO, 
+  PaginatedSportsSessionsResponseDTO, 
+  SportSessionDetailedPublicDTO,
+  SportsSessionResponseDTO,
+} from '@/dtos/response/session/sports.session.response.dto';
+import { ISportsSessionRepository } from '@/interfaces/repositories/ISports.session.repository';
+import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
+import { ISportsSessionService } from '@/interfaces/services/session/ISports.session.service';
+import {
+  toSportSessionDetailedPublicDTO,
+  toSportSessionPublicDTO,
+  toSportsSessionResponseDTO,
+} from '@/mappers/sports.session.mapper';
+
+import { ISportsSession } from '@/models/sportsSession.model';
+
+import AppError from '@/utils/AppError';
+import { FilterQuery } from 'mongoose';
+import { Types } from 'mongoose';
+import { formatTo12Hour } from '@/utils/formatTo';
+
+export class SportsSessionService implements ISportsSessionService {
+  private _sportsSessionRepo: ISportsSessionRepository;
+  private _trainerRepo: ITrainerRepository;
+
+  constructor(sportsSessionRepo: ISportsSessionRepository, trainerRepo: ITrainerRepository) {
+    this._sportsSessionRepo = sportsSessionRepo;
+    this._trainerRepo = trainerRepo;
+  }
+  //----------create Session------------------
+  async createSportSession(
+    sessionData: Partial<ISportsSession>
+  ): Promise<SportsSessionResponseDTO> {
+
+
+    //-----------check timeslots are within trainer working hours
+    this.checkWithinWorkingHours(sessionData);
+
+    //check for conflict with existing session's timeslots
+    const newSlots=sessionData.timeSlots; 
+    const conflict=await this.checkConflicts(sessionData.trainerId, newSlots);
+    if (conflict?.hasConflict) throw new AppError(conflict.message,STATUS_CODE.ERROR.CONFLICT);
+
+    const data = await this._sportsSessionRepo.create(sessionData);
+    if (!data) {
+      throw new AppError(ERROR_MESSAGES.SESSION.CREATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
+    }
+    const session = toSportsSessionResponseDTO(data);
+    return session;
+  }
+
+  //--------update session-----------
+  async updateSportSession(
+    id: string | Types.ObjectId,
+    sessionData: Partial<ISportsSession>
+  ): Promise<SportsSessionResponseDTO> {
+     //check timeslots are within trainer working hours
+    this.checkWithinWorkingHours(sessionData);
+
+    //check for conflict with existing session's timeslots
+    const newSlots=sessionData.timeSlots;
+    const conflict=await this.checkConflicts(sessionData.trainerId, newSlots,sessionData.id);
+    if (conflict?.hasConflict) throw new AppError(conflict.message,STATUS_CODE.ERROR.CONFLICT);
+    const data = await this._sportsSessionRepo.findOneAndUpdate(id, sessionData);
+    if (!data) {
+      throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
+    }
+    const session = toSportsSessionResponseDTO(data);
+    return session;
+  }
+
+  //-------delete session---------
+  async deleteSportSession(id: string | Types.ObjectId): Promise<SportsSessionResponseDTO> {
+    const data = await this._sportsSessionRepo.findOneAndUpdate(id, {
+      isDeleted: true,
+      isActive: false,
+    });
+    if (!data) {
+      throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
+    }
+    const session = toSportsSessionResponseDTO(data);
+    return session;
+  }
+
+  //-------------- get all sessions by a trianerId--------------
+  async getSessionsByTrainer(userId: string | Types.ObjectId,filters: FilterQuery<ISportsSession>): Promise<PaginatedSportsSessionsResponseDTO> {
+    const trainer = await this._trainerRepo.findByUserId(userId);
+    if (!trainer)
+      throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
+    const { search, page,limit } = filters;
+    const query: FilterQuery<ISportsSession> = {trainerId:trainer.id, isDeleted: false,page:page,limit:limit };
+    if (search) {
+      query.$or=[
+        {sessionName : { $regex: search, $options: 'i' }},
+        {sessionType : { $regex: search, $options: 'i' }},       
+        { mode:{ $regex: search, $options: 'i' }}
+      ]
+    }
+    // search by duration
+    const isNumber = !isNaN(Number(search));
+    if (isNumber && search !== "") {
+    query.$or.push({ duration: Number(search) });
+    
+}
+    const result = await this._sportsSessionRepo.findByTrainer(query);
+    const sessionData = result?.sessions || [];
+    const sessions = sessionData.map(session => toSportsSessionResponseDTO(session));
+    return { sessions, pagination: result.pagination };
+  }
+
+  //--------------- get all sessions--------------
+  async getAllSessions(filters: FilterQuery<ISportsSession>): Promise<GetSessionsResponseDTO> {
+    const {page,limit, search, sport, sessionType, ageGroup,lat,lng,radius } = filters;
+
+    const query: FilterQuery<ISportsSession> = { isDeleted: false ,isApproved:true,isActive:true};
+   
+    if (search) {
+      query.$or = [
+        { sessionName: { $regex: search, $options: 'i' } },
+        { slug: { $regex: search, $options: 'i' } },
+      ];
+      
+    }
+    if (sport && sport !== 'all') query.sportCategory = sport;
+    if (sessionType && sessionType !== 'all') query.sessionType = sessionType;
+    if (ageGroup && ageGroup !== 'all') query.ageGroup = ageGroup;
+
+    
+    if (lat && lng && radius) {
+    
+      query["venue.location"] = {
+        $geoWithin: {
+      $centerSphere: [
+        [Number(lat), Number(lng)],  // [longitude, latitude]
+        radius/ 6371 
+      ]
+    }
+      };
+    }  
+    const result = await this._sportsSessionRepo.findAll(query, {page: Number(page) || 1,limit: Number(limit) || PAGINATION_LIMIT});
+    const sessionData = result?.sessions || [];
+    const sessions = sessionData.map(session => toSportSessionPublicDTO(session));
+    return { sessions, pagination: result.pagination };
+  }
+
+  // ---------------------get  a session by ID-public-------------
+  async getASession(id: string | Types.ObjectId): Promise<SportSessionDetailedPublicDTO> {
+    const sessionData = await this._sportsSessionRepo.findBysessionId(id);
+
+    const session = toSportSessionDetailedPublicDTO(sessionData);
+    return session;
+  }
+
+
+// -------------Find any session belonging to this trainer that has an overlap---------------
+   checkConflicts = async  (trainerId, newTimeSlots, sessionId = null) => {
+    for (const dayEntry of newTimeSlots) {
+      const { day, slots } = dayEntry;
+
+      for (const slot of slots) {        
+        const conflict = await this._sportsSessionRepo.findOne({
+          trainerId,
+          // If editing, exclude the current session itself from the check
+          _id: { $ne: sessionId }, 
+          timeSlots: {
+            $elemMatch: {
+              day: day,
+              slots: {
+                $elemMatch: {
+                  startTime: { $lt: slot.endTime },
+                  endTime: { $gt: slot.startTime }
+                }
+              }
+            }
+          }
+        });
+
+        if (conflict) {
+          return {
+            hasConflict: true,
+            message: `Time conflict on ${day} (${formatTo12Hour(slot.startTime)}-${formatTo12Hour(slot.endTime)}) with existing session: "${conflict.sessionName}"`
+          };
+        }
+      }
+    }
+    return { hasConflict: false };
+  }; 
+
+//--------------- check session is within in trainer working hours-----------------
+  checkWithinWorkingHours=async(sessionData)=>{
+    const trainerProfile = await this._trainerRepo.findById(sessionData.trainerId);
+    const availability = trainerProfile.availability;
+
+    sessionData.timeSlots.forEach(newDayEntry => {
+        const dayName = newDayEntry.day;
+        const trainerDay = availability[dayName];
+
+        // 1. Check if they even work that day
+        if (!trainerDay || !trainerDay.available) {
+            throw new AppError(`Trainer does not work on ${dayName}`, STATUS_CODE.ERROR.BAD_REQUEST);
+        }
+
+        // 2. Check every slot against working hours
+        newDayEntry.slots.forEach(slot => {
+            const isOutsideHours = 
+                slot.startTime < trainerDay.startTime || 
+                slot.endTime > trainerDay.endTime;
+
+            if (isOutsideHours) {
+                throw new AppError(
+                    `Slot ${slot.startTime}-${slot.endTime} is outside working hours (${trainerDay.startTime}-${trainerDay.endTime})`,
+                    STATUS_CODE.ERROR.BAD_REQUEST
+                );
+            }
+        });
+    });
+  }
+
+
+
+
+  
+}
+
+
+
+
