@@ -37,7 +37,7 @@ const TransactionCard = ({
         <p
           className={`flex items-center text-sm  ${transaction.transactionType === TRANSACTION_TYPE.CREDIT ? 'text-emerald-600' : 'text-amber-700'}`}
         >
-          {CURRENCY.INR} {transaction.amount.toFixed(2)}
+          {CURRENCY} {transaction.amount.toFixed(2)}
           <span className="">
             <ChevronRight className="w-5 h-5  text-gray-400 text-center" />{' '}
           </span>

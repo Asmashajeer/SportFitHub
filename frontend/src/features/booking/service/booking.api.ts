@@ -3,6 +3,7 @@ export const BOOKING_ROUTE = {
   LOCK_SLOT: '/booking/lock-slot',
   IS_DUPLICATE_BOOKING:'/booking/check-duplicate-booking',
   CREATE_CHECKOUT_SESSION: '/booking/payment/create-checkout-session',
+  CREATE_BOOKING_WITH_WALLET:'/booking/wallet/create-booking',
   GET_BOOKING_STATUS: {
     BY_STRIPE_SESSIONID: (stripeSessionId: string) =>
       `/booking/status/${stripeSessionId}`,

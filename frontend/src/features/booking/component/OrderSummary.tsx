@@ -38,7 +38,7 @@ const OrderSummary = ({ data, image }: props) => {
         <div className="flex items-center px-8 text-emerald-500 text-xs font-bold">
           <img
             src={image}
-            className="w-full h-full object-cover"
+            className="w-50 h-50 object-cover"
             alt="Session image"
           />
         </div>

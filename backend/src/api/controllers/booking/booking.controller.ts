@@ -147,4 +147,17 @@ export class BookingController{
         res.status(STATUS_CODE.SUCCESS.OK).json(isDuplicate);
     }
 
+
+    //----------------------------------booking a session with wallet Amount--------
+    bookingWithWallet=async (req:AuthRequest, res: Response,next:NextFunction) => {
+         if (!req.user) {           
+                return next(new AppError('Authentication required. Please log in.', STATUS_CODE.ERROR.UNAUTHORIZED));
+            }
+            const userId = req.user.id; 
+            console.log(userId)          ;
+            const payload=req.body;
+             const bookings= await this._bookingService.createBookingWithWallet(userId,payload);
+            res.status(STATUS_CODE.SUCCESS.OK).json(bookings);
+    }
+   
 }

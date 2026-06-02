@@ -24,10 +24,10 @@ export interface IPayment extends Document {
 const PaymentSchema = new Schema({ 
   bookingId: { type: Schema.Types.ObjectId, ref: 'Booking', required: false },
    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  transactionId: { type: String, required: true }, // Stripe PaymentIntent ID
-  invoiceId:{ type: String, required: true ,default:""},
+  transactionId: { type: String, required: false }, // Stripe PaymentIntent ID
+  invoiceId:{ type: String, required: false ,default:""},
   amount: { type: Number, required: true },
-  currency: { type: String, default: 'aed' },
+  currency: { type: String, default: 'inr' },
   paymentMethod: { type: String }, 
   discount: {
     code: String,

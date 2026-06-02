@@ -25,7 +25,14 @@ const BookingService = {
     );
     return data;
   },
-
+  // ----------------create checkout session
+  createBookingWithWallet: async (payload: Payload) => {
+    const { data } = await api.post(
+      BOOKING_ROUTE.CREATE_BOOKING_WITH_WALLET,
+      payload
+    );
+    return data;
+  },
   // ---------------get booking Status
   getBookingStatus: async (stripeSessionId: string) => {
     const res = await api.get(

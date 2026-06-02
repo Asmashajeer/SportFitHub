@@ -1,6 +1,6 @@
-import { BOOKING_SESSION_STATUS, BOOKING_STATUS, BOOKING_TYPE, PAYLOAD_MODEL, PAYMENT_STATUS, TRANSACTION_REASON, TRANSACTION_STATUS, TRANSACTION_TYPE, TTLSECONDS } from "@/constants/enums";
+import { BOOKING_SESSION_STATUS, BOOKING_STATUS, BOOKING_TYPE, CURRENCY, PAYLOAD_MODEL, PAYMENT_METHOD, PAYMENT_STATUS, TRANSACTION_REASON, TRANSACTION_STATUS, TRANSACTION_TYPE, TTLSECONDS } from "@/constants/enums";
 import { ERROR_MESSAGES, STATUS_CODE } from "@/constants/messages";
-import { BookedSlot, BookingSessionRequestfilterDTO, CheckAvailabilityDTO, LockSlotDTO } from "@/dtos/request/booking/booking.request.dto";
+import { BookedSlot, BookingSessionRequestfilterDTO, CheckAvailabilityDTO, LockSlotDTO, PayloadDTO } from "@/dtos/request/booking/booking.request.dto";
 import { IBookingRepository } from "@/interfaces/repositories/IBooking.repository";
 import { IFitnessSessionRepository } from "@/interfaces/repositories/IFitness.session.repository";
 import { IPaymentRepository } from "@/interfaces/repositories/IPayment.repository";
@@ -47,13 +47,14 @@ export class BookingService implements IBookingService {
   }
 
   //--------------lock booking Slots------------------------
-  async lockSessionSlots(lockSlotsData):Promise<string[]>{
+  async lockSessionSlots(lockSlotsData:LockSlotDTO[]):Promise<string[]>{
         const lockResults= await  Promise.allSettled(lockSlotsData.map((lockData)=>this.lockSlot(lockData)));
 
         const failedLocks = lockResults
           .map((result, index) => ({ result, slot: lockSlotsData[index] }))
           .filter(({ result }) => result.status === "rejected");
         if (failedLocks.length > 0) {
+         
           // 4. Release all successfully locked slots — rollback
           const successfulLockKeys = lockResults
             .filter((r): r is PromiseFulfilledResult<string> => r.status === "fulfilled")
@@ -64,10 +65,10 @@ export class BookingService implements IBookingService {
           )
           
           const failedSummary = failedLocks
-            .map(({ slot }) => `${slot.date} [${slot.slotId}]`)
+            .map(({ slot }) => `${formatDateTo(slot.date)} [${slot.slotId}]`)
             .join(", ")
           console.log(`Failed to lock slots: ${failedSummary}. Please select new slots.`)
-          throw new AppError(`Failed select slot . Please select new slots.`)
+          throw new AppError(`Failed select slot . Please select new slots.`, STATUS_CODE.ERROR.CONFLICT)
         }
 
         // 5. All locked — collect lock keys
@@ -105,7 +106,7 @@ export class BookingService implements IBookingService {
         // payment receipt and method
       const charge = paymentIntent.latest_charge as Stripe.Charge;
       const receiptUrl = charge?.receipt_url;
-      const paymentMethod = charge.payment_method_details?.type|| 'card';     
+      const paymentMethod = charge.payment_method_details?.type|| PAYMENT_METHOD.CARD;     
       
       //   Fetch the Session data (Sport or Fitness)
       const sessionRepo=sessionModel===PAYLOAD_MODEL.SPORT_SESSION?this._sportsSessionRepo:this._fitnessSessionRepo;   
@@ -114,7 +115,8 @@ export class BookingService implements IBookingService {
    
       const sessionsToBook= JSON.parse(metadata.sessionsToBook)
       if(!sessionsToBook ){
-        throw new AppError("Missing sessionToBook in metadata");        
+        console.log("Missing sessionToBook in metadata"); 
+        throw new AppError("Missing sessions ToBook");        
       }
       
       //check availability of slots
@@ -184,6 +186,7 @@ export class BookingService implements IBookingService {
         status: BOOKING_STATUS.CONFIRMED,        
 
       }, dbSession);
+
       const AllSessionsToBoook=await Promise.all(sessionsToBook.map(async(S)=>{
 
             //convert to utc date 
@@ -505,6 +508,175 @@ export class BookingService implements IBookingService {
 
 
 
+  async createBookingWithWallet(userId:string,payload:PayloadDTO ):Promise<BookingConfirmResponseDTO>{
+    const timezone=getTimezone();
+     const dbSession = await mongoose.startSession();
+     dbSession.startTransaction();   
+    try{
+        const wallet= await this._walletService.findWallet(userId);
+        if(wallet.balance<payload.amount) 
+          throw new AppError(" there is no enough balance");
+        const lockSlotsData=payload.sessionsToBook.map((slot)=>({
+                userId:userId,
+                sessionId:payload.sessionId,
+                date:slot.date,
+                slotId:slot.slotId,
+                startTime:slot.startTime
+            })) 
+            const lockKeys=await this.lockSessionSlots(lockSlotsData);   
+        
+    
+           //   Fetch the Session data (Sport or Fitness)
+          const sessionRepo=payload.sessionModel===PAYLOAD_MODEL.SPORT_SESSION?this._sportsSessionRepo:this._fitnessSessionRepo;   
+          const session=await sessionRepo.findBysessionId(payload.sessionId);
+          if(!session)throw new AppError(ERROR_MESSAGES.SESSION.NOT_FOUND,STATUS_CODE.ERROR.NOT_FOUND);
+          if(!payload.sessionsToBook ){
+            throw new AppError("Missing sessions ToBook ");        
+          }
+
+          //check availability of slots
+        const availabilityResults=await Promise.allSettled(payload.sessionsToBook.map((slot)=>
+            this.checkAvailability({
+            sessionId:session.id,
+            slotId:slot.slotId,
+            date:slot.date,
+            maxCapacity:session.maxCapacity,
+            timezone:timezone
+            }, dbSession)
+          )
+        )
+        const occupiedSlots = availabilityResults
+          .map((result, index) => ({ result, slot: payload.sessionsToBook[index] }))
+          .filter(({ result }) =>
+            result.status === "rejected" ||
+            (result.status === "fulfilled" && !result.value.isAvailable)  // false = occupied
+          )
+          .map(({ slot, result }) => ({
+            ...slot,
+            remainingCount: result.status === "fulfilled" ? result.value.remainingCount : 0,
+          }))   
+
+        // 3. If any occupied — throw with summary
+        if (occupiedSlots.length > 0) {
+          const summary = occupiedSlots
+            .map((slot) => `${slot.date} [${formatTo12Hour(slot.startTime)}- ${formatTo12Hour(slot.endTime)}]`)
+            .join(", ");
+          console.log(`${occupiedSlots.length} slot(s) already booked or at max capacity: ${summary}`) ; 
+          throw new AppError(
+            `${occupiedSlots.length} slot(s) already booked or at max capacity: ${summary}`
+          )
+        }
+
+             // 5. Deduct from wallet 
+        const newWallet=await this._walletService.deductFromWallet(userId, payload.amount, dbSession); 
+
+        //  1. Save Payment 
+        let payment = await this._paymentRepo.createPayment({
+        // bookingId: Types.ObjectId; 
+        userId:new Types.ObjectId (userId),
+        // transactionId: paymentIntent.id,
+        // invoiceId:invoiceId,       
+        amount:payload.amount,
+        currency: 'inr',
+        paymentMethod:PAYMENT_METHOD.WALLET,          
+        receiptUrl: "",
+        status: PAYMENT_STATUS.SUCCESS,  
+      }, dbSession);
+
+    
+      // 2. Save Booking
+      const booking = await this._bookingRepo.createBooking({
+        userId:new Types.ObjectId (userId),
+        sessionId:new Types.ObjectId (payload.sessionId),
+        sessionModel:payload.sessionModel,  
+        pricePlan:{  
+            planId: payload.planId,         
+            totalSessions: payload.numberOfSessions,
+            pricePaid: payload.amount,
+            unitPrice:payload.amount/payload.numberOfSessions,
+        }, 
+        venue:session.venue,
+        paymentId: payment._id,        
+        status: BOOKING_STATUS.CONFIRMED,        
+
+      }, dbSession);
+
+      //-wallet transaction
+       const walletTransaction=await this._walletTransactionService.addTransaction({
+            userId:new Types.ObjectId(userId),         
+            transactionType:TRANSACTION_TYPE.DEBIT,
+            amount:payload.amount,
+            walletTransactionReason :TRANSACTION_REASON.BOOKING_PAYMENT,
+            status:TRANSACTION_STATUS.COMPLETED,
+            description:`Booked session with  ${payload.amount}  with booking Id ${booking._id} and payment Id ${payment._id} )`    ,
+            balanceAfter:newWallet.balance,          
+            bookingId:booking._id,
+           
+          },dbSession)
+
+      const AllSessionsToBoook=await Promise.all(payload.sessionsToBook.map(async (S)=>{
+            //convert to utc date 
+            const utcDate = toUTC_Date(S.date,S.startTime);
+           return await this._bookingSessionRepo.createSessionBooking({        
+                  bookingId: booking._id,
+                  userId:    new Types.ObjectId (userId),
+                  sessionId: new Types.ObjectId (payload.sessionId),
+                  sessionModel: payload.sessionModel,
+                  slotId:   S.slotId,  
+                  date:     utcDate,
+                  startTime:  S.startTime,
+                  endTime: S.endTime, 
+                  status: BOOKING_SESSION_STATUS.SCHEDULED,                  
+                  
+                }, dbSession)
+          }))  
+
+      // 3. Link Booking back to Payment
+      payment=await this._paymentRepo.updatePayment(payment._id, { bookingId: booking._id ,transactionId:walletTransaction.id}, dbSession);  
+      
+       await dbSession.commitTransaction();  
+        const keys=JSON.stringify(lockKeys)
+        const locks = keys.split(',');
+        for (const lock of locks) {
+            await this._slotLockService.releaseLock(lock);
+        }    
+       const bookingSummary = AllSessionsToBoook
+            .map((slot) => `${slot.date} [${formatTo12Hour(slot.startTime)}- ${formatTo12Hour(slot.endTime)}]`)
+            .join(", ")
+         
+                
+        // sending mail to user about confirmation
+        await sendNotificationEmail({
+            to: payload.user.email,
+            title: "Booking Confirmed!",
+            description:"Your coaching session has been successfully booked. Our coach is looking forward to seeing you on the field.",
+            details: {
+            userName: payload.user.name,
+            sessionName: session.sessionName,
+            bookingSummary:bookingSummary,
+            numberOfSessions:payload.numberOfSessions,
+            amount: payload.amount,
+            venueAddress:session.venue
+            },
+            closingLine:`Please arrive 10 minutes early to warm up. If you need to cancel, please do so at least ${session.bookingDeadline} hr  in advance.`
+        });
+        const bookingData=toUserBookingResponseDTO(booking);
+        const  paymentData=toUserPaymentResponseDTO(payment);
+        return { booking:bookingData, payment:paymentData };
+
+      
+      } catch (error) {
+        await dbSession.abortTransaction();
+
+        throw error;
+      }
+      finally {
+        dbSession.endSession();
+      }
+    }
+  
+
+
       
   
 
@@ -513,19 +685,25 @@ export class BookingService implements IBookingService {
   //  ----------- function to lock a slot--------------
   lockSlot=async(lockSlotData:LockSlotDTO)=>{
    const { userId, sessionId,date,slotId,startTime} = lockSlotData;
-      
+          console.log('userId :',userId );
         const utcDate=toUTC_Date(date,startTime)  // convert to UTC Date
-        const lockKey = `lock:slot:${sessionId}:${utcDate}:${slotId}`;
-      
+        const lockKey = `lock_slot_${sessionId}_${utcDate}_${slotId}`;
+         const existingOwner = await this._slotLockService.getLockOwner(lockKey);
+       if (existingOwner) {
+          if (existingOwner === userId) {          
+              await this._slotLockService.releaseLock(lockKey);
+          } else {
+              throw new AppError(`Slot is already locked by another user`, STATUS_CODE.ERROR.CONFLICT);
+          }
+        }
         const locked = await this._slotLockService.lockSlot(lockKey,userId,TTLSECONDS);
         console.log("locked  :",locked);
-        if (!locked) {
-          //  const owner=await this._slotLockService.getLockOwner(lockKey);
-           throw new AppError(`Slot is already locked by another user`,STATUS_CODE.ERROR.CONFLICT);
+        if (!locked) {        
+           throw new AppError(`Failed to lock slot`, STATUS_CODE.ERROR.CONFLICT);
         }
        return lockKey;    
      } 
-}
+    }
 
 
 

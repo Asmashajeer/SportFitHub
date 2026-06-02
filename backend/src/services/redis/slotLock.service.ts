@@ -10,7 +10,7 @@ class SlotLockService implements ISlotLockService{
     }
 
     async lockSlot(lockKey:string, userId: string, ttlSeconds: number = 900): Promise<boolean> {
-        // const lockKey = `lock:slot:${sessionId}:${date}:${slotId}`;
+       
         const client = this._redisClientService.getClient();
 
         const result = await (await client).SET(lockKey, userId, { EX: ttlSeconds, NX: true })
@@ -21,7 +21,7 @@ class SlotLockService implements ISlotLockService{
 
     // Refresh the lock periodically on checkout page
    async refreshLock(lockKey:string, userId: string, ttlSeconds: number = 900): Promise<void> {
-        // const lockKey = `lock:slot:${sessionId}:${date}:${slotId}`;
+       
         const client = this._redisClientService.getClient();
 
         //  verify it's the same user before refreshing
@@ -33,14 +33,14 @@ class SlotLockService implements ISlotLockService{
 
     //   Release the lock
     async releaseLock(lockKey:string): Promise<void> {
-        // const lockKey = `lock:slot:${sessionId}:${date}:${slotId}`;
+    
         const client = this._redisClientService.getClient();
         await (await client).del(lockKey);
     }
 
     //get owner of lock
     async getLockOwner(lockKey:string): Promise<string | null> {
-        //   const lockKey = `lock:slot:${sessionId}:${date}:${slotId}`;
+      
         const client = await this._redisClientService.getClient();
         return client.get(lockKey) as Promise<string | null>;
     }

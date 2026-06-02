@@ -55,14 +55,14 @@ export enum TRAINER_STATUS {
   SUSPENDED = 'suspended',
 }
 
-export enum CURRENCY {
-  US = '$',
-  EURO = '€',
-  BRITISH_POUND = '£',
-  INR = '₹',
-  UAE_DIRHAM = 'AED',
-}
-
+export const CURRENCIES = {
+  US: '$',
+  EURO: '€',
+  BRITISH_POUND: '£',
+  INR: '₹',
+  UAE_DIRHAM: 'AED',
+};
+export const CURRENCY='₹';
 
 // session
 export enum AGE_GROUP{
@@ -108,6 +108,10 @@ export enum  PAYLOAD_MODEL{
 export enum BOOKING_TYPE{
   SINGLE='single',
   MULTIPLE='multiple'
+}
+export enum PAYMENT_METHOD{
+  CARD='card',
+  WALLET= 'wallet'
 }
 export enum PAYMENT_STATUS{
   SUCCESS='succeeded',

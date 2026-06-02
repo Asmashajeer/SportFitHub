@@ -26,8 +26,8 @@ function PaymentCard({ payment }: { payment: UserPaymentResponseData }) {
 
   const handleDownload = async () => {
     if (payment.invoiceId) {
-      const { invoice } = await PaymentService.getInvoice(payment.invoiceId);
-      if (invoice.invoicePdf) window.open(invoice.invoicePdf, '_blank');
+      const data = await PaymentService.getInvoice(payment.invoiceId);
+      if (data.pdfUrl) window.open(data.pdfUrl, '_blank');
       return;
     }
   };

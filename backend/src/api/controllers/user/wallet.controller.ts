@@ -30,7 +30,7 @@ export class WalletController{
     const userId=user.id;
     try {
         const transactions=await this._walletTransactionService.getTransactions(userId);
-        console.log(transactions);
+      
         res.status(STATUS_CODE.SUCCESS.OK).json(transactions);
     } catch (error) {
         next(error);

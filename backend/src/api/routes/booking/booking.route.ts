@@ -16,7 +16,7 @@ router.get('/checkSlotAvailability',bookingController.checkAvailability);
 router.post('/check-duplicate-booking',bookingController.checkDuplicateBooking);
 
 router.post('/payment/create-checkout-session',  paymentController.createCheckoutSession);
-
+router.post('/wallet/create-booking',  bookingController.bookingWithWallet);
 router.get ('/status/:stripeSessionId',bookingController.getBookingStatus);
 router.get('/my-bookings',bookingController.getUserBookings);
 router.get('/my-sessions',bookingController.getUserSessions);

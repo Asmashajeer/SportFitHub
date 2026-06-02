@@ -20,4 +20,10 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
     const wallet =await this.model.findOneAndUpdate({userId:userId},{$inc:{balance:amount}},{ new: true ,session})
     return wallet;
   }
+  async deductFromWallet(userId:string|Types.ObjectId,amount:number,session:ClientSession):Promise<IWallet>{
+    await this.findByUserId(userId);
+   
+    const wallet =await this.model.findOneAndUpdate({userId:userId},{$inc:{balance:-amount}},{ new: true ,session})
+    return wallet;
+  }
 }

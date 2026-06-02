@@ -1,4 +1,4 @@
-import { BookedSlot, BookingSessionRequestfilterDTO, CheckAvailabilityDTO } from "@/dtos/request/booking/booking.request.dto";
+import { BookedSlot, BookingSessionRequestfilterDTO, CheckAvailabilityDTO, PayloadDTO } from "@/dtos/request/booking/booking.request.dto";
 import {  BookedSessionTrainerResponseDTO, BookedSlotPublicResponseData, BookingConfirmResponseDTO, CancelBookedSessionResponseDTO, UserBookedSessionsResponseDTO, UserBookingResponseDTO, UserSessionsResponseDTOwithPopulatedSession } from "@/dtos/response/booking/booking.response.dto";
 import { IBookedSlot } from "@/models/booking.model";
 import { ClientSession, Types } from "mongoose";
@@ -16,5 +16,6 @@ export interface IBookingService{
   cancelSession(sessionBookingId: string,userId:string,reason:string):Promise<CancelBookedSessionResponseDTO>
     getPublicBookedSlots(sessionId :string):Promise<BookedSlotPublicResponseData[]>
     getBookedSessionByTrainerId(trainerId:string,timezone:string,filter:BookingSessionRequestfilterDTO):Promise<BookedSessionTrainerResponseDTO>
+    createBookingWithWallet(userId:string,payload:PayloadDTO ):Promise<BookingConfirmResponseDTO>
     
 }
