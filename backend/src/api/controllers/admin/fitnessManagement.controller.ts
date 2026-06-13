@@ -1,3 +1,4 @@
+import { PAGINATION_LIMIT } from '@/constants/enums';
 import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import { IFitnessManagementService } from '@/interfaces/services/admin/IFitnessManagementService';
 
@@ -28,14 +29,14 @@ export class FitnessManagementController {
     const page = parseInt(req.query.page as string) || 1;
     const search = req.query.search as string;
     const status = req.query.status as string;
-
+    const limit=PAGINATION_LIMIT;
     try {
-      const programs = await this._fitnessManagementService.getPrograms({ page, search, status });
+      const fitnessData = await this._fitnessManagementService.getPrograms({ page,limit, search, status });
 
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         message: SUCCESS_MESSAGES.GENERAL.FETCHED,
-        programs,
+        fitnessData,
       });
     } catch (error) {
       next(error);

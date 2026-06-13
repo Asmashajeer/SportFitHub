@@ -3,8 +3,13 @@ import { OTP_TYPE, ROLES } from '../../../constants/constants';
 
 export const EmailSchema = z
   .email('Invalid email')
-  .trim() // 2. Trim FIRST (so " a@b.com" becomes "a@b.com")
-  .min(4, 'Email required'); // 3. Check length
+  .trim()
+  .min(4, 'Email required')  
+  .refine(
+    (val) => val.split('@')[0].length >= 3,
+    'Email must have at least 3 characters before @'
+  );
+  
 
 export const passwordSchema = z
   .string('Password is required')

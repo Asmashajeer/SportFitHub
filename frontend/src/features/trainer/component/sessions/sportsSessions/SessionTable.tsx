@@ -1,5 +1,8 @@
 import { Button } from '@/components/ui/button';
-
+import type {
+  PaginationResponseData,
+  SportsSessionResponseData,
+} from '../../../../session/store/session.types';
 import {
   Table,
   TableBody,
@@ -9,25 +12,28 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronsRight, Edit, X } from 'lucide-react';
+import { AlertCircle, ChevronLeft, ChevronsRight, Edit, Eye, EyeOff, X } from 'lucide-react';
 import ConfirmDialog from '@/components/reusable/ConfirmDialog';
 
 import toast from 'react-hot-toast';
 
-import type { FitnessSessionResponseData } from '../../store/fitness.session.types';
-
-import type { PaginationResponseData } from '../../store/session.types';
 import { useSearchParams } from 'react-router-dom';
-import { fitnessSessionService } from '../../service/fitnessSessionService ';
 import { PAGINATION_DEFAULT_LIMIT } from '@/constants/constants';
+
+import { trainerBookingsService } from '@/features/trainer/service/trainer.bookings.service';
+
+import { useState } from 'react';
+import DeleteSessionDialog from '../DeleteSessionDialog';
+import { TrainerSportSessionService } from '@/features/trainer/service/sessionService/trainer.sports.session.service';
+
 interface Props {
-  sessions: FitnessSessionResponseData[];
+  sessions: SportsSessionResponseData[];
   pagination: PaginationResponseData;
-  onEdit: (session: FitnessSessionResponseData) => void;
+  onEdit: (session: SportsSessionResponseData) => void;
   refresh: () => void;
 }
 
-export const FitnessSessionTable = ({
+export const SessionTable = ({
   sessions,
   pagination,
   onEdit,
@@ -37,7 +43,8 @@ export const FitnessSessionTable = ({
   const handlePageChange = (newPage: number) => {
     setSearchParams({ page: newPage.toString() });
   };
-
+  const [hasBookings, setHasBookings] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   if (sessions.length === 0) {
     return (
       <div className="text-center py-12 border-2 border-dashed bg-card rounded-xl">
@@ -52,13 +59,47 @@ export const FitnessSessionTable = ({
   }
   const handleDeleteSession = async (id: string) => {
     try {
-      const data = await fitnessSessionService.deleteSession(id);
-      toast.success(`${data.session.sessionName} deleted`);
-      refresh();
+      const data= await trainerBookingsService.getBookedSessionsBySessionId(id);
+      if(data.length===0){
+          const data = await TrainerSportSessionService.deleteSession(id);
+          toast.success(`${data.session.sessionName} deleted`);
+          refresh();
+      }
+      else{
+       setHasBookings(true);
+       setDeleteTarget(id);
+      }
     } catch (error) {
-      toast.error(error?.toString() || 'failed to create session');
+      console.log(error);
+      toast.error( 'failed to create session');
     }
   };
+//  Action handlers
+const handleSessionVisibility = async (sessionId:string,isActive:boolean) => {
+  await  TrainerSportSessionService.updateSessionVisibility(sessionId,isActive);
+  toast.success('Session made inactive');
+  setDeleteTarget(null);
+  refresh();
+};
+
+const handleDeleteAnyway = async () => {
+  await  TrainerSportSessionService.deleteSession(deleteTarget!);
+ toast.success('Session deleted. Users have been refunded and notified.');
+ toast.custom(<div className="flex items-center gap-2 px-4 py-3 rounded-lg border bg-amber-400 text-amber-950 border-amber-800 text-sm">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span> 'A penalty strike has been applied to your account.',</span>
+              </div> ,
+            {duration: 6000 }
+              );
+  setDeleteTarget(null);
+  refresh();
+};
+
+const handleCancel = () => {
+  setDeleteTarget(null);
+  setHasBookings(false);
+};
+
   return (
     <div className="space-y-4">
       <div className="rounded-md border">
@@ -72,10 +113,7 @@ export const FitnessSessionTable = ({
               <TableHead className="text-slate-500 font-bold  ">
                 Duration
               </TableHead>
-              <TableHead className="text-slate-500 font-bold  ">
-                Level
-              </TableHead>
-              <TableHead className="text-slate-500 font-bold  ">Mode</TableHead>
+         
               <TableHead className="text-slate-500 font-bold  ">
                 Status
               </TableHead>
@@ -96,10 +134,17 @@ export const FitnessSessionTable = ({
                   {session.sessionType.toLowerCase()}
                 </TableCell>
                 <TableCell>{session.duration} mins</TableCell>
-                <TableCell>{session.intensityLevel}</TableCell>
-                <TableCell>{session.mode} </TableCell>
+            
                 <TableCell>
                   {/* Using Shadcn Badge component */}
+                  {!session.isApproved ?
+                    <Badge
+                      variant= 'outline'
+                      className= ' text-amber-600 hover:border-amber-900'                      
+                    >
+                     Pending Approval                   
+                    </Badge>
+                  :
                   <Badge
                     variant={session.isActive ? 'default' : 'secondary'}
                     className={
@@ -109,9 +154,12 @@ export const FitnessSessionTable = ({
                     }
                   >
                     {session.isActive ? 'Active' : 'Inactive'}
+                    
                   </Badge>
+                }  
                 </TableCell>
                 <TableCell className="text-right space-x-2">
+
                   <Button
                     variant="ghost"
                     size="sm"
@@ -119,6 +167,26 @@ export const FitnessSessionTable = ({
                     onClick={() => onEdit(session)}
                   >
                     <Edit />
+                  </Button>
+                   <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-primary"
+                    onClick={() =>{                                         
+                      handleSessionVisibility(session.id,!session.isActive)}
+                    } 
+                  >
+                    {session.isActive ? (
+                      <>
+                        <EyeOff size={12} />
+                        Hide
+                      </>
+                    ) : (
+                      <>
+                        <Eye size={12}  />
+                        Show
+                      </>
+                    )}
                   </Button>
                   <ConfirmDialog
                     icon={<X className="h-4 w-4 text-red-400" />}
@@ -131,6 +199,15 @@ export const FitnessSessionTable = ({
             ))}
           </TableBody>
         </Table>
+        
+        {hasBookings && deleteTarget && (
+          <DeleteSessionDialog
+            sessionId={deleteTarget}
+            onCancel={handleCancel}
+            sessionVisibility={handleSessionVisibility}
+            onDeleteAnyway={handleDeleteAnyway}
+          />
+        )}
       </div>
       {/* --- PAGINATION CONTROLS --- */}
       <div className="flex items-center justify-between px-2 py-4 border-t border-zinc-800">

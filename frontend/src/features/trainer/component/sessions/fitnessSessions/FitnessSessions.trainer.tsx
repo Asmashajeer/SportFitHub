@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 
 import { TableSkeleton } from '@/components/reusable/SkeletonTable';
 
-import type { FitnessSessionResponseData } from '../../store/fitness.session.types';
+import type { FitnessSessionResponseData } from '../../../../session/store/fitness.session.types';
 
 import CreateFitnessSessionModal from './CreateFitnessSession';
-import { useFitnessSessions } from '../../hook/useFitnessSessions';
+import { useFitnessSessions } from '../../../../session/hook/useFitnessSessions';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useSearchParams } from 'react-router-dom';
 

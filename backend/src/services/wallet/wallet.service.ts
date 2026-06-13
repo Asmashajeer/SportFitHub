@@ -20,12 +20,13 @@ export class WalletService implements IWalletService{
         if (wallet) return wallet;
        
     }
-    async addToWallet(userId: string,amount:number,session:ClientSession): Promise<IWallet> {        
+    async addToWallet(userId: string,amount:number,session:ClientSession): Promise<IWallet> { 
+            
         const wallet = await this._walletRepo.addToWallet(userId,amount,session);
         console.log("wallet balance",wallet);
         if (wallet) return wallet;
     }   
-    async deductFromWallet(userId: string,amount:number,session:ClientSession): Promise<IWallet> {   
+    async deductFromWallet(userId: string,amount:number,session?:ClientSession): Promise<IWallet> {   
        
         const currentWallet=await this.findWallet(userId);
         if (  currentWallet.balance<amount) {

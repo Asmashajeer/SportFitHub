@@ -12,5 +12,5 @@ export interface ISportsSessionRepository extends IBaseRepository<ISportsSession
     getSessionStats() ;
     findAllWithTrainer(filter: FilterQuery<ISportsSession>, options: { skip: number; limit: number }    ) 
     findBysessionIdwithTrainerDetails(sessionId: string | Types.ObjectId)
-   
+    deleteASession(id: string| Types.ObjectId )
 }

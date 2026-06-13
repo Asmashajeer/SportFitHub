@@ -22,7 +22,7 @@ const TrainerWelcome = () => {
     return (
       <div className="bg-zinc-900   rounded-xl p-6">
         <div className="flex items-start gap-4">
-          
+         
           <div>
             <h2 className="text-xl font-semibold text-amber-700">
               Welcome, {firstName}! Your profile is  under review.
@@ -47,6 +47,7 @@ const TrainerWelcome = () => {
             <h2 className="text-2xl font-semibold text-gray-500">
               {greeting}, {firstName}! 
             </h2>
+             
       </div>
         <p className="text-gray-500 text-sm mt-1">
             Here's what's happening with your sessions today.

@@ -3,19 +3,21 @@ import { IFitnessSession } from "@/models/fitnessSession.model";
 import { ISportsSession } from "@/models/sportsSession.model";
 import { formatInTimeZone } from 'date-fns-tz';
 import { getTimezone } from "@/context/timezone.context";
+import { IFitnessSessionDTOWithCategory, ISportsSessionDTOWithCategory } from "@/dtos/request/admin/admin.session.dto";
 
-export const toAdminSessionResponseDTO=(session:ISportsSession|IFitnessSession)=>{
+export const toAdminSessionResponseDTO=(session:ISportsSessionDTOWithCategory|IFitnessSessionDTOWithCategory)=>{
     const timezone = getTimezone();
-     const category = 'sportCategory' in session
-        ? session.sportCategory   // ISportsSession
-        : session.fitnessCategory; 
+     const isFitness = 'fitnessCategory' in session;
+    const category = isFitness
+        ? (session as IFitnessSessionDTOWithCategory).fitnessCategory.programName
+        : (session as ISportsSessionDTOWithCategory).sportCategory.sportName;
     return{
          id:session._id.toString(),
         sessionName: session.sessionName,
         trainer: session.trainerId,
         category,
         sessionType: session.sessionType,
-        mode: session.mode,
+       
         ageGroup:session.ageGroup, 
         enrolledCount: session.enrolledCount,
         maxCapacity:session.maxCapacity ,
@@ -24,22 +26,27 @@ export const toAdminSessionResponseDTO=(session:ISportsSession|IFitnessSession)=
         isApproved: session.isApproved,
         isDeleted: session.isDeleted,
         createdAt: formatInTimeZone(session.createdAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX').toString(),
+        // only include for fitness sessions
+        ...(isFitness && {
+            mode: (session as IFitnessSessionDTOWithCategory).mode,           
+        }),
     }
 }
 
 
 export const toAdminSessionActionResponseDTO=(session:ISportsSession|IFitnessSession)=>{
     const timezone = getTimezone();
-      const category = 'sportCategory' in session
-        ? session.sportCategory .toString()  // ISportsSession
-        : session.fitnessCategory.toString(); 
+    const isFitness = 'fitnessCategory' in session;
+    const category = isFitness
+        ? (session as IFitnessSession).fitnessCategory.toString()
+        : (session as ISportsSession).sportCategory.toString()
     return{
          id:session._id.toString(),
         sessionName: session.sessionName,
         trainer: session.trainerId.toString(),
         category,
         sessionType: session.sessionType,
-        mode: session.mode,
+        
         ageGroup:session.ageGroup, 
         enrolledCount: session.enrolledCount,
         maxCapacity:session.maxCapacity ,
@@ -48,6 +55,9 @@ export const toAdminSessionActionResponseDTO=(session:ISportsSession|IFitnessSes
         isApproved: session.isApproved,
         isDeleted: session.isDeleted,
         createdAt:formatInTimeZone(session.createdAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX').toString(),
+         ...(isFitness && {
+            mode: (session as IFitnessSession).mode,           
+        }),
     }
 }
 interface  ITrainerDetails extends IPopulatedTrainer{    
@@ -68,9 +78,10 @@ export interface FitnessSessionDetails extends  Omit<IFitnessSession ,'trainerId
 };
 export const toAdminSessionDetailedViewDTO=(session:SportsSessionDetails|FitnessSessionDetails)=>{
     const timezone = getTimezone();
-      const category = 'sportCategory' in session
-        ? session.sportCategory .toString()  // ISportsSession
-        : session.fitnessCategory.toString(); 
+    const isFitness = 'fitnessCategory' in session;
+    const category = isFitness
+        ? (session as unknown as IFitnessSession).fitnessCategory.toString()
+        : (session as unknown as ISportsSession).sportCategory.toString();
     return{
         id:session._id.toString(),
         trainer:session.trainerId?{
@@ -94,9 +105,7 @@ export const toAdminSessionDetailedViewDTO=(session:SportsSessionDetails|Fitness
         sessionType: session.sessionType,
         
         maxCapacity:session.maxCapacity ,
-        enrolledCount: session.enrolledCount,
-        mode: session.mode,
-        meetingLink:session.meetingLink, 
+        enrolledCount: session.enrolledCount,       
         venue: session.venue,
         amenities: session.amenities,
         timeSlots:session.timeSlots,
@@ -111,5 +120,11 @@ export const toAdminSessionDetailedViewDTO=(session:SportsSessionDetails|Fitness
         rating:session.rating, 
         createdAt:formatInTimeZone(session.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX').toString(),
         updatedAt:formatInTimeZone(session.updatedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX').toString(),
+        // only include for fitness sessions
+        ...(isFitness && {
+            mode: (session as FitnessSessionDetails).mode,
+            meetingLink: (session as FitnessSessionDetails).meetingLink ?? null,
+            venue: (session as FitnessSessionDetails).venue ?? null,
+        }),
     }
 }

@@ -1,3 +1,6 @@
+import { IFitnessSession } from "@/models/fitnessSession.model";
+import { ISportsSession } from "@/models/sportsSession.model"
+import { Types } from "mongoose";
 
 
 export interface statsDTO{
@@ -20,10 +23,21 @@ export interface  AdminSessionFilterDTO{
     search: string
     status:string  ,
     sessionType:string  ,
-    mode:string  ,
-     
+    mode:string  ,     
 }
-
-
+interface PopulatedSportCategory {
+    _id: Types.ObjectId;
+    sportName: string;
+}
+export interface ISportsSessionDTOWithCategory extends Omit<ISportsSession,'sportCategory'>{
+    sportCategory:PopulatedSportCategory;
+}
+interface PopulatedFitnessCategory {
+    _id: Types.ObjectId;
+    programName: string;
+}
+export interface IFitnessSessionDTOWithCategory extends Omit<IFitnessSession,'fitnessCategory'>{
+    fitnessCategory:PopulatedFitnessCategory;
+}
 
 

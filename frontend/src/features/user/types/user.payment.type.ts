@@ -3,6 +3,7 @@ import type { DISCOUNT_TYPE, PAYMENT_STATUS } from '@/constants/constants';
 export interface UserPaymentResponseData {
   id: string;
   bookingId: string; // Cross-reference back to Booking
+  bookingUId:string,
   userId: string;
   transactionId: string; // The Stripe PaymentIntent ID (pi_...)
   invoiceId: string;

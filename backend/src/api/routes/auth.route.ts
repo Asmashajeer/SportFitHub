@@ -10,6 +10,7 @@ import {
   VerifyEmailSchema,
 } from '../../dtos/request/auth.request.dto';
 import { restrictTo } from '@/middleware/role.middleware';
+
 import { UserRole } from '@/constants/enums';
 
 const router = Router();

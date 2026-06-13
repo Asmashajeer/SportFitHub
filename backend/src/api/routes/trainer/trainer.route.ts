@@ -1,5 +1,5 @@
 import { UserRole } from '@/constants/enums';
-import { trainerController } from '@/container';
+import { isBlocked, trainerController } from '@/container';
 import { protect } from '@/middleware/auth.middleware';
 import { timezoneMiddleware } from '@/middleware/timezone.middleware';
 import { restrictTo } from '@/middleware/role.middleware';
@@ -12,6 +12,7 @@ import { Router } from 'express';
 
 const router = Router();
 router.use(protect);
+router.use(isBlocked);
 router.use(timezoneMiddleware); 
 router.use(restrictTo([UserRole.TRAINER]));
 router.use('/sessions', sessionRoute);

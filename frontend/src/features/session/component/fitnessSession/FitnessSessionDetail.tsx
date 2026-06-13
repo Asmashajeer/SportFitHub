@@ -396,7 +396,7 @@ const FitnessSessionDetail = () => {
         </div>
 
         {/* RIGHT COLUMN — above content on mobile, sticky on desktop */}
-        <div className="lg:col-span-4 order-first lg:order-none">
+        <div className="lg:col-span-4 order-first lg:order-0">
           <div className="lg:sticky lg:top-28 space-y-6">
 
             {/* Pricing Card */}

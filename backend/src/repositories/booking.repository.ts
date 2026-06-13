@@ -130,6 +130,7 @@ export  class BookingRepository extends BaseRepository<IBooking> implements IBoo
               $project: {
                 _id: 0,
                 bookingId:    '$_id',
+                bookingUId:'$bookingUId',
                 userName:   '$user.name',
                 userEmail:  '$user.email',              
                 sessionName:  '$sessionDoc.sessionName',

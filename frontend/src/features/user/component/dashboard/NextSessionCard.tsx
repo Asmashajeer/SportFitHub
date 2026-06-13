@@ -1,10 +1,7 @@
-import { useState } from 'react';
 
-import type { SportsSessionResponseData } from '@/features/session/store/session.types';
-import type { FitnessSessionResponseData } from '@/features/session/store/fitness.session.types';
 
 import type { UserBookedSessionsResponseData } from '../../types/user.booking.types';
-import { useUserDashboardStore } from '../../store/useUserDashboardStore';
+
 import { useNavigate } from 'react-router-dom';
 
 interface Props {

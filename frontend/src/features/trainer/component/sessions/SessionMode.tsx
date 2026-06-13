@@ -1,5 +1,5 @@
 import { MapPicker } from '@/components/reusable/MapPicker';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SESSION_MODE } from '@/constants/constants';
@@ -12,7 +12,7 @@ import {
   type PathValue,
 } from 'react-hook-form';
 
-const SessionMode = <T extends FieldValues>() => {
+const SessionMode = <T extends FieldValues>({offlineOnly=false}:{offlineOnly?:boolean}) => {
   const {
     register,
     setValue,
@@ -20,9 +20,14 @@ const SessionMode = <T extends FieldValues>() => {
     watch,
     clearErrors,
   } = useFormContext<T>();
-  const currentMode = watch('mode' as Path<T>) || SESSION_MODE.OFFLINE;
+   const currentMode = offlineOnly     ? SESSION_MODE.OFFLINE 
+    : watch('mode' as Path<T>) || SESSION_MODE.OFFLINE;
+
   const [venueLocation, setVenueLocation] = useState(''); // Location address display only
   useEffect(() => {
+    if (offlineOnly) {
+      setValue('mode' as Path<T>, SESSION_MODE.OFFLINE as PathValue<T, Path<T>>);
+    }
     showPickedAddress(
       watch('venue.location.coordinates.1' as Path<T>),
       watch('venue.location.coordinates.0' as Path<T>)
@@ -49,28 +54,32 @@ const SessionMode = <T extends FieldValues>() => {
 
   return (
     <div className="space-y-4">
-      <Label>Session Mode</Label>
-      <Tabs
-        value={currentMode}
-        onValueChange={(val) => {
-          setValue('mode' as Path<T>, val as PathValue<T, Path<T>>);
+      {!offlineOnly && (
+        <>       
+          <Label>Session Mode</Label>
+          <Tabs
+            value={currentMode}
+            onValueChange={(val) => {
+              setValue('mode' as Path<T>, val as PathValue<T, Path<T>>);
 
-          clearErrors(['venue' as Path<T>, 'meetingLink' as Path<T>]);
-        }}
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value={SESSION_MODE.OFFLINE}>
-            In-Person (Offline)
-          </TabsTrigger>
-          <TabsTrigger value={SESSION_MODE.ONLINE}>Remote (Online)</TabsTrigger>
-        </TabsList>
-      </Tabs>
+              clearErrors(['venue' as Path<T>, 'meetingLink' as Path<T>]);
+            }}
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value={SESSION_MODE.OFFLINE}>
+                In-Person (Offline)
+              </TabsTrigger>
+              <TabsTrigger value={SESSION_MODE.ONLINE}>Remote (Online)</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </>
+      )}
 
       {currentMode === SESSION_MODE.OFFLINE ? (
         /* venue Details */
         <section className="space-y-4 p-5 rounded-xl  bg-card">
           <h3 className="flex items-center gap-2 font-bold text-primary">
-            <MapPin size={18} /> 2. Venue Logic
+            <MapPin size={18} /> 2. Venue 
           </h3>
           <Label>Name</Label>
           <Input

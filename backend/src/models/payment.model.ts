@@ -4,6 +4,7 @@ import { Document, Types } from 'mongoose';
 
 export interface IPayment extends Document {
   _id: Types.ObjectId;
+  bookingUId:string
   bookingId?: Types.ObjectId;        // Cross-reference back to Booking
   userId: Types.ObjectId;           
   transactionId: string;            // The Stripe PaymentIntent ID (pi_...)
@@ -23,6 +24,7 @@ export interface IPayment extends Document {
 
 const PaymentSchema = new Schema({ 
   bookingId: { type: Schema.Types.ObjectId, ref: 'Booking', required: false },
+  bookingUId:{ type: String, required: false }, 
    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   transactionId: { type: String, required: false }, // Stripe PaymentIntent ID
   invoiceId:{ type: String, required: false ,default:""},

@@ -35,7 +35,7 @@ const MyBalanceCard = () => {
           <p>AvailableBalance</p>
           <p className="text-3xl">
             {' '}
-            {CURRENCY.INR} {myBalance.toFixed(2)}{' '}
+            {CURRENCY} {myBalance.toFixed(2)}{' '}
           </p>
         </div>
       </div>

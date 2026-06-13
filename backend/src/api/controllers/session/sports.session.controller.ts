@@ -1,6 +1,6 @@
 
-import { PAGINATION_LIMIT } from '@/constants/enums';
-import { STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
+import { PAGINATION_LIMIT, UserRole } from '@/constants/enums';
+import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import { ISportsSessionService } from '@/interfaces/services/session/ISports.session.service';
 import { AuthRequest } from '@/middleware/auth.middleware';
 
@@ -48,17 +48,31 @@ export class SportsSessionController {
 
 
   //----------------delete session----------
-    deleteSportSession = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    deleteSportSession = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
        
         const id=req.params.id;
+        const userRole=req.user.role;
         try {
-          const session = await this._sportsSessionService.deleteSportSession(id);;
-          
-          res.status(STATUS_CODE.SUCCESS.OK).json({
-            success: true,
-            message: SUCCESS_MESSAGES.SESSION.SESSION_DELETED,
-            session,
+          if(userRole===UserRole.TRAINER){
+            const session = await this._sportsSessionService.deleteSportSession(id,userRole);          
+            res.status(STATUS_CODE.SUCCESS.OK).json({
+              success: true,
+              message: SUCCESS_MESSAGES.SESSION.SESSION_DELETED,
+              session,
+            });
+          }
+          else if (userRole === UserRole.USER) {        
+          res.status(STATUS_CODE.ERROR.FORBIDDEN).json({
+            success: false,
+            message: ERROR_MESSAGES.USER.USER_FORBIDDEN+' delete the session',
           });
+        } else {
+          res.status(STATUS_CODE.ERROR.FORBIDDEN).json({
+            success: false,
+            message: ERROR_MESSAGES.AUTH.FORBIDDEN,
+          });
+        }
+
         } catch (error) {
           next(error);
         }
@@ -136,4 +150,22 @@ export class SportsSessionController {
     }
   }
 
+
+  // ----------------------------make active/Inactive a session----------------
+  
+updateSessionVisibility=async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const isActive = req.body.isActive;
+    const id=req.params.id;
+    try {
+      const session = await this._sportsSessionService.updateSessionVisibility(id,isActive);
+      
+      res.status(STATUS_CODE.SUCCESS.OK).json({
+        success: true,
+        message: SUCCESS_MESSAGES.SESSION.SESSION_UPDATED,
+        session,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

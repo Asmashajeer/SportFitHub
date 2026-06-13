@@ -16,7 +16,7 @@ import {
   SESSION_TYPE,
 } from '@/constants/constants';
 
-import SportsBanner from '../sportSession/SportsSessionBanner';
+import SportsBanner from '../SportsSessionBanner';
 
 import type { FitnessData } from '@/features/admin/store/types';
 import { Label } from '@/components/ui/label';

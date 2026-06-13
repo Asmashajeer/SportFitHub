@@ -2,7 +2,7 @@ import { IProfileService } from '@/interfaces/services/user/IProfile.service';
 
 import { STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import type { Request, Response, NextFunction } from 'express';
-import { IUser } from '@/models/user.model';
+
 import Logger from '@/utils/logger';
 import { AuthRequest } from '@/middleware/auth.middleware';
 

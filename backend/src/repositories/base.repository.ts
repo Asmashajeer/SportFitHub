@@ -20,7 +20,9 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
   async find(filter: FilterQuery<T> = {}): Promise<T[]> {
     return await this.model.find(filter).exec();
   }
-
+  async findByIdAndUpdate(id: string | Types.ObjectId, data: UpdateQuery<T>): Promise<T | null> {
+    return await this.model.findByIdAndUpdate(id, data, { new: true, runValidators: true }).exec();
+  }
   async findOneAndUpdate(id: string | Types.ObjectId, data: UpdateQuery<T>): Promise<T | null> {
     return await this.model.findByIdAndUpdate(id, data, { new: true, runValidators: true }).exec();
   }

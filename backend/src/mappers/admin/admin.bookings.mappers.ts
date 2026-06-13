@@ -17,6 +17,7 @@ interface BookingUser{
  
 interface AdminIBooking extends Omit<IBooking,'userId' |'sessionId'>{
   userId:BookingUser,
+  bookingUId:string,
    sessionId:{
       _id:Types.ObjectId
       trainerId:Types.ObjectId,
@@ -29,6 +30,7 @@ export const toAdminBookingsResponseDTO=(booking:AdminIBooking)=>{
      const timezone = getTimezone();
     return {
           bookingId: booking._id.toString(),
+          bookingUId:booking.bookingUId,
           userId:booking.userId._id.toString(),
           userName: booking.userId.name,
           userEmail: booking.userId.email,         

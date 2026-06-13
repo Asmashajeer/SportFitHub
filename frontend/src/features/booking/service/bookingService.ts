@@ -70,10 +70,10 @@ const BookingService = {
   },
 
   // ------------------CANCEL bookings
-  cancelSession: async (sessionBookingId: string, reason: string) => {
+  cancelSession: async (sessionBookingId: string, reason: string,cancellationWindow:number) => {
     const res = await api.patch(
       BOOKING_ROUTE.CANCEL_SESSION.BY_SESSION_BOOKINGID(sessionBookingId),
-      { reason }
+      { reason,cancellationWindow }
     );
     return res.data;
   },

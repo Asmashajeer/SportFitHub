@@ -12,7 +12,7 @@ const SportSessionCard = ({
   const handleCardClick = () => navigate(`/sports/sessions/${session.id}`);
 
   const startingPrice = Math.min(...session.pricing.map((p) => p.price));
-  const isOnline = session.mode === SESSION_MODE.ONLINE;
+
 
   return (
     <div
@@ -33,17 +33,9 @@ const SportSessionCard = ({
         {/* Top-left: online / venue badge */}
         <div className="absolute top-3 left-3">
           <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm text-white border border-white/20">
-            {isOnline ? (
-              <>
-                <Zap size={11} className="text-emerald-400" />
-                Online
-              </>
-            ) : (
-              <>
-                <MapPin size={11} className="text-sky-300" />
-                {session.venue?.name}
-              </>
-            )}
+            <MapPin size={11} className="text-sky-300" />
+                {session.venue?.name}           
+            
           </span>
         </div>
 

@@ -13,8 +13,8 @@ const errorHandler: ErrorRequestHandler = (
   const isAppError = err instanceof AppError;
 
   const statusCode = isAppError ? err.status : 500;
-  const message =
-    isAppError || process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error';
+  const message =err.message ;
+    // isAppError || process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error';
 
   logger.error(message, {
     statusCode,

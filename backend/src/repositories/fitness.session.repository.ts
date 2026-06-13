@@ -127,6 +127,12 @@ export class FitnessSessionRepository extends BaseRepository<IFitnessSession> im
           .exec();
           
         return session
-      }  
+      } 
+    async deleteASession(id: string| Types.ObjectId ){
+    return await this.model.findByIdAndUpdate(id, {
+        isDeleted: true,
+        isActive: false,
+      });
+  } 
 
 }

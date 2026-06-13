@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../features/auth/store/useAuthStore';
+import { authService } from '@/features/auth/service/authService';
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const api = axios.create({
@@ -58,10 +59,15 @@ api.interceptors.response.use(
             errorMessage = error.response.data?.message || 'Invalid request.';
             break;
           case 401:
-            errorMessage = 'Session expired. Please log in again.';           
+            errorMessage = error.response.data?.message||'Session expired. Please log in again.';           
             break;
           case 403:
-            errorMessage = "You don't have permission to do this.";
+            errorMessage = error.response.data?.message||"Access Denied.";
+            if(error.response.data?.message==='Your account has been suspended'){
+              useAuthStore.getState().clearAuth();
+              authService.logout();              
+              return Promise.reject(new Error(errorMessage));
+            }
             break;
           case 404:
             errorMessage = ' Not found.';
@@ -85,7 +91,7 @@ api.interceptors.response.use(
       console.error('Unexpected Error:', error.message);
       errorMessage = 'An unexpected error occurred.';
     }
-    return Promise.reject(errorMessage);
+    return Promise.reject(new Error(errorMessage));
   }
 );
 export default api;

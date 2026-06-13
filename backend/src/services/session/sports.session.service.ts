@@ -1,5 +1,5 @@
 
-import { PAGINATION_LIMIT } from '@/constants/enums';
+import { PAGINATION_LIMIT, UserRole } from '@/constants/enums';
 
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 import {
@@ -24,13 +24,21 @@ import { FilterQuery } from 'mongoose';
 import { Types } from 'mongoose';
 import { formatTo12Hour } from '@/utils/formatTo';
 
+import { IBookingService } from '@/interfaces/services/booking/IBooking.service';
+
+import { IAuthUser } from '@/interfaces/common/IAuthUser';
+import { toIAuthUser } from '@/mappers/auth.mapper';
+
 export class SportsSessionService implements ISportsSessionService {
   private _sportsSessionRepo: ISportsSessionRepository;
   private _trainerRepo: ITrainerRepository;
-
-  constructor(sportsSessionRepo: ISportsSessionRepository, trainerRepo: ITrainerRepository) {
+  private _bookingService:IBookingService;
+   
+  constructor(sportsSessionRepo: ISportsSessionRepository, trainerRepo: ITrainerRepository,bookingService:IBookingService) {
     this._sportsSessionRepo = sportsSessionRepo;
     this._trainerRepo = trainerRepo;
+    this._bookingService=bookingService;
+
   }
   //----------create Session------------------
   async createSportSession(
@@ -75,17 +83,65 @@ export class SportsSessionService implements ISportsSessionService {
   }
 
   //-------delete session---------
-  async deleteSportSession(id: string | Types.ObjectId): Promise<SportsSessionResponseDTO> {
-    const data = await this._sportsSessionRepo.findOneAndUpdate(id, {
-      isDeleted: true,
-      isActive: false,
-    });
-    if (!data) {
-      throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
-    }
-    const session = toSportsSessionResponseDTO(data);
-    return session;
+  async deleteSportSession(id: string,cancelledBy:UserRole ): Promise<SportsSessionResponseDTO> {    
+    const bookingSessions= await this._bookingService.getBookedSessionsBySessionId(id);
+    // ---no bookings
+    if(bookingSessions.length===0){
+      const data = await this._sportsSessionRepo.deleteASession(id);
+      if (!data) {
+        throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
+      }    
+      const session = toSportsSessionResponseDTO(data);
+      return session;
+    }   
+   
+    // ----with bookings
+    const cancellationWindow= bookingSessions[0].session.cancellationWindow   
+     const withinWindow = bookingSessions.some((bookingSession) =>
+        this._bookingService.isWithinCancellationWindow(
+          bookingSession.date.toString(),
+          bookingSession.startTime,
+          bookingSession.session.cancellationWindow
+        )
+      );
+
+  if (withinWindow) {
+    throw new AppError(
+      `Cannot delete — one or more booked sessions are within the ${cancellationWindow}hr cancellation window`,
+      STATUS_CODE.ERROR.BAD_REQUEST
+    );
   }
+
+    await Promise.all( 
+      bookingSessions.map(async(bookingSession)=>{
+        const sessionBookingId=bookingSession.id;
+        const userId=bookingSession.userId.toString();
+        const reason="Cancelled by trainer"
+           
+        await this._bookingService.cancelSession(sessionBookingId,reason,cancelledBy);
+      })
+    );
+    const data= await this._sportsSessionRepo.deleteASession(id);
+    if (!data) {
+        throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
+      }
+    
+      const session = toSportsSessionResponseDTO(data);
+      return session;
+  }
+
+
+  
+  //--------------make active/inactive session ----------
+  async updateSessionVisibility( id: string | Types.ObjectId,isActive:boolean):Promise<SportsSessionResponseDTO>{
+      const data = await this._sportsSessionRepo.findOneAndUpdate(id, {isActive:isActive});
+      if (!data) {
+        throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
+      }
+      const session = toSportsSessionResponseDTO(data);
+      return session;
+  }
+
 
   //-------------- get all sessions by a trianerId--------------
   async getSessionsByTrainer(userId: string | Types.ObjectId,filters: FilterQuery<ISportsSession>): Promise<PaginatedSportsSessionsResponseDTO> {
@@ -113,7 +169,7 @@ export class SportsSessionService implements ISportsSessionService {
     return { sessions, pagination: result.pagination };
   }
 
-  //--------------- get all sessions--------------
+  //--------------- get all sessions-----Public Listing---------
   async getAllSessions(filters: FilterQuery<ISportsSession>): Promise<GetSessionsResponseDTO> {
     const {page,limit, search, sport, sessionType, ageGroup,lat,lng,radius } = filters;
 

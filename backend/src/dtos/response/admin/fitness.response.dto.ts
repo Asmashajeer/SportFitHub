@@ -6,3 +6,10 @@ export interface ProgramResponseDTO {
   description: string;
   isActive: boolean;
 }
+
+export interface FitnessProgramResponseDTOWithPagination{
+  programs: ProgramResponseDTO[],
+  total: number,
+  totalPages: number,
+  page:number
+}

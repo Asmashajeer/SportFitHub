@@ -2,7 +2,8 @@ import { DISCOUNT_TYPE, PAYMENT_STATUS } from "@/constants/enums";
 
 export interface UserPaymentResponseDTO{    
       id:string,
-      bookingId: string,        // Cross-reference back to Booking
+      bookingId: string, // Cross-reference back to Booking
+      bookingUId:string,       
       userId: string;           
       transactionId: string;            // The Stripe PaymentIntent ID (pi_...)
       invoiceId:string;

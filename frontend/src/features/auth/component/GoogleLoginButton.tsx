@@ -21,7 +21,9 @@ const GoogleLoginButton = () => {
       }
 
       const userData = await authService.googleLogin(idToken);
+      console.log(userData);
       setUser(userData.user);
+      
 
       if (Object.values(ROLES).includes(userData.role) === false) {
         return navigate('/update-role');
@@ -36,8 +38,11 @@ const GoogleLoginButton = () => {
         setHasProfile(userData.hasProfile);
         navigate(`/${userData.role}/dashboard`);
       }
-    } catch (error) {
-      toast.error(error?.toString() || 'Something went wrong');
+    } catch (error )   {
+      const message = typeof error === 'string'  ? error    : error instanceof Error
+      ? error.message
+      : 'Something went wrong';
+      toast.error(message );
     }
   };
   return (

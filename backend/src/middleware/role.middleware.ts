@@ -10,11 +10,10 @@ export const restrictTo = (allowedRoles: Role[]) => {
     if (!req.user) {
      return next( new AppError('Access Denied: User not authenticated (Missing Token or Failed Verification', STATUS_CODE.ERROR.UNAUTHORIZED)      );
     }
-      const userRole = req.user.role as Role;
-      if (allowedRoles.includes(userRole)) {
+    const userRole = req.user.role as Role;
+    if (allowedRoles.includes(userRole)) {
       return next(); 
-      }
-
+    }
     return next(new AppError('Forbidden: Access denied', STATUS_CODE.ERROR.FORBIDDEN));
   };
     

@@ -75,11 +75,9 @@ const  NextSessionCard=()=> {
     :
       <div className=" border border-dashed bg-transparent border-slate-800 rounded-xl p-12 text-center">
           <p className="text-slate-600 mb-4">
-            You haven't created any sessions yet.
+            You haven't  any booked sessions yet.
           </p>
-          <Button variant="outline" onClick={() => navigate('/trainer/sessions')}>
-           Start, create a  Session
-          </Button>
+          
       </div>
     }
    </>      

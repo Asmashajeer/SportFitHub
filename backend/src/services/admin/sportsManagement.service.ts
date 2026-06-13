@@ -1,6 +1,7 @@
+import { PAGINATION_LIMIT } from '@/constants/enums';
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 import { getQueryDTO, SportRequestDTO } from '@/dtos/request/admin/admin.category.dto';
-import { SportsResponseDTO } from '@/dtos/response/admin/sports.response.dto';
+import { SportsResponseDTO, SportsResponseDTOWithPagination } from '@/dtos/response/admin/sports.response.dto';
 import { ISportsRespository } from '@/interfaces/repositories/ISports.respository';
 import { ISportsManagementService } from '@/interfaces/services/admin/ISportsManagementService';
 import { toSportsResponseDTO } from '@/mappers/sports.mapper';
@@ -26,10 +27,11 @@ export class SportsManagementService implements ISportsManagementService {
     return sport;
   }
 
-  async getSports(filter: getQueryDTO): Promise<SportsResponseDTO[]> {
-    const { search, status } = filter;
+  async getSports(filter: getQueryDTO): Promise<SportsResponseDTOWithPagination> {
+    const {page,limit, search, status } = filter;
     const query: FilterQuery<ISports> = {};
-
+    
+    const skip=(page-1)*limit
     if (search) {
       query.sportName = { $regex: search, $options: 'i' };
     }
@@ -38,11 +40,23 @@ export class SportsManagementService implements ISportsManagementService {
     } else if (status === 'inactive') {
       query.isActive = false;
     }
-    const data = await this._sportsRepository.find(query);
-    if (!data.length) throw new AppError(ERROR_MESSAGES.GENERAL.NOT_FOUND);
-    const sports = data.map(sport => toSportsResponseDTO(sport));
-    return sports;
+    
+     const [sportsData, totalCount] = await Promise.all([
+              await this._sportsRepository.findAll(query,{skip, limit}),
+              await this._sportsRepository.count(query),
+            ]);
+    if (!sportsData.length) throw new AppError(ERROR_MESSAGES.GENERAL.NOT_FOUND);
+    const sports = sportsData.map(sport => toSportsResponseDTO(sport));
+    return {
+      sports,
+      total: totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+      page, 
+    }
   }
+
+
+
 
   async getSport(id: string | Types.ObjectId): Promise<SportsResponseDTO> {
     const data = await this._sportsRepository.findById(id);

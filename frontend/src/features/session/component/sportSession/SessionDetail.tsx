@@ -267,22 +267,7 @@ const SessionDetail = () => {
                 {session.sessionType}
               </Badge>
             </div>
-            {session.mode === SESSION_MODE.ONLINE && (
-              <div className="absolute bottom-4 sm:bottom-8 right-4 sm:right-8 gap-3 bg-emerald-500/10 border border-emerald-500/20 px-3 sm:px-4 py-2 rounded-2xl">
-                <div className="relative flex h-3 w-3">
-                  <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">
-                    Live Session
-                  </span>
-                  <span className="text-xs sm:text-sm font-bold text-zinc-200">
-                    Digital Access via Zoom/Meet
-                  </span>
-                </div>
-              </div>
-            )}
+           
           </section>
 
           {/* Header Info */}
@@ -345,7 +330,6 @@ const SessionDetail = () => {
           </section>
 
           {/* Amenities & Venue */}
-          {session.mode === SESSION_MODE.OFFLINE && (
             <div className="grid grid-cols-1 md:grid-cols-[1fr_3fr] gap-6 sm:gap-8">
               <div className="bg-zinc-900 p-5 rounded-[2rem] border border-zinc-800/50 space-y-6">
                 <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
@@ -370,10 +354,10 @@ const SessionDetail = () => {
                 </h3>
                 <div>
                   <p className="font-black italic uppercase text-xl text-white">
-                    {session.venue?.name}
+                    {session.venue.name}
                   </p>
                   <p className="text-zinc-500 text-sm mt-1">
-                    {session.venue?.address}
+                    {session.venue.address}
                   </p>
                 </div>
                 <MapView
@@ -381,12 +365,12 @@ const SessionDetail = () => {
                   lng={session.venue.location.coordinates[0]}
                   label={`${session.venue.name}  ${session.venue.address}`}
                 />
-                {session.venue?.location?.coordinates && (
+                {session.venue.location?.coordinates && (
                   <GetMapsLink coords={session.venue.location.coordinates} />
                 )}
               </div>
             </div>
-          )}
+          
         </div>
 
         {/* RIGHT COLUMN — shown below left on mobile, sticky on desktop */}

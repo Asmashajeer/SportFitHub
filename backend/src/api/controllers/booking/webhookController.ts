@@ -35,10 +35,9 @@ export class WebhookController{
         
         // Handle  payment
         switch (event.type) {
-            case 'checkout.session.completed':
+            case 'checkout.session.completed':{
                 const paymentIntentId = stripeSession.payment_intent as string; 
-                const invoiceId = stripeSession.invoice as string; 
-               
+                const invoiceId = stripeSession.invoice as string;               
 
                 if (!paymentIntentId) {
                     console.error(" No PaymentIntent ID found in session");                   
@@ -62,7 +61,7 @@ export class WebhookController{
                     return  next(err);
                 }
                 break;
-
+            }
             case 'checkout.session.async_payment_failed':
             case 'checkout.session.expired':
                 

@@ -1,4 +1,4 @@
-import { PAGINATION_LIMIT, PAYLOAD_MODEL } from "@/constants/enums";
+import { PAGINATION_LIMIT, PAYLOAD_MODEL, UserRole } from "@/constants/enums";
 import { STATUS_CODE } from "@/constants/messages";
 import { getTimezone } from "@/context/timezone.context";
 import { CheckAvailabilityDTO } from "@/dtos/request/booking/booking.request.dto";
@@ -7,6 +7,7 @@ import { AuthRequest } from "@/middleware/auth.middleware";
 import AppError from "@/utils/AppError";
 
 import { Request,Response,NextFunction } from "express";
+import { STATUS_CODES } from "http";
 
 export class BookingController{
     private _bookingService:IBookingService;
@@ -94,13 +95,16 @@ export class BookingController{
         if (!authReq.user) {           
             return next(new AppError('Authentication required. Please log in.', STATUS_CODE.ERROR.UNAUTHORIZED));
         }
-        const userId = authReq.user.id; 
+        const userRole=authReq.user.role;
+        const userId = authReq.user.id 
         const { sessionBookingId } = req.params;
         const  {reason}=req.body;
         
-        try{        
-            const data= await this._bookingService.cancelSession(sessionBookingId,userId,reason); 
-            res.status(STATUS_CODE.SUCCESS.OK).json(data);                 
+        try{  
+          if(userRole===UserRole.USER){    
+             const data= await this._bookingService.cancelSession(sessionBookingId,reason,userRole); 
+             res.status(STATUS_CODE.SUCCESS.OK).json(data); 
+          }                
             
         }catch(err){
             next(err);
@@ -140,11 +144,16 @@ export class BookingController{
 
     //-----------------check duplicate booking----------------
     checkDuplicateBooking=async (req:AuthRequest, res: Response,next:NextFunction) => {
+        
         const {bookingSlots,sessionId}=req.body;
         const userId=req.user.id;
-        const isDuplicate= await this._bookingService.checkDuplicateBooking(userId,sessionId,bookingSlots); 
-
-        res.status(STATUS_CODE.SUCCESS.OK).json(isDuplicate);
+        try{
+            const isDuplicate= await this._bookingService.checkDuplicateBooking(userId,sessionId,bookingSlots);
+            res.status(STATUS_CODE.SUCCESS.OK).json(isDuplicate);
+        }
+        catch(error){
+            next(error);
+        }
     }
 
 
@@ -160,4 +169,17 @@ export class BookingController{
             res.status(STATUS_CODE.SUCCESS.OK).json(bookings);
     }
    
+    //------------------------getbookings bySessionId
+    getBookedSessionsBySessionId=async (req:AuthRequest, res: Response,next:NextFunction) => {
+      
+        const {sessionId}=req.params;
+       
+        try{
+            const bookings=await this._bookingService.getBookedSessionsBySessionId(sessionId);
+            res.status(STATUS_CODE.SUCCESS.OK).json(bookings);
+        }
+        catch(error){
+            next(error);
+        }
+   }
 }

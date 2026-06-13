@@ -1,6 +1,6 @@
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 import { FitnessPgmRequestDTO, getQueryDTO } from '@/dtos/request/admin/admin.category.dto';
-import { ProgramResponseDTO } from '@/dtos/response/admin/fitness.response.dto';
+import { FitnessProgramResponseDTOWithPagination, ProgramResponseDTO } from '@/dtos/response/admin/fitness.response.dto';
 
 import { IFitnessRespository } from '@/interfaces/repositories/IFitness.respository';
 import { IFitnessManagementService } from '@/interfaces/services/admin/IFitnessManagementService';
@@ -28,10 +28,10 @@ export class FitnessManagementService implements IFitnessManagementService {
     return program;
   }
 
-  async getPrograms(filter: getQueryDTO): Promise<ProgramResponseDTO[]> {
-    const { search, status } = filter;
+  async getPrograms(filter: getQueryDTO): Promise<FitnessProgramResponseDTOWithPagination> {
+    const {page,limit, search, status } = filter;
     const query: FilterQuery<IFitnessProgram> = {};
-
+    const skip=(page-1)*limit
     if (search) {
       query.programName = { $regex: search, $options: 'i' };
     }
@@ -41,10 +41,18 @@ export class FitnessManagementService implements IFitnessManagementService {
       query.isActive = false;
     }
     const data = await this._fitnessRepository.find(query);
-
-    if (!data.length) throw new AppError(ERROR_MESSAGES.GENERAL.NOT_FOUND);
-    const program = data.map(pgm => toProgramResponseDTO(pgm));
-    return program;
+     const [fitnessData, totalCount] = await Promise.all([
+              await this._fitnessRepository.findAll(query,{skip, limit}),
+              await this._fitnessRepository.count(query),
+            ]);
+    if (!fitnessData.length) throw new AppError(ERROR_MESSAGES.GENERAL.NOT_FOUND);
+    const programs = fitnessData.map(pgm => toProgramResponseDTO(pgm));
+   return {
+      programs,
+      total: totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+      page, 
+    }
   }
   async getProgram(id: string | Types.ObjectId): Promise<ProgramResponseDTO> {
     const data = await this._fitnessRepository.findById(id);

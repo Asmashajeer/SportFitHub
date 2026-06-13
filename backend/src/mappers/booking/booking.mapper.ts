@@ -4,6 +4,7 @@ import { IBooking, IVenue } from "@/models/booking.model"
 import { IBookedSessionPopulate, IBookingSession } from "@/models/booking.session.model"
 import { formatInTimeZone } from 'date-fns-tz';
 import { getTimezone } from "@/context/timezone.context";
+import { UserSessionsResponseDTOwithPopulatedSession } from "@/dtos/response/booking/booking.response.dto";
 
 
 
@@ -11,6 +12,7 @@ export const toUserBookingResponseDTO=(booking:IBooking)=>{
     const timezone = getTimezone();
     return {
             id:booking._id.toString(),
+            bookingUId:booking.bookingUId,
             userId: booking.userId.toString(),           
             sessionId: booking.sessionId.toString(),
             sessionModel:booking.sessionModel,
@@ -57,33 +59,36 @@ export const toUserSessionsResponseDTO=(bookedSession:IBookingSession)=>{
         refundAmount:bookedSession.refundAmount ,
     }
 }
-export const toUserSessionsResponseDTOwithPopulatedSession=(bookedSession:IBookedSessionPopulate)=>{
-      const timezone = getTimezone();
-    return{
-        id:bookedSession._id.toString(),
-        bookingId:bookedSession.bookingId._id.toString(),
-        userId:bookedSession.userId.toString()   ,
-        sessionId:bookedSession.sessionId._id.toString(),
-        sessionModel:bookedSession.sessionModel,
-        trainerId:bookedSession.sessionId.trainerId.toString(),
-        sessionName:bookedSession.sessionId.sessionName,
-        sessionType:bookedSession.sessionId.sessionType,
-        maxCapacity:bookedSession.sessionId.maxCapacity,
-        bookingDeadline:bookedSession.sessionId.bookingDeadline,
-        cancellationWindow:bookedSession.sessionId.cancellationWindow,
-        venue:((bookedSession.bookingId as unknown) as IBooking).venue as IVenue,
-        slotId:bookedSession.slotId   ,  
-        date:formatInTimeZone(bookedSession.date,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
-        startTime:bookedSession.startTime  ,
-        endTime:bookedSession.endTime, 
-        status:bookedSession.status,
-        rescheduledTo:bookedSession.rescheduledTo?.toString(),
-        attendance:bookedSession.attendance ,  
-        cancellationReason:bookedSession.cancellationReason,
-        refundedToWallet:bookedSession.refundedToWallet,
-        refundAmount:bookedSession.refundAmount ,
-    }
-}
+export const toUserSessionsResponseDTOwithPopulatedSession = (  bookedSession: IBookedSessionPopulate): UserSessionsResponseDTOwithPopulatedSession => {
+  const timezone = getTimezone();
+
+  return {
+    id: bookedSession._id.toString(),
+    bookingId: bookedSession.bookingId._id.toString(),
+    userId: bookedSession.userId.toString(),
+    sessionModel: bookedSession.sessionModel,
+    slotId: bookedSession.slotId,
+    date: formatInTimeZone(bookedSession.date, timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
+    startTime: bookedSession.startTime,
+    endTime: bookedSession.endTime,
+    status: bookedSession.status,
+    rescheduledTo: bookedSession.rescheduledTo?.toString(),
+    attendance: bookedSession.attendance,
+    cancellationReason: bookedSession.cancellationReason,
+    refundedToWallet: bookedSession.refundedToWallet,
+    refundAmount: bookedSession.refundAmount,  
+    session: {
+      sessionId: bookedSession.sessionId._id.toString(),
+      trainerId: bookedSession.sessionId.trainerId.toString(),
+      sessionName: bookedSession.sessionId.sessionName,
+      sessionType: bookedSession.sessionId.sessionType,
+      maxCapacity: bookedSession.sessionId.maxCapacity,
+      bookingDeadline: bookedSession.sessionId.bookingDeadline,
+      cancellationWindow: bookedSession.sessionId.cancellationWindow,
+    },
+    venue: bookedSession.bookingId.venue,
+  };
+};
 
 
 export const toCancelBookedSessionResponseDTO=(data)=>{

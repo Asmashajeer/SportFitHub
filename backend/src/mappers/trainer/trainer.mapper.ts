@@ -9,7 +9,7 @@ export const toTrainerProfileData = (
   profile: Partial<ITrainerProfile>
 ): TrainerProfileResponseDTO => {
   {
-    const timezone = getTimezone();
+    // const timezone = getTimezone();
     return {
       basicInfo: {
         displayName: profile.displayName,
@@ -36,7 +36,7 @@ export const toTrainerProfileData = (
 export const toPendingTrainersBasicData = (
   profile: Partial<ITrainerProfile>
 ): PendingTrainersBasicDTO => {
-  const timezone = getTimezone();
+  // const timezone = getTimezone();
   return {
     id: profile._id.toString(),
     userId: profile.userId.toString(),

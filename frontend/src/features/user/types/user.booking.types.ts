@@ -28,6 +28,7 @@ export interface IPricePlan {
 }
 export interface UserBookingResponseData {
   id: string;
+  bookingUId:string,
   userId: string;
   sessionId: string;
   sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
@@ -41,18 +42,21 @@ export interface UserBookingResponseData {
   createdAt: string;
 }
 
-export interface UserBookedSessionsResponseData {
-  id: string;
-  bookingId: string;
-  userId: string;
+export interface PopulatedSessionData {
   sessionId: string;
-  sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
+  trainerId: string;
   sessionName: string;
   sessionType: (typeof SESSION_TYPE)[keyof typeof SESSION_TYPE];
   maxCapacity: number;
   bookingDeadline: number;
   cancellationWindow: number;
-  venue: IVenue;
+}
+
+export interface UserBookedSessionsResponseData {
+  id: string;
+  bookingId: string;
+  userId: string;
+  sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
   slotId: string;
   date: string;
   startTime: string;
@@ -63,4 +67,6 @@ export interface UserBookedSessionsResponseData {
   cancellationReason: string;
   refundedToWallet: boolean;
   refundAmount: number;
+  session: PopulatedSessionData;  
+  venue: IVenue;
 }

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
-import type { AdminFitnessSessionDetails, AdminSportSessionDetails, FitnessSessionDetailsData, SportsSessionDetailsData } from "@/features/admin/store/types/session.types"
-import { formatDateDDMMYY, formatDateReadable } from "@/utils/formatDate"
+import type { AdminFitnessSessionDetails, AdminSportSessionDetails} from "@/features/admin/store/types/session.types"
+import { formatDateDDMMYY } from "@/utils/formatDate"
 import { Check } from "lucide-react"
 
 const Trainer=({session}:{session:AdminSportSessionDetails | AdminFitnessSessionDetails}) =>{

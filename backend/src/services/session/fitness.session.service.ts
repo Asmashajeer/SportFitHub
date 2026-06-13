@@ -1,9 +1,11 @@
 
-import { PAGINATION_LIMIT } from "@/constants/enums";
+import { PAGINATION_LIMIT, UserRole } from "@/constants/enums";
 import { ERROR_MESSAGES, STATUS_CODE } from "@/constants/messages";
 import { FitnessSessionDetailedPublicDTO, FitnessSessionResponseDTO, GetFitnessSessionsResponseDTO, PaginatedFitnessSessionsResponseDTO } from "@/dtos/response/session/fitness.session.response.dto";
 import { IFitnessSessionRepository } from "@/interfaces/repositories/IFitness.session.repository";
 import { ITrainerRepository } from "@/interfaces/repositories/ITrainer.repository";
+import { IUserRepository } from "@/interfaces/repositories/IUser.repository";
+import { IBookingService } from "@/interfaces/services/booking/IBooking.service";
 import { IFitnessSessionService } from "@/interfaces/services/session/IFitness.session.service ";
 import { toFitnessSessionDetailedPublicDTO, toFitnessSessionPublicDTO, toFitnessSessionResponseDTO } from "@/mappers/fitness.session.mapper";
 import { IFitnessSession } from "@/models/fitnessSession.model";
@@ -14,10 +16,13 @@ export class FitnessSessionService implements IFitnessSessionService{
     
     private _fitnessSessionRepo:IFitnessSessionRepository;  
     private _trainerRepo: ITrainerRepository;
-    constructor(fitnessSessionRepo:IFitnessSessionRepository,trainerRepo: ITrainerRepository){
+    private _bookingService:IBookingService;
+  
+    constructor(fitnessSessionRepo:IFitnessSessionRepository,trainerRepo: ITrainerRepository,bookingService:IBookingService){
         
         this._fitnessSessionRepo=fitnessSessionRepo
         this._trainerRepo = trainerRepo;
+  
      }
  
     
@@ -48,18 +53,64 @@ export class FitnessSessionService implements IFitnessSessionService{
       }
     
       //-------delete session---------
-      async deleteFitnessSession(id: string | Types.ObjectId): Promise<FitnessSessionResponseDTO> {
-        const data = await this._fitnessSessionRepo.findOneAndUpdate(id, {
-          isDeleted: true,
-          isActive: false,
-        });
-        if (!data) {
-          throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
+      async deleteFitnessSession(id: string,cancelledBy:UserRole  ): Promise<FitnessSessionResponseDTO> {
+        const bookingSessions= await this._bookingService.getBookedSessionsBySessionId(id);
+         // ---no bookings
+        if(bookingSessions.length===0){
+          const data = await this._fitnessSessionRepo.deleteASession(id);
+          
+          if (!data) {
+            throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
+          }
+          const session = toFitnessSessionResponseDTO(data);
+          return session;
         }
-        const session = toFitnessSessionResponseDTO(data);
-        return session;
+        // ----with bookings
+        const cancellationWindow= bookingSessions[0].session.cancellationWindow        
+        const withinWindow = bookingSessions.some((bookingSession) =>
+            this._bookingService.isWithinCancellationWindow(
+              bookingSession.date.toString(),
+              bookingSession.startTime,
+              bookingSession.session.cancellationWindow
+            )
+          );
+        if (withinWindow) {
+            throw new AppError(
+              `Cannot delete — one or more booked sessions are within the ${cancellationWindow}hr cancellation window`,
+              STATUS_CODE.ERROR.BAD_REQUEST
+            );
+          }
+        await Promise.all( 
+          bookingSessions.map(async(bookingSession)=>{
+            const sessionBookingId=bookingSession.id;
+            const userId=bookingSession.userId.toString();
+            const reason="Cancelled by trainer"
+              
+            await this._bookingService.cancelSession(sessionBookingId,reason,cancelledBy);
+          })
+        );
+        const data = await this._fitnessSessionRepo.deleteASession(id);
+          
+          if (!data) {
+            throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
+          }
+          const session = toFitnessSessionResponseDTO(data);
+          return session;
       }
-    
+     //--------------make active/inactive session ----------
+      async updateSessionVisibility( id: string | Types.ObjectId,isActive:boolean):Promise<FitnessSessionResponseDTO>{
+          const data = await this._fitnessSessionRepo.findOneAndUpdate(id, {isActive:isActive});
+          if (!data) {
+            throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
+          }
+          const session = toFitnessSessionResponseDTO(data);
+          return session;
+      }
+
+
+
+
+
       //-------------- get all sessions by a trianerId--------------
       async getSessionsByTrainer(userId: string | Types.ObjectId,filters: FilterQuery<IFitnessSession>): Promise<PaginatedFitnessSessionsResponseDTO> {
         const trainer = await this._trainerRepo.findByUserId(userId);

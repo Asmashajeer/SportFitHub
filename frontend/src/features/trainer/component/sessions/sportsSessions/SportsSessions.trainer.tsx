@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button';
 
 import CreateSportSessionModal from './CreateSportSession';
 import { useEffect, useState } from 'react';
-import { useSportSessions } from '../../hook/useSportSessions';
+import { useSportSessions } from '../../../../session/hook/useSportSessions';
 import { TableSkeleton } from '@/components/reusable/SkeletonTable';
-import type { SportsSessionResponseData } from '../../store/session.types';
+import type { SportsSessionResponseData } from '../../../../session/store/session.types';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { useSearchParams } from 'react-router-dom';

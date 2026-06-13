@@ -1,11 +1,11 @@
 import { FitnessPgmRequestDTO, getQueryDTO } from '@/dtos/request/admin/admin.category.dto';
-import { ProgramResponseDTO } from '@/dtos/response/admin/fitness.response.dto';
+import { FitnessProgramResponseDTOWithPagination, ProgramResponseDTO } from '@/dtos/response/admin/fitness.response.dto';
 
 import { Types } from 'mongoose';
 
 export interface IFitnessManagementService {
   addProgram(data: FitnessPgmRequestDTO): Promise<ProgramResponseDTO>;
-  getPrograms(filter: getQueryDTO): Promise<ProgramResponseDTO[]>;
+  getPrograms(filter: getQueryDTO): Promise<FitnessProgramResponseDTOWithPagination>
   getProgram(id: string | Types.ObjectId): Promise<ProgramResponseDTO>;
   toggleProgramStatus(id: string | Types.ObjectId): Promise<ProgramResponseDTO>;
   updateProgram(

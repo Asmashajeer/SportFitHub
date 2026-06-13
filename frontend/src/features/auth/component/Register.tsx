@@ -1,4 +1,4 @@
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import {
   Select,
   SelectContent,
@@ -16,14 +16,15 @@ import { useAuthStore } from '../store/useAuthStore';
 import { RegisterSchema } from '../types/auth.schema';
 import { ArrowBigLeft, EyeIcon, EyeOffIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import GoogleLoginButton from './GoogleLoginButton';
 
 const Register = () => {
   const navigate = useNavigate();
   const setUser = useAuthStore((state) => state.setUser);
+  const { isAuthenticated, user } = useAuthStore();
 
-  // const setHasProfile = useAuthStore((state) => state.setHasProfile);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -38,6 +39,15 @@ const Register = () => {
     timezone:'UTC',
   });
 
+  useEffect(() => {
+    if (isAuthenticated && user?.isVerified) {
+    const dashboardPath = Object.values(ROLES).includes(user.role)
+          ? `/${user.role}/dashboard`
+          : '/update-role';
+        navigate(dashboardPath, { replace: true });
+    }
+  }, [isAuthenticated, user]);
+
   const handleFocus = () => {
     if (error) setError('');
   };
@@ -45,6 +55,21 @@ const Register = () => {
   const handleLogin = () => {
     navigate('/login');
   };
+   const validateField=(name:string,value:string)=>{
+      const result=RegisterSchema.safeParse({...formData,[name]:value})
+      if(!result.success){
+        const fieldError=result.error.issues.find(issue=>issue.path[0]===name);
+        setFieldErrors(prev=>({
+          ...prev,
+          [name]:fieldError?.message || ''}));
+  
+      }
+      else {
+        setFieldErrors(prev=>({
+          ...prev,
+          [name]: ''}));
+      }
+    };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -111,10 +136,16 @@ const Register = () => {
                 placeholder="Name"
                 value={formData.name}
                 onFocus={handleFocus}
-                onChange={(e) =>
+                onChange={(e) =>{
                   setFormData({ ...formData, name: e.target.value })
-                }
+                  validateField('name',e.target.value );
+                }}
               />
+               {fieldErrors.name && (
+              <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                {fieldErrors.name}
+              </p>
+            )}
             </fieldset>
             <fieldset className="relative text-left rounded-md py-1  focus-visible:border-ring-0 ">
               {/* The legend sits on the border line */}
@@ -126,10 +157,16 @@ const Register = () => {
                 placeholder="Email Address"
                 value={formData.email}
                 onFocus={handleFocus}
-                onChange={(e) =>
+                onChange={(e) =>{
                   setFormData({ ...formData, email: e.target.value })
-                }
+                  validateField('email',e.target.value );
+                }}
               />
+               {fieldErrors.email && (
+              <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                {fieldErrors.email}
+              </p>
+            )}
             </fieldset>
             <div className="space-y-2 relative w-full">
               <fieldset className="relative text-left rounded-md py-1  focus-visible:border-ring-0 ">
@@ -143,9 +180,10 @@ const Register = () => {
                   placeholder="Password"
                   value={formData.password}
                   onFocus={handleFocus}
-                  onChange={(e) =>
+                  onChange={(e) =>{
                     setFormData({ ...formData, password: e.target.value })
-                  }
+                    validateField('password',e.target.value );
+                  }}
                 />
                 {/* show password button */}
                 <Button
@@ -160,6 +198,11 @@ const Register = () => {
                     <EyeOffIcon className="h-4 w-4  text-green-700" />
                   )}
                 </Button>
+                 {fieldErrors.password && (
+                    <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                      {fieldErrors.password}
+                    </p>
+                  )}
               </fieldset>
             </div>
 
@@ -173,12 +216,10 @@ const Register = () => {
                   placeholder="Confirm Password"
                   value={formData.confirmPassword}
                   onFocus={handleFocus}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      confirmPassword: e.target.value,
-                    })
-                  }
+                  onChange={(e) =>{
+                    setFormData({  ...formData,  confirmPassword: e.target.value})
+                    validateField('confirmPassword',e.target.value );
+                  }}
                 />
                 <Button
                   type="button"
@@ -192,6 +233,11 @@ const Register = () => {
                     <EyeOffIcon className="h-4 w-4  text-green-700" />
                   )}
                 </Button>
+                {fieldErrors.confirmPassword && (
+                    <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                      {fieldErrors.confirmPassword}
+                    </p>
+                  )}
               </fieldset>
             </div>
             {/*user role  */}

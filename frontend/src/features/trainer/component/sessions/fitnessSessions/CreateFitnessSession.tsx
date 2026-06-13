@@ -6,19 +6,20 @@ import {
   Image as ImageIcon,
   Tag,
   X,
-  Plus,
   Minus,
-  Info,
+  Plus,
 } from 'lucide-react';
 import {
   AGE_GROUP,
   DAYS_OF_WEEK,
+  GENDER,
+  INTENSITY_LEVEL,
   SESSION_MODE,
   SESSION_TYPE,
   TIME_PERIOD,
   type DayName,
 } from '@/constants/constants';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
@@ -29,34 +30,40 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import type {
-  SportsSessionFormValues,
-  SportsSessionResponseData,
-  TimeSlot,
-} from '../../store/session.types';
+
 import { uploadService } from '@/service/upload.service';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
-import { sportSessionService } from '../../service/sportSessionService';
+
 import toast from 'react-hot-toast';
 import { useEffect, useMemo, useState } from 'react';
 
-import type { SportData } from '@/features/admin/store/types';
+import type { FitnessData } from '@/features/admin/store/types';
 import { useTrainerStore } from '@/features/trainer/store/useTrainerStore';
-import { useSessionStore } from '../../store/useSessionStore';
+import { useSessionStore } from '../../../../session/store/useSessionStore';
 
 import SessionMode from '../SessionMode';
+import type {
+  
+  FitnessSessionResponseData,
+  TimeSlot,
+} from '../../../../session/store/fitness.session.types';
+import { fitnessSessionService } from '../../../../session/service/fitnessSessionService ';
 import { formatTo12Hour } from '@/utils/formatDate';
+import type { FitnessSessionFormValues } from '@/features/trainer/types/trainer.fitness.session.types';
+import { TrainerFitnessSessionService } from '@/features/trainer/service/sessionService/trainer.fitness.session.service';
 
 const initialData = {
-  sportCategory: '',
+  fitnessCategory: '',
   sessionName: '',
   slug: '',
   description: '',
   duration: Number(Object.keys(TIME_PERIOD)[0]),
   ageGroup: AGE_GROUP.ALL,
+  gender: GENDER.ALL,
   sessionType: SESSION_TYPE.ONE_ONE,
   maxCapacity: 1,
   enrolledCount: 0,
+  intensityLevel: INTENSITY_LEVEL.BEGINNER,
   mode: SESSION_MODE.OFFLINE,
   meetingLink: '',
 
@@ -68,6 +75,7 @@ const initialData = {
       coordinates: [0, 0] as [number, number],
     },
   },
+  requirements: '',
   images: null,
   pricing: [{ sessionCount: 1, price: 100 }],
   timeSlots: [
@@ -93,9 +101,9 @@ interface Props {
   isEditing: boolean;
   onSuccess: () => void;
   onClose: () => void;
-  sessionToEdit?: SportsSessionResponseData | null;
+  sessionToEdit?: FitnessSessionResponseData | null;
 }
-const CreateSportSessionModal = ({
+const CreateFitnessSessionModal = ({
   isOpen,
   isEditing,
   sessionToEdit,
@@ -105,10 +113,12 @@ const CreateSportSessionModal = ({
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const { profile, fetchProfile } = useTrainerStore();
   const { user } = useAuthStore();
-  const { sports, setSports } = useSessionStore();
+  const { fitness, setFitness } = useSessionStore();
   const [availableDays, setAvailableDays] = useState<string[]>([]);
-  const form = useForm<SportsSessionFormValues>({ defaultValues: initialData });
-  const [sportId,setSportId]=useState("");
+  const [fitnessId,setFitnessId]=useState('');   //fitness category id to add to slug
+  const form = useForm<FitnessSessionFormValues>({
+    defaultValues: initialData,
+  });
   const {
     reset,
     register,
@@ -130,14 +140,14 @@ const CreateSportSessionModal = ({
     remove: removeSlot,
   } = useFieldArray({ control, name: 'timeSlots' });
 
-  //  to get available sports
+  //  to get available programs
   useEffect(() => {
     fetchProfile();
-    const getSportCategory = async () => {
-      const data = await sportSessionService.getAvailableSports();
-      setSports(data.sports);
+    const getFitnessCategory = async () => {
+      const data = await fitnessSessionService.getAvailableFitnessPgms();
+      setFitness(data.fitnessPgms);
     };
-    getSportCategory();
+    getFitnessCategory();
   }, []);
 
   //to get trainer working day
@@ -146,27 +156,33 @@ const CreateSportSessionModal = ({
       const workingDays = DAYS_OF_WEEK.filter((day) => {
         return profile?.availability?.[day]?.available === true;
       });
-      
+      console.log('AvailableDays:    ', workingDays);
       setAvailableDays(workingDays);
     }
   }, [profile]);
 
   useEffect(() => {
+    console.log(sessionToEdit);
     if (isEditing && sessionToEdit) {
       setExistingImages(sessionToEdit.images || []);
       const initialAmenities = Array.isArray(sessionToEdit.amenities)
         ? sessionToEdit.amenities.join(', ')
         : '';
+      const initialRequirements = Array.isArray(sessionToEdit.requirements)
+        ? sessionToEdit.requirements.join(', ')
+        : '';
 
       const flattenedSlots = sessionToEdit.timeSlots.flatMap((dayGroup) =>
         dayGroup.slots.map((slot) => ({
           day: dayGroup.day,
-          slots: [slot],
+          slots: [slot], // Keep as array to match your register path: .slots.0.startTime
         }))
       );
+
       reset({
         ...sessionToEdit,
         amenities: initialAmenities, //convert string of aminities into a string eg: water,restroom
+        requirements: initialRequirements,
         images: null,
         timeSlots: flattenedSlots,
       });
@@ -175,15 +191,16 @@ const CreateSportSessionModal = ({
       reset(initialData);
     }
   }, [isEditing, sessionToEdit, reset]);
-    const sport = useMemo(() => 
-      sports.find(sp => sp.id === sportId), 
-    [sports, sportId])
-  // create slug from session name
-  const handleSlug = (   
+
+  // to get fitness program and add to slug
+  const fitpgm = useMemo(() => 
+        fitness.find(ft => ft.id === fitnessId), 
+      [fitness, fitnessId]);
+  const handleSlug = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {   
+  ) => {
     const { value } = e.target;
-    const session_slug = value+'-'+sport?.sportName
+    const session_slug = value+'-'+fitpgm?.programName
       .toLowerCase()
       .trim()
       .replace(/[^\w\s-]/g, '') // Remove special characters
@@ -192,20 +209,18 @@ const CreateSportSessionModal = ({
     setValue('slug', session_slug, { shouldValidate: true });
   };
 
-  //time to minute
   const timeToMinutes = (time: string) => {
     if (!time) return 0;
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
   };
-
-  //check within working hours of trainer
   const checkInWorkingHours = (
     day: DayName,
     startTime: string,
     endTime: string
   ) => {
     const workingDay = profile?.availability?.[day];
+
     if (!workingDay || !workingDay.available) return false;
 
     if (workingDay.startTime && workingDay.endTime) {
@@ -213,6 +228,7 @@ const CreateSportSessionModal = ({
       const sessionEnd = timeToMinutes(endTime);
       const trainerStart = timeToMinutes(workingDay.startTime);
       const trainerEnd = timeToMinutes(workingDay.endTime);
+      // Check if session start is >= trainer start AND session end is <= trainer end
       return sessionStart >= trainerStart && sessionEnd <= trainerEnd;
     }
   };
@@ -233,7 +249,7 @@ const CreateSportSessionModal = ({
         if (sorted[i].endTime > sorted[i + 1].startTime) {
           return {
             hasConflict: true,
-            message: `Time slots  overlaping on ${day} - ${formatTo12Hour(sorted[i].endTime)} & ${formatTo12Hour(sorted[i + 1].startTime)}`,
+            message: `Time conflict on ${day} - ${sorted[i].endTime} & ${sorted[i + 1].startTime}`,
           };
         }
       }
@@ -241,7 +257,7 @@ const CreateSportSessionModal = ({
     return { hasConflict: false };
   };
 
-  const onSubmit = async (formData: SportsSessionFormValues) => {
+  const onSubmit = async (formData: FitnessSessionFormValues) => {
     fetchProfile();
     if (!profile) {
       toast.error(' trainer data not available');
@@ -249,8 +265,7 @@ const CreateSportSessionModal = ({
     }
     const conflict = checkInternalOverlap(watch('timeSlots'));
     if (conflict.hasConflict) {
-      toast.custom(conflict?.message || 'Time  slot overlap');
-      return;
+      toast.error(conflict?.message || 'Time overlap');
     }
     const formattedAmenities = formData.amenities
       ? formData.amenities
@@ -258,6 +273,19 @@ const CreateSportSessionModal = ({
           .map((item: string) => item.trim())
           .filter((item: string) => item !== '')
       : [];
+    const formattedRequirements = formData.requirements
+      ? formData.requirements
+          .split(',')
+          .map((item: string) => item.trim())
+          .filter((item: string) => item !== '')
+      : [];
+      if(formData.mode===SESSION_MODE.OFFLINE && !formData.venue?.location){
+        toast.error("select location from map");
+        return;
+      }
+      else if(formData.mode===SESSION_MODE.ONLINE &&! formData.meetingLink){
+         toast.error("Add online meetlink");return;
+      }
     if (user) {
       //grouping timeslotsby day
       const groupedSlots = formData.timeSlots.reduce<TimeSlot[]>(
@@ -269,10 +297,11 @@ const CreateSportSessionModal = ({
           // Check if we already have this day
           const existingDay = acc.find((item) => item.day === curr.day);
 
-          if (existingDay) {            
+          if (existingDay) {
+            // If Monday already exists, just push the new time slot into its array
             existingDay.slots.push(newSlot);
-          }
-          else {           
+          } else {
+            // If this is the first time seeing this day, create the entry
             acc.push({
               day: curr.day,
               slots: [newSlot],
@@ -282,13 +311,12 @@ const CreateSportSessionModal = ({
         },
         []
       );
-
       try {
         let finalImageUrls = [...existingImages];
-        //uploadImages
+
         if (formData.images && formData.images.length > 0) {
           const userId = user?.id;
-          const folderPath = `sports/${userId}`;
+          const folderPath = `fitness/${userId}`;
           const newUrls = await uploadService.upload(
             formData.images,
             folderPath,
@@ -301,37 +329,34 @@ const CreateSportSessionModal = ({
           const sessionData = {
             ...formData,
             amenities: formattedAmenities,
+            requirements: formattedRequirements,
             trainerId: profile.id,
             images: finalImageUrls,
             timeSlots: groupedSlots,
           };
+
           if (isEditing && sessionToEdit) {
-            await sportSessionService.updateSession(
+            await TrainerFitnessSessionService.updateSession(
               sessionToEdit?.id,
               sessionData
             );
-            toast.success('The sport session Updated');
+            toast.success('A fitness session Updated');
           } else {
-            await sportSessionService.addSession(sessionData);
-            toast.success('A sport session Added');
+            await TrainerFitnessSessionService.addSession(sessionData);
+            toast.success('A fitness  session Added');
           }
           onSuccess();
           onClose();
-        } 
-        else{ toast.error('failed to upload images');
-          return;
-        }
+        } else toast.error('failed to create session');
       } catch (error) {
-        toast.error(error as string || 'failed to create session');
-        return;
+        toast.error(error?.toString() || 'failed to create session');
       }
     }
-    onClose();
-  };
 
+    // onClose();
+  };
   const handleSelectChange = (name: any, value: string) => {
     setValue(name, value, { shouldValidate: true });
-    
   };
   if (!isOpen) return null;
 
@@ -342,7 +367,7 @@ const CreateSportSessionModal = ({
         <div className="p-6 border-b flex justify-between items-center bg-card">
           <div>
             <h2 className="text-xl font-bold text-slate-400">
-              {isEditing ? 'Edit Sport Session' : 'Create Sport Session'}
+              {isEditing ? 'Edit fitness Session' : 'Create Fitness Session'}
             </h2>
             <p className="text-slate-500 text-sm">
               {isEditing ? 'update the ' : 'Fill in all'} details to publish
@@ -370,29 +395,31 @@ const CreateSportSessionModal = ({
                   <h3 className="flex items-center gap-2 font-bold text-green-600">
                     <Tag size={18} /> 1. Identity
                   </h3>
+                  {/* fitnessCategory */}
                   <div className="flex items-center gap-2">
-                    <Label className=" text-slate-400">Sport category</Label>
+                    <Label className=" text-slate-400">Fitness category</Label>
                     <Select
-                      key={watch('sportCategory') || 'new-session'}
-                      value={watch('sportCategory') || ''}
+                      key={watch('fitnessCategory') || 'new-session'}
+                      value={watch('fitnessCategory') || ''}
                       onValueChange={(val) =>{
-                        setSportId(val)
-                        handleSelectChange('sportCategory', val)
+                        setFitnessId(val)
+                        handleSelectChange('fitnessCategory', val)
                       }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select sport " />
+                        <SelectValue placeholder="Select fitness program " />
                       </SelectTrigger>
                       <SelectContent>
-                        {sports.length &&
-                          sports.map((sport: SportData) => (
-                            <SelectItem key={sport.id} value={sport.id}>
-                              {sport.sportName} {sport.icon}
+                        {fitness.length &&
+                          fitness.map((program: FitnessData) => (
+                            <SelectItem key={program.id} value={program.id}>
+                              {program.programName}{' '}
                             </SelectItem>
                           ))}
                       </SelectContent>
                     </Select>
                   </div>
+                  {/* sessionName */}
                   <div className="flex items-center gap-2">
                     <Label>SessionName</Label>
                     <Input
@@ -404,7 +431,6 @@ const CreateSportSessionModal = ({
                             'Please enter a valid program name (min 5 chars)',
                         },
                       })}
-                     
                       onChange={(e) => handleSlug(e)}
                       placeholder="Session Name"
                       className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
@@ -441,28 +467,32 @@ const CreateSportSessionModal = ({
                       {errors.description.message}
                     </p>
                   )}
-                  <div className="flex items-center gap-4">
-                    <Label>Duration</Label>
-                    <Select
-                      key={watch('duration') || Object.keys(TIME_PERIOD)[0]}
-                      value={watch('duration').toString() || ''}
-                      onValueChange={(val) => setValue('duration', Number(val))}
-                      defaultValue={Object.keys(TIME_PERIOD)[0]}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select duration" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(TIME_PERIOD).map(([key, label]) => (
-                          <SelectItem key={key} value={key}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
 
-                  <div className="  grid grid-cols-2 gap-2">
+                  <div className="  grid grid-cols-2 gap-8">
+                    {/* duration */}
+                    <div className="flex items-center gap-4">
+                      <Label>Duration</Label>
+                      <Select
+                        key={watch('duration') || Object.keys(TIME_PERIOD)[0]}
+                        value={watch('duration').toString() || ''}
+                        onValueChange={(val) =>
+                          setValue('duration', Number(val))
+                        }
+                        defaultValue={Object.keys(TIME_PERIOD)[0]}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(TIME_PERIOD).map(([key, label]) => (
+                            <SelectItem key={key} value={key}>
+                              {label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {/* age group */}
                     <div className="flex items-center gap-2">
                       <Label className=" text-slate-400">Age group</Label>
                       <Select
@@ -484,6 +514,9 @@ const CreateSportSessionModal = ({
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+                  <div className="  grid grid-cols-2 gap-8">
+                    {/* session type-grup/one to one */}
                     <div className="flex items-center gap-2 ">
                       <Label className=" text-slate-400">Type</Label>
                       <Select
@@ -522,13 +555,76 @@ const CreateSportSessionModal = ({
                         </div>
                       )}
                     </div>
+                    {/* gender           */}
+                    <div className="flex items-center gap-2">
+                      <Label className=" text-slate-400">Gender</Label>
+                      <Select
+                        key={watch('gender') || ''}
+                        value={watch('gender') || ''}
+                        onValueChange={(val) =>
+                          handleSelectChange('gender', val)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.values(GENDER).map((gen) => (
+                            <SelectItem key={gen} value={gen}>
+                              {gen}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  {/* intensity */}
+                  <div className="  grid grid-cols-2 gap-8">
+                    <div className="flex items-center gap-2">
+                      <Label className=" text-slate-400">Intensity </Label>
+                      <Select
+                        key={watch('intensityLevel') || ''}
+                        value={watch('intensityLevel') || ''}
+                        onValueChange={(val) =>
+                          handleSelectChange('intensityLevel', val)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select intensity Level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.values(INTENSITY_LEVEL).map((lev) => (
+                            <SelectItem key={lev} value={lev}>
+                              {lev}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </section>
                 {isEditing ? (
-                  <SessionMode<SportsSessionResponseData> />
+                  <SessionMode<FitnessSessionResponseData> />
                 ) : (
-                  <SessionMode<SportsSessionFormValues> />
+                  <SessionMode<FitnessSessionFormValues> />
                 )}
+                <div className="p-2 border bg-card round'ed-lg">
+                  <span className="text-xs font-bold text-slate-400 block mb-2">
+                    Requirements
+                  </span>
+                  <Input
+                    {...register('requirements', {
+                      required: 'add   requirements  ',
+                    })}
+                    placeholder="Towel, yoga Mat..."
+                    className="w-full text-sm outline-none"
+                  />
+                  {(errors as any)?.requirements && (
+                    <p className="text-xs text-red-500">
+                      {(errors as any).requirements.message}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* RIGHT COLUMN: The images,"When" and "How Much" */}
@@ -657,32 +753,33 @@ const CreateSportSessionModal = ({
                     const end = watch(`timeSlots.${index}.slots.0.endTime`);
                     // Validation
                     const isWithinHours = checkInWorkingHours(day, start, end);
-                    console.log('isWithinHours  :', isWithinHours);
                     const hasError = start && end && !isWithinHours;
                     return (
                       <div
                         key={field.id}
                         className="grid grid-cols-2 gap-2 pb-2 border-b border-blue-100 last:border-0"
                       >
-                        <Label className="w-30">Day</Label>
-                        <Select
-                          key={watch(`timeSlots.${index}.day` || '')}
-                          value={watch(`timeSlots.${index}.day`) || ''}
-                          onValueChange={(val) =>
-                            handleSelectChange(`timeSlots.${index}.day`, val)
-                          }
-                        >
-                          <SelectTrigger className=" w-30">
-                            <SelectValue placeholder="Select day" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableDays.map((day, index) => (
-                              <SelectItem key={index} value={day}>
-                                {day}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="flex items-center justify-between">
+                          <Label className="w-24">Day</Label>
+                          <Select
+                            key={watch(`timeSlots.${index}.day` )|| ''}
+                            value={watch(`timeSlots.${index}.day`) || undefined}
+                            onValueChange={(val) =>
+                              handleSelectChange(`timeSlots.${index}.day`, val)
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select day" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableDays.map((day, index) => (
+                                <SelectItem key={index} value={day}>
+                                  {day}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                         {/* Start Time Input */}
                         <div className="col-span-3 flex  justify-between">
                           <Label className="w-30">Start Time</Label>
@@ -713,8 +810,12 @@ const CreateSportSessionModal = ({
                         {hasError && (
                           <p className="text-[10px] text-red-600 font-bold ml-2">
                             ⚠️ Outside working hours (
-                            {profile?.availability[day].startTime} -{' '}
-                            {profile?.availability[day].endTime})
+                            {formatTo12Hour(
+                              profile?.availability[day].startTime
+                            )}{' '}
+                            -{' '}
+                            {formatTo12Hour(profile?.availability[day].endTime)}
+                            )
                           </p>
                         )}
                         {/* End Time (Read Only) */}
@@ -847,34 +948,21 @@ const CreateSportSessionModal = ({
             </div>
 
             {/* Footer Actions */}
-            <div className="mt-12 flex justify-between gap-4 pt-6 border-t">
-              <div className="flex items-start gap-3 bg-amber-950/30 border border-amber-800/50 rounded-lg p-4 mb-6">
-                <Info className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-amber-400 text-sm font-medium">Sessions require admin approval</p>
-                  <p className="text-amber-600/80 text-xs mt-0.5">
-                    Once submitted, your session will be reviewed by our team. You'll be notified once it's approved and visible to clients.
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-end gap-4 border-t">
-                  <Button
-                  variant="secondary"
-                  type="button"
-                  onClick={onClose}
-                  className="px-6 py-1.5 font-medium text-slate-600 hover:bg-slate-600 hover:text-black rounded-lg transition-all"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="px-10 py-2.5 text-white font-bold  hover:bg-green-600 shadow-sm rounded-lg shadow-green-500 transition-all flex items-center gap-2"
-                >
-                  <CheckCircle size={18} />{' '}
-                  {isEditing ? 'Update Changes' : 'Publish Session'}
-                </Button>
-              </div>
-              
+            <div className="mt-12 flex justify-end gap-4 pt-6 border-t">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-1.5 font-medium text-slate-600 hover:bg-slate-600 hover:text-black rounded-lg transition-all"
+              >
+                Cancel
+              </button>
+              <Button
+                type="submit"
+                className="px-10 py-2.5 text-white font-bold  hover:bg-green-600 shadow-sm rounded-lg shadow-green-500 transition-all flex items-center gap-2"
+              >
+                <CheckCircle size={18} />{' '}
+                {isEditing ? 'Update Changes' : 'Publish Session'}
+              </Button>
             </div>
           </form>
         </FormProvider>
@@ -892,4 +980,4 @@ const calculateEndTime = (startTime: string, duration: number): string => {
 
   return `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
 };
-export default CreateSportSessionModal;
+export default CreateFitnessSessionModal;

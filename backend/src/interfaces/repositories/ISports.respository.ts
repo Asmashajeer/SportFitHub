@@ -1,4 +1,7 @@
 import { ISports } from '@/models/sports.model';
 import { IBaseRepository } from './IBase.repository';
+import { FilterQuery } from 'mongoose';
 
-export type ISportsRespository = IBaseRepository<ISports>
+export interface ISportsRespository extends IBaseRepository<ISports>{
+    findAll(query:FilterQuery<ISports>,options: { skip:number, limit:number })
+}

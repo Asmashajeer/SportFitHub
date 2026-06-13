@@ -19,7 +19,7 @@ import {
   SESSION_TYPE,
 } from '@/constants/constants';
 import SportSessionCard from './SportSessionCard';
-import SportsBanner from './SportsSessionBanner';
+import SportsBanner from '../SportsSessionBanner';
 
 import type { SportData } from '@/features/admin/store/types';
 import { Label } from '@/components/ui/label';

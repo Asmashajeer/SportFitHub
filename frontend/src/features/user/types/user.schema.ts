@@ -16,15 +16,16 @@ export const CreateProfileSchema = z
     gender: z.enum(GENDER),
     phone: z
       .string()
+      .regex(phoneRegex, { message: 'Invalid phone number format' })
       .min(10, { message: 'Phone number is too short' })
-      .max(15, { message: 'Phone number is too long' })
-      .regex(phoneRegex, { message: 'Invalid phone number format' }),
+      .max(15, { message: 'Phone number is too long' }),
+      
     relationship: z.enum(RELATIONSHIP),
-    street: z.string().optional(),
-    city: z.string().optional(),
+    street: z.string("Address required"),
+    city: z.string("city required").optional(),
     zip: z
       .string()
-      .regex(/^[0-9]{5,6}$/, { message: 'invalid zip code' })
+      .regex(/^[0-9]{5,6}$/, { message: 'Invalid zip code' })
       .optional()
       .or(z.literal('')),
     longitude: z.number().optional(),

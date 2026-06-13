@@ -10,18 +10,18 @@ import { ArrowBigLeft, EyeIcon, EyeOffIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 import GoogleLoginButton from './GoogleLoginButton';
-import { Input } from '@/components/ui/input';
-import PaymentService from '@/features/booking/service/bookingService';
+
+
 import { useBookingStore } from '@/features/booking/store/useBookingStore';
+import { Input } from '@/components/ui/Input';
 
 const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
   const setUser = useAuthStore((state) => state.setUser);
-  // const authUser = useAuthStore((state) => state.user);
   const setHasProfile = useAuthStore((state) => state.setHasProfile);
-  // const [isLogin, setIsLogin] = useState(true);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -34,6 +34,7 @@ const Login = () => {
   });
   const payload = useBookingStore((state) => state.payload);
   const from = location.state?.from || '';
+  
   useEffect(() => {
     if (isAuthenticated && user?.isVerified) {
       if (from && payload && user.role===ROLES.USER) {
@@ -52,6 +53,23 @@ const Login = () => {
   };
   const handleFocus = () => {
     if (error) setError('');
+  };
+
+
+  const validateField=(name:string,value:string)=>{
+    const result=LoginSchema.safeParse({...formData,[name]:value})
+    if(!result.success){
+      const fieldError=result.error.issues.find(issue=>issue.path[0]===name);
+      setFieldErrors(prev=>({
+        ...prev,
+        [name]:fieldError?.message || ''}));
+
+    }
+    else {
+      setFieldErrors(prev=>({
+        ...prev,
+        [name]: ''}));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,7 +124,7 @@ const Login = () => {
         navigate(`${user_Role}/dashboard`, { replace: true });
       }
     } catch (error) {
-      toast.error('Invalid email or password !');
+      toast.error(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsSubmitting(false);
     }
@@ -151,10 +169,16 @@ const Login = () => {
                 placeholder="Email Address"
                 value={formData.email}
                 onFocus={handleFocus}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) =>{
+                  setFormData({ ...formData, email: e.target.value });
+                  validateField('email',e.target.value );
+                }}
               />
+             {fieldErrors.email && (
+              <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                {fieldErrors.email}
+              </p>
+            )}
             </fieldset>
 
             <div className="space-y-2 relative w-full">
@@ -163,14 +187,15 @@ const Login = () => {
                   Password
                 </legend>
                 <Input
-                  // label={'Email'}
+                  
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Password"
                   value={formData.password}
                   onFocus={handleFocus}
-                  onChange={(e) =>
+                  onChange={(e) =>{
                     setFormData({ ...formData, password: e.target.value })
-                  }
+                    validateField('password', e.target.value);
+                  }}
                 />
                 {/* show password button */}
                 <Button
@@ -185,6 +210,11 @@ const Login = () => {
                     <EyeOffIcon className="h-4 w-4  text-green-700" />
                   )}
                 </Button>
+                {fieldErrors.password && (
+                  <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                    {fieldErrors.password}
+                  </p>
+                )}
               </fieldset>
             </div>
 

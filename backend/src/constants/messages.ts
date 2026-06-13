@@ -51,7 +51,7 @@ export const ERROR_MESSAGES = {
   AUTH: {
     DB_CONN_ERROR: 'Cant connect with database',
     USER_EXISTS: 'User already exists',
-    BLOCKED_USER: 'User blocked by admin',
+    BLOCKED_USER: 'Your account has been suspended',
     INVALID_CREDENTIALS: 'Invalid credentials ',
     OTP_INVALID: 'Invalid or expired code.Please request new one',
     ROLE_INVALID: 'Invalid Role selected',
@@ -60,11 +60,13 @@ export const ERROR_MESSAGES = {
     REFRESH_TOKEN_INVALID: 'Invalid token',
     USER_NOT_FOUND: 'User not found',
     GOOGLE_EMAIL_MISSING: 'No email provided by Google',
+    FORBIDDEN:'Unauthorized action.'
   },
   USER: {
     PROFILE_EXISTS: 'Profile for this user already exists',
     PROFILE_NOT_FOUND: 'Profile for this user NOT exists',
     STATS_ERROR: 'Cannot fetch stats details',
+    USER_FORBIDDEN:'USER CANNOT  '
   },
   GENERAL: {
     EXISTED: ' Already exist',

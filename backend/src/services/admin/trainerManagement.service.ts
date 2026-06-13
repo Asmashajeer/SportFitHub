@@ -9,7 +9,7 @@ import { DocumentUpdateDTO, TrainerFilterRequestDTO, trainerStatusDTO } from '@/
 import { toPendingTrainersBasicData, ToTrainerProfileDTO } from '@/mappers/trainer/trainer.mapper';
 import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { ITrainerProfile } from '@/models/trainerProfile.model';
-import { AdminTrainersDTOWithPagination, AdminTrainersResponseDTO } from '@/dtos/response/admin/trainer.response.dto';
+import { AdminTrainersDTOWithPagination } from '@/dtos/response/admin/trainer.response.dto';
 import { toAdminTrainersResponseDTO } from '@/mappers/admin/admin.trainers.mappers';
 
 export class TrainerManagementService implements ITrainerManagementService {

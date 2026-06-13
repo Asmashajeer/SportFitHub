@@ -17,6 +17,12 @@ export const sendNotificationEmail = async ({
   details,
   closingLine,
 }: NotificationEmailProps): Promise<void> => {
+    const buildDetailsRows = (details: Record<string, any>): string => {
+       return Object.entries(details)
+        .filter(([key, value]) => key !== 'userName' && value !== undefined && value !== null)
+        .map(([key, value]) => `<p style="margin: 4px 0;"><strong>${key}:</strong> ${value}</p>`)
+        .join('');
+    };
  try{ 
     await transporter.sendMail({
       from: `"SportFitHub" <${process.env.GMAIL_USER}>`,
@@ -28,7 +34,7 @@ export const sendNotificationEmail = async ({
           <p>Hi <strong>${details.userName}</strong>,</p>
           <p>${description}</p>
           <div style="background: #f4f4f4; padding: 15px; border-radius: 5px;">
-            <p style="margin: 0;">${JSON.stringify(details)}</p>
+            <p style="margin: 0;">${buildDetailsRows(details)}</p>
           </div>
           <p>${closingLine}</p>
           <footer style="margin-top: 20px; font-size: 11px; color: #888;">

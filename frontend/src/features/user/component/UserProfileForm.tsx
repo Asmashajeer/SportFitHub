@@ -15,7 +15,7 @@ import {
   type GenderType,
   type RelationType,
 } from '../../../constants/constants';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import {
   Select,
   SelectContent,
@@ -31,7 +31,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { uploadService } from '@/service/upload.service';
 import { CreateProfileSchema } from '../types/user.schema';
 import { Button } from '@/components/ui/button';
-import PaymentService from '@/features/booking/service/bookingService';
+
 import { useBookingStore } from '@/features/booking/store/useBookingStore';
 
 interface UserProfile {
@@ -70,7 +70,7 @@ const UserProfileForm: React.FC = () => {
     profilePic: '',
     isPrimary: false,
   });
-
+   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // For backend
   const [previewImage, setPreviewImage] = useState(''); // For UI
@@ -125,12 +125,25 @@ const UserProfileForm: React.FC = () => {
     }
   };
 
+  const validateField=(name:string,value:string)=>{
+      const result=CreateProfileSchema.safeParse({...profile,[name]:value})
+      if(!result.success){
+        const fieldError=result.error.issues.find(issue=>issue.path[0]===name);
+        setFieldErrors(prev=>({
+          ...prev,
+          [name]:fieldError?.message || ''}));
+  
+      }
+      else {
+        setFieldErrors(prev=>({
+          ...prev,
+          [name]: ''}));
+      }
+    };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return toast.error('User not found');
-
     setIsLoading(true);
-
     try {
       let profilePicUrl = profile.profilePic;
 
@@ -175,13 +188,12 @@ const UserProfileForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0b0d] p-4">
-      <div className="max-w-3xl mx-auto">
-        {/* Changed div to form */}
+      <div className="max-w-3xl mx-auto">      
         <form
           onSubmit={handleSubmit}
           className="bg-secondary border border-[#454c59] rounded-3xl shadow-2xl p-8"
         >
-          {/* Header */}
+     
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-[#f8fafca9] mb-2">
               Profile Information
@@ -219,6 +231,7 @@ const UserProfileForm: React.FC = () => {
                 className="hidden"
                 onChange={handleImageUpload}
               />
+              
             </div>
             <p className="text-slate-400 text-xs mt-2">Click to upload photo</p>
           </div>
@@ -235,12 +248,18 @@ const UserProfileForm: React.FC = () => {
                   type="text"
                   required
                   value={profile.fullName}
-                  onChange={(e) =>
+                  onChange={(e) =>{
                     handleInputChange('fullName', e.target.value)
-                  }
+                     validateField('fullName', e.target.value);
+                  }}
                   placeholder="Enter your full name"
                   className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white focus:ring-2 focus:ring-primary outline-none"
                 />
+                 {fieldErrors.fullName && (
+                  <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                    {fieldErrors.fullName}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -251,14 +270,22 @@ const UserProfileForm: React.FC = () => {
                   Date of Birth
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />
                   <Input
                     type="date"
                     required
                     value={profile.DOB}
-                    onChange={(e) => handleInputChange('DOB', e.target.value)}
+                    onChange={(e) => {
+                      handleInputChange('DOB', e.target.value)
+                       validateField('DOB', e.target.value);
+                    }}
                     className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white"
                   />
+                   {fieldErrors.DOB && (
+                    <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                      {fieldErrors.DOB}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -293,15 +320,23 @@ const UserProfileForm: React.FC = () => {
                   Phone
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  <Phone className="absolute left-4 top-1/3 -translate-y-1/2 w-5 h-5 text-slate-500" />
                   <Input
                     type="tel"
                     required
                     value={profile.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    onChange={(e) =>{
+                       handleInputChange('phone', e.target.value)
+                        validateField('phone', e.target.value);
+                      }}
                     placeholder="Enter phone number"
                     className="pl-12 w-full rounded-xl bg-secondary/60 border border-[#454c59] text-white"
                   />
+                   {fieldErrors.phone && (
+                      <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                        {fieldErrors.phone}
+                      </p>
+                    )}
                 </div>
               </div>
             </div>
@@ -316,22 +351,52 @@ const UserProfileForm: React.FC = () => {
                 <Input
                   placeholder="Street Address"
                   value={profile.street}
-                  onChange={(e) => handleInputChange('street', e.target.value)}
+                  onChange={(e) =>{
+                     handleInputChange('street', e.target.value)
+                      validateField('street', e.target.value);
+                    }}
                   className="bg-secondary/60 border-[#454c59]"
                 />
+                 {fieldErrors.street && (
+                  <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                    {fieldErrors.street}
+                  </p>
+                )}
+
+
                 <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    placeholder="City"
-                    value={profile.city}
-                    onChange={(e) => handleInputChange('city', e.target.value)}
-                    className="bg-secondary/60 border-[#454c59]"
-                  />
-                  <Input
-                    placeholder="ZIP Code"
-                    value={profile.zip}
-                    onChange={(e) => handleInputChange('zip', e.target.value)}
-                    className="bg-secondary/60 border-[#454c59]"
-                  />
+                  <div>                 
+                    <Input
+                      placeholder="City"
+                      value={profile.city}
+                      onChange={(e) => {
+                        handleInputChange('city', e.target.value)
+                        validateField('city', e.target.value);
+                      }}
+                      className="bg-secondary/60 border-[#454c59]"
+                    />
+                    {fieldErrors.city && (
+                      <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                        {fieldErrors.city}
+                      </p>
+                    )}
+                  </div> 
+                  <div>   
+                    <Input
+                      placeholder="ZIP Code"
+                      value={profile.zip}
+                      onChange={(e) => {
+                        handleInputChange('zip', e.target.value)
+                        validateField('zip', e.target.value);
+                      }}
+                      className="bg-secondary/60 border-[#454c59]"
+                    />
+                    {fieldErrors.zip && (
+                      <p className="text-red-500 text-[10px] mt-1 tracking-wider">
+                        {fieldErrors.zip}
+                      </p>
+                    )}
+                  </div> 
                 </div>
               </div>
             </div>
@@ -341,7 +406,7 @@ const UserProfileForm: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-[#f8fafca9] flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-primary" />
-                  current Location
+                  Location
                 </h3>
                 <Button
                   type="button"
@@ -358,13 +423,13 @@ const UserProfileForm: React.FC = () => {
                   readOnly
                   placeholder="Lat"
                   value={profile.latitude}
-                  className="bg-secondary/60 opacity-70"
+                  className="hidden"
                 />
                 <Input
                   readOnly
                   placeholder="Lng"
                   value={profile.longitude}
-                  className="bg-secondary/60 opacity-70"
+                  className="hidden"
                 />
               </div>
             </div>

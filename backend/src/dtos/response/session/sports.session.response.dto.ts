@@ -49,11 +49,9 @@ export interface ISportsSessionPopulated  {
     ageGroup: AGE_GROUP;
     sessionType: SESSION_TYPE;
     enrolledCount: number;
-    maxCapacity: number;
-    mode:SESSION_MODE;
-    meetingLink?:string;   // Required if mode === ONLINE
-    venue?: IVenue;         // Required if mode === OFFLINE
-    amenities?: string[];   // Required if mode === OFFLINE
+    maxCapacity: number; 
+    venue: IVenue;        
+    amenities: string[];  
     timeSlots: ITimeSlot[];
     pricing: IPricing[];
     cancellationPolicy: string; 
@@ -95,9 +93,7 @@ export interface SportsSessionResponseDTO{
    ageGroup: AGE_GROUP;
    sessionType: SESSION_TYPE;
    maxCapacity: number;
-   enrolledCount: number;
-   mode:SESSION_MODE;
-   meetingLink?:string; 
+   enrolledCount: number;   
    venue: IVenue;
    amenities: string[];
    timeSlots: ITimeSlot[];

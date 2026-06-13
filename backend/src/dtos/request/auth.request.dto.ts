@@ -20,7 +20,7 @@ export type RegisterRequestDTO = z.infer<typeof RegisterSchema>;
 
 //verifyEmailDTO
 export const VerifyEmailSchema = z.object({
-  email: z.string().email('Invalid email format'),
+  email: z.email('Invalid email format'),
   otp: z
     .string()
     .length(6, 'OTP must be exactly 6 digits')

@@ -50,7 +50,7 @@ export class BookingsManagementService implements IBookingsManagementService {
       ]);   
     
       return {
-        // bookings: bookingsData, 
+        
         bookings,     
         total: totalCount,
         totalPages: Math.ceil(totalCount / limit),

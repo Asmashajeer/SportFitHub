@@ -14,6 +14,7 @@ export interface BookingsStatsResponseDTO{
 
 export interface AdminBookingsResponseDTO{  
   bookingId: string;
+  bookingUId:string;
   userId:string,
   userName: string;
   userEmail: string; 

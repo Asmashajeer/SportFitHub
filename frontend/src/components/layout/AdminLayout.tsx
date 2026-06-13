@@ -8,7 +8,7 @@ function AdminMainLayout() {
      <aside className="fixed top-0 left-0 h-screen w-64 overflow-y-auto border-r border-zinc-800 px-10 py-6">
       <AdminSidebar activePage="dashboard" />
     </aside>  
-      <main className=" flex-1 ml-48  overflow-y-auto">
+      <main className=" flex-1 ml-64  overflow-y-auto">
         <div className="">
           <Outlet />
         </div>

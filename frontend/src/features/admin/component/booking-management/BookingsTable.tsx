@@ -196,7 +196,7 @@ const BookingsTable = () => {
                     {/* Booking ID */}
                     <td className={tdCls}>
                       <span className="text-zinc-500 font-mono text-xs">
-                        #{booking.bookingId.slice(-6).toUpperCase()}
+                        #{booking.bookingUId}
                       </span>
                     </td>
 

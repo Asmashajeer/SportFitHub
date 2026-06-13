@@ -8,7 +8,8 @@ const { JsonWebTokenError, TokenExpiredError } = jwt;
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    role: UserRole;
+    email:string;
+    role: UserRole;    
     timezone:string
   };
 }
@@ -20,9 +21,10 @@ export const protect = (req: AuthRequest, res: Response, next: NextFunction) => 
     return next(new AppError('Unauthorized: Access Token missing.', 401));
   }
   try {
-    const decoded = jwt.verify(accessToken, authConfig.secret) as { id: string; role: UserRole,timezone: string; };
+    const decoded = jwt.verify(accessToken, authConfig.secret) as { id: string;email:string, role: UserRole,timezone: string; };
     req.user = {
       id: decoded.id,
+      email:decoded.email,
       role: decoded.role,
       timezone:decoded.timezone,
     };

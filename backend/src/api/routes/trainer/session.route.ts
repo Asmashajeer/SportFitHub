@@ -8,7 +8,8 @@ const router=Router();
 //----------------Sports session route--------------
 router.post('/sports/sport',validateBody(sportsSessionSchema), sportsSessionController.createSportSession);
 router.put('/sports/sport/:id',validateBody(sportsSessionSchema), sportsSessionController.updateSportSession);
-router.patch('/sports/sport/:id', sportsSessionController.deleteSportSession);
+router.delete('/sports/sport/:id', sportsSessionController.deleteSportSession);
+router.patch('/sports/sport/:id', sportsSessionController.updateSessionVisibility);
 router.get('/sports',sportsSessionController.getTrainerSessions);
 
 
@@ -16,7 +17,8 @@ router.get('/sports',sportsSessionController.getTrainerSessions);
 //----------------fitness Session Route----------------------
 router.post('/fitness/fitnessSession',validateBody(fitnessSessionSchema), fitnessSessionController.createFitnessSession);
 router.put('/fitness/fitnessSession/:id',validateBody(fitnessSessionSchema), fitnessSessionController.updateFitnessSession);
-router.patch('/fitness/fitnessSession/:id', fitnessSessionController.deleteFitnessSession);
+router.delete('/fitness/fitnessSession/:id', fitnessSessionController.deleteFitnessSession);
+router.patch('/fitness/fitnessSession/:id', fitnessSessionController.updateSessionVisibility);
 router.get('/fitness',fitnessSessionController.getTrainerSessions);
 
 

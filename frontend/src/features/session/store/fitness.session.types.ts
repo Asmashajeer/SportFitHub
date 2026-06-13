@@ -39,39 +39,39 @@ interface Pricing {
   sessionCount: number;
   price: number;
 }
-export interface FitnessSessionFormValues {
-  fitnessCategory: string;
-  sessionName: string;
-  slug: string;
-  description: string;
-  duration: number;
-  ageGroup: (typeof AGE_GROUP)[keyof typeof AGE_GROUP];
-  gender: GenderType;
-  sessionType: (typeof SESSION_TYPE)[keyof typeof SESSION_TYPE];
-  maxCapacity: number;
-  enrolledCount: number;
-  intensityLevel: Intensity_level_type;
-  mode: Session_Mode_type;
-  meetingLink?: string;
-  venue?: Venue;
-  requirements: string;
-  images: FileList | null;
-  pricing: Pricing[];
-  timeSlots: TimeSlot[];
-  amenities: string;
-  cancellationPolicy: string;
-  cancellationWindow: number;
-  bookingDeadline: number;
-}
-export interface FitnessSessionData extends Omit<
-  FitnessSessionFormValues,
-  'images' | 'amenities' | 'requirements'
-> {
-  trainerId: string;
-  images: string[];
-  requirements: string[];
-  amenities: string[];
-}
+// export interface FitnessSessionFormValues {
+//   fitnessCategory: string;
+//   sessionName: string;
+//   slug: string;
+//   description: string;
+//   duration: number;
+//   ageGroup: (typeof AGE_GROUP)[keyof typeof AGE_GROUP];
+//   gender: GenderType;
+//   sessionType: (typeof SESSION_TYPE)[keyof typeof SESSION_TYPE];
+//   maxCapacity: number;
+//   enrolledCount: number;
+//   intensityLevel: Intensity_level_type;
+//   mode: Session_Mode_type;
+//   meetingLink?: string;
+//   venue?: Venue;
+//   requirements: string;
+//   images: FileList | null;
+//   pricing: Pricing[];
+//   timeSlots: TimeSlot[];
+//   amenities: string;
+//   cancellationPolicy: string;
+//   cancellationWindow: number;
+//   bookingDeadline: number;
+// }
+// export interface FitnessSessionData extends Omit<
+//   FitnessSessionFormValues,
+//   'images' | 'amenities' | 'requirements'
+// > {
+//   trainerId: string;
+//   images: string[];
+//   requirements: string[];
+//   amenities: string[];
+// }
 
 export interface FitnessSessionResponseData {
   id: string;

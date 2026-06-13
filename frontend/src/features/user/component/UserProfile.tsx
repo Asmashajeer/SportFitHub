@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -28,6 +28,7 @@ import {
   User2Icon,
   PhoneCall,
   Camera,
+  Navigation,
 } from 'lucide-react';
 
 import { userService } from '../service/userService';
@@ -36,6 +37,7 @@ import { GENDER } from '@/constants/constants';
 
 import { uploadService } from '@/service/upload.service';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
+import toast from 'react-hot-toast';
 
 export const UserProfile = () => {
   const { user, setUser } = useAuthStore();
@@ -85,6 +87,30 @@ export const UserProfile = () => {
     );
   };
 
+
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserData((prev) => 
+            prev ? {
+              ...prev,          
+              location:{
+                type: 'Point',
+                coordinates:[position.coords.latitude, position.coords.longitude]
+            }
+            }:prev
+          );
+          toast.success('Location updated!');
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          toast.error('Unable to get current location');
+        })     
+    } else {
+      toast.error('Geolocation is not supported by this browser');
+    }
+  };
   // Helper for Date Input (HTML date inputs require YYYY-MM-DD)
   const formatDateForInput = (date: any) => {
     if (!date) return '';
@@ -169,11 +195,13 @@ return (
               accept="image/*"
               className="hidden"
               onChange={handleImageUpload}
-            />
+            />            
           </div>
-          <div>
+          
+          <div className='text-start'>
             <h3 className="text-base font-semibold">{userData.fullName}</h3>
             <p className="text-sm text-muted-foreground">Member</p>
+            <p className="text-sm text-primary " >{user?.email}</p>
           </div>
         </div>
 
@@ -309,7 +337,21 @@ return (
 
             {/* Location */}
             <div className="py-3 space-y-1">
-              <p className="text-xs text-muted-foreground"> Location</p>              
+              <p className="text-xs text-muted-foreground"> Location</p>  
+              {isEditing?(
+                <div className="flex items-center justify-between mb-4">
+                 
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={getCurrentLocation}
+                    className="flex items-center gap-2 rounded-full border-primary/30 text-xs"
+                  >
+                    <Navigation className="w-4 h-4" />
+                    Get Current Location
+                  </Button>
+                </div>
+              ):(            
                 <a href={`https://www.google.com/maps?q=${userData.location?.coordinates[1]},${userData.location?.coordinates[0]}`}
                 target="_blank"
                 className="text-sm font-medium text-primary hover:underline flex items-center gap-1.5"
@@ -317,6 +359,7 @@ return (
                 <MapPin className="h-3.5 w-3.5" />
                 View on Google Maps
               </a>
+              )}
             </div>
           </div>
         </div>

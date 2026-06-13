@@ -114,7 +114,10 @@ export interface ITrainerProfile extends Document {
   rejectionReason?: string;
   rejectedAt?: Date;
   applicationCount: number;
-
+  penalty:number
+  strikePoints:number;
+  cancellationCount: number,
+   lastStrikeDate?:Date
   // Timestamps
   createdAt: Date;
   updatedAt: Date;
@@ -246,6 +249,10 @@ const TrainerProfileSchema = new mongoose.Schema(
     rejectionReason: String,
     rejectedAt: Date,
     applicationCount: { type: Number, default: 1 },
+    penalty: { type: Number, default: 0 },
+    strikePoints: { type: Number, default: 0 },
+    cancellationCount: { type: Number, default: 0 }, 
+    lastStrikeDate: { type: Date, default: null },
   },
   { timestamps: true }
 );

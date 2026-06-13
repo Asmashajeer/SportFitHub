@@ -104,7 +104,7 @@ export class AuthService implements IAuthService {
 
     const hasProfile = profileCount !== 0;
     userData.hasProfile = hasProfile;
-    const accessToken = this.generateAccessToken(user._id.toString(), user.role,user.timezone);
+    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.role,user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
 
     return {
@@ -161,10 +161,11 @@ export class AuthService implements IAuthService {
     if (!user || !user.password)
       throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     const isMatch = await bcrypt.compare(data.password, user.password);
-    if (user.isBlocked)
-      throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
     if (!isMatch)
       throw new AppError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, STATUS_CODE.ERROR.UNAUTHORIZED);  
+    if (user.isBlocked)
+      throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
+    
      const userWithTimezone = await this._userRepo.findOneAndUpdate(user._id, { timezone:data.timezone } );
      const userData: UserDataDTO = toUserData(userWithTimezone);
     if (!user.isVerified)
@@ -179,7 +180,7 @@ export class AuthService implements IAuthService {
       profileCount = await this._trainerRepo.count({ userId: user._id.toString() });
     }
     userData.hasProfile = profileCount !== 0;
-    const accessToken = this.generateAccessToken(user._id.toString(), user.role,user.timezone);
+    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.role,user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
     console.log('user logged in');
     return {
@@ -202,6 +203,7 @@ export class AuthService implements IAuthService {
     const { email, sub, name } = ticket.getPayload();
 
     let user = await this._userRepo.findByEmail(email);
+  
     if (!user) {
       user = await this._userRepo.create({
         googleId: sub,
@@ -214,6 +216,7 @@ export class AuthService implements IAuthService {
     }
     if (user.isBlocked)
       throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
+    
     const userData: UserDataDTO = toUserData(user);
     let profileCount = 0;
     if (user.role === UserRole.USER) {
@@ -223,7 +226,7 @@ export class AuthService implements IAuthService {
       profileCount = await this._trainerRepo.count({ userId: user._id.toString() });
     }
     userData.hasProfile = profileCount !== 0;
-    const accessToken = this.generateAccessToken(user._id.toString(), user.role,user.timezone);
+    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.role,user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
     return {
       success: true,
@@ -258,7 +261,7 @@ export class AuthService implements IAuthService {
     }
     const hasProfile = profileCount !== 0;
     userData.hasProfile = hasProfile;
-    const accessToken = this.generateAccessToken(user._id.toString(), user.role,user.timezone);
+    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.role,user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
 
     return {
@@ -301,13 +304,14 @@ export class AuthService implements IAuthService {
   refreshAccessToken = async (refreshToken: string): Promise<RefreshTokensResponse> => {
     const decoded = jwt.verify(refreshToken, authConfig.refresh_secret) as {
       id: string;
+      email:string;
       role: string;
       timezone:string
     };
     if (!decoded)
       throw new AppError(ERROR_MESSAGES.AUTH.REFRESH_TOKEN_INVALID, STATUS_CODE.ERROR.UNAUTHORIZED);
 
-    const accessToken = this.generateAccessToken(decoded.id, decoded.role,decoded.timezone) as string;
+    const accessToken = this.generateAccessToken(decoded.id, decoded.email,decoded.role,decoded.timezone) as string;
     refreshToken = this.generateRefreshToken(decoded.id, decoded.role) as string;
     return { accessToken, refreshToken };
   };
@@ -326,8 +330,8 @@ export class AuthService implements IAuthService {
   };
 
   //access Token
-  private generateAccessToken(id: string, role: string,timezone:string): string {
-    return jwt.sign({ id, role,timezone }, authConfig.secret!, {
+  private generateAccessToken(id: string,email:string, role: string,timezone:string): string {
+    return jwt.sign({ id,email,role,timezone }, authConfig.secret!, {
       expiresIn: authConfig.secret_expires_in,
     } as SignOptions);
   }
@@ -350,7 +354,7 @@ export class AuthService implements IAuthService {
       await sendEmailOTP(email, OTP);
       console.log('Verification code sent to:', email);
     } catch (error) {
-          
+       console.log(error)   ;
       throw new AppError("Failed to send verification email", STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
     }
     

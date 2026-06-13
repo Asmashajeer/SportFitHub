@@ -25,11 +25,30 @@ import { SportModal } from './Sport.modal';
 import { useDebounce } from '@/hooks/useDebounce';
 import toast from 'react-hot-toast';
 import ConfirmDialog from '@/components/reusable/ConfirmDialog';
+import Pagination from '@/components/reusable/Pagination';
+import type { SportData } from '../../store/types';
+import { PAGINATION_DEFAULT_LIMIT } from '@/constants/constants';
 
+
+interface SportsMangerState {
+  sports: SportData[];
+  totalPages: number;
+  total: number;
+  page: number;
+}
+
+
+  
 const SportsManager = () => {
+  const [sportsData, setSportsData] = useState<SportsMangerState >({
+  sports: [],
+    totalPages: 0,
+    total: 0,
+    page: 1,
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-
+  const [currentPage, setCurrentPage] = useState(1);
   const { sports, setSports, updateSport, deleteSport } = UseAdminStore();
 
   const debouncedSearch = useDebounce(searchQuery, 500);
@@ -37,19 +56,21 @@ const SportsManager = () => {
   useEffect(() => {
     const fetchSports = async () => {
       try {
-        const data = await CategoryMangementService.getSports({
-          page: 1,
+        const {sportsData} = await CategoryMangementService.getSports({
+          page: currentPage,
           search: debouncedSearch,
           status: statusFilter,
         });
-        setSports(data.sports);
+        setSportsData(sportsData);
+        setSports(sportsData.sports);
+        setCurrentPage(sportsData.page);
       } catch (error) {
         toast.error(error?.toString() || 'Something went wrong');
         setSports([]);
       }
     };
     fetchSports();
-  }, [debouncedSearch, statusFilter]);
+  }, [debouncedSearch, statusFilter,currentPage]);
 
   const handleToggleStatus = async (id: string) => {
     const data = await CategoryMangementService.toggleSportStatus(id);
@@ -160,6 +181,15 @@ const SportsManager = () => {
           </TableBody>
         </Table>
       </div>
+      {/* Pagination */}
+        <Pagination
+          totalPages={sportsData.totalPages}
+          ITEMS_PER_PAGE={PAGINATION_DEFAULT_LIMIT}
+          currentPage={sportsData.page}
+          totalCount={sportsData.total}
+          setCurrentPage={setCurrentPage}
+          label="Sports"
+        />
     </div>
   );
 };

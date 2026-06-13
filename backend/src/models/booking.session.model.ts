@@ -2,7 +2,8 @@ import { BOOKING_SESSION_STATUS, PAYLOAD_MODEL, SESSION_TYPE } from "@/constants
 import mongoose, { Document, Schema, Types } from "mongoose"
 import { IVenue } from "./booking.model"
 
-export interface  IBookingSession extends Document{ 
+export interface  IBookingSession extends Document{
+  _id: Types.ObjectId,
   bookingId: Types.ObjectId,
   userId:     Types.ObjectId,
   sessionId:  Types.ObjectId,
@@ -18,7 +19,7 @@ export interface  IBookingSession extends Document{
   refundedToWallet: boolean,
   refundAmount: number, 
 }
-export interface IBookedSessionPopulate extends Omit<IBookingSession,'sessionId'>{
+export interface IBookedSessionPopulate extends Omit<IBookingSession,'sessionId'|'bookingId'>{
   sessionId:{
       _id:Types.ObjectId
       trainerId:Types.ObjectId,
@@ -28,7 +29,10 @@ export interface IBookedSessionPopulate extends Omit<IBookingSession,'sessionId'
     bookingDeadline:number,
     cancellationWindow:number
   }
-  venue:IVenue
+  bookingId:{
+    _id:Types.ObjectId,
+    venue:IVenue
+  }
 }
 // const session=
 const BookingSessionSchema = new Schema({

@@ -2,8 +2,9 @@ import { BOOKING_SESSION_STATUS, BOOKING_STATUS, BOOKING_TYPE,  PAYLOAD_MODEL, S
 import {  IPricePlan, IVenue } from "@/models/booking.model";
 import { UserPaymentResponseDTO } from "./payment.response.dto";
 
-export interface UserBookingResponseDTO{
+export interface UserBookingResponseDTO{  
     id:string,
+    bookingUId:string
     userId: string;           
     sessionId: string;
     sessionModel:PAYLOAD_MODEL,

@@ -35,10 +35,8 @@ export interface ISportsSession extends Document {
   sessionType: SESSION_TYPE;
   enrolledCount: number;
   maxCapacity: number;
-  mode:SESSION_MODE;
-  meetingLink?:string;   // Required if mode === ONLINE
-  venue?: IVenue;         // Required if mode === OFFLINE
-  amenities?: string[];   // Required if mode === OFFLINE
+  venue?: IVenue;      
+  amenities?: string[];   
   timeSlots: ITimeSlot[];
   pricing: IPricing[];
    cancellationPolicy: string; 
@@ -103,42 +101,34 @@ const SportsSessionSchema = new mongoose.Schema<ISportsSession>(
       type: Number,
       default: 0,
     },
-    mode: { 
-    type: String, 
-    enum: Object.values(SESSION_MODE), 
-    default: SESSION_MODE.OFFLINE 
-    },
-    meetingLink: { 
-      type: String, 
-      required: function() { return this.mode === SESSION_MODE.ONLINE; } 
-    },
+   
     venue: {
       name: {
         type: String,
-        required: function() { return this.mode === SESSION_MODE.OFFLINE; },
+        required:true,
         trim: true,
       },
       address: {
         type: String,
-         required: function() { return this.mode === SESSION_MODE.OFFLINE; },
+         required: true,
       },
 
       location: {
         type: {
           type: String,
           enum: ['Point'],
-          required: function() { return this.mode === SESSION_MODE.OFFLINE; },
+          required: true,
           default: 'Point',
         },
         coordinates: {
           type: [Number], // [longitude, latitude]
-           required: function() { return this.mode === SESSION_MODE.OFFLINE; },
+           required: true,
         },
       },
       
     },
     amenities:{ type:[String],
-      required: function() { return this.mode === SESSION_MODE.OFFLINE; } 
+      required: true 
     },
 
     // 4. SCHEDULE (Weekly  slots)

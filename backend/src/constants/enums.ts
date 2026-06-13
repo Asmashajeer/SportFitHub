@@ -153,3 +153,15 @@ export enum TRANSACTION_STATUS {
   COMPLETED = "completed",
   FAILED = "failed",
 }
+
+export const PENALTY = {
+  CANCELLATION_PENALTY_PERCENT: 15,   // 15% of session revenue deducted from trainer wallet
+  
+  STRIKE_THRESHOLDS: {
+    WARNING: 1,       // 1st strike → warning email only
+    PENALTY: 2,       // 2nd strike → financial deduction
+    SUSPENSION: 3,    // 3rd strike → account suspended
+  },
+
+  STRIKE_RESET_DAYS: 90,   // strikes reset after 90 days 
+} as const;

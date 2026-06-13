@@ -1,3 +1,4 @@
+import { PAGINATION_LIMIT } from '@/constants/enums';
 import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import { ISportsManagementService } from '@/interfaces/services/admin/ISportsManagementService';
 import AppError from '@/utils/AppError';
@@ -27,14 +28,14 @@ export class SportsManagementController {
     const page = parseInt(req.query.page as string) || 1;
     const search = req.query.search as string;
     const status = req.query.status as string;
-
+    const limit=PAGINATION_LIMIT;
     try {
-      const sports = await this._sportsManagementService.getSports({ page, search, status });
+      const sportsData = await this._sportsManagementService.getSports({ page,limit, search, status });
 
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         message: SUCCESS_MESSAGES.GENERAL.FETCHED,
-        sports,
+        sportsData,
       });
     } catch (error) {
       next(error);

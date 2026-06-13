@@ -69,10 +69,13 @@ import { SessionManagementService } from './services/admin/sessionManagement.ser
 import { SessionManagementController } from './api/controllers/admin/session.management.controller';
 import { BookingsManagementService } from './services/admin/bookingsManagement.service';
 import { BookingsManagementController } from './api/controllers/admin/bookingsManagement.controller';
+import { checkBlocked } from './middleware/checkBlocked.middleware';
+import { PenaltyRepository } from './repositories/penalty.repository';
+import { PenaltyService } from './services/trainer/penalty.service';
 const userRepository = new UserRepository(User);
 const userManagementService = new UserManagementService(userRepository);
 const userManagementController = new UserManagementController(userManagementService);
-
+const isBlocked= checkBlocked(userRepository);
 const profileRepository = new ProfileRepository(Profile);
 const profileService = new ProfileService(profileRepository, userRepository);
 const profileController = new ProfileController(profileService);
@@ -111,13 +114,13 @@ const fitnessManagementController = new FitnessManagementController(fitnessManag
 
 
 const sportsSessionRepository=new SportsSessionRepository(sportsSessionModel);
-const sportsSessionService= new SportsSessionService(sportsSessionRepository,trainerRepository);
-const sportsSessionController=new SportsSessionController (sportsSessionService);
+// const sportsSessionService= new SportsSessionService(sportsSessionRepository,trainerRepository,bookingService);
+// const sportsSessionController=new SportsSessionController (sportsSessionService);
 
 const fitnessSessionRepository=new FitnessSessionRepository(fitnessSessionModel);
-const fitnessSessionService= new FitnessSessionService(fitnessSessionRepository,trainerRepository);
-const fitnessSessionController=new FitnessSessionController (fitnessSessionService);
-const sessionController=new SessionController(sportsSessionService,fitnessSessionService);
+// const fitnessSessionService= new FitnessSessionService(fitnessSessionRepository,trainerRepository);
+// const fitnessSessionController=new FitnessSessionController (fitnessSessionService);
+// const sessionController=new SessionController(sportsSessionService,fitnessSessionService);
 const sessionManagementService= new SessionManagementService(sportsSessionRepository,fitnessSessionRepository);
 const sessionManagementController=new SessionManagementController(sessionManagementService);
 
@@ -132,18 +135,24 @@ const walletService=new WalletService(walletRepository);
 const walletTransactionRepository=new WalletTransactionRepository(walletTransactionModel);
 const walletTransactionService=new WalletTransactionService(walletRepository,walletTransactionRepository);
 const walletController=new WalletController(walletService,walletTransactionService);
-
+const penaltyRepository = new PenaltyRepository(TrainerProfile);
+const penaltyService = new PenaltyService(penaltyRepository, walletService);
 const bookingRepository=new BookingRepository(bookingModel);
 const bookingSessionRepository=new BookingSessionRepository(bookingSessionModel);
-const bookingService=new BookingService(bookingRepository,bookingSessionRepository,paymentRepository,sportsSessionRepository,fitnessSessionRepository,slotLockService,walletService,walletTransactionService);
+const bookingService=new BookingService(bookingRepository,bookingSessionRepository,paymentRepository,sportsSessionRepository,fitnessSessionRepository,slotLockService,walletService,walletTransactionService,penaltyService);
 const paymentController=new PaymentController(paymentService,bookingService);
 const bookingController=new BookingController(bookingService);
 const webhookController=new WebhookController(bookingService,slotLockService);
-
+const sportsSessionService= new SportsSessionService(sportsSessionRepository,trainerRepository,bookingService);
+const sportsSessionController=new SportsSessionController (sportsSessionService);
+const fitnessSessionService= new FitnessSessionService(fitnessSessionRepository,trainerRepository,bookingService);
+const fitnessSessionController=new FitnessSessionController (fitnessSessionService);
+const sessionController=new SessionController(sportsSessionService,fitnessSessionService);
 const bookingsManagementService=new BookingsManagementService(bookingRepository,bookingSessionRepository);
 const bookingsManagementController=new BookingsManagementController(bookingsManagementService);
 export {
   authController,
+  isBlocked,
   profileController,
   trainerController,
   userManagementController,

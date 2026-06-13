@@ -26,11 +26,28 @@ import { useDebounce } from '@/hooks/useDebounce';
 import toast from 'react-hot-toast';
 import ConfirmDialog from '@/components/reusable/ConfirmDialog';
 import { FitnessProgramModal } from './FitnessProgram.modal';
+import type { FitnessData } from '../../store/types';
+import Pagination from '@/components/reusable/Pagination';
+import { PAGINATION_DEFAULT_LIMIT } from '@/constants/constants';
+
+interface FitnessMangerState {
+  programs: FitnessData[];
+  totalPages: number;
+  total: number;
+  page: number;
+}
+
 
 const FitnessManager = () => {
+  const [fitnessData, setFitnessData] = useState<FitnessMangerState  >({
+    programs: [],
+      totalPages: 0,
+      total: 0,
+      page: 1,
+    });
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-
+   const [currentPage, setCurrentPage] = useState(1);
   const { programs, setPrograms, updateProgram, deleteProgram } =
     UseAdminStore();
 
@@ -39,19 +56,21 @@ const FitnessManager = () => {
   useEffect(() => {
     const fetchprograms = async () => {
       try {
-        const data = await CategoryMangementService.getPrograms({
-          page: 1,
+        const {fitnessData} = await CategoryMangementService.getPrograms({
+          page: currentPage,
           search: debouncedSearch,
           status: statusFilter,
         });
-        setPrograms(data.programs);
+        setFitnessData(fitnessData);
+        setPrograms(fitnessData.programs);
+        setCurrentPage(fitnessData.page);
       } catch (error) {
         toast.error(error?.toString() || 'Something went wrong');
         setPrograms([]);
       }
     };
     fetchprograms();
-  }, [debouncedSearch, statusFilter]);
+  }, [debouncedSearch, statusFilter ,currentPage]);
 
   const handleToggleStatus = async (id: string) => {
     const data = await CategoryMangementService.toggleProgramStatus(id);
@@ -165,6 +184,14 @@ const FitnessManager = () => {
           </TableBody>
         </Table>
       </div>
+      <Pagination
+          totalPages={fitnessData.totalPages}
+          ITEMS_PER_PAGE={PAGINATION_DEFAULT_LIMIT}
+          currentPage={fitnessData.page}
+          totalCount={fitnessData.total}
+          setCurrentPage={setCurrentPage}
+          label="Programs"
+        />
     </div>
   );
 };

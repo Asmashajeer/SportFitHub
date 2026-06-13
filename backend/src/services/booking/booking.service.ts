@@ -1,4 +1,4 @@
-import { BOOKING_SESSION_STATUS, BOOKING_STATUS, BOOKING_TYPE, CURRENCY, PAYLOAD_MODEL, PAYMENT_METHOD, PAYMENT_STATUS, TRANSACTION_REASON, TRANSACTION_STATUS, TRANSACTION_TYPE, TTLSECONDS } from "@/constants/enums";
+import { BOOKING_SESSION_STATUS, BOOKING_STATUS, BOOKING_TYPE,  PAYLOAD_MODEL, PAYMENT_METHOD, PAYMENT_STATUS, TRANSACTION_REASON, TRANSACTION_STATUS, TRANSACTION_TYPE, TTLSECONDS, UserRole } from "@/constants/enums";
 import { ERROR_MESSAGES, STATUS_CODE } from "@/constants/messages";
 import { BookedSlot, BookingSessionRequestfilterDTO, CheckAvailabilityDTO, LockSlotDTO, PayloadDTO } from "@/dtos/request/booking/booking.request.dto";
 import { IBookingRepository } from "@/interfaces/repositories/IBooking.repository";
@@ -25,6 +25,9 @@ import { getTimezone } from "@/context/timezone.context";
 import { format, formatInTimeZone, fromZonedTime } from "date-fns-tz";
 import { formatDateTo, formatTo12Hour, toUTC_Date } from "@/utils/formatTo";
 import { IBookedSlot } from "@/models/booking.model";
+import { IAuthUser } from "@/interfaces/common/IAuthUser";
+import { IUserRepository } from "@/interfaces/repositories/IUser.repository";
+import { IPenaltyService } from "@/interfaces/services/trainer/IPenalty.service";
 
 export class BookingService implements IBookingService {
   private _bookingRepo:IBookingRepository;
@@ -32,10 +35,12 @@ export class BookingService implements IBookingService {
   private _paymentRepo:IPaymentRepository;
   private _fitnessSessionRepo:IFitnessSessionRepository;  
   private _sportsSessionRepo: ISportsSessionRepository;
+
   private _slotLockService:ISlotLockService;
   private _walletService:IWalletService;
   private _walletTransactionService:IWalletTransactionService
-  constructor(bookingRepo:IBookingRepository,bookingSessionRepo:IBookingSessionRepository,paymentRepo:IPaymentRepository,sportsSessionRepo: ISportsSessionRepository,fitnessSessionRepo:IFitnessSessionRepository,slotLockService:ISlotLockService,walletService:IWalletService,walletTransactionService:IWalletTransactionService){
+  private _penaltyService:IPenaltyService;
+  constructor(bookingRepo:IBookingRepository,bookingSessionRepo:IBookingSessionRepository,paymentRepo:IPaymentRepository,sportsSessionRepo: ISportsSessionRepository,fitnessSessionRepo:IFitnessSessionRepository,slotLockService:ISlotLockService,walletService:IWalletService,walletTransactionService:IWalletTransactionService,penaltyService:IPenaltyService){
     this._bookingRepo=bookingRepo;
     this._bookingSessionRepo=bookingSessionRepo;
     this._paymentRepo=paymentRepo;
@@ -44,6 +49,7 @@ export class BookingService implements IBookingService {
     this._slotLockService=slotLockService;
     this._walletService=walletService;
     this._walletTransactionService=walletTransactionService
+    this._penaltyService=penaltyService;
   }
 
   //--------------lock booking Slots------------------------
@@ -211,7 +217,7 @@ export class BookingService implements IBookingService {
      
 
       // 3. Link Booking back to Payment
-      payment=await this._paymentRepo.updatePayment(payment._id, { bookingId: booking._id }, dbSession);  
+      payment=await this._paymentRepo.updatePayment(payment._id, { bookingId: booking._id,bookingUId:booking.bookingUId }, dbSession);  
       
       await dbSession.commitTransaction();       
        const bookingSummary = AllSessionsToBoook
@@ -336,6 +342,7 @@ export class BookingService implements IBookingService {
   //-----------find user booked sessions------
   async getUserSessions(userId :string|Types.ObjectId):Promise<UserSessionsResponseDTOwithPopulatedSession[]> {
     const sessions = await this._bookingSessionRepo.findUserSessions({userId:userId});
+    
     if(!sessions)
        throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND ,STATUS_CODE.ERROR.NOT_FOUND); 
     
@@ -380,27 +387,33 @@ export class BookingService implements IBookingService {
       const newBooking=toUserSessionsResponseDTO(newBookingData);
       return newBooking;
 
-    } catch (error) {
-   
-      throw error;
+    } catch (error) {   
+      throw new Error(error);
     } finally {
       dbSession.endSession();
     }
   }
   
   // ---------------------- cancellation of a booked session-------------------
-  async cancelSession(sessionBookingId: string,userId:string,reason:string):Promise<CancelBookedSessionResponseDTO>{
-    
-      const bookedSession = await this._bookingSessionRepo.findById(sessionBookingId);
-      if (!bookedSession) throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
-      if(bookedSession.userId.toString()!==userId) throw new AppError('Authentication required. Please log in.', STATUS_CODE.ERROR.UNAUTHORIZED);
+  async cancelSession(sessionBookingId: string,reason:string,cancelledBy:UserRole):Promise<CancelBookedSessionResponseDTO>{
 
-      const refundBooking = await this._bookingRepo.findById( bookedSession.bookingId );  
-      const refundAmount = refundBooking?.pricePlan?.unitPrice;   
+      const bookedSessions = await this._bookingSessionRepo.findBookedSessionsPopulatedUser({_id:sessionBookingId},{skip:0,limit:1});
+      if (bookedSessions.length===0) throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
+  
+      // const refundBooking = await this._bookingRepo.findById( bookedSession.bookingId );  
+      const bookedSession=bookedSessions[0]
+      console.log("bookedSession ",bookedSession);
+   
+      const refundAmount = bookedSession.bookingId.pricePlan?.unitPrice;
+      const within=this.isWithinCancellationWindow(bookedSession.date.toString(),bookedSession.startTime,bookedSession.sessionId.cancellationWindow);
+      if(within) throw new AppError(`Cannot delete session within ${bookedSession.sessionId.cancellationWindow} hours of start time`,
+        STATUS_CODE.ERROR.BAD_REQUEST
+      );
 
       const dbSession = await mongoose.startSession();
       dbSession.startTransaction();
       try{
+       
         // update status of bookingSession
         await this._bookingSessionRepo.updateSessionBookingStatus(sessionBookingId,
           {
@@ -410,11 +423,11 @@ export class BookingService implements IBookingService {
             refundAmount:refundAmount
           },dbSession);
           //add  refund amount  to wallet
-          const wallet=await this._walletService.addToWallet(userId,refundAmount,dbSession);
+          const wallet=await this._walletService.addToWallet(bookedSession.userId._id.toString(),refundAmount,dbSession);
           console.log(wallet);
           // add corresponding wallet transaction 
           await this._walletTransactionService.addTransaction({
-            userId:new Types.ObjectId(userId),         
+            userId:bookedSession.userId._id,         
             transactionType:TRANSACTION_TYPE.CREDIT,
             amount:refundAmount,
             walletTransactionReason :TRANSACTION_REASON.CANCELLATION_FUND,
@@ -425,7 +438,45 @@ export class BookingService implements IBookingService {
             bookingSessionId:bookedSession._id
           },dbSession)
           
-            await dbSession.commitTransaction();
+
+           await dbSession.commitTransaction();
+
+          if (cancelledBy === UserRole.TRAINER) {
+            await this._penaltyService.applyPenalty(
+              bookedSession.sessionId.trainerId.toString(),
+              refundAmount
+            );
+          }
+
+           const bookingSummary=` Your Booking Summary was ${bookedSession.sessionId.sessionname} was scheduled on ${bookedSession.date} (${bookedSession.startTime}-${bookedSession.endTime}) at ${bookedSession.bookingId.venue.address}. `
+
+           // sending mail to user about cancellation 
+           const emailContent = cancelledBy === UserRole.TRAINER
+            ? {
+                title: "Session Cancelled by Trainer",
+                description: "Your session has been cancelled by the trainer. A full refund has been processed to your wallet.",
+                closingLine: `We apologize for the inconvenience caused by the trainer. Your refund of ${refundAmount} has been credited to your wallet and is available immediately.`
+              }
+            : {
+                title: "Session Cancellation Confirmed",
+                description: "Your session has been successfully cancelled as requested. Your refund has been processed to your wallet.",
+                closingLine: `Your refund of ${refundAmount} has been credited to your wallet and is available immediately.`
+              };          
+         await sendNotificationEmail({
+            to: bookedSession.userId.email,                   
+            ...emailContent,
+            details: {
+              userName:bookedSession.userId.name,
+              sessionName: bookedSession.sessionId.sessionName,
+              session: bookedSession.sessionModel,
+              summary: bookingSummary,
+              numberOfSessions: 1,
+              amount: refundAmount,
+              
+            },           
+          });
+
+
            const  cancellationResponse= {            
               sessionBookingId,
               bookingId: bookedSession.bookingId,
@@ -481,7 +532,7 @@ export class BookingService implements IBookingService {
     }      
 
     if(date ){
-     const start = new Date(date);
+    //  const start = new Date(date);
       //convert to utc date        
         const startDay =fromZonedTime(`${date}T00:00:00`,timezone);
         const endofDay=fromZonedTime(`${date}T23:59:59`,timezone);   
@@ -675,7 +726,16 @@ export class BookingService implements IBookingService {
       }
     }
   
+ async getBookedSessionsBySessionId(sessionId:string):Promise<UserSessionsResponseDTOwithPopulatedSession[]>{
+    const sessions=await this._bookingSessionRepo.findUserSessions({sessionId:sessionId,status:BOOKING_SESSION_STATUS.SCHEDULED});
+    if(!sessions)
+       throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND ,STATUS_CODE.ERROR.NOT_FOUND); 
+    
+    const bookedSessions = sessions.map(session => toUserSessionsResponseDTOwithPopulatedSession(session as unknown as IBookedSessionPopulate));
+   
+    return bookedSessions;
 
+ }
 
       
   
@@ -703,6 +763,22 @@ export class BookingService implements IBookingService {
         }
        return lockKey;    
      } 
+
+
+
+      //  ----------- function to check isWithinCancellationWindow--------------
+      isWithinCancellationWindow(date: string, time: string,cancellationWindow:number): boolean {
+      
+      const sessionDateTime=toUTC_Date(date,time);
+      const now = new Date();
+      const diffMs = sessionDateTime.getTime() - now.getTime();
+      const diffHours = diffMs / (1000 * 60 * 60);
+
+      // Within window = session is less than 24hrs away
+      return diffHours <= cancellationWindow;
+    }
+
+
     }
 
 

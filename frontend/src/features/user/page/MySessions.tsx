@@ -23,7 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import SessionDetailModal from '../component/mySessions/SessionDetailModal';
 import Pagination from '@/components/reusable/Pagination';
-import GetMapsLink from '@/components/reusable/GetMapsLink';
+
 
 interface CancelStateProps {
   isCancel: boolean;
@@ -124,20 +124,20 @@ export default function MySessions() {
     reason: string
   ) => {
     const filter = {
-      id: currentSession.sessionId,
+      id: currentSession.session.sessionId,
       sessionModel: currentSession.sessionModel, //sportsSession| fitnessSession
     };
     try {
-      const { session } =
-        await sessionService.getSessionDetailsfiltered(filter);
+      const { session } = await sessionService.getSessionDetailsfiltered(filter);
+      const  cancellationWindow=  session.cancellationWindow;
       const diff =new Date(currentSession.date).getTime() - new Date().getTime();
-    if (diff < session.cancellationWindow){
+    if (diff < cancellationWindow){
         toast.custom(
           ` sorry unable to cancel this session. you should cancel this booked session before  ${session.cancellationWindow} Hr`
         );
         return;
       }
-     const data=await BookingService.cancelSession(sessionBookingId, reason);
+     const data=await BookingService.cancelSession(sessionBookingId, reason,cancellationWindow);
      if(data){
         setCancelState({ isCancel: false, sessionBookingId: null, session: null, reason: '' });
         toast.success('Session Cancelled successfully! Amount Added to your wallet');    
@@ -162,9 +162,9 @@ export default function MySessions() {
     switch (action) {
       case 'reschedule':
         const diff =new Date(session.date).getTime() - new Date().getTime();
-        if (diff < session.cancellationWindow){
+        if (diff < session.session.cancellationWindow){
           toast.custom(
-            ` sorry unable to reschedule this session. you could reschedule this booked session before  ${session.cancellationWindow} Hr`
+            ` sorry unable to reschedule this session. you could reschedule this booked session before  ${session.session.cancellationWindow} Hr`
           );
           return;
         }
@@ -218,7 +218,7 @@ export default function MySessions() {
             <DialogHeader>
               <DialogTitle>Reason for Cancellation</DialogTitle>
               <DialogDescription>
-                Please provide a reason before cancelling the session.
+                Please provide  reason before cancelling the session.
               </DialogDescription>
             </DialogHeader>
 
@@ -331,7 +331,7 @@ export default function MySessions() {
               <>
                 <SessionCard
                   key={session.id}
-                  session={session}
+                  currentSession={session}
                   onAction={handleAction}
                 />
                 {selectedSession && (

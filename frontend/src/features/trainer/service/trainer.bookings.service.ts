@@ -25,4 +25,12 @@ export const trainerBookingsService = {
     });
     return res.data;
   },
+
+
+   // get bookedSessions of trainer  by sessionId 
+  getBookedSessionsBySessionId:async (sessionId:string)=>{
+     const res = await api.get(TRAINER_ROUTES.GET_BOOKED_SESSIONS + `/${sessionId}`);
+    return res.data;
+  },
+  
 };

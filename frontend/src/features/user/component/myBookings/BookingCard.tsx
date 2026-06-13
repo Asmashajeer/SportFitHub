@@ -27,7 +27,7 @@ function BookingCard({
     <div className="bg-zinc-800/40 hover:bg-zinc-800/70 border border-zinc-700/40 hover:border-zinc-600/60 rounded-xl p-4 transition-all duration-200">
       {/* Booking ID */}
       <p className="text-xs text-left font-mono text-zinc-500 mb-3">
-        B.ID: {booking.id} - {booking.sessionModel}
+        B.ID: {booking.bookingUId} - {booking.sessionModel}
       </p>
 
       {/* Grid */}

@@ -34,7 +34,7 @@ export class SportsSessionRepository
       } 
   }
 
-  //------------------get all sports sessions--------
+  //------------------get all sports sessions---public Listing-----
   async findAll(query: FilterQuery<ISportsSession> = {},options:{page:number,limit:number}) {
     
     const {page,limit}=options;
@@ -106,7 +106,7 @@ export class SportsSessionRepository
 
 
 
-  // ------------------find session by ID
+  // ------------------find  All sessions by Admin----------
   async findAllWithTrainer(filter: FilterQuery<ISportsSession>, options: { skip: number; limit: number }    ) {
     const  sessions =await this.model
         .find(filter)
@@ -135,6 +135,15 @@ export class SportsSessionRepository
 
     return session
   }  
+
+
+  
+  async deleteASession(id: string| Types.ObjectId ){
+    return await this.model.findByIdAndUpdate(id, {
+        isDeleted: true,
+        isActive: false,
+      });
+  }
 }
   
 

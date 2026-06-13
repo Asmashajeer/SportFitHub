@@ -54,17 +54,12 @@ export const authService = {
     return await api.patch(AUTH_ROUTES.RESET_PASSWORD, data);
   },
   googleLogin: async (idToken: string) => {
-    try {
+   
       const response = await api.post(AUTH_ROUTES.GOOGLE_LOGIN, {
         token: idToken,
       });
       return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        const message = error.message || 'Google Login failed';
-        throw new Error(message);
-      }
-    }
+  
   },
   updateRole: async (email: string, selectedRole: UserRole) => {
     const response = await api.patch(AUTH_ROUTES.ADD_ROLE, {

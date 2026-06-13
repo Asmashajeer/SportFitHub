@@ -39,8 +39,8 @@ function PaymentCard({ payment }: { payment: UserPaymentResponseData }) {
         <span className="text-xs font-mono text-zinc-500">
           {payment.transactionId}
         </span>
-        <span className="text-xs font-mono text-zinc-600">
-          Booking: {payment.bookingId}
+        <span className="text-xs font-mono text-zinc-500">
+         BookingID: {payment.bookingUId}
         </span>
         <span
           className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusBadge[payment.status] ?? 'bg-zinc-700/50 text-zinc-400'}`}

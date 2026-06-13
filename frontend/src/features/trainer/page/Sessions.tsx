@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import SportsSessions from './sportSession/SportsSessions.trainer';
-import FitnessSessions from './fitnessSession/FitnessSessions.trainer';
+import SportsSessions from '../component/sessions/sportsSessions/SportsSessions.trainer';
+import FitnessSessions from '../component/sessions/fitnessSessions/FitnessSessions.trainer';
 
 const Sessions = () => {
   return (

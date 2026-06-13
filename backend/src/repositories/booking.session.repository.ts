@@ -21,7 +21,7 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
 
     async findUserSessions(filter:FilterQuery<IBookingSession>){
         const sessions=await this.model.find(filter)
-        .populate('bookingId', '  venue')
+        .populate('bookingId', ' _id venue')
         .populate('sessionId','_id trainerId sessionName sessionType maxCapacity bookingDeadline cancellationWindow')
         .lean()
         .exec();
@@ -36,7 +36,7 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
     async findBookedSessionsPopulatedUser(filter:FilterQuery<IBookingSession> = {},options: { skip: number; limit: number }){
         const sessions=await this.model.find(filter)
         .populate('userId', '_id name email')
-        .populate('bookingId', '  venue')
+        .populate('bookingId', 'pricePlan  venue')
         .populate('sessionId','_id trainerId sessionName sessionType maxCapacity bookingDeadline cancellationWindow')
         .lean()
         .sort({ createdAt: 1 })

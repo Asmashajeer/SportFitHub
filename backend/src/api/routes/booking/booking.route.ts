@@ -5,10 +5,11 @@ import { timezoneMiddleware } from '@/middleware/timezone.middleware';
 import { restrictTo } from '@/middleware/role.middleware';
 const router = Router();
 
-import { bookingController, paymentController } from '@/container';
+import { bookingController, isBlocked, paymentController } from '@/container';
 import { UserRole } from '@/constants/enums';
 
 router.use(protect);
+router.use(isBlocked);
 router.use(timezoneMiddleware); 
 router.use(restrictTo([UserRole.USER]));
 

@@ -13,7 +13,7 @@ import {
 import Logger from '@/utils/logger';
 import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import { AuthRequest } from '@/middleware/auth.middleware';
-import { userInfo } from 'node:os';
+
 
 export default class AuthController {
   private _authService: IAuthService;

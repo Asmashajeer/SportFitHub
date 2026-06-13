@@ -11,4 +11,5 @@ export interface IFitnessSessionRepository extends IBaseRepository<IFitnessSessi
   getSessionStats() ;
   findAllWithTrainer(  filter: FilterQuery<IFitnessSession>,  options: { skip: number; limit: number })
    findBysessionIdwithTrainerDetails(sessionId: string | Types.ObjectId)
+   deleteASession(id: string| Types.ObjectId )
 }

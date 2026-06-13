@@ -1,6 +1,11 @@
 import { BOOKING_STATUS, BOOKING_TYPE, PAYLOAD_MODEL } from '@/constants/enums';
 import mongoose, { Document, Schema, Types } from 'mongoose';
+import { randomUUID } from 'crypto';
 
+function generateBookingUId(): string {
+  const short = randomUUID().split('-')[0].toUpperCase(); // e.g. "A1B2C3D4"
+  return `BK-${short}`;
+}
 
 export interface IVenue {
   name: string;
@@ -23,13 +28,14 @@ export interface IBookedSlot{
     unitPrice: number, 
   };
 export interface IBooking extends Document {
+  bookingUId: string; 
   userId: Types.ObjectId;           
   sessionId: Types.ObjectId;
   sessionModel:typeof PAYLOAD_MODEL[keyof typeof PAYLOAD_MODEL] , //SportsSession or FitnessSession
   stripeSessionId?: string
   bookingType:BOOKING_TYPE,      
   pricePlan:IPricePlan,   
-  venue: IVenue;    
+  venue?: IVenue;    
   status: BOOKING_STATUS,
   paymentId: Types.ObjectId;        // Reference to the Payment document
   createdAt: Date;
@@ -39,6 +45,13 @@ export interface IBooking extends Document {
 
 
 const BookingSchema = new Schema({
+  
+  bookingUId: {
+      type: String,
+      unique: true,
+      index: true,
+      default: generateBookingUId,   // ✅ Auto-generated on every new booking
+    },
   userId: { type: Schema.Types.ObjectId, ref: 'User' ,index: true},
   sessionId: { type: Schema.Types.ObjectId,  refPath: "sessionModel",required: true }, 
   sessionModel:{type:String ,enum:Object.values(PAYLOAD_MODEL),required:true},

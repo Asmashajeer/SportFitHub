@@ -1,4 +1,4 @@
-import { CalendarIcon, ClockIcon, PinIcon, Trash2 } from 'lucide-react';
+import { CalendarIcon, ClockIcon, PinIcon } from 'lucide-react';
 import ActionButton from './ActionButton';
 import {
   formatDateDDMMYY,
@@ -10,7 +10,7 @@ import type { UserBookedSessionsResponseData } from '../../types/user.booking.ty
 import { format } from 'date-fns';
 import ConfirmDialog from '@/components/reusable/ConfirmDialog';
 import { useUserDashboardStore } from '../../store/useUserDashboardStore';
-import { useMemo, useState } from 'react';
+import { useMemo} from 'react';
 
 const STATUS_CONFIG: Record<
   (typeof BOOKING_SESSION_STATUS)[keyof typeof BOOKING_SESSION_STATUS],
@@ -43,16 +43,16 @@ const STATUS_CONFIG: Record<
   // },
 };
 function SessionCard({
-  session,
+ currentSession,
   onAction,
 }: {
-  session: UserBookedSessionsResponseData;
+  currentSession: UserBookedSessionsResponseData;
   onAction: (sessionId: string, action: string) => void;
 }) {
   const { userSessions } = useUserDashboardStore();
 
-  const baseCfg = STATUS_CONFIG[session.status] ?? {
-    label: session.status,
+  const baseCfg = STATUS_CONFIG[ currentSession.status] ?? {
+    label:  currentSession.status,
     badge: 'bg-zinc-500/10 text-zinc-400 ring-1 ring-zinc-500/20',
     dot: 'bg-zinc-400',
     actions: [],
@@ -62,27 +62,27 @@ function SessionCard({
     actions: [...baseCfg.actions],
   };
   const rescheduledTo = useMemo(() => {
-    if (session.status !== BOOKING_SESSION_STATUS.RESCHEDULED) return null;
-    return userSessions.find((s) => s.id === session.rescheduledTo) ?? null;
-  }, [session, userSessions]);
+    if ( currentSession.status !== BOOKING_SESSION_STATUS.RESCHEDULED) return null;
+    return userSessions.find((s) => s.id ===  currentSession.rescheduledTo) ?? null;
+  }, [ currentSession, userSessions]);
 
 
   const isSlotBookable = (sessionStartTime: string): Boolean => {
     // check within bookingDeadline
-    if (!session?.date) return false;
+    if (! currentSession?.date) return false;
     const now = new Date();
-    const startDate = new Date(session.date);
+    const startDate = new Date( currentSession.date);
     const datePart = format(startDate, 'yyyy-MM-dd');
     const targetDateTime = new Date(`${datePart}T${sessionStartTime}`);
     const hoursDiff =
       (targetDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-    return hoursDiff > session.bookingDeadline;
+    return hoursDiff >  currentSession.session.bookingDeadline;
   };
   // session reached booking deadline
   if (
-    session.status === BOOKING_SESSION_STATUS.SCHEDULED &&
-    !isSlotBookable(session.startTime)
+     currentSession.status === BOOKING_SESSION_STATUS.SCHEDULED &&
+    !isSlotBookable( currentSession.startTime)
   ) {
     cfg.actions = [...cfg.actions.filter((action) => action !== 'reschedule')];
   }
@@ -98,28 +98,28 @@ function SessionCard({
           <div className="flex-1 pb-2 min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span className="text-sm font-medium text-zinc-100">
-                {session.sessionName}
+                { currentSession.session.sessionName}
               </span>
               <span className="text-xs text-zinc-400 bg-zinc-700/50 px-2 py-0.5 rounded-full">
-                {session.sessionType}
+                { currentSession.session.sessionType}
               </span>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500 mb-2">
               <span className="flex items-center gap-1">
                 <CalendarIcon />
-                {formatDateDDMMYY(session.date)}
+                {formatDateDDMMYY( currentSession.date)}
               </span>
               <span className="flex items-center gap-1">
                 <ClockIcon />
-                {formatTo12Hour(session.startTime)} –{' '}
-                {formatTo12Hour(session.endTime)}
+                {formatTo12Hour( currentSession.startTime)} –{' '}
+                {formatTo12Hour( currentSession.endTime)}
               </span>
               <span className="flex items-center gap-1">
                 <PinIcon />
-                {session.venue.name}, {session.venue.address}
+                { currentSession.venue.name}, { currentSession.venue.address}
               </span>
             </div>
-            <span className="text-xs text-zinc-700">{session.bookingId}</span>
+           
           </div>
           <div>
             <span
@@ -130,7 +130,7 @@ function SessionCard({
           </div>
         </div>
       </div>
-      {session.status === BOOKING_SESSION_STATUS.RESCHEDULED && (
+      { currentSession.status === BOOKING_SESSION_STATUS.RESCHEDULED && (
         <div>
           <p className="text-sm">
             Resheduled to:{' '}
@@ -152,16 +152,16 @@ function SessionCard({
                   icon={
                     <span className="text-xs text-red-400 border-red-500/30"> Cancel </span>
                   }
-                  title={`Cancel ${session.sessionName}?`}
-                  description={`Are you sure you want to cancel ${session.sessionName}? The amount will be added to your wallet.`}
-                  onConfirm={() => onAction(session.id, 'cancel')}
+                  title={`Cancel ${ currentSession.session.sessionName}?`}
+                  description={`Are you sure you want to cancel ${ currentSession.session.sessionName}? The amount will be added to your wallet.`}
+                  onConfirm={() => onAction( currentSession.id, 'cancel')}
                 />
               </div>
             ) : (
               <ActionButton
                 key={a}
                 type={a}
-                onAction={(type) => onAction(session.id, type)}
+                onAction={(type) => onAction(currentSession.id, type)}
               />
             )
           )}

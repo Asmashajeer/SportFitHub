@@ -70,6 +70,7 @@ export class SessionManagementService implements ISessionManagementService {
         repo.findAllWithTrainer(query, { skip, limit }),  // populate trainerId
         repo.count(query),
       ]);
+      console.log(Sessions)
         const sessionsData=Sessions.map((s) => toAdminSessionResponseDTO(s));
       return {
         sessions: sessionsData,      

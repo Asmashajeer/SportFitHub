@@ -37,7 +37,7 @@ const SessionDetailModal = ({
   const { userBookings } = useUserDashboardStore();
   useEffect(() => {
     const filter = {
-      id: userSession.sessionId,
+      id: userSession.session.sessionId,
       sessionModel: userSession.sessionModel, //sportsSession| fitnessSession
     };
     const getTrainerAndVenue = async () => {
@@ -59,9 +59,9 @@ const SessionDetailModal = ({
       <DialogContent className="max-w-3xl! ">
         <DialogHeader>
           <DialogTitle>
-            {userSession.sessionName}
+            {userSession.session.sessionName}
             <span className="px-2 text-xs bg-black text-gray-400 border">
-              {userSession.sessionType}
+              {userSession.session.sessionType}
             </span>
           </DialogTitle>
         </DialogHeader>

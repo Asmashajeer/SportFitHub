@@ -45,7 +45,7 @@ export class TrainerService implements ITrainerService {
   }
   async getTrainerByUserId(userId: string | Types.ObjectId): Promise<TrainerProfileDTO> {
     const trainer = await this._trainerRepo.findOne({ userId: userId });
-    console.log(trainer);
+    
     if (!trainer)
       throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(trainer);
