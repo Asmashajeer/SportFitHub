@@ -38,3 +38,11 @@ yarn-error.log*
 
 # Firebase
 **/serviceAccount.json  
+
+# Secrets & credentials
+backend/src/config/serviceAccountKey.json
+**/serviceAccountKey.json
+**/*firebase-adminsdk*.json
+
+*.pem
+*.key
