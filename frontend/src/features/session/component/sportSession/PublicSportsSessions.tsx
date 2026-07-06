@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Filter, MapPin, Search, X, SlidersHorizontal } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import {
   AGE_GROUP,
   LOCATION_RADIUS,
@@ -25,7 +25,7 @@ import type { SportData } from '@/features/admin/store/types';
 import { Label } from '@/components/ui/label';
 import { useDebounce } from '@/hooks/useDebounce';
 import toast from 'react-hot-toast';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { userService } from '@/features/user/service/userService';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import Pagination from '@/components/reusable/Pagination';

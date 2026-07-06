@@ -111,6 +111,14 @@ export interface SportsSessionResponseDTO{
 }
 
 
+export interface SportsSessionImage {
+  publicId: string;
+  url: string;
+}
+export interface SportSessionUpdateResponseDTO extends Omit<SportsSessionResponseDTO,'images'>{
+  images: SportsSessionImage[];
+}
+
 
 
 export interface SportsCategory extends Omit<IPopulatedSport ,'_id'>{

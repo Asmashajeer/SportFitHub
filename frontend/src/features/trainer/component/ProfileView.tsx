@@ -5,7 +5,7 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import {
   ExternalLink,
   CreditCard,
@@ -14,15 +14,18 @@ import {
   Award,
   Edit2,
   VerifiedIcon,
+  User2Icon,
+  Camera,
+  Loader2,
 } from 'lucide-react';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { DOC_VERIFY_STATUS, TRAINER_STATUS } from '@/constants/constants';
+import { CURRENCY, DOC_VERIFY_STATUS, ROLES, TRAINER_STATUS, UPLOAD_TYPE } from '@/constants/constants';
 
 import { parseISO } from 'date-fns';
 
-import { useTrainerStore, type ICertification } from '../store/useTrainerStore';
+import { useTrainerStore, type ICertification,  } from '../store/useTrainerStore';
 import CertificatesForm from './profileEditForm/CertificatesForm';
 
 import { trainerService } from '../service/trainerService';
@@ -31,20 +34,131 @@ import IdVerificationFormEdit from './profileEditForm/IdVerificationFormEdit';
 import AvailabilityFormEdit from './profileEditForm/AvailabiltyFormEdit';
 import PaymentInfoFormEdit from './profileEditForm/PaymentInfoEdit';
 import { formatTo12Hour } from '@/utils/formatDate';
+import { useAuthStore } from '@/features/auth/store/useAuthStore';
+import BasicInfoEditForm from './profileEditForm/BasicInfoEditForm';
+import PersonalInfoEditForm from './profileEditForm/PersonalInfoEditForm';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { uploadService } from '@/service/upload.service';
+import {  documentsService } from '../service/documentsService';
 
 const ProfileView = () => {
   const fetchProfile = useTrainerStore((state) => state.fetchProfile);
   const profile = useTrainerStore((state) => state.profile);
   const setProfile = useTrainerStore((state) => state.setProfile);
+  const [trainerData, setTrainerData] = useState(profile);
   const [editingSection, setEditingSection] = useState<string | null>(null);
-  // const {user}=useAuthStore();
+  const {user,setUser}=useAuthStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isLoading,setIsLoading]=useState(false);    
+  const [imageVersion, setImageVersion] = useState(Date.now());
 
   useEffect(() => {
-    fetchProfile();
-    
+    fetchProfile();    
   }, []);
 
-  const handleClose = () => setEditingSection(null);
+  useEffect(() => {
+       setTrainerData(profile)
+  }, [profile]);
+
+
+    const LOCKED_STATUSES = [
+      TRAINER_STATUS.SUBMITTED,
+      TRAINER_STATUS.UNDER_REVIEW,
+      TRAINER_STATUS.SUSPENDED,
+    ];
+
+    const canEditBasicInfo = !LOCKED_STATUSES.includes(profile?.status!);
+    const canEditPersonalInfo = !LOCKED_STATUSES.includes(profile?.status!);
+    const canEditProfessionalInfo = !LOCKED_STATUSES.includes(profile?.status!);
+    const canEditPricingAvailability = !LOCKED_STATUSES.includes(profile?.status!);
+    const canEditIdDocuments = profile?.status === TRAINER_STATUS.REJECTED;
+    const canEditPayment =  profile?.status === TRAINER_STATUS.APPROVED ||  profile?.status === TRAINER_STATUS.REJECTED;
+
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      const userId = user?.id;    
+      if (!file || !userId) return; 
+      try{
+        setIsLoading(true);
+         const folderPath = `trainers/${userId}/${profile?.category}`;
+        // 1. Upload Profile Picture
+        const  [profilePicUrl] = await uploadService.upload(
+            file,
+            `${folderPath}/profiles`,
+            userId!,
+            UPLOAD_TYPE.PROFILE_PIC
+          );
+        if(!trainerData?.id){
+          toast.error("failed to update profile photo, please try again");
+          return;
+        }
+        const data = await trainerService.updateProfilePic(trainerData.id, profilePicUrl);
+        setImageVersion(Date.now()); 
+        setProfile(data.profileData);
+        setUser({ 
+          ...user,
+          profilePic: data.profileData.profilePic,
+        });    
+        console.log(data.profileData.profilePic);
+       setIsLoading(false);
+    } 
+    catch (error) {
+        toast.error('Failed to update profile photo, please try again');
+        setIsLoading(false);
+    }
+     
+  };
+  const getCertificate=async(certId:string)=>{
+       const newTab = window.open('', '_blank'); 
+    try{      
+      if(profile){  
+         
+        const blob=await documentsService.getCertificateDoc(certId,profile?.id);
+       const objectUrl = URL.createObjectURL(blob);
+       if (newTab) {
+          newTab.location.href = objectUrl;
+        } else {
+          toast.error('Please allow popups to view this document');
+        }
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+          }
+
+    }catch(error){
+      newTab?.close();
+      const message= error instanceof Error? error.message:"cannot open document,try again";
+      toast.error(message);
+      console.log(error);            
+    }
+  }
+
+  const getIdAttachment=async()=>{
+       const newTab = window.open('', '_blank'); 
+    try{      
+      if(profile){  
+         
+        const blob=await documentsService.getIdAttchmentDoc(profile?.id);
+       const objectUrl = URL.createObjectURL(blob);
+       if (newTab) {
+          newTab.location.href = objectUrl;
+        } else {
+          toast.error('Please allow popups to view this document');
+        }
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+          }
+
+    }catch(error){
+      newTab?.close();
+      const message= error instanceof Error? error.message:"cannot open document,try again";
+      toast.error(message);
+      console.log(error);            
+    }
+  }
+
+  const handleClose = () => {
+    setEditingSection(null);
+  }
+  
+  
   const reSubmit = async () => {
     if (profile) {
       if (
@@ -61,105 +175,154 @@ const ProfileView = () => {
       setProfile(data.profile);
     }
   };
-console.log(profile);
-  return (
-    <div className=" bg-card grid grid-cols-1 lg:grid-cols-1 gap-6">
-      <div className="w-full py-6 z-50 font-bold">
-        <h1>Profile Overview</h1>
-        <p>
-          {profile?.status === TRAINER_STATUS.REJECTED && (
-            <Badge variant="destructive"> {profile?.status}</Badge>
-          )}
-        </p>
-        <span className="text-xs font-normal text-amber-200">
-          {profile?.status === TRAINER_STATUS.APPROVED ? (
-            <VerifiedIcon className="text-primary" />
-          ) : (
-            `status: ${profile?.status}`
-          )}
-        </span>
-      </div>
-      {profile && Object.keys(profile).length > 0 ? (
-        <>
-          <div className="lg:col-span-2 space-y-4"></div>
 
+  return (
+  
+    <div className="w-full max-w-3xl p-6 rounded-xl mx-auto z-50 bg-zinc-800/50">
+        <div className="  items-center  justify-center  gap-2 w-full pb-6 mb-4 z-50 font-bold">
+          <h1>Profile Overview</h1>
+          <p>
+            {profile?.status === TRAINER_STATUS.REJECTED && (
+              <Badge variant="destructive"> {profile?.status}</Badge>
+            )}
+          </p>
+          <span className="text-xs font-normal text-amber-200">
+            {profile?.status === TRAINER_STATUS.APPROVED ? (
+              <VerifiedIcon className="text-primary" />
+            ) : (
+              `status: ${profile?.status}`
+            )}
+          </span>
+        </div>
+       
+        {/* Avatar Row */}
+          <div className="flex items-center justify-center gap-5 pb-6 border-b border-border/50">
+            <div className="relative">
+              <Avatar className="h-16 w-16 border border-border">
+                <AvatarImage src={`${trainerData?.profilePic}?v=${imageVersion}`} />
+                <AvatarFallback className="bg-muted">
+                  <User2Icon size={28} className="text-muted-foreground" />
+                </AvatarFallback>
+              </Avatar>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-background border border-border flex items-center justify-center hover:bg-muted transition-colors"
+              >
+                <Camera className="h-3 w-3 text-muted-foreground" />
+              </button>
+               {isLoading && <Loader2 className="animate-spin h-4 w-4" />}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />            
+            </div>                 
+            <div className='text-start'>
+              <h3 className="text-base font-semibold">{profile?.displayName}</h3>
+              <p className="text-sm text-muted-foreground">{ROLES.TRAINER[0].toUpperCase()+ROLES.TRAINER.slice(1)}</p>
+              <p className="text-sm text-primary " >{user?.email}</p>
+            </div>
+          </div>
+        {profile && Object.keys(profile).length > 0 ? (
+        <>
+          <div className="space-y-4 border-2 rounded-xl p-2 mb-2">
+            {/* Basic info */}
+            <div className=" grid grid-cols-2 gap-y-4 justify-items-start text-left px-3 relative">
+                {canEditBasicInfo && (      
+                 <Button className=" absolute right-0  " variant="ghost"
+                  onClick={() => setEditingSection('basicInfo')}>
+                    <Edit2 className=" text-primary"/>
+                  </Button>
+                )}
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">
+                    Display Name:
+                  </p>
+                  <p className="text-sm font-normal">
+                    {profile?.displayName}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">
+                    Core Discipline{' '}
+                  </p>
+                  <p className="text-sm font-medium">
+                    {profile?.category} -{profile?.coreDiscipline}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">
+                    Email{' '}
+                  </p>
+                  <p className="text-sm font-medium">
+                    {user?.email} 
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">
+                    Specialties{' '}
+                  </p>
+                  <p className="text-sm font-medium">
+                    {profile?.specialties?.length> 1 ?profile?.specialties.join(', '):profile?.specialties}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-muted-foreground uppercase">
+                    Experience :{' '}
+                  </p>{' '}
+                  <span className="text-sm font-medium">
+                    {profile?.experience} year
+                  </span>
+                  <hr />
+                </div>  
+                <div>
+                  <p className="text-sm font-semibold text-muted-foreground uppercase">
+                    Language{' '}
+                  </p>
+                  <span>{profile?.languages?.length> 1 ?profile?.languages.join(', '):profile?.languages}
+                  </span>
+                  
+                </div>
+
+                <div className="col-span-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">
+                    Bio
+                  </p>
+                  <p className="text-sm">{profile?.bio} </p>
+                </div>
+              </div>             
+          </div>
+           {/* edit section */}
+            <div>
+                {editingSection === 'basicInfo' && (
+                  <BasicInfoEditForm
+                    initialData={{displayName:profile?.displayName,category:profile?.category,coreDiscipline:profile?.coreDiscipline,bio:profile?.bio?profile?.bio:"",specialties:profile?.specialties,languages:profile?.languages,experience:profile?.experience}}
+                    onCancel={handleClose}                    
+                  />
+                )}
+            </div>
           <div className="lg:col-span-2 space-y-4">
             <Accordion
-              type="multiple"
-              defaultValue={['personal', 'id']}
+              type="single"
+              collapsible 
+              // defaultValue={['personal', 'id']}
               className="w-full"
-            >
-              {/* Basic info */}
-              <AccordionItem
-                value="Branding"
-                className="border  rounded-lg px-4"
-              >
-                <AccordionTrigger className="  hover:  no-underline py-4">
-                  <div className="flex  gap-3">
-                    <ShieldCheck className="text-green-600 h-5 w-5" />
-                    <span className="font-bold">Branding Information</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="   relative pb-4 bg-[#1e1e1f] border-t pt-4 rounded-lg">
-                  {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
-                    <Button className=" absolute right-0" variant="ghost">
-                      <Edit2 className=" text-trainer-primary" />
-                    </Button>
-                  )}
-                  <div className=" grid grid-cols-2 gap-y-4 justify-items-start text-left px-3">
-                    <div>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        DisplayName
-                      </p>
-                      <p className="text-sm font-medium">
-                        {profile?.displayName}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        Core Discipline{' '}
-                      </p>
-                      <p className="text-sm font-medium">
-                        {profile?.category} -{profile?.coreDiscipline}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        Expertise{' '}
-                      </p>
-                      <p className="text-sm font-medium">
-                        {profile?.specialties.join(', ')}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-muted-foreground uppercase">
-                        Experience :{' '}
-                      </p>{' '}
-                      <span className="text-sm font-medium">
-                        {profile?.experience} year
-                      </span>
-                      <hr />
-                      <p className="text-sm font-semibold text-muted-foreground uppercase">
-                        Language{' '}
-                      </p>
-                      <p>{profile?.languages.join(", ")}</p>
-                    </div>
-
-                    <div className="col-span-2">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        Bio
-                      </p>
-                      <p className="text-sm">{profile?.bio} </p>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+            >          
+             
               {/* Personal & Address */}
               <AccordionItem
                 value="personal"
-                className="border rounded-lg px-4"
+                className="border rounded-lg px-4 "
               >
-                <AccordionTrigger className="hover:no-underline py-4">
+                <AccordionTrigger className="hover:no-underline  py-4 border-b border-gray-500
+                 
+                  data-[state=open]:text-gray-400
+                    data-[state=open]:bg-green-900/50
+                   data-[state=open]:border-b-2
+                  data-[state=open]:px-2
+                  data-[state=open]:rounded-t-lg">
                   <div className="flex items-center gap-3">
                     <ShieldCheck className="text-green-600 h-5 w-5" />
                     <span className="font-bold">
@@ -169,9 +332,10 @@ console.log(profile);
                 </AccordionTrigger>
 
                 <AccordionContent className=" relative pb-4 bg-[#1e1e1f] border-t pt-4">
-                  {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
-                    <Button className=" absolute right-0" variant="ghost">
-                      <Edit2 className=" text-trainer-primary" />
+                  {canEditPersonalInfo && (
+                    <Button className=" absolute right-0" variant="ghost"
+                    onClick={() => setEditingSection('personalInfo')}>
+                      <Edit2 className=" text-trainer-primary" />                      
                     </Button>
                   )}
                   <div className="grid grid-cols-2 gap-y-4 justify-items-start text-left px-3">
@@ -180,7 +344,7 @@ console.log(profile);
                         Full Name
                       </p>
                       <p className="text-sm font-medium">
-                        {profile?.personalInfo.fullName}
+                        {profile?.personalInfo?.fullName}
                       </p>
                     </div>
                     <div>
@@ -189,7 +353,7 @@ console.log(profile);
                       </p>
                       <p className="text-sm font-medium">
                         {parseISO(
-                          profile?.personalInfo.DOB ?? ''
+                          profile?.personalInfo?.DOB ?? ''
                         ).toLocaleDateString()}
                         {}
                       </p>
@@ -198,14 +362,14 @@ console.log(profile);
                       <p className="text-xs  font-semibold text-muted-foreground uppercase">
                         Gender{' '}
                       </p>
-                      <p>{profile?.personalInfo.gender}</p>
+                      <p>{profile?.personalInfo?.gender}</p>
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
                         Phone{' '}
                       </p>
                       <p className="text-sm font-medium">
-                        {profile?.personalInfo.phone}
+                        {profile?.personalInfo?.phone}
                       </p>
                     </div>
 
@@ -214,12 +378,21 @@ console.log(profile);
                         Address
                       </p>
                       <p className="text-sm">
-                        {profile?.personalInfo.address.street},{' '}
-                        {profile?.personalInfo.address.city},{' '}
-                        {profile?.personalInfo.address.state} -{' '}
-                        {profile?.personalInfo.address.zip}
+                        {profile?.personalInfo?.address.street},{' '}
+                        {profile?.personalInfo?.address.city},{' '}
+                        {profile?.personalInfo?.address.state} -{' '}
+                        {profile?.personalInfo?.address.zip}
                       </p>
                     </div>
+                  </div>
+                  {/* edit section */}
+                  <div>
+                      {editingSection === 'personalInfo' && (
+                        <PersonalInfoEditForm
+                          initialData={profile.personalInfo}
+                          onCancel={handleClose}                    
+                        />
+                      )}
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -228,7 +401,13 @@ console.log(profile);
                 value="Certificates"
                 className="border rounded-lg px-4"
               >
-                <AccordionTrigger className="hover:no-underline py-4">
+                <AccordionTrigger className="hover:no-underline py-4 border-b border-gray-500
+              data-[state=open]:text-gray-400
+                    data-[state=open]:bg-green-900/50
+                   data-[state=open]:border-b-2
+                  data-[state=open]:px-2
+                  data-[state=open]:rounded-t-lg">
+                
                   <div className="flex items-center gap-3">
                     <Award className="text-green-600 h-5 w-5" />
                     <span className="font-bold">
@@ -238,7 +417,7 @@ console.log(profile);
                 </AccordionTrigger>
                 <AccordionContent className="relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3">
                   <div className=" grid grid-cols-2 gap-y-4">
-                    {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
+                    {canEditProfessionalInfo && (
                       <Button
                         variant="outline"
                         className=" absolute right-0"
@@ -252,11 +431,34 @@ console.log(profile);
                         )}
                       </Button>
                     )}
-                    {profile?.certificationInfo.documents.map(
+                    {profile?.certificationInfo?.documents.length && (
+                      <div className="absolute flex items-end left-0 top-0  gap-2 px-4 py-2">
+                        <div>
+                          <p className='text-xs'> verification Status :
+                            <span
+                              className={`text-xs ${
+                                profile?.certificationInfo?.status ===
+                                DOC_VERIFY_STATUS.REJECTED
+                                  ? 'text-red-600'
+                                  :  profile?.certificationInfo?.status ===DOC_VERIFY_STATUS.PENDING?'text-amber-400':'text-white'
+                              }`}
+                            >
+                              {' '}
+                            
+                              {profile?.certificationInfo?.status[0].toUpperCase()+profile?.certificationInfo?.status.slice(1)}
+                              {profile.certificationInfo.status ===
+                                DOC_VERIFY_STATUS.REJECTED &&
+                                ` with Reason : " ${profile?.certificationInfo?.rejectReason} "`}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    {profile?.certificationInfo?.documents.map(
                       (cert: ICertification, i: number) => (
                         <div
                           key={i}
-                          className="text-sm p-3 border rounded-md hover:bg-muted/30"
+                          className="text-sm mt-2 p-2 border border-black bg-zinc-900/80 rounded-md hover:bg-muted/30"
                         >
                           <p className="font-normal text-primary">
                             Name:{cert.name}
@@ -276,39 +478,18 @@ console.log(profile);
                             asChild
                           >
                             <a
-                              href={cert.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                                 onClick={()=>getCertificate(cert.id)}                             
                             >
-                              View Document
+                              View Certificate
                             </a>
                           </Button>
                         </div>
                       )
                     )}
-                    {profile?.certificationInfo.documents.length && (
-                      <div className=" flex items-left right-0 justify-around gap-5 px-2">
-                        <div>
-                          <p
-                            className={`text-sm ${
-                              profile?.certificationInfo?.status ===
-                              DOC_VERIFY_STATUS.REJECTED
-                                ? 'text-red-600'
-                                : 'text-white'
-                            }`}
-                          >
-                            {' '}
-                            verification Status :
-                            {profile?.certificationInfo?.status.toUpperCase()}
-                            {profile.certificationInfo.status ===
-                              DOC_VERIFY_STATUS.REJECTED &&
-                              ` with Reason : " ${profile?.certificationInfo?.rejectReason} "`}
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                    
                   </div>
                   {/* edit section */}
+                  {}
                   <div>
                     {editingSection === 'certificationInfo' && (
                       <CertificatesForm
@@ -323,7 +504,12 @@ console.log(profile);
 
               {/* Govt ID Verification */}
               <AccordionItem value="id" className="border rounded-lg mt-4 px-4">
-                <AccordionTrigger className="hover:no-underline">
+                <AccordionTrigger className="hover:no-underline border-b border-gray-500
+                 data-[state=open]:text-gray-400
+                    data-[state=open]:bg-green-900/50
+                   data-[state=open]:border-b-2
+                  data-[state=open]:px-2
+                  data-[state=open]:rounded-t-lg">
                   <div className="flex items-center gap-3">
                     <CreditCard className="text-orange-600 h-5 w-5" />
                     <span className="font-bold">
@@ -332,37 +518,35 @@ console.log(profile);
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className=" relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3">
-                  {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
+                  {canEditIdDocuments && (
                     <Button
                       variant="outline"
                       className=" absolute right-0"
                       onClick={() => setEditingSection('idVerification')}
                     >
-                      {profile?.idVerification?.status !==
-                      DOC_VERIFY_STATUS.REJECTED ? (
+                      {profile?.idVerification?.status ===
+                      DOC_VERIFY_STATUS.REJECTED && (
                         <Edit2 className=" text-trainer-primary" />
-                      ) : (
-                        'Change'
-                      )}
+                      ) }
                     </Button>
                   )}
                   <div className="flex flex-col md:flex-row gap-4 items-start">
                     <div className="flex-1 space-y-3">
                       <p className="text-sm">
-                        Type: <strong>{profile?.idVerification.idType}</strong>
+                        Type: <strong>{profile?.idVerification?.idType}</strong>
                       </p>
                       <p className="text-sm">
                         Number:{' '}
-                        <strong>{profile?.idVerification.idNumber}</strong>
+                        <strong>{profile?.idVerification?.idNumber}</strong>
                       </p>
                       <Badge
                         variant={
-                          profile?.idVerification.verified
+                          profile?.idVerification?.verified
                             ? 'default'
                             : 'destructive'
                         }
                       >
-                        {profile?.idVerification.status}
+                        {profile?.idVerification?.status}
                       </Badge>
                     </div>
 
@@ -372,7 +556,7 @@ console.log(profile);
                       </p>
                       <Button variant="outline" size="sm" asChild>
                         <a
-                          href={profile?.idVerification.idAttachment}
+                          onClick={getIdAttachment}
                           target="_blank"
                         >
                           <ExternalLink className="h-3 w-3 mr-2" />
@@ -392,7 +576,7 @@ console.log(profile);
                         )}
                       </div>
                     )}
-                    {profile?.idVerification.status ===
+                    {profile?.idVerification?.status ===
                       DOC_VERIFY_STATUS.REJECTED && (
                       <div className="flex items-center gap-2 ">
                         <Button variant="ghost">
@@ -417,14 +601,19 @@ console.log(profile);
                 value="personal"
                 className="border rounded-lg px-4"
               >
-                <AccordionTrigger className="hover:no-underline py-4">
+                <AccordionTrigger className="hover:no-underline py-4 border-b border-gray-500
+                 data-[state=open]:text-gray-400
+                    data-[state=open]:bg-green-900/50
+                   data-[state=open]:border-b-2
+                  data-[state=open]:px-2
+                  data-[state=open]:rounded-t-lg">
                   <div className="flex items-center gap-3">
                     <ShieldCheck className="text-green-600 h-5 w-5" />
                     <span className="font-bold">Availability & Schedule</span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3 ">
-                  {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
+                  {canEditPricingAvailability && (
                     <Button
                       variant="ghost"
                       className=" absolute right-0"
@@ -434,50 +623,50 @@ console.log(profile);
                       <Edit2 className=" text-trainer-primary" />
                     </Button>
                   )}
-                  <div className="grid grid-cols-2 gap-y-4">
-                    <div>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        SessionCharge
-                      </p>
-                      <p className="text-sm font-medium">
-                       ₹ {profile?.pricing.sessionCharge}{' '}
-                        
-                      </p>
-                    </div>
-                    <div className="">
+                  <div>
+                    <div className="grid grid-cols-2 items-center gap-y-4">
+                      <div>
+                          <p className="text-xs font-semibold p-2 text-muted-foreground uppercase">
+                            SessionCharge :<span className="text-sm px-2 text-white font-medium">
+                          {' '}{CURRENCY} {profile?.pricing?.sessionCharge}
+                            
+                          </span>
+                          </p>                      
+                      </div>                  
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
                         Availabilty:{' '}
                         <span className="px-2 text-sm font-bold text-primary">
-                          {profile?.availability.isAvailable
+                          {profile?.availability?.isAvailable
                             ? 'Active'
                             : 'Not Available'}{' '}
                         </span>
                       </p>
-                      <div className="space-y-2 ">
-                        {profile?.availability &&
-                          Object.entries(profile.availability)
-                            .filter(
-                              ([key, value]) =>
-                                key !== 'isAvailable' &&
-                                typeof value === 'object' &&
-                                value.available
-                            )
-                            .map(([day, info]: [string, any]) => (
-                              <div
-                                key={day}
-                                className="w-full flex justify-between items-center  text-sm border-b pb-1 border-muted/50"
-                              >
-                                <span className="font-medium capitalize">
-                                  {day}:
-                                </span>
-                                <span className="px-10 text-muted-foreground">
-                                  {formatTo12Hour(info.startTime)} - {formatTo12Hour(info.endTime)}
-                                </span>
-                              </div>
+                    </div>  
+                    <div className=" space-y-2 border rounded-xl p-2">
+                          {profile?.availability &&
+                            Object.entries(profile.availability)
+                              .filter(
+                                ([key, value]) =>
+                                  key !== 'isAvailable' &&
+                                  typeof value === 'object' &&
+                                  value.available
+                              )
+                              .map(([day, info]: [string, any]) => (
+                                <div
+                                  key={day}
+                                  className="grid grid-cols-2 gap-y-2"
+                                  // className="w-full flex justify-between items-center  text-sm border-b pb-1 border-muted/50"
+                                >
+                                  <span className="font-medium capitalize">
+                                    {day}:
+                                  </span>
+                                  <span className="px-6 text-muted-foreground">
+                                    {formatTo12Hour(info.startTime)} - {formatTo12Hour(info.endTime)}
+                                  </span>
+                                </div>
                             ))}
-                      </div>
                     </div>
-                  </div>
+                  </div>    
                   {editingSection === 'availability' && (
                     <AvailabilityFormEdit
                       initialData={{
@@ -494,14 +683,19 @@ console.log(profile);
                 value="payment"
                 className="border rounded-lg mt-4 px-4"
               >
-                <AccordionTrigger className="hover:no-underline">
+                <AccordionTrigger className="hover:no-underline border-b border-gray-500
+                 data-[state=open]:text-gray-400
+                    data-[state=open]:bg-green-900/50
+                   data-[state=open]:border-b-2
+                  data-[state=open]:px-2
+                  data-[state=open]:rounded-t-lg">
                   <div className="flex items-center gap-3">
                     <Building2 className="text-green-600 h-5 w-5" />
                     <span className="font-bold">Banking & Payment Data</span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className=" relative pb-4 bg-[#1e1e1f] border-t pt-4 justify-items-start text-left px-3">
-                  {profile.status !== TRAINER_STATUS.UNDER_REVIEW && (
+                  {canEditPayment && (
                     <Button
                       variant="ghost"
                       className=" absolute right-0"
@@ -517,13 +711,13 @@ console.log(profile);
                         Bank Account
                       </p>
                       <p className="text-sm">
-                        Name: {profile?.paymentInfo.bankAccount?.accountName}
+                        Name: {profile?.paymentInfo?.bankAccount?.accountName}
                       </p>
                       <p className="text-sm">
-                        A/C : {profile?.paymentInfo.bankAccount?.accountNumber}
+                        A/C : {profile?.paymentInfo?.bankAccount?.accountNumber}
                       </p>
                       <p className="text-sm">
-                        IFSC: {profile?.paymentInfo.bankAccount?.ifscCode}
+                        IFSC: {profile?.paymentInfo?.bankAccount?.ifscCode}
                       </p>
                     </div>
                     <div className="p-3 bg-secondary/20 rounded">
@@ -531,7 +725,7 @@ console.log(profile);
                         UPI ID
                       </p>
                       <p className="text-sm font-mono mt-2">
-                        {profile?.paymentInfo.upiId || 'Not Provided'}
+                        {profile?.paymentInfo?.upiId || 'Not Provided'}
                       </p>
                     </div>
                   </div>
@@ -546,9 +740,10 @@ console.log(profile);
             </Accordion>
           </div>
 
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
+            
+            {/* <div className="border rounded-lg bg-secondary/10 p-4 sticky top-4"> */}
             {/* ADMIN ACTION BOX */}
-            <div className="border rounded-lg bg-secondary/10 p-4 sticky top-4">
               {profile && (
                 <div className="space-y-2">
                   {profile.status === TRAINER_STATUS.REJECTED && (
@@ -561,13 +756,13 @@ console.log(profile);
                   )}
                 </div>
               )}
-            </div>
-          </div>
+            {/* </div> */}
+          {/* </div> */}
         </>
-      ) : (
-        <div className="p-10 text-center text-muted-foreground">
-          Loading Profile ...
-        </div>
+        ) : (
+          <div className="p-10 text-center text-muted-foreground">
+            Loading Profile ...
+          </div>
       )}
     </div>
   );

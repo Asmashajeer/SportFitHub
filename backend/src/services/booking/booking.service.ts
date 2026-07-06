@@ -1,4 +1,4 @@
-import { BOOKING_SESSION_STATUS, BOOKING_STATUS, BOOKING_TYPE,  PAYLOAD_MODEL, PAYMENT_METHOD, PAYMENT_STATUS, TRANSACTION_REASON, TRANSACTION_STATUS, TRANSACTION_TYPE, TTLSECONDS, UserRole } from "@/constants/enums";
+import { BOOKING_SESSION_STATUS, BOOKING_STATUS, BOOKING_TYPE,  CURRENCY,  PAYLOAD_MODEL, PAYMENT_METHOD, PAYMENT_STATUS, TRANSACTION_REASON, TRANSACTION_STATUS, TRANSACTION_TYPE, TTLSECONDS, UserRole } from "@/constants/enums";
 import { ERROR_MESSAGES, STATUS_CODE } from "@/constants/messages";
 import { BookedSlot, BookingSessionRequestfilterDTO, CheckAvailabilityDTO, LockSlotDTO, PayloadDTO } from "@/dtos/request/booking/booking.request.dto";
 import { IBookingRepository } from "@/interfaces/repositories/IBooking.repository";
@@ -11,8 +11,8 @@ import { sendNotificationEmail } from "@/utils/sendNotfication.mail";
 import mongoose, { Types } from "mongoose";
 import { ClientSession } from "mongoose";
 import Stripe from "stripe";
-import {  BookedSessionTrainerResponseDTO, BookedSlotPublicResponseData, BookingConfirmResponseDTO, CancelBookedSessionResponseDTO, UserBookedSessionsResponseDTO, UserBookingResponseDTO, UserSessionsResponseDTOwithPopulatedSession } from "@/dtos/response/booking/booking.response.dto";
-import { toBookedSessionResponseDTOWithPopulatedUser, toBookedSlotPublicResponseData,toCancelBookedSessionResponseDTO,toUserBookingResponseDTO,  toUserSessionsResponseDTO, toUserSessionsResponseDTOwithPopulatedSession } from "@/mappers/booking/booking.mapper";
+import {  BookedSessionTrainerResponseDTO, BookedSlotPublicResponseData, BookingConfirmResponseDTO, CancelBookedSessionResponseDTO, UserBookedSessionsResponseDTO, UserBookingResponseDTO,  UserBookingResponseDTOwithStatusCount, UserSessionsResponseDTOwithPopulatedSession } from "@/dtos/response/booking/booking.response.dto";
+import { toBookedSessionResponseDTOWithPopulatedUser, toBookedSlotPublicResponseData,toCancelBookedSessionResponseDTO,totoUserBookingResponseDTOwithStatusCount,toUserBookingResponseDTO,  toUserSessionsResponseDTO, toUserSessionsResponseDTOwithPopulatedSession } from "@/mappers/booking/booking.mapper";
 import { ISlotLockService } from "@/interfaces/services/booking/ISlotLock.service";
 import { IBookingSessionRepository } from "@/interfaces/repositories/IBook.session.repository";
 import { IBookedSessionPopulate, IBookingSession } from "@/models/booking.session.model";
@@ -28,6 +28,9 @@ import { IBookedSlot } from "@/models/booking.model";
 import { IAuthUser } from "@/interfaces/common/IAuthUser";
 import { IUserRepository } from "@/interfaces/repositories/IUser.repository";
 import { IPenaltyService } from "@/interfaces/services/trainer/IPenalty.service";
+import { PushNotificationPayload, sendPushNotification } from "@/utils/push-notification.service";
+import { IAuthService } from "@/interfaces/services/IAuth.service";
+import { ITrainerRepository } from "@/interfaces/repositories/ITrainer.repository";
 
 export class BookingService implements IBookingService {
   private _bookingRepo:IBookingRepository;
@@ -35,12 +38,13 @@ export class BookingService implements IBookingService {
   private _paymentRepo:IPaymentRepository;
   private _fitnessSessionRepo:IFitnessSessionRepository;  
   private _sportsSessionRepo: ISportsSessionRepository;
-
   private _slotLockService:ISlotLockService;
   private _walletService:IWalletService;
   private _walletTransactionService:IWalletTransactionService
   private _penaltyService:IPenaltyService;
-  constructor(bookingRepo:IBookingRepository,bookingSessionRepo:IBookingSessionRepository,paymentRepo:IPaymentRepository,sportsSessionRepo: ISportsSessionRepository,fitnessSessionRepo:IFitnessSessionRepository,slotLockService:ISlotLockService,walletService:IWalletService,walletTransactionService:IWalletTransactionService,penaltyService:IPenaltyService){
+  private _userRepo:IUserRepository;
+  private _trainerRepo:ITrainerRepository;
+  constructor(bookingRepo:IBookingRepository,bookingSessionRepo:IBookingSessionRepository,paymentRepo:IPaymentRepository,sportsSessionRepo: ISportsSessionRepository,fitnessSessionRepo:IFitnessSessionRepository,slotLockService:ISlotLockService,walletService:IWalletService,walletTransactionService:IWalletTransactionService,penaltyService:IPenaltyService,userRepo:IUserRepository,trainerRepo:ITrainerRepository){
     this._bookingRepo=bookingRepo;
     this._bookingSessionRepo=bookingSessionRepo;
     this._paymentRepo=paymentRepo;
@@ -50,6 +54,8 @@ export class BookingService implements IBookingService {
     this._walletService=walletService;
     this._walletTransactionService=walletTransactionService
     this._penaltyService=penaltyService;
+    this._userRepo=userRepo;
+    this._trainerRepo=trainerRepo;
   }
 
   //--------------lock booking Slots------------------------
@@ -99,6 +105,7 @@ export class BookingService implements IBookingService {
     try {
       // 1. Extract  Metadata
         const sessionId = metadata.SessionId;
+        const trainerId=metadata.trainerId;
         const sessionModel=metadata.sessionModel as PAYLOAD_MODEL;// sports or fitness
         const userId = metadata.userId;
         const userEmail=metadata.email;
@@ -201,6 +208,7 @@ export class BookingService implements IBookingService {
             await this._bookingSessionRepo.createSessionBooking({        
                   bookingId: booking._id,
                   userId:    new Types.ObjectId (userId),
+                  trainerId:new Types.ObjectId (trainerId),
                   sessionId: new Types.ObjectId (sessionId),
                   sessionModel:sessionModel,
                   slotId:   S.slotId,  
@@ -240,6 +248,35 @@ export class BookingService implements IBookingService {
             },
             closingLine:`Please arrive 10 minutes early to warm up. If you need to cancel, please do so at least ${session.bookingDeadline} hr  in advance.`
         });
+
+
+        // send push notification to user 
+        const user=await this._userRepo.findById(userId);        
+        if (user?.fcmToken) {
+            await sendPushNotification(user.fcmToken,{
+          title: 'Booking Confirmed',
+          body: `You have successfully booked ${numberOfSessions} session(s) of ${session.sessionName}  : ${bookingSummary}`,
+          data: {
+                type: BOOKING_SESSION_STATUS.SCHEDULED,
+                bookingId: booking._id.toString(),
+              
+              }
+            });
+        }
+        //notification to trainer
+        const trainerNotificationpayload={
+          title: 'Booking Received',
+          body: `A client has booked  ${numberOfSessions} session(s) of ${session.sessionName}  : ${bookingSummary}`,
+          data: {
+                type: BOOKING_SESSION_STATUS.SCHEDULED,
+                bookingId: booking._id.toString(),
+              
+              }
+            }
+        this.notifyTrainer(session.trainerId,trainerNotificationpayload);
+
+
+
         const bookingData=toUserBookingResponseDTO(booking);
         const  paymentData=toUserPaymentResponseDTO(payment);
         
@@ -328,13 +365,18 @@ export class BookingService implements IBookingService {
 
 
     //-----------find user bookings------
-  async getUserBookings(userId :string|Types.ObjectId):Promise<UserBookingResponseDTO[]>{
+  async getUserBookings(userId :string|Types.ObjectId):Promise<UserBookingResponseDTOwithStatusCount[]>{
     const bookings=await this._bookingRepo.find({userId:userId} );  
     if (!bookings) {
        throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND ,STATUS_CODE.ERROR.NOT_FOUND);
     }
-    
-    const userBookings=bookings.map(booking=>toUserBookingResponseDTO(booking))  ;    
+    const bookingIds = bookings.map(b => b._id.toString());
+  
+    const counts = await this._bookingSessionRepo.bookingsessionsStatusInfo(bookingIds);
+
+
+    const userBookings=bookings.map(booking=>totoUserBookingResponseDTOwithStatusCount(booking,counts))  ;    
+   
     return userBookings;
   }
 
@@ -355,9 +397,9 @@ export class BookingService implements IBookingService {
   //----------------reschedule booked session-------------------
 
   async rescheduleSession(sessionBookingId: string,newSlot:BookedSlot):Promise<UserBookedSessionsResponseDTO> {   
-    const bookedSession=await this._bookingSessionRepo.findById(sessionBookingId);
+    const bookedSession=await this._bookingSessionRepo.findByBookingSessionId(sessionBookingId);
     if(!bookedSession)  throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND,STATUS_CODE.ERROR.NOT_FOUND)   ;
-    const { userId,sessionId,sessionModel,bookingId}=bookedSession; 
+    const { userId,trainerId,sessionId,sessionModel,bookingId}=bookedSession; 
     const dbSession = await mongoose.startSession();
     dbSession.startTransaction();
     try {
@@ -369,13 +411,14 @@ export class BookingService implements IBookingService {
         {
           bookingId: new Types.ObjectId(bookingId),
           userId: new Types.ObjectId(userId),
+          trainerId: new Types.ObjectId(trainerId),
           sessionId: new Types.ObjectId(sessionId),
           sessionModel,
           slotId: newSlot.slotId,
           date: utcDate,
           startTime: newSlot.startTime,
           endTime: newSlot.endTime,
-          status: BOOKING_SESSION_STATUS.SCHEDULED,
+          status: BOOKING_SESSION_STATUS.SCHEDULED,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
         },
         dbSession
       );
@@ -383,8 +426,52 @@ export class BookingService implements IBookingService {
       await this._bookingSessionRepo.updateSessionBookingStatus(sessionBookingId,{status: BOOKING_SESSION_STATUS.RESCHEDULED,rescheduledTo:newBookingData._id},dbSession);
 
       await dbSession.commitTransaction();
-
+      
       const newBooking=toUserSessionsResponseDTO(newBookingData);
+                 
+      // sending mail to user about rescheduling
+     const  timezone=getTimezone();
+      const user=await this._userRepo.findById(userId.toString());
+      await sendNotificationEmail({
+            to: user?.email,
+            title: "Booking Rescheduled!",
+            description:`Your booking on ${formatInTimeZone(bookedSession.date, timezone, 'yyyy-MM-dd')}-${formatTo12Hour(bookedSession.startTime)} session has been successfully rescheduled to ${formatDateTo(newSlot.date)}-${formatTo12Hour(newSlot.startTime)}`,
+            details: {
+            userName: user.name,
+            bookingId:bookedSession.bookingId,
+            date:formatDateTo(newSlot.date),
+            time:`${formatTo12Hour(newSlot.startTime)}-${formatTo12Hour(newSlot.endTime)}`            
+          
+            },
+            closingLine:`Please arrive 10 minutes early to warm up. If you need to cancel, please do so at least 24 hr  in advance.`
+        });
+
+        // sending notification to user 
+        if (user.fcmToken) {
+            await sendPushNotification(user.fcmToken, {          
+              title: 'Booking Rescheduled',
+              body: `Your booking on ${formatDateTo(bookedSession.date.toString())}-${formatTo12Hour(bookedSession.startTime)} session has been successfully rescheduled to ${formatDateTo(newSlot.date)}-${formatTo12Hour(newSlot.startTime)}`,
+              data: {
+                type: BOOKING_SESSION_STATUS.RESCHEDULED,
+                bookingId: bookedSession.bookingId.toString(),
+                newDate:`${formatDateTo(newSlot.date)}-${formatTo12Hour(newSlot.startTime)}`
+              }            
+        });
+        }
+
+        // notification to trainer
+        const trainerNotificationpayload={          
+              title: 'Booking Rescheduled by client',
+              body: ` booking of session: ${bookedSession.sessionId.sessionName} on ${formatDateTo(bookedSession.date.toString())}-${formatTo12Hour(bookedSession.startTime)} session has been successfully rescheduled to ${formatDateTo(newSlot.date)}-${formatTo12Hour(newSlot.startTime)}`,
+              data: {
+                type: BOOKING_SESSION_STATUS.RESCHEDULED,
+                bookingId: bookedSession.bookingId.toString(),
+                sessionId:bookedSession.sessionId._id,
+                session:bookedSession.sessionId.sessionName,
+                newDate:`${formatDateTo(newSlot.date)}-${formatTo12Hour(newSlot.startTime)}`
+              }            
+        }
+        this.notifyTrainer(bookedSession.sessionId.trainerId, trainerNotificationpayload);
       return newBooking;
 
     } catch (error) {   
@@ -440,7 +527,7 @@ export class BookingService implements IBookingService {
           
 
            await dbSession.commitTransaction();
-
+            
           if (cancelledBy === UserRole.TRAINER) {
             await this._penaltyService.applyPenalty(
               bookedSession.sessionId.trainerId.toString(),
@@ -475,9 +562,34 @@ export class BookingService implements IBookingService {
               
             },           
           });
+         // notification to user
+          if (bookedSession.userId.fcmToken) {
+            await sendPushNotification(bookedSession.userId.fcmToken, {
+              title: 'Session Cancelled',
+              body: `Your session has been cancelled. ${CURRENCY} ${refundAmount} refunded to your wallet.`,
+              data: {
+                type: 'SESSION_CANCELLED',
+                bookingId: bookedSession.bookingId._id.toString(),
+                ...emailContent
+              }
+            });
+          }
 
 
-           const  cancellationResponse= {            
+          ///notification to trainer
+           const  trainerNotificationPayload={
+              title: 'Session Cancelled',
+              body: `session  cancelled. ${CURRENCY} ${refundAmount} refunded to user wallet.`,
+              data: {
+                type: 'SESSION_CANCELLED',
+                bookingId: bookedSession.bookingId._id.toString(),
+                cancelledBy:cancelledBy===UserRole.TRAINER?'cancelled by You':'client '
+              }
+            }
+
+          this.notifyTrainer(bookedSession.sessionId.trainerId,  trainerNotificationPayload);
+
+         const  cancellationResponse= {            
               sessionBookingId,
               bookingId: bookedSession.bookingId,
               refundAmount,
@@ -515,13 +627,13 @@ export class BookingService implements IBookingService {
     const skip= (page-1)*limit;
     const query:FilterQuery<IBookingSession>={};
     // get trainer's session IDs 
-    const [sportsSessions, fitnessSessions] = await Promise.all([
-      this._sportsSessionRepo.find({ trainerId }),
-      this._fitnessSessionRepo.find({ trainerId }),
-    ]);
+    // const [sportsSessions, fitnessSessions] = await Promise.all([
+    //   this._sportsSessionRepo.find({ trainerId }),
+    //   this._fitnessSessionRepo.find({ trainerId }),
+    // ]);
       
-      const sessionIds = [...sportsSessions,... fitnessSessions].map(s => s._id);      
-      query.sessionId= { $in: sessionIds };
+    //   const sessionIds = [...sportsSessions,... fitnessSessions].map(s => s._id);      
+      query.trainerId= trainerId;
 
      if(sessionModel) query.sessionModel=sessionModel;   
      if (status) {
@@ -779,6 +891,20 @@ export class BookingService implements IBookingService {
     }
 
 
+
+     // ─── to notify trainer  ───
+      private async notifyTrainer(
+        trainerId: string,
+        payload: PushNotificationPayload
+      ): Promise<void> {
+        const userId = await this._trainerRepo.findUserIdByTrainerId(trainerId);
+        if (!userId) return;
+
+        const fcmToken = await this._userRepo.findFcmTokenByUserId(userId);
+        if (!fcmToken) return;
+
+        await sendPushNotification(fcmToken, payload);
+      }
     }
 
 

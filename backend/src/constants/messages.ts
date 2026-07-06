@@ -51,6 +51,7 @@ export const ERROR_MESSAGES = {
   AUTH: {
     DB_CONN_ERROR: 'Cant connect with database',
     USER_EXISTS: 'User already exists',
+    USER_DELETED:"This account no longer exists",
     BLOCKED_USER: 'Your account has been suspended',
     INVALID_CREDENTIALS: 'Invalid credentials ',
     OTP_INVALID: 'Invalid or expired code.Please request new one',
@@ -70,7 +71,7 @@ export const ERROR_MESSAGES = {
   },
   GENERAL: {
     EXISTED: ' Already exist',
-    NOT_FOUND: 'There is no values to fetch',
+    NOT_FOUND: 'No records found',
     UPLOAD_FAILED: ' File upload failed',
     FAILED: 'Internal server Error',
     UPDATE_FAILED: 'updation failed',
@@ -78,6 +79,13 @@ export const ERROR_MESSAGES = {
   TRAINER: {
     TRAINER_NOT_FOUND: 'trainer not found',
     TRAINER_EXISTS: 'Profile for this TRAINER already exists',
+  },
+  CERT:{
+      NOT_FOUND:'Certificate Not Found',
+      FORBIDDEN:'unAuthorized Access'
+  },
+  ID_VERIFICATION:{
+     NOT_FOUND:'Identity document  Not Found',
   },
   SESSION: {
         CREATE_FAILED: "We couldn't schedule your  session. Please  try again.",

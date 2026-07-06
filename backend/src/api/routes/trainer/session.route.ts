@@ -7,6 +7,7 @@ import { Router } from "express";
 const router=Router();
 //----------------Sports session route--------------
 router.post('/sports/sport',validateBody(sportsSessionSchema), sportsSessionController.createSportSession);
+router.get('/sports/sport/:id/update', sportsSessionController.getSportSessiontoUpdate);
 router.put('/sports/sport/:id',validateBody(sportsSessionSchema), sportsSessionController.updateSportSession);
 router.delete('/sports/sport/:id', sportsSessionController.deleteSportSession);
 router.patch('/sports/sport/:id', sportsSessionController.updateSessionVisibility);

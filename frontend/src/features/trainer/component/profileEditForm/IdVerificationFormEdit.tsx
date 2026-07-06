@@ -23,8 +23,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { trainerService } from '../../service/trainerService';
 import { useTrainerStore } from '../../store/useTrainerStore';
 import { uploadService } from '@/service/upload.service';
@@ -67,11 +67,11 @@ const IdVerificationFormEdit = ({ initialData, onCancel }: props) => {
               idNumber: data.idNumber,
               idAttachment: url,
             };
-            const updatedProfile = await trainerService.updateIdverification(
-              profile?.id,
+            const updatedData = await trainerService.updateIdverification(
+            profile?.id,
               idverifcationInfo
             );
-            setProfile(updatedProfile);
+            setProfile(updatedData.profile);
             onCancel();
           }
           toast.error('fileupload failed');
@@ -87,6 +87,8 @@ const IdVerificationFormEdit = ({ initialData, onCancel }: props) => {
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-2 border-2 p-4 my-4"
       >
+        <p className='text-[10px] text-amber-400'>* changes in ID Document require admin Approval</p>
+
         <div className=" flex items-start gap-3 p-3">
           <FormField
             control={control}

@@ -4,11 +4,10 @@ import { useTrainerStore } from "../../store/useTrainerStore";
 import { useEffect, useMemo, useState } from "react";
 import type { BookedSessionResponseDataWithUserInfo } from "../../types/trainer.bookings.types";
 import BookingSessionCard from "../bookings/BookingSessionCard";
-import { Badge } from "@/components/ui/badge";
+
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, ArrowRightCircle } from "lucide-react";
-import { divIcon } from "leaflet";
-import { Button } from "@/components/ui/button";
+
 
 interface SessionsDataProps {
   sessions: BookedSessionResponseDataWithUserInfo[] | [];

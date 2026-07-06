@@ -7,6 +7,8 @@ import { IProfileRepository } from '@/interfaces/repositories/IProfile.repositor
 import { CreateUserProfileDTO } from '@/dtos/request/user/profile.request.dto';
 import { toProfileResponseData } from '@/mappers/profile.mapper';
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
+import { AuthUser } from '@/middleware/auth.middleware';
+
 
 export class ProfileService {
   private _profileRepo: IProfileRepository;
@@ -17,11 +19,9 @@ export class ProfileService {
   }
 
   //-------------Create a profile
-  async addProfile(data: CreateUserProfileDTO): Promise<ProfileResponseDataDTO> {
-    
+  async addProfile(data: CreateUserProfileDTO): Promise<ProfileResponseDataDTO> {    
     const { userId: inputUserId } = data;
     const profileCount = await this._profileRepo.count({ userId: inputUserId });
-
     const isPrimary = profileCount === 0;
     const existing = await this._profileRepo.findOne({
       fullName: data.fullName,
@@ -67,7 +67,7 @@ export class ProfileService {
 
   // ----------------to get a primary profile by userId
   async getPrimaryProfile(
-    userId: string,
+   userId:string,
     isPrimary: boolean = true
   ): Promise<ProfileResponseDataDTO | null> {
     const result = await this._profileRepo.findOne({ userId, isPrimary });
@@ -81,7 +81,7 @@ export class ProfileService {
     return profileData;
   }
   //------------- to get All profile by userId
-  async getProfiles(userId: string): Promise<ProfileResponseDataDTO[]> {
+  async getProfiles(userId:string): Promise<ProfileResponseDataDTO[]> {
     const profiles = await this._profileRepo.AllProfiles(userId);
     const allProfiles: ProfileResponseDataDTO[] = profiles.map(profile =>
       toProfileResponseData(profile)
@@ -93,7 +93,7 @@ export class ProfileService {
   //---------------- Update Profile
   async updateProfile(
     profileId: string,
-    updateData: Partial<IProfile>
+    updateData: Partial<IProfile>,   
   ): Promise<ProfileResponseDataDTO> {
     const updated = await this._profileRepo.findOneAndUpdate(profileId, updateData);
 

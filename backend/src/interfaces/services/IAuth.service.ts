@@ -25,4 +25,5 @@ export interface IAuthService {
   updateRole(data: UpdateRoleDTO): Promise<UserResponseDTO>;
   authMe(userId: string): Promise<AuthMeResponseDto>;
   refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }>;
+  updateFcmToken(userId: string, fcmToken: string): Promise<void> 
 }

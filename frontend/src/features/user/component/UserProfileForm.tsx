@@ -30,7 +30,7 @@ import { userService } from '../service/userService';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { uploadService } from '@/service/upload.service';
 import { CreateProfileSchema } from '../types/user.schema';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 import { useBookingStore } from '@/features/booking/store/useBookingStore';
 
@@ -46,7 +46,8 @@ interface UserProfile {
   zip: string;
   latitude: number;
   longitude: number;
-  profilePic: string;
+  // profilePic: string;// Cloudinary public_id, 
+  profilePic:string,
   isPrimary: boolean;
 }
 
@@ -76,6 +77,7 @@ const UserProfileForm: React.FC = () => {
   const [previewImage, setPreviewImage] = useState(''); // For UI
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { payload } = useBookingStore(); //for user to redirect to checkout
+  const [ userLocation,setUserLocation]=useState("");
   const from = location.state?.from || '';
 
   useEffect(() => {
@@ -103,7 +105,13 @@ const UserProfileForm: React.FC = () => {
   const handleInputChange = (field: keyof UserProfile, value: any) => {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
-
+  const showPickedAddress = async (lat: number, lng: number) => {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+    );
+    const data = await res.json();
+    setUserLocation(data.display_name); // selected location  display only
+  };
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -114,6 +122,7 @@ const UserProfileForm: React.FC = () => {
             longitude: position.coords.longitude,
           }));
           toast.success('Location updated!');
+          showPickedAddress( position.coords.latitude, position.coords.longitude);
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -150,7 +159,6 @@ const UserProfileForm: React.FC = () => {
       if (selectedFile) {
         const userId = user?.id;
         const folderPath = `users/${userId}`;
-
         [profilePicUrl] = await uploadService.upload(
           selectedFile,
           `${folderPath}_profiles`,
@@ -160,9 +168,9 @@ const UserProfileForm: React.FC = () => {
       }
       const profilePayload = {
         ...profile,
-        profilePic: profilePicUrl, // new URL
+        profilePic: profilePicUrl, //uploaded url
       };
-
+      
       const validation = CreateProfileSchema.safeParse(profilePayload);
       if (!validation.success) {
         const errorMessage = validation.error.issues[0].message;
@@ -419,18 +427,7 @@ const UserProfileForm: React.FC = () => {
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Input
-                  readOnly
-                  placeholder="Lat"
-                  value={profile.latitude}
-                  className="hidden"
-                />
-                <Input
-                  readOnly
-                  placeholder="Lng"
-                  value={profile.longitude}
-                  className="hidden"
-                />
+                <p>{userLocation}</p>
               </div>
             </div>
 

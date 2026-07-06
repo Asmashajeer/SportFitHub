@@ -49,7 +49,7 @@ export const fitnessSessionSchema = z
     maxCapacity: z.number().int().min(1, "Capacity must be at least 1"),
     enrolledCount: z.number().int().default(0),
     intensityLevel:  z.enum(INTENSITY_LEVEL), 
-    images: z.array(z.string().url("Invalid image URL")).optional().default([]),
+    images: z.array(z.string("image required")).optional().default([]),
     mode: z.enum(SESSION_MODE),
     meetingLink: z.string().url("Invalid meeting URL").optional().or(z.literal("")),
     venue: VenueSchema.optional(),

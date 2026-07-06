@@ -16,8 +16,9 @@ interface IAddress {
 }
 
 export interface ICertification {
+  _id: Types.ObjectId;
   name: string;
-  url: string;
+  url: string; // Cloudinary public_id, 
   validUpto: Date;
   issuedAt: Date;
 }
@@ -60,6 +61,7 @@ export interface ITrainerProfile extends Document {
 
   // certificates & Verification
   certificationInfo: {
+    
     documents: ICertification[];
     verified: boolean;
     status: DOC_VERIFY_STATUS;
@@ -71,7 +73,7 @@ export interface ITrainerProfile extends Document {
   idVerification: {
     idType: GOVT_ID_TYPE;
     idNumber: string;
-    idAttachment: string;
+    idAttachment: string;// Cloudinary public_id, 
     verified: boolean;
     status: DOC_VERIFY_STATUS;
     verifiedAt?: Date;
@@ -109,6 +111,10 @@ export interface ITrainerProfile extends Document {
 
   // Administrative State
   status: TRAINER_STATUS;
+  verificationRemarks: {
+    fields: [string],  // which fields changed
+    changedAt: Date,
+  };
   suspensionReason?: string;
   suspendedAt?: Date;
   rejectionReason?: string;
@@ -117,13 +123,26 @@ export interface ITrainerProfile extends Document {
   penalty:number
   strikePoints:number;
   cancellationCount: number,
-   lastStrikeDate?:Date
+  lastStrikeDate?:Date,
+  isDeleted:boolean,
   // Timestamps
   createdAt: Date;
   updatedAt: Date;
 }
 
 // -------------------SCHEMA---------
+const verificationRemarksSchema = new mongoose.Schema({
+    fields: {
+        type: [String],
+        enum: ['experience', 'fullName', 'bankAccount', 'upiId', 'certificationInfo', 'idVerification'],
+        default: []
+    },
+    changedAt: {
+        type: Date,
+        default: null
+    }
+}, { _id: false });
+
 
 const TrainerProfileSchema = new mongoose.Schema(
   {
@@ -244,6 +263,10 @@ const TrainerProfileSchema = new mongoose.Schema(
       enum: Object.values(TRAINER_STATUS),
       default: TRAINER_STATUS.SUBMITTED,
     },
+   verificationRemarks: {
+        type: verificationRemarksSchema,
+        default: { fields: [], changedAt: null }
+    },
     suspensionReason: String,
     suspendedAt: Date,
     rejectionReason: String,
@@ -253,6 +276,7 @@ const TrainerProfileSchema = new mongoose.Schema(
     strikePoints: { type: Number, default: 0 },
     cancellationCount: { type: Number, default: 0 }, 
     lastStrikeDate: { type: Date, default: null },
+    isDeleted:{type:Boolean,dafault:false}
   },
   { timestamps: true }
 );

@@ -23,7 +23,7 @@ export const validateBody =
           message: e.message,
         }));
 
-        return next(new AppError(`${mappedErrors[0]?.message} :(${mappedErrors[0]?.field.toString()})`, 400));
+        return next(new AppError(`${mappedErrors[0]?.message} :(${mappedErrors[0]?.field?.toString()})`, 400));
       }
       next(error);
     }

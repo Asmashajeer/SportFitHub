@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import type {
   PaginationResponseData,
   SportsSessionResponseData,
@@ -29,7 +29,7 @@ import { TrainerSportSessionService } from '@/features/trainer/service/sessionSe
 interface Props {
   sessions: SportsSessionResponseData[];
   pagination: PaginationResponseData;
-  onEdit: (session: SportsSessionResponseData) => void;
+  onEdit: (sessionId: string) => void;
   refresh: () => void;
 }
 
@@ -164,7 +164,7 @@ const handleCancel = () => {
                     variant="ghost"
                     size="sm"
                     className="h-8 text-primary"
-                    onClick={() => onEdit(session)}
+                    onClick={() => onEdit(session.id)}
                   >
                     <Edit />
                   </Button>

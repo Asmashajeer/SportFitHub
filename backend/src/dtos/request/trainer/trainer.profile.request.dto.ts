@@ -1,43 +1,43 @@
-import {  GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY } from '@/constants/enums';
+import {  GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY, TRAINER_STATUS } from '@/constants/enums';
 import z from 'zod';
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 // 1.
-export const step1Schema = z.object({
-  category: z.enum(['sport', 'fitness', 'both']),
-  displayName: z.string().min(3, 'Name must be at least 3 characters'),
-  coreDiscipline: z.string().min(1, 'Main discipline is required'),
-  bio: z.string().min(10, 'Bio should be at least 10 characters').max(1000),
-  // Note: profilePic is validated as a File object on frontend
+// export const step1Schema = z.object({
+//   category: z.enum(['sport', 'fitness', 'both']),
+//   displayName: z.string().min(3, 'Name must be at least 3 characters'),
+//   coreDiscipline: z.string().min(1, 'Main discipline is required'),
+//   bio: z.string().min(10, 'Bio should be at least 10 characters').max(1000),
+//   // Note: profilePic is validated as a File object on frontend
 
-  profilePic: z
-    .instanceof(File, { message: 'Please upload an image' })
-    .refine(file => file.size <= MAX_FILE_SIZE, 'File too large'),
-});
-export const step2Schema = z.object({
-  specialties: z.array(z.string()).nonempty('Select at least one specialty'),
-  experience: z.coerce.number().min(0, 'Experience cannot be negative'),
-  languages: z.array(z.string()).nonempty('Select at least one language'),
-  // Note: certifications (Files) are handled by the form state
-});
+//   profilePic: z
+//     .instanceof(File, { message: 'Please upload an image' })
+//     .refine(file => file.size <= MAX_FILE_SIZE, 'File too large'),
+// });
+// export const step2Schema = z.object({
+//   specialties: z.array(z.string()).nonempty('Select at least one specialty'),
+//   experience: z.coerce.number().min(0, 'Experience cannot be negative'),
+//   languages: z.array(z.string()).nonempty('Select at least one language'),
+//   // Note: certifications (Files) are handled by the form state
+// });
 
-export const step3Schema = z.object({
-  personalInfo: z.object({
-    fullName: z.string().min(3, 'Full name is required'),
-    DOB: z.coerce.date().refine(data => data < new Date(), 'Date of birth must be in the past'),
-    gender: z.nativeEnum(GENDER),
-    phone: z.string().min(10, 'Valid phone number is required'),
-    address: z.object({
-      street: z.string().optional(),
-      city: z.string().min(1, 'City is required'),
-      state: z.string().min(1, 'State is required'),
-      zip: z.string().min(1, 'Zip code is required'),
-    }),
-  }),
-  idVerification: z.object({
-    idType: z.nativeEnum(GOVT_ID_TYPE),
-    idNumber: z.string().min(1, 'ID Number is required'),
-  }),
-});
+// export const step3Schema = z.object({
+//   personalInfo: z.object({
+//     fullName: z.string().min(3, 'Full name is required'),
+//     DOB: z.coerce.date().refine(data => data < new Date(), 'Date of birth must be in the past'),
+//     gender: z.nativeEnum(GENDER),
+//     phone: z.string().min(10, 'Valid phone number is required'),
+//     address: z.object({
+//       street: z.string().optional(),
+//       city: z.string().min(1, 'City is required'),
+//       state: z.string().min(1, 'State is required'),
+//       zip: z.string().min(1, 'Zip code is required'),
+//     }),
+//   }),
+//   idVerification: z.object({
+//     idType: z.nativeEnum(GOVT_ID_TYPE),
+//     idNumber: z.string().min(1, 'ID Number is required'),
+//   }),
+// });
 
 const daySchema = z.object({
   available: z.boolean(),
@@ -63,6 +63,7 @@ export const AvailabilityPricingSchema = z.object({
   }),
   
 });
+
 export type AvailabiltyPricingReqDTO = z.infer<typeof AvailabilityPricingSchema>;
 
 export const PaymentInfoSchema = z.object({
@@ -78,11 +79,17 @@ export const PaymentInfoSchema = z.object({
 });
 export type PaymentInfoReqDTO = z.infer<typeof PaymentInfoSchema>;
 
-export interface idVerificationReqDTO {
-  idType: GOVT_ID_TYPE;
-  idNumber: string;
-  idAttachment: string;
-}
+export const IdVerificationSchema= z.object({
+    idType: z.enum(GOVT_ID_TYPE),
+    idNumber: z.string().min(1, 'ID Number is required'),
+    idAttachment: z.string(),
+  });
+  export type idVerificationReqDTO=z.infer<typeof IdVerificationSchema>
+// export interface idVerificationReqDTO {
+//   idType: GOVT_ID_TYPE;
+//   idNumber: string;
+//   idAttachment: string;
+// }
 
 const dayAvailabilitySchema = z.object({
   available: z.boolean().default(false),
@@ -90,10 +97,10 @@ const dayAvailabilitySchema = z.object({
   endTime: z.string().optional(),
 });
 
-const documents = z
+export const DocumentsInfoSchema = z
   .object({
     name: z.string(),
-    url: z.url(),
+    url: z.string(),
     validUpto: z.coerce.date(),
     issuedAt: z.coerce.date(),
   })
@@ -107,12 +114,16 @@ const documents = z
       path: ['validUpto'],
     }
   );
+  export const CertificatesSchema=z.object({
+    documents:z.array(DocumentsInfoSchema),
+  });
+  export type  CertificationReqDTO=z.infer<typeof CertificatesSchema>;
 
 export const AddTrainerProfileSchema = z.object({
   // --- Basic Info ---
   displayName: z.string().min(3, 'Display name must be at least 3 characters'),
   category: z.enum(TRAINER_CATEGORY),
-  mainDiscipline: z.string().min(1, 'Main discipline is required'),
+  coreDiscipline: z.string().min(1, 'Main discipline is required'),
   bio: z.string().min(10, 'Bio should be at least 10 characters').max(500),
   profilePic: z.url(),
   //professionalInfo
@@ -120,7 +131,7 @@ export const AddTrainerProfileSchema = z.object({
   experience: z.number().min(0, 'Experience cannot be negative'),
   languages: z.array(z.string()).min(1, 'Select at least one language'),
   certificationInfo: z.object({
-    documents: z.array(documents),
+    documents: z.array(DocumentsInfoSchema),
   }),
 
   // Personal Info
@@ -185,5 +196,45 @@ export const AddTrainerProfileSchema = z.object({
       upiId: z.string().optional(),
     })
     .optional(),
+     status:z.enum(TRAINER_STATUS),
+      verificationRemarks: z.object({
+        fields: z.array(z.string()), // which fields changed
+        changedAt: z.coerce.date(), 
+      }),    
+      applicationCount: z.number(),
+      penalty:z.number(),
+      strikePoints:z.number(),
+      cancellationCount:z.number(),      
+      isDeleted:z.boolean(),
 });
 export type AddTrainerProfileDTO = z.infer<typeof AddTrainerProfileSchema>;
+
+
+export const BasicInfoSchema = z.object({
+  displayName:z.string().min(3, 'Display name must be at least 3 characters'),       
+  category: z.enum(TRAINER_CATEGORY),
+  coreDiscipline: z.string().min(1, 'Main discipline is required'),
+  bio:z.string().min(10, 'Bio should be at least 10 characters').max(500),
+  specialties:z.array(z.string()).min(1, 'Select at least one specialty'),
+  experience:z.number().min(0, 'Experience cannot be negative'),
+   languages: z.array(z.string()).min(1, 'Select at least one language'),
+});
+export type BasicInfoReqDTO = z.infer<typeof BasicInfoSchema>;
+
+
+export const  PersonalInfoSchema= z.object({
+    fullName: z.string().min(3),
+    DOB: z.coerce.date(), // Automatically converts date strings to Date objects
+    gender: z.enum(GENDER),
+    phone: z.string().min(10),
+    address: z
+      .object({
+        street: z.string().optional(),
+        city: z.string().optional(),
+        state: z.string().optional(),
+        zip: z.string().optional(),
+      })
+      .optional(),
+  });
+
+  export type PersonalInfoReqDTO = z.infer<typeof PersonalInfoSchema>;

@@ -1,12 +1,13 @@
 
+import { BOOKING_SESSION_STATUS } from "@/constants/enums";
 import { ERROR_MESSAGES} from "@/constants/messages";
 import { AdminBookingsFilterDTO } from "@/dtos/request/admin/admin.bookings.request.dto";
-import { AdminBookingDetailDTO, AdminBookingsResponseDTOwithPagination, BookingsStatsResponseDTO } from "@/dtos/response/admin/bookings.response.dto";
+import { AdminBookingDetailDTO, adminBookingSessionDTOwithUserId, AdminBookingsResponseDTOwithPagination, BookingsStatsResponseDTO } from "@/dtos/response/admin/bookings.response.dto";
 
 import { IBookingSessionRepository } from "@/interfaces/repositories/IBook.session.repository";
 import { IBookingRepository } from "@/interfaces/repositories/IBooking.repository";
 import { IBookingsManagementService } from "@/interfaces/services/admin/IBookingsManagement.service";
-import { toAdminBookingSessionDTO, toAdminBookingsResponseDTO } from "@/mappers/admin/admin.bookings.mappers";
+import { toAdminBookingSessionDTO, toAdminBookingSessionDTOwithUserId, toAdminBookingsResponseDTO } from "@/mappers/admin/admin.bookings.mappers";
 import { IBooking } from "@/models/booking.model";
 import AppError from "@/utils/AppError";
 
@@ -66,7 +67,7 @@ export class BookingsManagementService implements IBookingsManagementService {
         this._bookingRepo.findByIdwithDetails(bookingId),
         this._bookingSessionRepo.findAllByBookingId(bookingId)
     ]);
-    console.log(booking,sessions);
+    
     if (!booking) throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND);
       const bookingData= toAdminBookingsResponseDTO(booking);
       const bookedSessions=sessions.map(session=>(toAdminBookingSessionDTO(session)));
@@ -77,4 +78,16 @@ export class BookingsManagementService implements IBookingsManagementService {
         sessions: bookedSessions
       }
    }
+
+
+   //--------------get bookingSessions By Admin
+  async getBookingSessions(userId:string  ): Promise<adminBookingSessionDTOwithUserId[]> {
+             
+    const sessions = await this._bookingSessionRepo.find({ userId:userId, status:BOOKING_SESSION_STATUS.SCHEDULED }) as any[];
+    const bookedSessions = sessions.map(session => toAdminBookingSessionDTOwithUserId(session));
+    return bookedSessions ;      
+          
+                                 
+     
+  }
 }

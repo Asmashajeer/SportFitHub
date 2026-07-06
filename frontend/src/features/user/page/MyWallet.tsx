@@ -10,7 +10,7 @@ import type { WalletTransactionResponseData } from '../types/user.wallet.types';
 import Pagination from '@/components/reusable/Pagination';
 
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 const MyWallet = () => {
   const navigate = useNavigate();

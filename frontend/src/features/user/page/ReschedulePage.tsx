@@ -54,7 +54,7 @@ export default function ReschedulePage() {
 
   // ── Fetch session data
   useEffect(() => {
-    if (!currentSession?.sessionId) {
+    if (!currentSession?.session.sessionId) {
       toast.error('no booked sessionData');
       return;
     }
@@ -62,7 +62,7 @@ export default function ReschedulePage() {
     const fetchSession = async () => {
       try {
         const filter = {
-          id: currentSession.sessionId,
+          id: currentSession.session.sessionId,
           sessionModel: currentSession.sessionModel, //sportsSession| fitnessSession
         };
 
@@ -83,7 +83,7 @@ export default function ReschedulePage() {
           setOffDays(off);
 
           const bookings = await BookingService.getBookedSlots(
-            currentSession.sessionId
+            currentSession.session.sessionId
           );
           const { occupiedSlots } = await checkAvailability({
             sessionId: session.id,
@@ -100,7 +100,7 @@ export default function ReschedulePage() {
     };
 
     fetchSession();
-  }, [currentSession?.sessionId]);
+  }, [currentSession?.session.sessionId]);
 
   // ── Slot availability check ───
   const isSlotBookable = (slotStartTime: string): boolean => {
@@ -196,9 +196,9 @@ export default function ReschedulePage() {
               Current Booking
             </p>
             <p className="text-sm font-medium text-zinc-100">
-              {currentSession.sessionName}{' '}
+              {currentSession.session.sessionName}{' '}
               <span className="text-xs text-gray-500">
-                ({currentSession.sessionType})
+                ({currentSession.session.sessionType})
               </span>
             </p>
             <div className="flex flex-wrap gap-4 text-xs text-zinc-400">

@@ -103,12 +103,19 @@ export interface TrainerProfileDTO {
 
   // Administrative State
   status: TRAINER_STATUS;
+  verificationRemarks: {
+    fields: string[],
+    changedAt: string, 
+  },
   suspensionReason?: string;
   suspendedAt?: string;
   rejectionReason?: string;
   rejectedAt?: string;
   applicationCount: number;
-
+  penalty:number
+  strikePoints:number;
+  cancellationCount: number,
+  lastStrikeDate?:string
   // Timestamps
   createdAt: string;
   updatedAt: string;

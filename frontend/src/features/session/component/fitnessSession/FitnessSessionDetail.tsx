@@ -13,7 +13,7 @@ import {
   UserCircle,
   Maximize,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 
@@ -71,6 +71,10 @@ const FitnessSessionDetail = () => {
   const { setPayload } = useBookingStore();
   const { checkAvailability } = useCheckAvailability();
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+  
   useEffect(() => {
     const fetchSession = async () => {
       try {
@@ -158,6 +162,7 @@ const FitnessSessionDetail = () => {
    }
     const bookingData: Payload = {
       sessionId: session.id,
+      trainerId:session.trainer.id,
       sessionModel: PAYLOAD_MODEL.FITNESS_SESSION,
       bookingType:
         pricePlan?.sessionCount! > 1

@@ -62,6 +62,7 @@ export default class PaymentService implements IPaymentService {
             },
             metadata: {
                 SessionId: payload.sessionId.toString(),
+                trainerId:payload.trainerId.toString(),
                 sessionsToBook: JSON.stringify(payload.sessionsToBook),
                 planId: payload.planId.toString(),                
                 numberOfSessions: payload.numberOfSessions.toString(),

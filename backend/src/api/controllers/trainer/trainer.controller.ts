@@ -4,6 +4,7 @@ import { ITrainerService } from '@/interfaces/services/trainer/Itrainer.service'
 import { AuthRequest } from '@/middleware/auth.middleware';
 
 import Logger from '@/utils/logger';
+import { serializeTrainerProfile } from '@/utils/serializeTrainerProfile';
 
 import { Request, Response, NextFunction } from 'express';
 
@@ -16,31 +17,33 @@ export class TrainerController {
 
   addProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const authReq = req as AuthRequest;
-              const userId = authReq.user.id;
+         const { user } = req as AuthRequest;
      
-      await this._trainerService.checkExistingProfile(userId);
+      await this._trainerService.checkExistingProfile(user.id);
 
       const profile = {
-        userId,
+        userId:user.id,
         ...req.body,
       };
-      const result = await this._trainerService.addProfile(profile);
-      Logger.info('Trainer created an application', { id: userId });
+      const result = await this._trainerService.addProfile(profile,user);
+      Logger.info('Trainer created an application', { id: user.id });
+      
       res.status(STATUS_CODE.SUCCESS.CREATED).json({
         success: true,
         message: SUCCESS_MESSAGES.USER.PROFILE_CREATED,
-        profileData: result,
+        profileData:  result,
       });
     } catch (error) {
       next(error);
     }
   };
+
+  //-------------------profile pic---------
   getProfilePic = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authReq = req as AuthRequest;
-              const userId = authReq.user.id;
-      const profile = await this._trainerService.getTrainerByUserId(userId);
+      const { user } = req as AuthRequest;
+     
+      const profile = await this._trainerService.getTrainerByUserId(user);
       const profilePic = profile.profilePic;
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
@@ -50,11 +53,13 @@ export class TrainerController {
       next(error);
     }
   };
+
+  //------------get profile 
   getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-     const authReq = req as AuthRequest;
-              const userId = authReq.user.id;
-      const profile = await this._trainerService.getTrainerByUserId(userId);
+      const { user } = req as AuthRequest;
+       console.log(user);
+      const profile = await this._trainerService.getTrainerByUserId(user);
 
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
@@ -64,11 +69,59 @@ export class TrainerController {
       next(error);
     }
   };
+  updateProfilePic = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { user } = req as AuthRequest;
+
+      const id = req.params.id;
+      const profilePic = req.body.profilePic;
+      const profileData = await this._trainerService.updateProfilePic(id,profilePic,user);
+      res.status(STATUS_CODE.SUCCESS.OK).json({
+        success: true,
+        profileData,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  updateBasicInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const data = req.body;
+      const { user } = req as AuthRequest;
+
+      const profile = await this._trainerService.updateBasicInfo(id, data,user);
+      res.status(STATUS_CODE.SUCCESS.OK).json({
+        success: true,
+        profile,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  updatePersonalInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const data = req.body;
+      const { user } = req as AuthRequest;
+
+      const profile = await this._trainerService.updatePersonalInfo(id, data,user);
+      res.status(STATUS_CODE.SUCCESS.OK).json({
+        success: true,
+        profile,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   updateCertificates = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const documents = req.body;
-      const profile = await this._trainerService.updateCertificate(id, documents);
+      const {documents} = req.body;
+      const { user } = req as AuthRequest;
+
+      const profile = await this._trainerService.updateCertificate(id, documents,user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profile,
@@ -81,7 +134,9 @@ export class TrainerController {
     try {
       const { id } = req.params;
       const data = req.body;
-      const profile = await this._trainerService.updateIdVerification(id, data);
+      const { user } = req as AuthRequest;
+
+      const profile = await this._trainerService.updateIdVerification(id, data,user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profile,
@@ -98,7 +153,9 @@ export class TrainerController {
     try {
       const { id } = req.params;
       const data = req.body;
-      const profile = await this._trainerService.updateAvailabilityPricing(id, data);
+      const { user } = req as AuthRequest;
+
+      const profile = await this._trainerService.updateAvailabilityPricing(id, data,user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profile,
@@ -112,7 +169,9 @@ export class TrainerController {
     try {
       const { id } = req.params;
       const data = req.body;
-      const profile = await this._trainerService.updatePaymentInfo(id, data);
+      const { user } = req as AuthRequest;
+
+      const profile = await this._trainerService.updatePaymentInfo(id, data,user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profile,
@@ -124,12 +183,11 @@ export class TrainerController {
 
   updateStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
    
-    const { id } = req.params;
-    
+    const { id } = req.params;    
     const { status } = req.body;
-   
+   const { user } = req as AuthRequest;
     try {
-      const profile = await this._trainerService.resubmitApplicaion(id, status);
+      const profile = await this._trainerService.resubmitApplicaion(id, status,user);
       Logger.info(`Resubmitted the application  for ID: ${id}`, {
         trainerId: id,
         newStatus: status,

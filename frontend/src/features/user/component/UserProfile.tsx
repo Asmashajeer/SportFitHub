@@ -6,9 +6,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/label';
+
 import {
   Select,
   SelectContent,
@@ -29,6 +29,7 @@ import {
   PhoneCall,
   Camera,
   Navigation,
+  Loader2,
 } from 'lucide-react';
 
 import { userService } from '../service/userService';
@@ -38,6 +39,7 @@ import { GENDER } from '@/constants/constants';
 import { uploadService } from '@/service/upload.service';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import toast from 'react-hot-toast';
+import { CreateProfileSchema } from '../types/user.schema';
 
 export const UserProfile = () => {
   const { user, setUser } = useAuthStore();
@@ -45,7 +47,9 @@ export const UserProfile = () => {
   const { profile, fetchProfile, setProfile } = useUserStore();
   const [userData, setUserData] = useState(profile);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const [isLoading,setIsLoading]=useState(false);
+  
+  const [imageVersion, setImageVersion] = useState(Date.now());
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -54,21 +58,42 @@ export const UserProfile = () => {
   }, [profile]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+   
     const file = e.target.files?.[0];
-    const userId = user?.id;
-    const folderPath = `users/${userId}`;
-    if (file && userId) {
+    console.log(file?.name);
+    if (!file || !user) return; 
+    const userId = user.id;
+    try {   
+       setIsLoading(true);
       const [profilePicUrl] = await uploadService.upload(
         file,
-        `${folderPath}_profiles`,
+        `users/${userId}_profiles`,
         userId,
         'profile_pic'
-      );
-      setUserData((prev) =>
-        prev ? { ...prev, ['profilePic']: profilePicUrl } : prev
-      );
-      setUser({ ...user, profilePic: profilePicUrl });
+      );       
+     
+      if(!userData?.id){
+         toast.error("failed to update profile photo, please try again");
+         return;
+      }
+      const data = await userService.updateProfilePic(userData.id, profilePicUrl);
+      setImageVersion(Date.now()); 
+      setProfile(data.profileData);
+      setUser({ 
+        ...user,
+        profilePic: data.profileData.profilePic,
+      });
+
+
+
+    
+      setIsLoading(false);
+    } 
+    catch (error) {
+        toast.error('Failed to update profile photo, please try again');
+        setIsLoading(false);
     }
+    
   };
 
   const handleChange = (name: string, value: string) => {
@@ -134,8 +159,13 @@ export const UserProfile = () => {
     return age;
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async () => {     
     if (userData) {
+      const validation = CreateProfileSchema.safeParse(userData);
+          if (!validation.success) {
+            const errorMessage = validation.error.issues[0].message;
+            return toast.error(errorMessage);
+          }
       const data = await userService.updateProfile(userData.id, userData);
       setProfile(data.profileData);
       setUserData(data.profileData);
@@ -147,7 +177,7 @@ export const UserProfile = () => {
     return <div className="p-10 text-center">Loading Profile...</div>;
 
 return (
-  <div className="max-w-4xl mx-auto p-4">
+  <div className=" min-h-screen max-w-6xl w-2xl mx-auto p-4">
     <Card className="shadow-sm border border-border/50 overflow-hidden">
       
       {/* Header */}
@@ -178,7 +208,7 @@ return (
         <div className="flex items-center gap-5 pb-6 border-b border-border/50">
           <div className="relative">
             <Avatar className="h-16 w-16 border border-border">
-              <AvatarImage src={userData.profilePic} />
+              <AvatarImage      src={`${userData.profilePic}?v=${imageVersion}`}   alt="Profile" /> 
               <AvatarFallback className="bg-muted">
                 <User2Icon size={28} className="text-muted-foreground" />
               </AvatarFallback>
@@ -189,6 +219,7 @@ return (
             >
               <Camera className="h-3 w-3 text-muted-foreground" />
             </button>
+           {isLoading && <Loader2 className="animate-spin h-4 w-4" />}
             <input
               ref={fileInputRef}
               type="file"

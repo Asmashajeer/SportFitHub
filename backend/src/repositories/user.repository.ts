@@ -77,7 +77,18 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
   }
   async softDeleteUser(id: string | Types.ObjectId): Promise<IUser | null> {
     return await this.model
-      .findByIdAndUpdate(id, { $set: { isActive: false } }, { new: true })
+      .findByIdAndUpdate(id, { $set: { isActive: false,isBlocked:true } }, { new: true })
       .exec();
   }
+
+
+    async updateFcmToken(userId: string, fcmToken: string): Promise<void> {
+       await this.model.findByIdAndUpdate(userId, { fcmToken });
+    }
+
+
+    async findFcmTokenByUserId(userId: string): Promise<string | null> {
+      const user = await this.model.findById(userId).select('fcmToken');
+      return user?.fcmToken ?? null;
+    }
 }

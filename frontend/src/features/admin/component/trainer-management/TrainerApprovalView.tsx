@@ -5,15 +5,16 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { trainerManagementService } from '../../service/trainerManagementService';
-
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   ExternalLink,
   CreditCard,
   Building2,
   ShieldCheck,
   Award,
+  User2Icon,
 } from 'lucide-react';
 import { UseAdminStore } from '../../store/useAdminStore';
 import { useEffect, useState } from 'react';
@@ -26,6 +27,9 @@ import {
 import toast from 'react-hot-toast';
 import { parseISO } from 'date-fns';
 import { formatTo12Hour } from '@/utils/formatDate';
+import { documentsService } from '@/features/trainer/service/documentsService';
+
+
 export const TrainerApprovalView = ({
   trainer,
   onClose,
@@ -50,6 +54,51 @@ export const TrainerApprovalView = ({
     fetchCurrentUser();
   }, [trainer]);
 
+
+    const getCertificate=async(certId:string)=>{
+      const newTab = window.open('', '_blank'); 
+      try{      
+        if(selectedTrainer){            
+          const blob=await documentsService.getCertificateDoc(certId,selectedTrainer?.id);
+        const objectUrl = URL.createObjectURL(blob);
+        if (newTab) {
+            newTab.location.href = objectUrl;
+          } else {
+            toast.error('Please allow popups to view this document');
+          }
+          setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+            }
+
+      }catch(error){
+        newTab?.close();
+        const message= error instanceof Error? error.message:"cannot open document,try again";
+        toast.error(message);
+        console.log(error);            
+      }
+    }
+
+    const getIdAttachment=async()=>{
+        const newTab = window.open('', '_blank'); 
+      try{      
+        if(selectedTrainer){  
+          
+          const blob=await documentsService.getIdAttchmentDoc(selectedTrainer.id);
+        const objectUrl = URL.createObjectURL(blob);
+        if (newTab) {
+            newTab.location.href = objectUrl;
+          } else {
+            toast.error('Please allow popups to view this document');
+          }
+          setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+            }
+
+      }catch(error){
+        newTab?.close();
+        const message= error instanceof Error? error.message:"cannot open document,try again";
+        toast.error(message);
+        console.log(error);            
+      }
+    }
   //update cerificates/id status
   const updateStatus = async (
     id: string,
@@ -97,23 +146,54 @@ export const TrainerApprovalView = ({
       toast.error(error?.toString() || 'Something went wrong');
     }
   };
+
+  
   return (
     <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+        <div className="flex items-center p-6 border-b border-zinc-800">
+            <div>
+                <Avatar className="h-16 w-16 border border-border">
+                    <AvatarImage   src={`${selectedTrainer?.profilePic}?v=${new Date()}`}   alt="Profile" /> 
+                    <AvatarFallback className="bg-muted">
+                    <User2Icon size={28} className="text-muted-foreground" />
+                    </AvatarFallback>
+                </Avatar>
+            </div>
+            <div className="flex flex-col px-2">
+              <h1 className="text-xl text-left font-semibold text-zinc-100">{selectedTrainer?.displayName}</h1>
+              <p  className="text-xs text-left "> {selectedTrainer?.email}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs text-zinc-400">{selectedTrainer?.coreDiscipline}·</span>
+                <span className="text-xs text-zinc-400">{selectedTrainer?.category}·</span>
+                <span className="text-xs text-zinc-400">{selectedTrainer?.experience} Yrs exp</span>              
+              </div>
+              <Badge variant={"destructive"}> {selectedTrainer?.status!==TRAINER_STATUS.APPROVED?' waiting for Approval':""}</Badge>
+            </div>
+
+            
+          </div>
+
+
       <div className="lg:col-span-2 space-y-4">
         <Accordion
-          type="multiple"
-          defaultValue={['personal', 'id']}
+          type="single"        
+           collapsible 
           className="w-full"
         >
           {/* Basic info */}
           <AccordionItem value="Branding" className="border rounded-lg px-4">
-            <AccordionTrigger className="hover:no-underline py-4">
+            <AccordionTrigger className="text-[13px] hover:no-underline py-4
+             data-[state=open]:text-gray-400
+                    data-[state=open]:bg-green-900/50
+                   data-[state=open]:border-b-2
+                  data-[state=open]:px-2
+                  data-[state=open]:rounded-t-lg">
               <div className="flex items-center gap-3">
                 <ShieldCheck className="text-green-600 h-5 w-5" />
-                <span className="font-bold">Branding Information</span>
+                <span className="font-bold">Basic Information</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-4 border-t pt-4">
+            <AccordionContent className="pb-4 border-t pt-4 bg-zinc-800/70 p-4">
               <div className="grid grid-cols-2 gap-y-4">
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
@@ -131,7 +211,7 @@ export const TrainerApprovalView = ({
                     {selectedTrainer?.category} -  {selectedTrainer?.coreDiscipline}
                   </p>
                 </div>
-                <div>
+                <div className="col-span-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
                     Expertise{' '}
                   </p>
@@ -145,14 +225,15 @@ export const TrainerApprovalView = ({
                   </p>{' '}
                   <span className="text-sm font-medium">
                     {selectedTrainer?.experience}
-                  </span>
+                  </span>                  
+                </div>
+                <div>
                   <hr />
                   <p className="text-sm font-semibold text-muted-foreground uppercase">
                     Language{' '}
                   </p>
-                  <p>{selectedTrainer?.languages.join(", ")}</p>
+                  <p>{selectedTrainer?.languages.join(", ")}</p>           
                 </div>
-
                 <div className="col-span-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
                     Bio
@@ -164,7 +245,12 @@ export const TrainerApprovalView = ({
           </AccordionItem>
           {/* Personal & Address */}
           <AccordionItem value="personal" className="border rounded-lg px-4">
-            <AccordionTrigger className="hover:no-underline py-4">
+            <AccordionTrigger className="text-[13px] hover:no-underline py-4
+             data-[state=open]:text-gray-400
+                    data-[state=open]:bg-green-900/50
+                   data-[state=open]:border-b-2
+                  data-[state=open]:px-2
+                  data-[state=open]:rounded-t-lg">
               <div className="flex items-center gap-3">
                 <ShieldCheck className="text-green-600 h-5 w-5" />
                 <span className="font-bold">
@@ -172,7 +258,7 @@ export const TrainerApprovalView = ({
                 </span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-4 border-t pt-4">
+            <AccordionContent className="pb-4 border-t pt-4  bg-zinc-800/70 p-4">
               <div className="grid grid-cols-2 gap-y-4">
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
@@ -233,43 +319,9 @@ export const TrainerApprovalView = ({
                 <span className="font-bold">Professional Certificates </span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-4 border-t pt-4">
-              <div className="grid grid-cols-2 gap-y-4">
-                {selectedTrainer?.certificationInfo.documents.map(
-                  (cert: ICertification, i: number) => (
-                    <div
-                      key={i}
-                      className="text-sm p-3 border rounded-md hover:bg-muted/30"
-                    >
-                      <p className="font-normal text-primary">
-                        Name:   {cert.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Issued: {new Date(cert.issuedAt).toLocaleDateString()}
-                      </p>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        Expires: {new Date(cert.validUpto).toLocaleDateString()}
-                      </p>
-
-                      <Button
-                        variant="link"
-                        className="p-0 h-auto text-xs"
-                        asChild
-                      >
-                        <a
-                          href={cert.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          View Document
-                        </a>
-                      </Button>
-                    </div>
-                  )
-                )}
-              </div>
-              {selectedTrainer?.certificationInfo.documents.length && (
-                <div className="flex items-end right-0 justify-around">
+            <AccordionContent className="pb-4 border-t pt-4  bg-zinc-800/70 p-4">
+             {selectedTrainer?.certificationInfo.documents.length && (
+                <div className="flex items-center text-start  justify-between">
                   <p>
                     Certificates verificaton status:{' '}
                     {selectedTrainer?.certificationInfo?.status.toUpperCase()}
@@ -347,56 +399,89 @@ export const TrainerApprovalView = ({
                   )}
                 </div>
               )}
+              <div className="grid grid-cols-5 gap-y-4">
+                {selectedTrainer?.certificationInfo.documents.map(
+                  (cert: ICertification, i: number) => (
+                    <div
+                      key={i}
+                      className="text-sm p-3 border rounded-md hover:bg-muted/30"
+                    >
+                      <p className="font-normal text-primary">
+                        Name:   {cert.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Issued: {new Date(cert.issuedAt).toLocaleDateString()}
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Expires: {new Date(cert.validUpto).toLocaleDateString()}
+                      </p>
+
+                      <Button
+                        variant="link"
+                        className="p-0 h-auto text-xs"
+                        asChild
+                      >
+                        <a
+                          onClick={()=>getCertificate(cert.id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View Document
+                        </a>
+                      </Button>
+                    </div>
+                  )
+                )}
+              </div>
+             
             </AccordionContent>
           </AccordionItem>
-
           {/* Govt ID Verification */}
-          <AccordionItem value="id" className="border rounded-lg mt-4 px-4">
-            <AccordionTrigger className="hover:no-underline">
+          <AccordionItem value="id" className="border rounded-lg  px-4">
+            <AccordionTrigger className="text-[13px] hover:no-underline
+             data-[state=open]:text-gray-400
+                    data-[state=open]:bg-green-900/50
+                   data-[state=open]:border-b-2
+                  data-[state=open]:px-2
+                  data-[state=open]:rounded-t-lg">
               <div className="flex items-center gap-3">
                 <CreditCard className="text-orange-600 h-5 w-5" />
                 <span className="font-bold">Government ID Verification</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-4 border-t pt-4">
-              <div className="flex flex-col md:flex-row gap-4 items-start">
-                <div className="flex-1 space-y-3">
-                  <p className="text-sm">
-                    Type:{' '}
-                    <strong>{selectedTrainer?.idVerification.idType}</strong>
-                  </p>
-                  <p className="text-sm">
-                    Number:{' '}
-                    <strong>{selectedTrainer?.idVerification.idNumber}</strong>
-                  </p>
-                  <Badge
-                    variant={
-                      selectedTrainer?.idVerification.verified
-                        ? 'default'
-                        : 'destructive'
-                    }
+            <AccordionContent className="pb-4 border-t pt-4 bg-zinc-800/70 p-4">
+              <div className="flex items-center text-start  justify-between"> 
+               <div className="flex items-center   justify-evenly gap-4 px-2">
+                <div className="px-2">
+                  <p>verification Status{' '}    </p>
+                  <Badge variant={
+                        selectedTrainer?.idVerification.verified
+                          ? 'default'
+                          : 'destructive'
+                      }
+                    >                  
+                      {selectedTrainer?.idVerification.status}
+                    </Badge> 
+                </div>             
+                <div className="px-2">
+                    <p className="text-sm">                    Type:{' '} </p>
+                      <strong>{selectedTrainer?.idVerification.idType}</strong>                 
+                </div> 
+                <div className="px-2"> 
+                  <p className="text-sm">                    Number:{' '} </p>  
+                    <strong>{selectedTrainer?.idVerification.idNumber}</strong>                               
+                </div>               
+                <Button variant="outline" size="sm" asChild>
+                  <a
+                   onClick={getIdAttachment}
+                    target="_blank"
                   >
-                    verification Status:{' '}
-                    {selectedTrainer?.idVerification.status}
-                  </Badge>
+                    <ExternalLink className="h-3 w-3 mr-2" />
+                    Preview ID
+                  </a>
+                </Button>
                 </div>
-
-                <div className="w-full md:w-48 aspect-video bg-muted rounded flex flex-col items-center justify-center border border-dashed border-gray-400">
-                  <p className="text-[10px] text-muted-foreground mb-2 text-center px-2">
-                    ID Attachment
-                  </p>
-                  <Button variant="outline" size="sm" asChild>
-                    <a
-                      href={selectedTrainer?.idVerification.idAttachment}
-                      target="_blank"
-                    >
-                      <ExternalLink className="h-3 w-3 mr-2" />
-                      Preview ID
-                    </a>
-                  </Button>
-                </div>
-
-                {selectedTrainer?.idVerification.status ===
+                 {selectedTrainer?.idVerification.status ===
                   DOC_VERIFY_STATUS.PENDING &&
                   rejectionTarget !== 'idVerification' && (
                     <div className="flex items-center gap-2 ">
@@ -418,7 +503,7 @@ export const TrainerApprovalView = ({
                         Reject
                       </Button>
                     </div>
-                  )}
+                )}              
                 {rejectionTarget === 'idVerification' && (
                   <div className="bg-destructive/5 border border-destructive/20 p-4 rounded-lg space-y-3 animate-in fade-in slide-in-from-top-1">
                     <div className="space-y-1">
@@ -469,13 +554,18 @@ export const TrainerApprovalView = ({
           </AccordionItem>
           {/* Availability & Schedule */}
           <AccordionItem value="personal" className="border rounded-lg px-4">
-            <AccordionTrigger className="hover:no-underline py-4">
+            <AccordionTrigger className=" text-[13px] hover:no-underline py-4
+             data-[state=open]:text-gray-400
+                    data-[state=open]:bg-green-900/50
+                   data-[state=open]:border-b-2
+                  data-[state=open]:px-2
+                  data-[state=open]:rounded-t-lg">
               <div className="flex items-center gap-3">
                 <ShieldCheck className="text-green-600 h-5 w-5" />
                 <span className="font-bold">Availability & Schedule</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-4 border-t pt-4">
+            <AccordionContent className="pb-4 border-t pt-4  bg-zinc-800/70 p-4">
               <div className="grid grid-cols-2 gap-y-4">
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
@@ -525,31 +615,39 @@ export const TrainerApprovalView = ({
           {/* Payment & Bank Info */}
           <AccordionItem
             value="payment"
-            className="border rounded-lg mt-4 px-4"
+            className="border rounded-lg px-4"
           >
-            <AccordionTrigger className="hover:no-underline">
+            <AccordionTrigger className="text-[13px] hover:no-underline
+             data-[state=open]:text-gray-400
+                    data-[state=open]:bg-green-900/50
+                   data-[state=open]:border-b-2
+                  data-[state=open]:px-2
+                  data-[state=open]:rounded-t-lg">
               <div className="flex items-center gap-3">
                 <Building2 className="text-green-600 h-5 w-5" />
                 <span className="font-bold">Banking & Payment Data</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-4 border-t pt-4">
+            <AccordionContent className="pb-4 border-t pt-4  bg-zinc-800/70 p-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 bg-secondary/20 rounded">
+                <div className="">
                   <p className="text-xs text-muted-foreground uppercase font-bold">
                     Bank Account
                   </p>
-                  <p className="text-sm">
-                    Name:{selectedTrainer?.paymentInfo.bankAccount?.accountName}
-                  </p>
-                  <p className="text-sm">
-                    A/C:
-                    {selectedTrainer?.paymentInfo.bankAccount?.accountNumber}
-                  </p>
-                  <p className="text-sm">
-                    IFSC: {selectedTrainer?.paymentInfo.bankAccount?.ifscCode}
-                  </p>
-                </div>
+                  <div className="p-2 bg-zinc-950 rounded">
+                    
+                    <p className="text-[13px] text-slate-400">
+                      Account Name: <span className='text-slate-200 px-2'>{selectedTrainer?.paymentInfo.bankAccount?.accountName}</span>
+                    </p>
+                    <p className="flex text-[13px] text-slate-400 ">
+                      A/C:
+                      <span className='px-2 text-slate-200'>{selectedTrainer?.paymentInfo.bankAccount?.accountNumber}</span>
+                    </p>
+                    <p className="text-[13px] text-slate-400">
+                      IFSC: <span className='text-slate-200 px-2'>{selectedTrainer?.paymentInfo.bankAccount?.ifscCode}</span>
+                    </p>
+                  </div>
+                </div>  
                 <div className="p-3 bg-secondary/20 rounded">
                   <p className="text-xs text-muted-foreground uppercase font-bold">
                     UPI ID
@@ -569,9 +667,9 @@ export const TrainerApprovalView = ({
         <div className="border rounded-lg bg-secondary/10 p-4 sticky top-4">
           <h4 className="font-bold text-sm mb-4">Verification Actions</h4>
           {selectedTrainer && (
-            <div className="space-y-2 flex  justify-around">
+            <div className="space-y-2 flex  justify-end gap-2">
               <Button
-                className=" bg-green-600 hover:bg-green-700 h-12"
+                className="text-[13px] bg-green-600 hover:bg-green-700 "
                 onClick={() =>
                   trainerApplicationStatus(
                     selectedTrainer?.id,
@@ -584,14 +682,9 @@ export const TrainerApprovalView = ({
               <div>
                 <Button
                   variant="outline"
-                  className=" h-12 border-destructive text-destructive hover:bg-destructive/5"
+                  className="text-[13px]  border-destructive text-destructive hover:bg-destructive/5"
                   onClick={() => setRejectionTarget('trainerStatus')}
-                  // onClick={() =>
-                  //   trainerApplicationStatus(
-                  //     selectedTrainer?.id,
-                  //     TRAINER_STATUS.REJECTED,
-                  //   )
-                  // }
+                 
                 >
                   Reject Application
                 </Button>
@@ -642,7 +735,7 @@ export const TrainerApprovalView = ({
               </div>
               <Button
                 variant="outline"
-                className=" h-12 border-b-amber-200 text-amber-200 hover:bg-amber-600/5"
+                className=" text-[13px] border-amber-200 text-amber-200 hover:bg-amber-600/5"
                 onClick={() =>
                   trainerApplicationStatus(
                     selectedTrainer?.id,

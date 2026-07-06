@@ -53,3 +53,6 @@ export interface AdminBookingSessionDTO {
   refundAmount: number;
   cancellationReason?: string;
 }
+  export interface adminBookingSessionDTOwithUserId extends AdminBookingSessionDTO {
+    userId:string;
+  }

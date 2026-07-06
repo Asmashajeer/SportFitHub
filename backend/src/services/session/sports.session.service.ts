@@ -6,6 +6,7 @@ import {
   GetSessionsResponseDTO, 
   PaginatedSportsSessionsResponseDTO, 
   SportSessionDetailedPublicDTO,
+  SportSessionUpdateResponseDTO,
   SportsSessionResponseDTO,
 } from '@/dtos/response/session/sports.session.response.dto';
 import { ISportsSessionRepository } from '@/interfaces/repositories/ISports.session.repository';
@@ -15,6 +16,7 @@ import {
   toSportSessionDetailedPublicDTO,
   toSportSessionPublicDTO,
   toSportsSessionResponseDTO,
+  toSportsSessionUpdateResponseDTO,
 } from '@/mappers/sports.session.mapper';
 
 import { ISportsSession } from '@/models/sportsSession.model';
@@ -26,8 +28,7 @@ import { formatTo12Hour } from '@/utils/formatTo';
 
 import { IBookingService } from '@/interfaces/services/booking/IBooking.service';
 
-import { IAuthUser } from '@/interfaces/common/IAuthUser';
-import { toIAuthUser } from '@/mappers/auth.mapper';
+
 
 export class SportsSessionService implements ISportsSessionService {
   private _sportsSessionRepo: ISportsSessionRepository;
@@ -62,23 +63,31 @@ export class SportsSessionService implements ISportsSessionService {
     return session;
   }
 
+  async  getSessionsToUpdate( id: string   ): Promise<SportSessionUpdateResponseDTO>{
+    const sessionData = await this._sportsSessionRepo.findBysessionId(id);
+   
+    const session = toSportsSessionUpdateResponseDTO(sessionData);
+    console.log(session);
+    return session;
+  }
   //--------update session-----------
   async updateSportSession(
-    id: string | Types.ObjectId,
+    id: string ,
     sessionData: Partial<ISportsSession>
-  ): Promise<SportsSessionResponseDTO> {
+  ): Promise<SportSessionUpdateResponseDTO> {
      //check timeslots are within trainer working hours
     this.checkWithinWorkingHours(sessionData);
-
+    
     //check for conflict with existing session's timeslots
     const newSlots=sessionData.timeSlots;
-    const conflict=await this.checkConflicts(sessionData.trainerId, newSlots,sessionData.id);
+    const conflict=await this.checkConflicts(sessionData.trainerId, newSlots,id);
     if (conflict?.hasConflict) throw new AppError(conflict.message,STATUS_CODE.ERROR.CONFLICT);
-    const data = await this._sportsSessionRepo.findOneAndUpdate(id, sessionData);
+    
+    const data = await this._sportsSessionRepo.updateSession(id, sessionData);
     if (!data) {
       throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
     }
-    const session = toSportsSessionResponseDTO(data);
+    const session = toSportsSessionUpdateResponseDTO(data);
     return session;
   }
 
@@ -207,36 +216,39 @@ export class SportsSessionService implements ISportsSessionService {
   // ---------------------get  a session by ID-public-------------
   async getASession(id: string | Types.ObjectId): Promise<SportSessionDetailedPublicDTO> {
     const sessionData = await this._sportsSessionRepo.findBysessionId(id);
-
+    console.log(sessionData);
     const session = toSportSessionDetailedPublicDTO(sessionData);
+    console.log(session);
     return session;
   }
 
 
 // -------------Find any session belonging to this trainer that has an overlap---------------
-   checkConflicts = async  (trainerId, newTimeSlots, sessionId = null) => {
+   checkConflicts = async  (trainerId, newTimeSlots, sessionId:string|null = null) => {
     for (const dayEntry of newTimeSlots) {
       const { day, slots } = dayEntry;
-
-      for (const slot of slots) {        
-        const conflict = await this._sportsSessionRepo.findOne({
-          trainerId,
-          // If editing, exclude the current session itself from the check
-          _id: { $ne: sessionId }, 
-          timeSlots: {
-            $elemMatch: {
-              day: day,
-              slots: {
-                $elemMatch: {
-                  startTime: { $lt: slot.endTime },
-                  endTime: { $gt: slot.startTime }
-                }
+      for (const slot of slots) {
+      const query: any = {
+        trainerId,
+        timeSlots: {
+          $elemMatch: {
+            day,
+            slots: {
+              $elemMatch: {
+                startTime: { $lt: slot.endTime },
+                endTime: { $gt: slot.startTime }
               }
             }
           }
-        });
+        }
+      };
 
-        if (conflict) {
+      if (sessionId) {
+        query._id = { $ne: new Types.ObjectId(sessionId) };
+      }
+      const conflict = await this._sportsSessionRepo.findOne(query);    
+
+      if (conflict) {
           return {
             hasConflict: true,
             message: `Time conflict on ${day} (${formatTo12Hour(slot.startTime)}-${formatTo12Hour(slot.endTime)}) with existing session: "${conflict.sessionName}"`

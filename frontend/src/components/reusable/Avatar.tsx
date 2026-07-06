@@ -10,7 +10,7 @@ import { Bell, UserCog } from 'lucide-react';
 import { userService } from '@/features/user/service/userService';
 
 import { trainerService } from '@/features/trainer/service/trainerService';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 
 function Avatar() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -27,10 +27,11 @@ function Avatar() {
       try {
         if (user?.id && !user.profilePic) {
           if (user?.role === ROLES.USER) {
-            const data = await userService.getProfilePic(user?.id);
+            const data = await userService.getProfilePic(user?.id);                        
             setUser({ ...user, profilePic: data?.profilePic });
           } else if (user?.role === ROLES.TRAINER) {
             const data = await trainerService.getProfilePic();
+            
             setUser({ ...user, profilePic: data?.profilePic });
           }
         }
@@ -56,6 +57,8 @@ function Avatar() {
       console.error(error);
     }
   };
+
+
   const ToDashboard = () => user && navigate(`/${user.role}/dashboard`);
 
   return (
@@ -75,7 +78,7 @@ function Avatar() {
       >
         {user?.profilePic ? (
           <img
-            src={user?.profilePic}
+            src={`${user.profilePic}?v=${new Date()}`}
             alt="Profile"
             className="w-full h-full rounded-full object-cover"
           />

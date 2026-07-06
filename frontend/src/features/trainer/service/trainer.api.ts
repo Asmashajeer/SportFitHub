@@ -7,7 +7,9 @@ export const TRAINER_ROUTES = {
   UPDATE_PROFILE: {
     BY_ID: (profileId: string) => `trainer/profile/${profileId}`,
   },
-
+  UPDATE_PROFILE_PIC: {
+      BY_ID: (profileId: string) => `trainer/profile/profile_pic/${profileId}`,
+    },
   //------------Booking------------
   GET_BOOKINGS: '/trainer/bookings',
   GET_BOOKED_SESSIONS:'/trainer/bookings/booked-sessions',
@@ -18,7 +20,9 @@ export const SPORTS_SESSION_ROUTE = {
   SPORT_SESSION: {
     BY_ID: (id: string) => `/trainer/sessions/sports/sport/${id}`,
   },
-
+  SPORT_SESSION_TO_UPDATE:{
+    BY_ID: (id: string) => `/trainer/sessions/sports/sport/${id}/update`,
+  },
   GET_SESSIONS: '/trainer/sessions/sports',
 };
 
@@ -30,3 +34,7 @@ export const FITNESS_SESSION_ROUTE = {
   GET_SESSIONS: '/trainer/sessions/fitness',
 };
 
+export const DOCUMENTS_ROUTE={
+  GET_CERTIFICATE:`/documents/download?type=certificate`,
+  GET_ID_ATTACHMENT:`/documents/download?type=id-attachment`,
+}

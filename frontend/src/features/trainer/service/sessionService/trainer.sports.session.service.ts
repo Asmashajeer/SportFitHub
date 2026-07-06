@@ -24,6 +24,14 @@ export const TrainerSportSessionService = {
     );
     return response.data;
   },
+
+  getSessionByIdToUpdate:async(sessionId: string)=>{
+     const response = await api.get(
+      SPORTS_SESSION_ROUTE.SPORT_SESSION_TO_UPDATE.BY_ID(sessionId)    
+    );
+    return response.data;
+  },
+
   updateSession: async (sessionId: string, sessionData: SportsSessionData) => {
     const response = await api.put(
       SPORTS_SESSION_ROUTE.SPORT_SESSION.BY_ID(sessionId),
@@ -31,6 +39,7 @@ export const TrainerSportSessionService = {
     );
     return response.data;
   },
+  
   deleteSession: async (sessionId: string) => {
     const response = await api.delete(
       SPORTS_SESSION_ROUTE.SPORT_SESSION.BY_ID(sessionId)

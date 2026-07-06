@@ -1,5 +1,7 @@
 import { TRAINER_CATEGORY, TRAINER_STATUS } from "@/constants/enums";
 import { PaginationResponseDTO } from "../pagination.response.dto";
+import { TrainerProfileDTO } from "../trainer/trainer.response.dto";
+import { ITrainerProfile } from "@/models/trainerProfile.model";
 
 export interface AdminTrainersResponseDTO{
 
@@ -15,6 +17,10 @@ export interface AdminTrainersResponseDTO{
   languages: string[];
   isCertsVerified:boolean,
   isIdVerified:boolean,
+  verificationRemarks: {
+    fields: string[],
+    changedAt: string, 
+  },
   status: TRAINER_STATUS;
   createdAt: string; 
 }
@@ -23,67 +29,37 @@ export interface AdminTrainersDTOWithPagination extends PaginationResponseDTO{
 }
 
 
-// export interface AdminTrainerDetails extends AdminTrainersResponseDTO{
-//     bio?: string;
-//      profilePic: string;
-//   pricing: {
-//     sessionCharge: number;    
-//   };
-//   // Personal Info
-//   personalInfo: {
-//     fullName: string;
-//     DOB: string;
-//     gender: GENDER;
-//     phone: string;
-//     address: IAddress;
-//   };
-//   // certificates & Verification
-//   certificationInfo: {
-//     documents: ICertification[];
-//     verified: boolean;
-//     status: DOC_VERIFY_STATUS;
-//     verifiedAt?: string;
-//     rejectReason?: string;
-//   };
-//   // id &verification
-//   idVerification: {
-//     idType: GOVT_ID_TYPE;
-//     idNumber: string;
-//     idAttachment: string;
-//     verified: boolean;
-//     status: DOC_VERIFY_STATUS;
-//     verifiedAt?: string;
-//     rejectIdReason?: string;
-//   };  
-//   // Location
-//   currentLocation: {
-//     type: 'Point';
-//     coordinates: [number, number]; // [longitude, latitude]
-//   };
-//   // availability
-//   availability: {
-//     isAvailable: boolean;
-//     Monday: IDayAvailability;
-//     Tuesday: IDayAvailability;
-//     Wednesday: IDayAvailability;
-//     Thursday: IDayAvailability;
-//     Friday: IDayAvailability;
-//     Saturday: IDayAvailability;
-//     Sunday: IDayAvailability;
-//   };
-//   // payment Data
-//   paymentInfo: {
-//     bankAccount?: {
-//       accountName?: string;
-//       accountNumber?: string;
-//       bankName?: string;
-//       ifscCode?: string;
-//     };
-//     upiId?: string;
-//   };
-//    suspensionReason?: string;
-//   suspendedAt?: string;
-//   rejectionReason?: string;
-//   rejectedAt?: string;
-//   applicationCount: number;
-// }
+
+export interface PendingTrainersBasicDTO {
+  id: string;
+  userId: string;
+
+  category: (typeof TRAINER_CATEGORY)[keyof typeof TRAINER_CATEGORY]; // basic Info Branding
+  displayName: string;
+  specialties: string[];
+  experience: number;
+  profilePic: string;
+
+  personalInfo: {
+    // Personal Info
+    fullName: string;
+    phone: string;
+  };
+
+  status: (typeof TRAINER_STATUS)[keyof typeof TRAINER_STATUS]; // Trainer State
+  verificationRemarks: {
+    fields: string[],
+    changedAt: string, 
+  },
+  createdAt: string; // Timestamps
+  certCount: number;
+}
+
+export interface ITrainerPopulated extends Omit<ITrainerProfile, 'userId'> {
+  userId: {_id:string, email: string; fcmToken?: string; name?: string }; 
+}
+
+export interface TrainerProfileDTOPopulatedUser extends TrainerProfileDTO{
+  email:string,
+  fcmToken?:string
+}

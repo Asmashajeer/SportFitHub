@@ -21,10 +21,10 @@ const dayAvailabilitySchema = z
   )
   .optional();
 
-const documents = z
+export const DocumentsInfoSchema = z
   .object({
-    name: z.string(),
-    url: z.url(),
+    name: z.string("certificate Name required"),
+    url: z.string("certificate Attachment is required"),
     validUpto: z.coerce.date(),
     issuedAt: z.coerce.date(),
   })
@@ -44,6 +44,11 @@ const documents = z
     message: 'Issue date cannot be in the future',
     path: ['issuedAt'],
   });
+ 
+export const DOBSchema = z.coerce
+  .date('Date of birth is required')
+  .min(new Date('1900-01-01'), 'Please enter a more recent date')
+  .max(new Date(), 'Date of birth cannot be in the future');
 
 export const AddTrainerProfileSchema = z.object({
   // --- Basic Info ---
@@ -51,19 +56,19 @@ export const AddTrainerProfileSchema = z.object({
   category: z.string().min(1, 'Category is required'),
   coreDiscipline: z.string().min(1, 'Main discipline is required'),
   bio: z.string().min(10, 'Bio should be at least 10 characters').max(500),
-  profilePic: z.url('Invalid profile picture URL'),
+  profilePic: z.string('profile pic required'),
   //professionalInfo
   specialties: z.array(z.string()).min(1, 'Select at least one specialty'),
   experience: z.number().min(0, 'Experience cannot be negative'),
   languages: z.array(z.string()).min(1, 'Select at least one language'),
   certificationInfo: z.object({
-    documents: z.array(documents),
+    documents: z.array(DocumentsInfoSchema),
   }),
 
   // Personal Info
   personalInfo: z.object({
     fullName: z.string().min(3, 'full name is required'),
-    DOB: z.coerce.date(), // Automatically converts date strings to Date objects
+    DOB:DOBSchema, // Automatically converts date strings to Date objects
     gender: z.enum(GENDER),
     phone: z.string().min(10, 'invalid phone number'),
     address: z
@@ -80,7 +85,7 @@ export const AddTrainerProfileSchema = z.object({
   idVerification: z.object({
     idType: z.enum(GOVT_ID_TYPE),
     idNumber: z.string().min(1, 'ID Number is required'),
-    idAttachment: z.url('Invalid ID attachment URL'),
+    idAttachment: z.string('required ID attachment '),
   }),
   // Location
   currentLocation: z
@@ -95,7 +100,7 @@ export const AddTrainerProfileSchema = z.object({
       .number()
       .min(1, 'Price must be at least 1')
       .max(10000, 'Price seems too high'),
-    currency: z.string().default(CURRENCY.INR),
+    currency: z.string().default(CURRENCY),
   }),
   // Availability
   availability: z.object({
@@ -123,5 +128,52 @@ export const AddTrainerProfileSchema = z.object({
       upiId: z.string().optional(),
     })
     .optional(),
-});
+})
+.refine(
+    (data) => {
+      const today = new Date();
+      const age = today.getFullYear() - data.personalInfo.DOB.getFullYear();
+      return age >= 18;
+    },
+    {
+      message: 'Trainer  must be at least 18 years old',
+      path: ['DOB'],
+    }
+  );;
 export type AddTrainerProfileData = z.infer<typeof AddTrainerProfileSchema>;
+
+
+export const BasicInfoSchema = z.object({
+  // --- Basic Info ---
+ displayName: z.string().min(3, 'Display name must be at least 3 characters'),
+  category: z.string().min(1, 'Category is required'),
+  coreDiscipline: z.string().min(1, 'Main discipline is required'),
+  bio: z.string().min(10, 'Bio should be at least 10 characters').max(500),
+   specialties: z.array(z.string()).min(1, 'Select at least one specialty'),
+  experience: z.number().min(0, 'Experience cannot be negative'),
+  languages: z.array(z.string()).min(1, 'Select at least one language')
+});
+export type basicInfoData = z.infer<typeof BasicInfoSchema>;
+
+
+  // Personal Info
+export const PersonalInfoSchema=z.object({
+    fullName: z.string().min(3, 'full name is required'),
+    DOB: z.coerce.date(), // Automatically converts date strings to Date objects
+    gender: z.enum(GENDER),
+    phone: z.string().min(10, 'invalid phone number')
+    .refine(val => !/^0+$/.test(val), 'Invalid phone number')        // ← blocks 0000000000
+    .refine(val => /^[0-9]+$/.test(val), 'Invalid phone number') ,    // ← only digits
+  
+    address: z
+      .object({
+        street: z.string().optional(),
+        city: z.string().optional(),
+        state: z.string().optional(),
+        zip: z.string().optional(),
+      })
+      .optional(),
+  });
+export type PersonalInfoData = z.infer<typeof PersonalInfoSchema>;
+
+

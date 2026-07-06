@@ -6,6 +6,10 @@ export interface trainerStatusDTO {
   suspendedAt?: Date;
   rejectionReason?: string;
   rejectedAt?: Date;
+  verificationRemarks?: {
+    fields: string[],
+    changedAt: string|null, 
+  },
 }
 export type DocumentUpdateDTO = Record<string, string | boolean | Date | null>;
 

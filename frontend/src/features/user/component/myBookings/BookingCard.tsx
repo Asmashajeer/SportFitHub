@@ -2,7 +2,8 @@ import { formatDateDDMMYY } from '@/utils/formatDate';
 import { BOOKING_STATUS } from '@/constants/constants';
 import type {
   UserBookedSessionsResponseData,
-  UserBookingResponseData,
+
+  UserBookingResponseDatawithStatusCount,
 } from '../../types/user.booking.types';
 
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +12,7 @@ function BookingCard({
   booking,
   bookedSession,
 }: {
-  booking: UserBookingResponseData;
+  booking: UserBookingResponseDatawithStatusCount;
   bookedSession: UserBookedSessionsResponseData | undefined;
 }) {
   const navigate = useNavigate();
@@ -22,7 +23,11 @@ function BookingCard({
     cancelled: 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20',
     completed: 'bg-teal-500/10 text-teal-400 ring-1 ring-teal-500/20',
   };
-
+  if(bookedSession===undefined){
+    return (
+      <div>No Sessions</div>
+    )
+  }
   return (
     <div className="bg-zinc-800/40 hover:bg-zinc-800/70 border border-zinc-700/40 hover:border-zinc-600/60 rounded-xl p-4 transition-all duration-200">
       {/* Booking ID */}
@@ -35,10 +40,10 @@ function BookingCard({
         <div>
           <p className=" text-zinc-500 mb-1 text-xs">Session</p>
           <p className="text-xs font-normal text-zinc-100">
-            {bookedSession?.sessionName || 'no session'}
+            {bookedSession?.session.sessionName || ''}
           </p>
           <span className="mt-1 inline-block text-xs text-zinc-400 bg-zinc-700/50 px-2 py-0.5 rounded-full">
-            {bookedSession?.sessionType}
+            {bookedSession?.session.sessionType}
           </span>
         </div>
 
@@ -74,11 +79,15 @@ function BookingCard({
           <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-700/50 text-zinc-400">
             {isMultiple ? 'Multiple sessions' : 'Single session'}
           </span>
-          <span
+          {/* <span
             className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusBadge[booking.status] ?? 'bg-zinc-700/50 text-zinc-400'}`}
           >
-            {isActive ? 'Active' : booking.status}
-          </span>
+            {isActive ? 'Active' : booking.status}           
+          </span> */}
+          <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-700/50 text-zinc-400"> Sessions :{booking.pricePlan.totalSessions}</span>
+          {booking.scheduledCount> 0 &&<span className="text-xs px-2.5 py-1 rounded-full bg-zinc-700/50 text-zinc-400"> Scheduled :{booking.scheduledCount}</span>}
+          {booking.cancelledCount> 0 &&<span className="text-xs px-2.5 py-1 rounded-full bg-zinc-700/50 text-zinc-400"> cancelled :{booking.cancelledCount}</span>}
+          {booking.completedCount> 0 &&<span className="text-xs px-2.5 py-1 rounded-full bg-zinc-700/50 text-zinc-400"> completed :{booking.completedCount}</span>}
         </div>
         <button
           onClick={() =>

@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../components/ui/select';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 
 import { ROLES } from '../../../constants/constants';
@@ -92,7 +92,10 @@ const Register = () => {
       toast.success(data.message);
       navigate('/verifyEmail', { state: data.user });
     } catch (error) {
-      toast.error(error as string);
+      console.log(error);
+      const message = error instanceof Error ? error.message : 'Something went wrong';
+      toast.error(message);
+     
     } finally {
       setIsSubmitting(false);
     }

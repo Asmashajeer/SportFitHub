@@ -1,5 +1,5 @@
 import { SessionTable } from './SessionTable';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 import CreateSportSessionModal from './CreateSportSession';
 import { useEffect, useState } from 'react';
@@ -13,8 +13,11 @@ import SearchBar from '@/components/reusable/SearchBar';
 
 const SportsSessions = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedSession, setSelectedSession] =
-    useState<SportsSessionResponseData | null>(null);
+   const [selectedSession, setSelectedSession] =
+    useState<string | null>(null);
+
+  // const [selectedSession, setSelectedSession] =
+  //   useState<SportsSessionResponseData | null>(null);
 
   const [search, setSearch] = useState('');
   const [searchParams, _] = useSearchParams();
@@ -33,8 +36,8 @@ const SportsSessions = () => {
     }
   }, [isModalOpen, refresh]);
 
-  const handleEditing = (session: SportsSessionResponseData) => {
-    setSelectedSession(session);
+  const handleEditing = (sessionId:string) => {
+    setSelectedSession(sessionId);
     setIsModalOpen(true);
   };
   const handleClose = () => {
@@ -61,7 +64,7 @@ const SportsSessions = () => {
         <CreateSportSessionModal
           isOpen={isModalOpen}
           isEditing={!!selectedSession}
-          sessionToEdit={selectedSession}
+          sessionIdToEdit={selectedSession?selectedSession:""}
           onSuccess={refresh}
           onClose={handleClose}
         />

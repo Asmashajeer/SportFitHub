@@ -9,9 +9,7 @@ const errorHandler: ErrorRequestHandler = (
   next: NextFunction
 ) => {
   console.log(`Error:`, err);
-
   const isAppError = err instanceof AppError;
-
   const statusCode = isAppError ? err.status : 500;
   const message =err.message ;
     // isAppError || process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error';

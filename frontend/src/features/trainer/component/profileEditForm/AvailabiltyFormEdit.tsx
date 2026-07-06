@@ -6,8 +6,8 @@ import type {
 } from '../../types/trainerprofile.types';
 import { useForm } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { useTrainerStore } from '../../store/useTrainerStore';
 import {
   Form,
@@ -68,11 +68,11 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
 
   const onSubmit = async (data: AvailabiltyPricing) => {
     if (profile) {
-      const updatedProfile = await trainerService.updateAvailability_Pricing(
+      const updatedData = await trainerService.updateAvailability_Pricing(
         profile?.id,
         data
       );
-      setProfile(updatedProfile);
+      setProfile( updatedData.profile);
       onCancel();
     }
   };
@@ -92,34 +92,7 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
               {...register('pricing.sessionCharge', { valueAsNumber: true })}
             />
           </div>
-          <FormField
-            control={control}
-            name="pricing.currency"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">currency</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="select ID document Type" />
-                    </SelectTrigger>
-                  </FormControl>
-
-                  <SelectContent>
-                    {Object.values(CURRENCY).map((CUR) => (
-                      <SelectItem key={CUR} value={CUR}>
-                        {CUR}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        
         </div>
         <hr />
         {/* Global Toggle */}

@@ -48,7 +48,7 @@ export const sportsSessionSchema = z
     sessionType: z.enum(SESSION_TYPE),
     maxCapacity: z.number().int().min(1, "Capacity must be at least 1"),
     enrolledCount: z.number().int().default(0),
-    images: z.array(z.string().url("Invalid image URL")).optional().default([]),
+    images: z.array(z.string('add image ')).optional().default([]),
 
     venue: VenueSchema,
     pricing: z.array(PricingSchema).min(1, "At least one pricing plan is required"),

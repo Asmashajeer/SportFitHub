@@ -68,6 +68,21 @@ export interface TrainerOnboardingFormValues {
   };
 }
 
+
+
+// export interface personalInfoData {
+//     fullName: string;
+//     DOB: string;
+//     gender: string;
+//     phone: string;
+//      address: {
+//       street?: string;
+//       city?: string;
+//       state?: string;
+//       zip?: string;
+//     };
+// }
+
 export interface documents {
   name: string;
   file: FileList | null;
@@ -125,16 +140,19 @@ interface BasicResponse {
   success: boolean;
   message: string;
 }
-interface basicInfo {
+export interface basicInfo {
   displayName: string;
   profilePic: string;
-  category: typeof TRAINER_CATEGORY;
+  category: typeof TRAINER_CATEGORY[keyof typeof TRAINER_CATEGORY];
   coreDiscipline: string;
-  bio: string;
+  bio?: string;
   specialties: string[];
-  experience: string;
+  experience: number;
   languages: string[];
 }
+// export interface basicInfoData extends Omit<basicInfo,'profilePic'>{}
+
+
 
 interface idStatus {
   type: typeof GOVT_ID_TYPE;

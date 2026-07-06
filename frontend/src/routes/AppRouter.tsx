@@ -27,7 +27,7 @@ import FitnessSessionDetailPage from '@/pages/FitnessSessionDetailPage';
 import BookingRoutes from './BookingRoutes';
 function AppRouter() {
   return (
-    <>
+    <div className="min-w-[320px]">
       <Router>
         <Routes>
           {/* public Routes */}
@@ -97,7 +97,7 @@ function AppRouter() {
           <Route path="/*" element={<NotFound />} />
         </Routes>
       </Router>
-    </>
+    </div>
   );
 }
 

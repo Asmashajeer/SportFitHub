@@ -6,6 +6,7 @@ export interface  IBookingSession extends Document{
   _id: Types.ObjectId,
   bookingId: Types.ObjectId,
   userId:     Types.ObjectId,
+  trainerId:Types.ObjectId,
   sessionId:  Types.ObjectId,
   sessionModel:typeof PAYLOAD_MODEL[keyof typeof PAYLOAD_MODEL] , //SportsSession or FitnessSession
   slotId:string,
@@ -38,7 +39,8 @@ export interface IBookedSessionPopulate extends Omit<IBookingSession,'sessionId'
 const BookingSessionSchema = new Schema({
   bookingId: { type: Types.ObjectId, ref: "Booking", required: true },
   userId:    { type: Types.ObjectId, ref: "User", required: true },
-  sessionId: { type: Types.ObjectId,  refPath: "sessionModel", required: true },
+  trainerId:{ type: Types.ObjectId, ref: "TrainerProfile", required: true },
+  sessionId: { type: Types.ObjectId,  refPath: "sessionModel", required: true },  
   sessionModel:{ type: String, enum: Object.values(PAYLOAD_MODEL), required: true },
   slotId:    { type:String,  required: true },
   date:      { type: Date, required: true },

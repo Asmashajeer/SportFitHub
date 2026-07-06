@@ -26,7 +26,7 @@ const BookingDetailModal = ({ booking, open, onClose }: BookingDetailModalProps)
           <div className="flex flex-col gap-1">
             <h1 className="text-xl font-semibold text-zinc-100">Booking Details</h1>
             <p className="text-xs text-zinc-500">
-              <span className="text-zinc-600">#ID: </span>{booking.bookingId}
+              <span className="text-zinc-600">#ID: </span>{booking.bookingUId}
             </p>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-xs text-zinc-400">{booking.sessionModel}</span>

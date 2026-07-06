@@ -6,12 +6,18 @@ import MiniBookingCard from './MiniBookingCard';
 import NextSessionCard from './NextSessionCard';
 import { BOOKING_SESSION_STATUS } from '@/constants/constants';
 import { useNavigate } from 'react-router-dom';
+import { useFCMToken } from '@/hooks/useFCMToken';
 
 const Dashboard = () => {
   const { userSessions, userBookings, fetchBookings } = useUserDashboardStore();
   const navigate = useNavigate();
+  const { initFCM } = useFCMToken();
   useEffect(() => {
-    fetchBookings();
+     const init = async () => {
+        await fetchBookings();
+        await initFCM(); 
+      };
+     init();     
   }, []);
   const upcoming = userSessions
     .filter(

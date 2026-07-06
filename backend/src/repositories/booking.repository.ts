@@ -2,7 +2,7 @@ import { IBooking } from "@/models/booking.model";
 import { BaseRepository } from "./base.repository";
 import { ClientSession, FilterQuery, Model, Types } from "mongoose";
 import { IBookingRepository } from "@/interfaces/repositories/IBooking.repository";
-import { BOOKING_STATUS } from "@/constants/enums";
+import { BOOKING_SESSION_STATUS, BOOKING_STATUS } from "@/constants/enums";
 
 
 export  class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository{
@@ -33,7 +33,7 @@ export  class BookingRepository extends BaseRepository<IBooking> implements IBoo
       return await this.model.find(filter)
       .populate('paymentId' ,'_id receiptUrl' );
     }
-
+   
       // ---------------bookings Stats----------------
     async getBookingsStats() {
       const result = await this.model.aggregate([
@@ -51,8 +51,8 @@ export  class BookingRepository extends BaseRepository<IBooking> implements IBoo
 
       return result[0] ?? { total: 0, pending: 0, completed: 0, cancelled: 0, confirmed: 0 };
     }
-
-
+  
+  
 
       // ------------------find All Bookings by admin------
       // async findAllBookings(filter: FilterQuery<IBooking>, options: { skip: number; limit: number }    ) {

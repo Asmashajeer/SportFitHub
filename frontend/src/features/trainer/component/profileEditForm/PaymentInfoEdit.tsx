@@ -7,8 +7,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { useTrainerStore } from '../../store/useTrainerStore';
 import { trainerService } from '../../service/trainerService';
 import toast from 'react-hot-toast';
@@ -65,6 +65,8 @@ const PaymentInfoFormEdit = ({
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 bg-[#1e1e1f] p-4  border rounded-lg"
       >
+        <p className='text-[10px] text-amber-400'>* changes in payment Information require admin Approval</p>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Bank Account Section */}
           <div className="space-y-3 p-3 bg-secondary/10 rounded-md border border-white/5">

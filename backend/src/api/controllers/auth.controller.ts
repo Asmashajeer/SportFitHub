@@ -8,19 +8,16 @@ import {
   RegisterResponseDTO,
   UserResponseDTO,
 } from '../../dtos/response/auth.response.dto';
-
-
 import Logger from '@/utils/logger';
 import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import { AuthRequest } from '@/middleware/auth.middleware';
-
 
 export default class AuthController {
   private _authService: IAuthService;
   constructor(authService: IAuthService) {
     this._authService = authService;
   }
-  //register user
+  //---------------user Registration------------
   register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     Logger.info(`User requested a for registration with ${req.body.email}`);
     try {
@@ -29,7 +26,6 @@ export default class AuthController {
         userId: result.user.id,
         action: 'registration',
         role: result.user.role,
-
       });
       res.status(result.statusCode).json(result);
     } catch (error) {
@@ -37,18 +33,20 @@ export default class AuthController {
     }
   };
 
+  //------------------email verififcation
   verifyEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result: UserResponseDTO = await this._authService.verifyEmail(req.body);
       const { refreshToken, accessToken, ...user } = result;
       this._setAuthCookies(res, accessToken, refreshToken);
-
       res.status(result.statusCode).json(user);
     } catch (error) {
       next(error);
     }
   };
 
+
+  //----------------resend OTP
   resendOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email, otpContext } = req.body;
@@ -59,6 +57,8 @@ export default class AuthController {
     }
   };
 
+
+  //-------------------forgot Password
   forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email } = req.body;
@@ -72,6 +72,8 @@ export default class AuthController {
     }
   };
 
+
+  //------------------reset PASSWORD
   resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email, otp, newPassword } = req.body;
@@ -82,7 +84,9 @@ export default class AuthController {
       next(error);
     }
   };
-  //---------------- login user-----------------
+
+
+  //----------------user Login-----------------
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email, password,timezone } = req.body;
@@ -98,7 +102,7 @@ export default class AuthController {
     }
   };
 
-  //-googleLogin
+  //------------------Google Login
   googleLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { token } = req.body; // Token from frontend
 
@@ -117,6 +121,7 @@ export default class AuthController {
     }
   };
 
+  //-----------------update userRole
   updateRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const authReq = req as AuthRequest;
@@ -141,12 +146,14 @@ export default class AuthController {
     }
   };
 
+
+
+  // -------------------------Authentication
   authMe = async (req: Request, res: Response, next: NextFunction) => {
     try {
      const authReq = req as AuthRequest;
      const userId = authReq.user.id;
-
-      const data: AuthMeResponseDto = await this._authService.authMe(userId);
+     const data: AuthMeResponseDto = await this._authService.authMe(userId);
 
       res.status(STATUS_CODE.SUCCESS.OK).json(data);
     } catch (error) {
@@ -154,7 +161,7 @@ export default class AuthController {
     }
   };
 
-  //refresh AccessToken
+  //---------------------------Refresh AccessToken
   refresh = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const refreshTokenExisted = req.cookies.refreshToken;
@@ -166,16 +173,14 @@ export default class AuthController {
 
       const { accessToken, refreshToken } =
         await this._authService.refreshAccessToken(refreshTokenExisted);
-
       this._setAuthCookies(res, accessToken, refreshToken);
-
       res.status(STATUS_CODE.SUCCESS.OK).json({ success: true });
     } catch (error) {
       next(error);
     }
   };
 
-  //Logout user
+  //-----------------------Logout user
   logout = async (req: Request, res: Response): Promise<void> => {
     const authReq = req as AuthRequest;
     const userId = authReq.user.id;
@@ -194,6 +199,19 @@ export default class AuthController {
       .json({ success: true, message: SUCCESS_MESSAGES.GENERAL.LOGGED_OUT });
   };
 
+  // ---------------------------Add FCM token for pushNotification
+ updateFcmToken=async(req: AuthRequest, res: Response, next: NextFunction): Promise<void>=> {
+  try {
+    const { fcmToken } = req.body;
+    await this._authService.updateFcmToken(req.user.id, fcmToken);
+    res.status(STATUS_CODE.SUCCESS.OK).json({ success: true });
+  } catch (error) {
+    next(error);
+  }
+}
+
+
+// -----------------------Set Cookies---------------
   private _setAuthCookies(res: Response, accessToken: string, refreshToken?: string) {
     const isProd = process.env.NODE_ENV === 'production';
 

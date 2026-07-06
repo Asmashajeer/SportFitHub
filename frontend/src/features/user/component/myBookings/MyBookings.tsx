@@ -13,7 +13,7 @@ const MyBookings = () => {
   const filters = ['all', ...Object.values(BOOKING_STATUS)];
   const [activeFilter, setActiveFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-
+ 
   const [stats, setStats] = useState({
     totalBookings: 0,
     totalSpent: 0,
@@ -21,7 +21,7 @@ const MyBookings = () => {
   });
 
   useEffect(() => {
-    fetchBookings();
+    fetchBookings();    
   }, []);
 
   const getSession = (bookingId: string) =>

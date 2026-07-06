@@ -26,14 +26,14 @@ const AdminSessions = () => {
           <TabsList className="w-full max-w-xs rounded-lg xborder border-zinc-700/40 h-10 mb-6">
             <TabsTrigger
               value="sports"
-              className="flex-1 text-sm data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900"
+              className="flex-1 text-sm data-[state=active]:bg-zinc-900 data-[state=active]:text-green-700"
             >
               Sports
            
             </TabsTrigger>
             <TabsTrigger
               value="fitness"
-              className="flex-1 text-sm data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900"
+              className="flex-1 text-sm text-zinc-500 data-[state=active]:bg-zinc-900 data-[state=active]:text-green-700"
             >
               Fitness
              

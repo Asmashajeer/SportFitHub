@@ -15,7 +15,7 @@ export interface TrainerState {
   fetchProfile: () => void;
 }
 
-export const useTrainerStore = create<TrainerState>((set, get) => ({
+export const useTrainerStore = create<TrainerState>((set) => ({
   profile: null,
   isLoading: false,
   setProfile: (profile: Trainer) => set({ profile }),
@@ -34,6 +34,7 @@ interface IAddress {
 }
 
 export interface ICertification {
+  id:string;
   name: string;
   url: string;
   validUpto: Date;
@@ -113,6 +114,10 @@ export interface Trainer {
     upiId?: string;
   };
   status: (typeof TRAINER_STATUS)[keyof typeof TRAINER_STATUS]; // Administrative State
+  verificationRemarks: {
+    fields: string[] ,
+    changedAt: string |null, 
+  },
   suspensionReason?: string;
   suspendedAt?: string;
   rejectionReason?: string;

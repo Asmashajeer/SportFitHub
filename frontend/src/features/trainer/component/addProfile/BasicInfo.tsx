@@ -1,7 +1,7 @@
 import { useFormContext } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import {
   Card,
@@ -25,6 +25,7 @@ import {
 import { TRAINER_CATEGORY } from '@/constants/constants';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import toast from 'react-hot-toast';
+import { FILE_RULES } from '@/utils/fileValidation';
 
 interface BasicInfoFormProps {
   setPreviewUrl: React.Dispatch<React.SetStateAction<string | null>>;
@@ -64,11 +65,11 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   ];
 
   return (
-    <Card className="w-full">
+    <Card className="w-full border-2  border-gray-400">
       <CardHeader>
         <CardTitle>Branding</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6  ">
         {/* profilepic */}
         <div className="flex flex-col items-center gap-4">
           <Label htmlFor="picture" className="cursor-pointer">
@@ -80,16 +81,29 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               </AvatarFallback>
             </Avatar>
           </Label>
-          <Input
+          <Input      
             id="picture"
             type="file"
+            accept={FILE_RULES.profile_pic.accept}
             className=" hidden max-w-xs"
             {...register('profilePic', {
               required: previewUrl ? false : 'Profile photo is required',
+              validate: {
+                fileType: (fileList: FileList | null) => {
+                  const file = fileList?.[0];
+                  if (!file) return true;
+                  return file.type.startsWith('image/') || 'Only image files are allowed';
+                },
+                fileSize: (fileList: FileList | null) => {
+                  const file = fileList?.[0];
+                  if (!file) return true;
+                  return file.size <= 5 * 1024 * 1024 || 'File must be under 5MB';
+                },
+              },
             })}
           />
           {errors.profilePic && (
-            <p className="text-destructive text-sm">
+           <p className="text-destructive text-sm"> 
               {errors.profilePic.message}
             </p>
           )}

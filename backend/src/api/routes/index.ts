@@ -6,6 +6,7 @@ import trainerRoute from './trainer/trainer.route';
 import uploadRoute from './upload.routes';
 import publicRoute from './public.route';
 import bookingRoute from './booking/booking.route'
+import documentsRoute from './documents.route'
 const rootRouter = Router();
 
 
@@ -16,6 +17,7 @@ rootRouter.use('/user', userRoute);
 rootRouter.use('/trainer', trainerRoute);
 rootRouter.use('/upload', uploadRoute);
 rootRouter.use('/booking',bookingRoute);
+rootRouter.use('/documents',documentsRoute);
 
 
 export default rootRouter;

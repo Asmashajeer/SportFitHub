@@ -40,12 +40,13 @@ export class FitnessManagementService implements IFitnessManagementService {
     } else if (status === 'inactive') {
       query.isActive = false;
     }
-    const data = await this._fitnessRepository.find(query);
+   
      const [fitnessData, totalCount] = await Promise.all([
-              await this._fitnessRepository.findAll(query,{skip, limit}),
-              await this._fitnessRepository.count(query),
+              this._fitnessRepository.findAll(query,{skip, limit}),
+              this._fitnessRepository.count(query),
             ]);
-    if (!fitnessData.length) throw new AppError(ERROR_MESSAGES.GENERAL.NOT_FOUND);
+    if (!fitnessData.length) return { programs: [], total: 0,totalPages: 0,page:0};
+      
     const programs = fitnessData.map(pgm => toProgramResponseDTO(pgm));
    return {
       programs,

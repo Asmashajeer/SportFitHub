@@ -12,6 +12,7 @@ export interface IUser extends Document {
   isVerified: boolean;
   isBlocked: boolean;
   isActive: boolean;
+  fcmToken: string
   createdAt: Date;
 }
 
@@ -38,6 +39,7 @@ const UserSchema = new mongoose.Schema(
     isVerified: { type: Boolean, default: false },
     isBlocked: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    fcmToken: { type: String, default: null },
   },
   { timestamps: true }
 );

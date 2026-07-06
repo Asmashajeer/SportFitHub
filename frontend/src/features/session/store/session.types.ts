@@ -64,6 +64,7 @@ export interface Pricing {
 //   amenities: string[];
 // }
 
+
 export interface SportsSessionResponseData {
   id: string;
   trainerId: string;
@@ -91,6 +92,13 @@ export interface SportsSessionResponseData {
   updatedAt?: Date;
 }
 
+export interface SportsSessionImage {
+  publicId: string;
+  url: string;
+}
+export interface SportSessionFormResponseDTO extends Omit<SportsSessionResponseData, 'images'> {
+  images: SportsSessionImage[];
+}
 export interface SportsSessionPublicResponseData extends Omit<
   SportsSessionResponseData,
   'sportCategory'

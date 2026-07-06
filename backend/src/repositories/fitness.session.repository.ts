@@ -1,7 +1,7 @@
 
 import { IFitnessSession } from "@/models/fitnessSession.model";
 import { BaseRepository } from "./base.repository";
-import { ClientSession, FilterQuery, Model, Types } from "mongoose";
+import { ClientSession, FilterQuery, Model, Types, UpdateQuery } from "mongoose";
 import { IFitnessSessionRepository } from "@/interfaces/repositories/IFitness.session.repository";
 import { PaginatedSessions } from "@/dtos/response/session/fitness.session.response.dto";
 
@@ -128,11 +128,27 @@ export class FitnessSessionRepository extends BaseRepository<IFitnessSession> im
           
         return session
       } 
+
+
+    async updateSession(id: string| Types.ObjectId,sessionData:UpdateQuery<IFitnessSession> ){
+      const { images, ...restData } = sessionData;
+      const updateQuery: UpdateQuery<IFitnessSession> = {
+        $set: restData,
+      };
+  
+      if (images && images.length > 0) {
+        updateQuery.$addToSet = {
+          images: { $each: images },
+        };
+      }
+      return await this.model.findByIdAndUpdate(id,updateQuery, { new: true });   
+      
+    }
     async deleteASession(id: string| Types.ObjectId ){
-    return await this.model.findByIdAndUpdate(id, {
-        isDeleted: true,
-        isActive: false,
-      });
-  } 
+      return await this.model.findByIdAndUpdate(id, {
+          isDeleted: true,
+          isActive: false,
+        });
+    } 
 
 }

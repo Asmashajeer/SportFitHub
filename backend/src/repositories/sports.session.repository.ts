@@ -1,6 +1,6 @@
 import { ISportsSession } from '@/models/sportsSession.model';
 import { BaseRepository } from './base.repository';
-import { ClientSession, FilterQuery, Model, Types } from 'mongoose';
+import { ClientSession, FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 import { ISportsSessionRepository } from '@/interfaces/repositories/ISports.session.repository';
 import { PaginatedSessions } from '@/dtos/response/session/sports.session.response.dto';
 
@@ -136,7 +136,20 @@ export class SportsSessionRepository
     return session
   }  
 
+  async updateSession(id: string| Types.ObjectId,sessionData:UpdateQuery<ISportsSession> ){
+    const { images, ...restData } = sessionData;
+    const updateQuery: UpdateQuery<ISportsSession> = {
+      $set: restData,
+    };
 
+    if (images && images.length > 0) {
+      updateQuery.$addToSet = {
+        images: { $each: images },
+      };
+    }
+    return await this.model.findByIdAndUpdate(id,updateQuery, { new: true });   
+   
+  }
   
   async deleteASession(id: string| Types.ObjectId ){
     return await this.model.findByIdAndUpdate(id, {

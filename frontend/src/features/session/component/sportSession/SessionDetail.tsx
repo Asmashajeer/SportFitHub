@@ -13,7 +13,7 @@ import {
   Star,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 
@@ -69,12 +69,16 @@ const SessionDetail = () => {
   const { setPayload } = useBookingStore();
   const { checkAvailability } = useCheckAvailability();
 
-  
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
   useEffect(() => {
     const fetchSession = async () => {
       try {
         const data = await sportSessionService.getSessionById(sessionId!);
         setSession(data.session);
+        console.log(data.session);
         if (data.session && data.session.timeSlots) {
           const availableDays = data.session.timeSlots.map((slot: TimeSlot) =>
             slot.day.toLowerCase()
@@ -154,6 +158,7 @@ const SessionDetail = () => {
    }
     const bookingData: Payload = {
       sessionId: session.id,
+      trainerId:session.trainer.id,
       sessionModel: PAYLOAD_MODEL.SPORT_SESSION,
       bookingType:
         pricePlan?.sessionCount! > 1
@@ -425,7 +430,7 @@ const SessionDetail = () => {
               <div className="flex-col m-1">
                 <div className="h-16 w-24 justify-center mx-auto rounded-2xl bg-zinc-800 overflow-hidden border border-zinc-700 group-hover:border-emerald-500/50 transition-colors">
                   <img
-                    src={session.trainer?.profilePic || '/coach-placeholder.jpg'}
+                    src={`${session.trainer?.profilePic}?v={${new Date()}}` || '/coach-placeholder.jpg'}
                     className="w-full h-full object-cover"
                     alt="Coach"
                   />

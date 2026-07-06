@@ -13,9 +13,9 @@ import {
 export interface TrainerSlice {
   pendingTrainers: TrainerOverView[] | null;
   trainerLoading: boolean;
-  selectedTrainer: Trainer | null;
+  selectedTrainer: TrainerProfileData | null;
   setTrainerLoading: (loading: boolean) => void;
-  setSelectedTrainer: (trainer: Trainer) => void;
+  setSelectedTrainer: (trainer: TrainerProfileData) => void;
   setPendingTrainers: (trainer: TrainerOverView[]) => void;
   removeTrainerFromList: (trainerId: string) => void;
 }
@@ -24,7 +24,7 @@ export const createTrainerSlice: StateCreator<TrainerSlice> = (set) => ({
   trainerLoading: false,
   selectedTrainer: null,
   setTrainerLoading: (loading) => set({ trainerLoading: loading }),
-  setSelectedTrainer: (trainer: Trainer) => set({ selectedTrainer: trainer }),
+  setSelectedTrainer: (trainer: TrainerProfileData) => set({ selectedTrainer: trainer }),
   setPendingTrainers: (trainers) => set({ pendingTrainers: trainers }),
   removeTrainerFromList: (trainerId) =>
     set((state) => ({
@@ -48,6 +48,10 @@ export interface TrainerOverView {
     phone: string;
   };
   status: (typeof TRAINER_STATUS)[keyof typeof TRAINER_STATUS]; //trainerStatus
+  verificationRemarks: {
+    fields: string[],
+    changedAt: string, 
+  },
   createdAt: Date; // Timestamps
   certCount: number;
 }
@@ -59,6 +63,7 @@ interface IAddress {
   zip?: string;
 }
 export interface ICertification {
+  id:string,
   name: string;
   url: string;
   validUpto: Date;
@@ -94,7 +99,7 @@ export interface Trainer {
     address: IAddress;
   };
   certificationInfo: {
-    // certificates & Verification
+    
     documents: ICertification[];
     verified: boolean;
     status: (typeof DOC_VERIFY_STATUS)[keyof typeof DOC_VERIFY_STATUS];
@@ -138,11 +143,24 @@ export interface Trainer {
     upiId?: string;
   };
   status: (typeof TRAINER_STATUS)[keyof typeof TRAINER_STATUS]; // Administrative State
+  verificationRemarks: {
+    fields: string[],
+    changedAt: string, 
+  },
   suspensionReason?: string;
   suspendedAt?: string;
   rejectionReason?: string;
   rejectedAt?: string;
-  applicationCount: number;
+  applicationCount: number;  
+  penalty:number
+  strikePoints:number;
+  cancellationCount: number,
+   lastStrikeDate?:string
   createdAt: string; // Timestamps
   updatedAt: string;
+}
+
+export interface TrainerProfileData extends Trainer{
+  email:string,
+  fcmToken?:string
 }

@@ -8,6 +8,8 @@ import sessionRoute from '../trainer/session.route';
 import bookingsRoute from './bookings.route'
 const upload = uploadMiddleware();
 import { Router } from 'express';
+import { validateBody } from '@/middleware/validate.middleware';
+import { AvailabilityPricingSchema, BasicInfoSchema, CertificatesSchema, DocumentsInfoSchema, IdVerificationSchema, PaymentInfoSchema, PersonalInfoSchema } from '@/dtos/request/trainer/trainer.profile.request.dto';
 
 
 const router = Router();
@@ -28,10 +30,13 @@ router.post(
   trainerController.addProfile
 );
 router.get('/profile_pic', trainerController.getProfilePic);
-router.patch('/profile/:id/certificationInfo', trainerController.updateCertificates);
-router.patch('/profile/:id/idVerification', trainerController.updateIdverification);
-router.patch('/profile/:id/availability_pricing', trainerController.updateAvailabilityPricing);
-router.patch('/profile/:id/paymentInfo', trainerController.updatePaymentInfo);
+router.patch('/profile/profile_pic/:id', trainerController.updateProfilePic);
+router.patch('/profile/:id/basicInfo',validateBody(BasicInfoSchema), trainerController.updateBasicInfo);
+router.patch('/profile/:id/personalInfo',validateBody( PersonalInfoSchema), trainerController.updatePersonalInfo);
+router.patch('/profile/:id/certificationInfo', validateBody( CertificatesSchema), trainerController.updateCertificates);
+router.patch('/profile/:id/idVerification',validateBody( IdVerificationSchema), trainerController.updateIdverification);
+router.patch('/profile/:id/availability_pricing', validateBody(AvailabilityPricingSchema), trainerController.updateAvailabilityPricing);
+router.patch('/profile/:id/paymentInfo', validateBody(PaymentInfoSchema),trainerController.updatePaymentInfo);
 router.patch('/profile/:id/trainer-status', trainerController.updateStatus);
 
 router.get('/profile', trainerController.getProfile);

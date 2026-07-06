@@ -10,6 +10,7 @@ import { IFitnessSessionService } from "@/interfaces/services/session/IFitness.s
 import { toFitnessSessionDetailedPublicDTO, toFitnessSessionPublicDTO, toFitnessSessionResponseDTO } from "@/mappers/fitness.session.mapper";
 import { IFitnessSession } from "@/models/fitnessSession.model";
 import AppError from "@/utils/AppError";
+import { formatTo12Hour } from "@/utils/formatTo";
 import { FilterQuery, Types } from "mongoose";
 
 export class FitnessSessionService implements IFitnessSessionService{
@@ -41,10 +42,17 @@ export class FitnessSessionService implements IFitnessSessionService{
     
       //--------update session-----------
       async updateFitnessSession(
-        id: string | Types.ObjectId,
+        id: string ,
         sessionData: Partial<IFitnessSession>
       ): Promise<FitnessSessionResponseDTO> {
-        const data = await this._fitnessSessionRepo.findOneAndUpdate(id, sessionData);
+         //check timeslots are within trainer working hours
+        this.checkWithinWorkingHours(sessionData);
+        
+        //check for conflict with existing session's timeslots
+        const newSlots=sessionData.timeSlots;
+        const conflict=await this.checkConflicts(sessionData.trainerId, newSlots,id);
+        if (conflict?.hasConflict) throw new AppError(conflict.message,STATUS_CODE.ERROR.CONFLICT);
+        const data = await this._fitnessSessionRepo.updateSession(id, sessionData);
         if (!data) {
           throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
         }
@@ -181,4 +189,70 @@ export class FitnessSessionService implements IFitnessSessionService{
        
     
       }
+
+      
+      // -------------Find any session belonging to this trainer that has an overlap---------------
+         checkConflicts = async  (trainerId, newTimeSlots, sessionId:string|null = null) => {
+          for (const dayEntry of newTimeSlots) {
+            const { day, slots } = dayEntry;
+            for (const slot of slots) {
+            const query: any = {
+              trainerId,
+              timeSlots: {
+                $elemMatch: {
+                  day,
+                  slots: {
+                    $elemMatch: {
+                      startTime: { $lt: slot.endTime },
+                      endTime: { $gt: slot.startTime }
+                    }
+                  }
+                }
+              }
+            };
+      
+            if (sessionId) {
+              query._id = { $ne: new Types.ObjectId(sessionId) };
+            }
+            const conflict = await this._fitnessSessionRepo.findOne(query);    
+      
+            if (conflict) {
+                return {
+                  hasConflict: true,
+                  message: `Time conflict on ${day} (${formatTo12Hour(slot.startTime)}-${formatTo12Hour(slot.endTime)}) with existing session: "${conflict.sessionName}"`
+                };
+              }
+            }
+          }
+          return { hasConflict: false };
+        }; 
+        //--------------- check session is within in trainer working hours-----------------
+          checkWithinWorkingHours=async(sessionData)=>{
+            const trainerProfile = await this._trainerRepo.findById(sessionData.trainerId);
+            const availability = trainerProfile.availability;
+        
+            sessionData.timeSlots.forEach(newDayEntry => {
+                const dayName = newDayEntry.day;
+                const trainerDay = availability[dayName];
+        
+                // 1. Check if they even work that day
+                if (!trainerDay || !trainerDay.available) {
+                    throw new AppError(`Trainer does not work on ${dayName}`, STATUS_CODE.ERROR.BAD_REQUEST);
+                }
+        
+                // 2. Check every slot against working hours
+                newDayEntry.slots.forEach(slot => {
+                    const isOutsideHours = 
+                        slot.startTime < trainerDay.startTime || 
+                        slot.endTime > trainerDay.endTime;
+        
+                    if (isOutsideHours) {
+                        throw new AppError(
+                            `Slot ${slot.startTime}-${slot.endTime} is outside working hours (${trainerDay.startTime}-${trainerDay.endTime})`,
+                            STATUS_CODE.ERROR.BAD_REQUEST
+                        );
+                    }
+                });
+            });
+          }
 }

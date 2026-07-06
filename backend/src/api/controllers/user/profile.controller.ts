@@ -14,12 +14,10 @@ export class ProfileController {
 
   addProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authReq=req as AuthRequest
-      const user = authReq.user ;
-      const userId = user.id;
-      console.log(userId);
-      const profileData = await this._profileService.addProfile({ userId, ...req.body });
-      Logger.info('User completed the profile', { 'user id': userId });
+           const { user } = req as AuthRequest;
+     
+      const profileData = await this._profileService.addProfile({ userId:user.id, ...req.body });
+      Logger.info('User completed the profile', { 'user id': user.id });
       res.status(STATUS_CODE.SUCCESS.CREATED).json({
         message: SUCCESS_MESSAGES.USER.PROFILE_CREATED,
         profileData,
@@ -30,10 +28,9 @@ export class ProfileController {
   };
   getAllProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authReq=req as AuthRequest
-      const user = authReq.user ;
-      const userId = user.id;
-      const profiles = await this._profileService.getProfiles(userId);
+            const { user } = req as AuthRequest;
+
+      const profiles = await this._profileService.getProfiles(user.id);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profiles,
@@ -44,10 +41,10 @@ export class ProfileController {
   };
   getProfilePic = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authReq=req as AuthRequest
-      const user = authReq.user ;
-      const userId = user.id;
-      const profile = await this._profileService.getPrimaryProfile(userId);
+      const { user } = req as AuthRequest;
+
+      const id=req.params.id;
+      const profile = await this._profileService.getPrimaryProfile(user.id);
       const profilePic = profile.profilePic;
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
@@ -59,9 +56,9 @@ export class ProfileController {
   };
   getProfile = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = req.user 
-      const userId = user.id;
-      const profile = await this._profileService.getPrimaryProfile(userId);
+      const { user } = req as AuthRequest;
+
+      const profile = await this._profileService.getPrimaryProfile(user.id);
 
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
@@ -74,9 +71,26 @@ export class ProfileController {
 
   updateProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const { user } = req as AuthRequest;
+
       const id = req.params.id;
       const data = req.body.profile;
       const profileData = await this._profileService.updateProfile(id, data);
+      res.status(STATUS_CODE.SUCCESS.OK).json({
+        success: true,
+        profileData,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  updateProfilePic = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { user } = req as AuthRequest;
+
+      const id = req.params.id;
+      const profilePic = req.body.profilePic;
+      const profileData = await this._profileService.updateProfile(id,{profilePic:profilePic});
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profileData,

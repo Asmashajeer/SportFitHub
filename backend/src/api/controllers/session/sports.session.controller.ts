@@ -28,7 +28,20 @@ export class SportsSessionController {
       next(error);
     }
   };
-  
+  getSportSessiontoUpdate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    
+    const id=req.params.id;
+     try {
+      const session = await this._sportsSessionService.getSessionsToUpdate(id);
+       res.status(STATUS_CODE.SUCCESS.CREATED).json({
+        success: true,
+        message: SUCCESS_MESSAGES.SESSION.SESSION_CREATED,
+        session,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   //---------------update session---------
   updateSportSession = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const data = req.body;

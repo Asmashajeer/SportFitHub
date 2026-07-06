@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 import { ROLES } from '../../../constants/constants';
@@ -15,7 +15,9 @@ import GoogleLoginButton from './GoogleLoginButton';
 import { useBookingStore } from '@/features/booking/store/useBookingStore';
 import { Input } from '@/components/ui/Input';
 
+
 const Login = () => {
+
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
@@ -87,7 +89,7 @@ const Login = () => {
       setIsSubmitting(false);
       return;
     }
-
+   
     const { email, password, role,timezone } = result.data;
     
     try {
@@ -96,6 +98,7 @@ const Login = () => {
         toast.error("Invalid email or password")
         return;
       }
+
       const user = data.user;
       const user_Role = user.role;
       setUser(data.user);     

@@ -1,7 +1,8 @@
 import { useForm, FormProvider } from 'react-hook-form';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  AppName,
   GENDER,
   GOVT_ID_TYPE,
   TRAINER_CATEGORY,
@@ -29,9 +30,13 @@ const TrainerOnboarding = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const setHasProfile = useAuthStore((state) => state.setHasProfile);
+  const userId = user?.id;
+  const CACHE_KEY = `trainer_onboarding_cache_${userId}`;
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [hasCachedData, setHasCachedData] = useState(false);
+
   const form = useForm<TrainerOnboardingFormValues>({
     defaultValues: {
       // Step 1: Basic info
@@ -101,11 +106,60 @@ const TrainerOnboarding = () => {
     mode: 'onChange', //Validates when a user clicks away from an input
   });
 
+
+
+  useEffect(() => {
+    if (!userId) return;
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const { formData, savedStep } = JSON.parse(cached);
+        form.reset(formData);
+        setStep(savedStep || 1);
+        setHasCachedData(true);
+      } catch {
+        localStorage.removeItem(CACHE_KEY);
+      }
+    }
+  }, [userId]);
+
+
+    // save for each form change
+    useEffect(() => {
+    const subscription = form.watch((formData) => {     
+      const cacheable = {
+        ...formData,
+        profilePic: null,                      //remove profilePic
+        idVerification: {
+          ...formData.idVerification,
+          idAttachment: null,                         // remove idAttachment
+        },
+        certificationInfo: {
+          documents: formData.certificationInfo?.documents?.map((doc: any) => ({
+            ...doc,
+            file: null,                         // remove certificateFile
+          })),
+        },
+      };
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({ formData: cacheable, savedStep: step })
+      );
+    });
+    return () => subscription.unsubscribe();
+  }, [form, step]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step]);
+
+
   const nextStep = async (fields: string[]) => {
     // This 'trigger' only checks the fields in the current card
     const isValid = await form.trigger(fields as any);
     if (isValid) {
       setStep((prev) => prev + 1);
+      setHasCachedData(false); 
     }
   };
 
@@ -192,7 +246,8 @@ const TrainerOnboarding = () => {
       }
       console.log('Final Payload:', finalPayload.data);
       const result = await trainerService.addProfile(finalPayload.data);
-      if (result.success) {
+      if (result.success) {      
+        localStorage.removeItem(CACHE_KEY);
         toast.success('Application submitted successfully!');
         setHasProfile(true);
         navigate('/trainer/dashboard');
@@ -215,15 +270,45 @@ const TrainerOnboarding = () => {
             <p className="text-muted-foreground max-w-xl mx-auto">
               "Your skills. Their growth. Start your coaching journey today."
               "Inspire. Train. Transform. Become a{' '}
-              <span className="text=primary">SportFit</span>Hub Coach
+              <span className="text=primary">{AppName}</span> Coach
             </p>
           </div>
+          {hasCachedData && (
+            <div className=" items-center justify-between p-3 border border-amber-200 rounded-lg">
+              <p className="text-sm text-amber-600">
+                You have an unfinished application. Resuming from step {step}.
+              </p>
+              <p className="text-xs text-amber-600 mt-1">
+                ⚠️ Please re-upload any files (profile photo, ID, certificates) as they cannot be saved.
+              </p>
+              <button
+                onClick={() => {
+                  localStorage.removeItem(CACHE_KEY);
+                  form.reset();
+                  setStep(1);
+                  setPreviewUrl(null);
+                  setHasCachedData(false);
+                }}
+                className="text-xs text-red-300 underline ml-4"
+              >
+                Start fresh
+              </button>
+            </div>
+          )}
+         <div className="w-full">
+            {/* Step Counter Text */}
+            <div className="flex justify-between items-center mb-1 text-sm font-medium text-muted-foreground">
+              <span>Progress</span>
+              <span>Step {step} of 5</span>
+            </div>
 
-          <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
-            <div
-              className="bg-primary h-full transition-all duration-300"
-              style={{ width: `${(step / 5) * 100}%` }}
-            />
+            {/* Progress Bar */}
+            <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
+              <div
+                className="bg-primary h-full transition-all duration-300"
+                style={{ width: `${(step / 5) * 100}%` }}
+              />
+            </div>
           </div>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {step === 1 && (

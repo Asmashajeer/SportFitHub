@@ -7,11 +7,11 @@ import {
   CardDescription,
   CardFooter,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import type { TrainerOnboardingFormValues } from '../../types/trainerprofile.types';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { MapPin, Target } from 'lucide-react';
 import {  DAYS_OF_WEEK, type DayName } from '@/constants/constants';
 
@@ -37,12 +37,20 @@ const Rates_ScheduleForm: React.FC<Rates_ScheduleFormProps> = ({
     clearErrors,
   } = form;
   const [loading, setLoading] = useState(false);
-
+  const [trainerLocation,setTrainerLocation]=useState("");
   const location = watch('currentLocation.coordinates');
   const availability = watch('availability');
 
   const currentFields = ['pricePerHour', 'availability', 'currentLocation'];
-  
+
+  const showPickedAddress = async (lat: number, lng: number) => {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+    );
+    const data = await res.json();
+    setTrainerLocation(data.display_name); // selected location  display only
+  };
+
   const handleGetLocation = () => {
     setLoading(true);
     clearErrors('currentLocation.coordinates');
@@ -55,6 +63,7 @@ const Rates_ScheduleForm: React.FC<Rates_ScheduleFormProps> = ({
             [position.coords.longitude, position.coords.latitude],
             { shouldValidate: true }
           );
+            showPickedAddress( position.coords.latitude, position.coords.longitude);
         },
         (error) => {
           toast.custom('Location access denied');
@@ -85,6 +94,8 @@ const Rates_ScheduleForm: React.FC<Rates_ScheduleFormProps> = ({
               </span>
               <Input
                 type="number"
+                min={100}
+                max={1000}
                 className="  pl-7 w-32"
                 placeholder="0.00"
                 {...register('pricing.sessionCharge', {
@@ -108,12 +119,14 @@ const Rates_ScheduleForm: React.FC<Rates_ScheduleFormProps> = ({
             </Label>
             <div className="p-4 bg-muted/30 rounded-lg flex items-center justify-between">
               <div className="text-sm">
-                <p className="font-medium">Current location </p>
-                <p className="text-muted-foreground font-mono">
+                <p className="font-medium text-start ">Current location </p>
+                <div className="text-muted-foreground font-mono">
                   {location && location[0] !== 0
-                    ? `${location[1].toFixed(4)}, ${location[0].toFixed(4)}`
-                    : 'Not set click  Get Location'}
-                </p>
+                    ? <div className="grid grid-cols-2 gap-4">
+                        <p>{trainerLocation}</p>
+                      </div>
+                    : 'Not set, click  Get Location'}
+                </div>
               </div>
               {errors?.currentLocation?.coordinates && (
                 <p className="text-xs text-red-500">

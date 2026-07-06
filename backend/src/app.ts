@@ -1,6 +1,4 @@
 import express from 'express';
-
-
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import errorHandler from './middleware/errorHandler';
@@ -8,6 +6,7 @@ import morgan from 'morgan';
 import { stream } from './utils/logger';
 import rootRouter from './api/routes';
 import webhookRoutes from './api/routes/booking/webhook.route'
+import './config/firebase.admin.config'
 
 
 const app = express();

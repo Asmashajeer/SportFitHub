@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type {
   UserBookedSessionsResponseData,
   UserBookingResponseData,
+  UserBookingResponseDatawithStatusCount,
 } from '../types/user.booking.types';
 import BookingService from '@/features/booking/service/bookingService';
 import toast from 'react-hot-toast';
@@ -12,7 +13,7 @@ import type { WalletTransactionResponseData } from '../types/user.wallet.types';
 
 interface UserDashboardState {
   userSessions: UserBookedSessionsResponseData[];
-  userBookings: UserBookingResponseData[];
+  userBookings: UserBookingResponseDatawithStatusCount[];
   userPayments: UserPaymentResponseData[];
   isLoading: boolean;
   myBalance: number;

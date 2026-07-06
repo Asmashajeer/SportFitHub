@@ -5,8 +5,14 @@ import { IBookedSessionPopulate, IBookingSession } from "@/models/booking.sessio
 import { formatInTimeZone } from 'date-fns-tz';
 import { getTimezone } from "@/context/timezone.context";
 import { UserSessionsResponseDTOwithPopulatedSession } from "@/dtos/response/booking/booking.response.dto";
+import { Types } from "mongoose";
 
-
+interface Counts{
+  _id:Types.ObjectId,
+  scheduledCount:number,
+  cancelledCount :number,
+  completedCount:number
+}
 
 export const toUserBookingResponseDTO=(booking:IBooking)=>{
     const timezone = getTimezone();
@@ -21,12 +27,24 @@ export const toUserBookingResponseDTO=(booking:IBooking)=>{
             pricePlan:booking.pricePlan,  
             venue: booking.venue, 
             status:booking.status,
-            paymentId:booking.paymentId.toString(),     
+            paymentId:booking.paymentId.toString(), 
+               
             updatedAt: formatInTimeZone(booking.updatedAt,timezone, 'yyyy-MM-dd'),
             createdAt:formatInTimeZone(booking.createdAt,timezone, 'yyyy-MM-dd '),
     }
 }
+export const totoUserBookingResponseDTOwithStatusCount =(booking:IBooking,counts:Counts[])=>{
+    const timezone = getTimezone();
+    const count = counts.find(c => c._id.toString() === booking._id.toString());
 
+    return {
+            ...toUserBookingResponseDTO(booking),
+            scheduledCount:count?.scheduledCount ?? 0,
+            cancelledCount :count?.cancelledCount ?? 0,
+            completedCount:count?.completedCount ?? 0,   
+     
+    }
+}
 
 export const  toBookedSlotPublicResponseData=(booking:IBookingSession)=>{
       const timezone = getTimezone();
@@ -45,6 +63,7 @@ export const toUserSessionsResponseDTO=(bookedSession:IBookingSession)=>{
         id:bookedSession._id.toString(),
         bookingId:bookedSession.bookingId.toString(),
         userId:bookedSession.userId.toString()   ,
+        trainerId:bookedSession.trainerId.toString(),
         sessionId:bookedSession.sessionId.toString(),
         sessionModel:bookedSession.sessionModel,
         slotId:bookedSession.slotId   ,  
@@ -66,6 +85,7 @@ export const toUserSessionsResponseDTOwithPopulatedSession = (  bookedSession: I
     id: bookedSession._id.toString(),
     bookingId: bookedSession.bookingId._id.toString(),
     userId: bookedSession.userId.toString(),
+    trainerId: bookedSession.trainerId.toString(),
     sessionModel: bookedSession.sessionModel,
     slotId: bookedSession.slotId,
     date: formatInTimeZone(bookedSession.date, timezone, 'yyyy-MM-dd HH:mm:ssXXX'),

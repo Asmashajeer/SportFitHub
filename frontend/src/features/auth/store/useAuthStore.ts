@@ -56,7 +56,10 @@ export const useAuthStore = create<AuthState>()(
       {
         name: 'auth-storage',
         partialize: (state) => ({
-          user: state.user,
+          user: state.user
+          ? { ...state.user, profilePic: undefined } // don't persist the signed URL
+          : null,
+          // user: state.user,
           isAuthenticated: state.isAuthenticated,
         }),
       }

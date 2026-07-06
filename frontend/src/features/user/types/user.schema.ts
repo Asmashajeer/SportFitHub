@@ -21,7 +21,7 @@ export const CreateProfileSchema = z
       .max(15, { message: 'Phone number is too long' }),
       
     relationship: z.enum(RELATIONSHIP),
-    street: z.string("Address required"),
+    street: z.string("Address required").optional(),
     city: z.string("city required").optional(),
     zip: z
       .string()

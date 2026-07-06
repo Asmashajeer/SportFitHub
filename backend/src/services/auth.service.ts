@@ -32,7 +32,6 @@ import {
   RegisterDataDTO,
 } from '@/dtos/response/auth.response.dto.js';
 import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
-
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export class AuthService implements IAuthService {
@@ -162,8 +161,10 @@ export class AuthService implements IAuthService {
       throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     const isMatch = await bcrypt.compare(data.password, user.password);
     if (!isMatch)
-      throw new AppError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, STATUS_CODE.ERROR.UNAUTHORIZED);  
-    if (user.isBlocked)
+      throw new AppError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, STATUS_CODE.ERROR.UNAUTHORIZED);
+     if (!user.isActive )
+      throw new AppError(ERROR_MESSAGES.AUTH.USER_DELETED, STATUS_CODE.ERROR.FORBIDDEN);  
+    if (user.isBlocked )
       throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
     
      const userWithTimezone = await this._userRepo.findOneAndUpdate(user._id, { timezone:data.timezone } );
@@ -316,6 +317,12 @@ export class AuthService implements IAuthService {
     return { accessToken, refreshToken };
   };
 
+  async updateFcmToken(userId: string, fcmToken: string): Promise<void> {
+    await this._userRepo.updateFcmToken(userId, fcmToken);
+  }
+
+
+
   verifyOTPInternal = async (data: VerifyOtpDTO) => {
     const savedOtp = await this._otpRepo.findOtp(data.userId, data.otpContext);
     if (!savedOtp) return { valid: false, message: ERROR_MESSAGES.AUTH.OTP_INVALID };
@@ -356,8 +363,7 @@ export class AuthService implements IAuthService {
     } catch (error) {
        console.log(error)   ;
       throw new AppError("Failed to send verification email", STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
-    }
-    
+    } 
     
     console.log('verification code sent to your mail. Please verify your email.');
     return true;

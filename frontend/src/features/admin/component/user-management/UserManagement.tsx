@@ -1,7 +1,7 @@
 // import StatCard from "../../../../components/reusable/StatCard";
 import { userManagementService } from '../../service/userManagementService';
 import { useEffect, useState } from 'react';
-import { ArrowRight, Ban, CheckCircle, Loader2, Users, X } from 'lucide-react';
+import { ArrowRight, Ban, CheckCircle, Loader2,X } from 'lucide-react';
 import Search from '../../../../components/ui/Search';
 import { UseAdminStore } from '../../store/useAdminStore';
 import {
@@ -27,6 +27,7 @@ import { ROLES } from '../../../../constants/constants';
 import toast from 'react-hot-toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import StatCard from '@/components/reusable/StatsCard';
+
 
 const UserManagement = () => {
   const setUsers = UseAdminStore((state) => state.setUsers);
@@ -75,7 +76,7 @@ const UserManagement = () => {
         setTotalPages(data.totalPages);
       } catch (error) {
         console.error();
-        toast.error('Failed to fetch:' + error);
+        toast.error('Failed to load users');
       } finally {
         setIsLoading(false);
       }
@@ -90,7 +91,7 @@ const UserManagement = () => {
       await fetchStats();
     } catch (error: unknown) {
       if (error instanceof Error) {
-        toast.error("We couldn't update the user's status right now,try again");
+        toast.error(error.message||"We couldn't update the user's status right now,try again");
       } else {
         toast.error('An unexpected error occurred:');
       }
@@ -99,6 +100,7 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (id: string) => {
     try {
+     
       const { userData } = await userManagementService.deleteUser(id);
       removeUser(userData.id);
       await fetchStats();
@@ -262,14 +264,14 @@ const UserManagement = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
                             className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              user.isBlocked
+                              user.isBlocked && user.isActive
                                 ? 'bg-red-100 text-red-800'
                                 : user.isActive
                                   ? 'bg-primary text-white-800'
                                   : 'bg-gray-700 text-gray-400'
                             }`}
                           >
-                            {user.isBlocked
+                            {user.isBlocked && user.isActive
                               ? 'Blocked'
                               : user.isActive
                                 ? 'Active'
@@ -340,11 +342,13 @@ const UserManagement = () => {
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>
-                                      "Delete User?"
+                                      Delete User?
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
                                       {user.isActive &&
-                                        `This user ${user.email} will delete .`}
+                                        `Are you sure you want to delete this user -
+                                     
+                                      ${user.name} with email ${user.email}  will no longer have access to the platform and cannot be undone `}
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
@@ -355,7 +359,7 @@ const UserManagement = () => {
                                       onClick={() => handleDeleteUser(user.id)}
                                       className="bg-red-600 hover:bg-red-700"
                                     >
-                                      Confirm
+                                      Delete Permenantly
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>

@@ -109,15 +109,15 @@ const SessionsTable = ({
   }, [currentPage, search, statusFilter, typeFilter, modeFilter, refreshKey]);
 
 
- const handleView = async (sessionId: string, sessionModel:(typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL]) => {
-  setLoading(true);
-  try {
-    const data = await SessionManagementService.getSessionById(sessionId, sessionModel);
-    setSelectedSession(data);
-  } finally {
-    setLoading(false);
-  }
-};
+  const handleView = async (sessionId: string, sessionModel:(typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL]) => {
+      setLoading(true);
+      try {
+        const data = await SessionManagementService.getSessionById(sessionId, sessionModel);
+        setSelectedSession(data);
+      } finally {
+        setLoading(false);
+      }
+  };
 
 
 

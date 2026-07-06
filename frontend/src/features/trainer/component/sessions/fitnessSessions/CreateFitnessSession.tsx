@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 import { uploadService } from '@/service/upload.service';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';

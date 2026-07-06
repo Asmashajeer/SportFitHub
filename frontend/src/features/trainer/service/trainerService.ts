@@ -1,9 +1,11 @@
 import api from '@/api/axiosInstance';
-import type { AddTrainerProfileData } from '../types/trainer.profile.schema';
+import type { AddTrainerProfileData, basicInfoData, PersonalInfoData } from '../types/trainer.profile.schema';
 import type {
   AvailabiltyPricing,
+
   idVerificationwithUrl,
   paymentInfoData,
+
   TrainerProfileResponseData,
 } from '../types/trainerprofile.types';
 import { TRAINER_ROUTES } from './trainer.api';
@@ -26,10 +28,30 @@ export const trainerService = {
     const response = await api.get(TRAINER_ROUTES.GET_PROFILE);
     return response.data;
   },
+  updateProfilePic:async (id: string, profilePic: string) => {
+    const response = await api.patch(TRAINER_ROUTES.UPDATE_PROFILE_PIC.BY_ID(id), {
+      profilePic,
+    });
+    return response.data;
+  },
+  updateBasicInfo:async (id: string, data: basicInfoData) => {
+    const response = await api.patch(
+      TRAINER_ROUTES.UPDATE_PROFILE.BY_ID(id) + '/basicInfo',
+      data
+    );
+    return response.data;
+  },
+  updatePersonalInfo:async (id: string, data: PersonalInfoData) => {
+    const response = await api.patch(
+      TRAINER_ROUTES.UPDATE_PROFILE.BY_ID(id) + '/personalInfo',
+      data
+    );
+    return response.data;
+  },
   updateCertificationInfo: async (id: string, documents: ICertification[]) => {
     const response = await api.patch(
       TRAINER_ROUTES.UPDATE_PROFILE.BY_ID(id) + '/certificationInfo',
-      documents
+      {documents}
     );
     return response.data;
   },

@@ -1,10 +1,11 @@
 
 import { SESSION_TYPE } from "@/constants/enums";
 import { IBooking } from "@/models/booking.model"
-import { IBookingSession } from "@/models/booking.session.model";
+import bookingSessionModel, { IBookingSession } from "@/models/booking.session.model";
 import { Types } from "mongoose";
 import { formatInTimeZone } from 'date-fns-tz';
 import { getTimezone } from "@/context/timezone.context";
+
 
 
 
@@ -58,5 +59,12 @@ export const toAdminBookingSessionDTO=(bookingSession:IBookingSession)=>{
           refundedToWallet:bookingSession.refundedToWallet,
           refundAmount:bookingSession.refundAmount,
           cancellationReason:bookingSession.cancellationReason
+    }
+}
+
+export const toAdminBookingSessionDTOwithUserId=(bookingSession:IBookingSession)=>{
+    return{
+        ...toAdminBookingSessionDTO(bookingSession),           
+        userId:bookingSession.userId.toString(),
     }
 }

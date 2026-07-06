@@ -1,6 +1,6 @@
 import { useFormContext } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import {
   Card,
@@ -19,6 +19,7 @@ import {
 import type { TrainerOnboardingFormValues } from '../../types/trainerprofile.types';
 import { GENDER, GOVT_ID_TYPE } from '@/constants/constants';
 import { Calendar, MapPin, Upload } from 'lucide-react';
+import { FILE_RULES } from '@/utils/fileValidation';
 
 interface PersonalInfoFormProps {
   onNext: (fields: any[]) => void;
@@ -80,7 +81,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
           )}
         </div>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className="block text-sm  text-slate-300 mb-2">
             Date of Birth
           </label>
           <div className="relative">
@@ -94,7 +95,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
                 validate: (v) =>
                   new Date(v) < new Date() || 'Date cannot be in the future',
               })}
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white"
+              className="w-full pl-12 pr-4 py-3 rounded-xl [&::-webkit-calendar-picker-indicator]:invert bg-secondary/60 border border-[#454c59] text-white"
             />
           </div>
           {errors?.personalInfo?.DOB && (
@@ -296,8 +297,23 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
                   <input
                     type="file"
                     className="hidden"
+                    accept={FILE_RULES.id_attachment.accept}
                     {...register('idVerification.idAttachment', {
                       required: 'ID attachment is required',
+                      validate: {
+                        fileType: (value) => {
+                          const fileList = value as FileList | null;
+                          const file = fileList?.[0];
+                          if (!file) return true;
+                          return file.type.startsWith('image/')||file.type=== 'application/pdf'|| 'Only  pdf  files are allowed';
+                        },
+                        fileSize: (value) => {
+                          const fileList = value as FileList | null;
+                          const file = fileList?.[0];
+                          if (!file) return true;
+                          return file.size <= 5 * 1024 * 1024 || 'File must be under 5MB';
+                        },
+                      }
                     })}
                   />
                   {errors?.idVerification?.idAttachment && (

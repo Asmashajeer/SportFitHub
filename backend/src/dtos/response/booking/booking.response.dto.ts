@@ -13,12 +13,17 @@ export interface UserBookingResponseDTO{
     pricePlan:IPricePlan,      
     venue: IVenue;    
     status: BOOKING_STATUS,
-    paymentId: string;        
+    paymentId: string;  
+        
     updatedAt: string;
     createdAt:string
 }
 
-
+export interface UserBookingResponseDTOwithStatusCount extends UserBookingResponseDTO{
+    scheduledCount:number,
+    cancelledCount :number,
+    completedCount:number  
+}
 
 export interface BookingConfirmResponseDTO{
  booking:UserBookingResponseDTO,
@@ -38,6 +43,7 @@ export interface UserBookedSessionsResponseDTO{
      id: string;
     bookingId: string,
     userId:     string,
+    trainerId:string,
     sessionId:  string,
     sessionModel: typeof PAYLOAD_MODEL[keyof typeof PAYLOAD_MODEL];
     slotId:   string,  

@@ -28,8 +28,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import type {
+  SportSessionFormResponseDTO,
+  
+  SportsSessionImage,
   SportsSessionResponseData,
   TimeSlot,
 } from '../../../../session/store/session.types';
@@ -86,7 +89,7 @@ const initialData = {
   cancellationPolicy:
     'Full refund available if cancelled at least 24 hours before start time. Late cancellations or no-shows are non-refundable.',
   cancellationWindow: 24,
-  bookingDeadline: 2,
+  bookingDeadline: 12,
 };
 
 interface Props {
@@ -94,22 +97,24 @@ interface Props {
   isEditing: boolean;
   onSuccess: () => void;
   onClose: () => void;
-  sessionToEdit?: SportsSessionResponseData | null;
+  sessionIdToEdit?:string;
+  // sessionToEdit?: SportSessionFormResponseDTO| null;
 }
 const CreateSportSessionModal = ({
   isOpen,
   isEditing,
-  sessionToEdit,
+  sessionIdToEdit,
   onSuccess,
   onClose,
 }: Props) => {
-  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<SportsSessionImage[]>([]);
   const { profile, fetchProfile } = useTrainerStore();
   const { user } = useAuthStore();
   const { sports, setSports } = useSessionStore();
   const [availableDays, setAvailableDays] = useState<string[]>([]);
   const form = useForm<SportsSessionFormValues>({ defaultValues: initialData });
   const [sportId,setSportId]=useState("");
+  const [sessionToEdit,setSessionToEdit]=useState<SportSessionFormResponseDTO| null>(null);
   const {
     reset,
     register,
@@ -151,9 +156,21 @@ const CreateSportSessionModal = ({
       setAvailableDays(workingDays);
     }
   }, [profile]);
+  useEffect(() => {
+    const getsessionToEdit=async()=>{
+      if(sessionIdToEdit){
+         const data=await TrainerSportSessionService.getSessionByIdToUpdate(sessionIdToEdit);
+        setSessionToEdit(data.session);
+      }
+    }
+    if(sessionIdToEdit)
+       getsessionToEdit();
+
+  },[isEditing]);
 
   useEffect(() => {
     if (isEditing && sessionToEdit) {
+      console.log(sessionToEdit);
       setExistingImages(sessionToEdit.images || []);
       const initialAmenities = Array.isArray(sessionToEdit.amenities)
         ? sessionToEdit.amenities.join(', ')
@@ -176,6 +193,7 @@ const CreateSportSessionModal = ({
       reset(initialData);
     }
   }, [isEditing, sessionToEdit, reset]);
+
     const sport = useMemo(() => 
       sports.find(sp => sp.id === sportId), 
     [sports, sportId])
@@ -285,25 +303,31 @@ const CreateSportSessionModal = ({
       );
 
       try {
-        let finalImageUrls = [...existingImages];
+       const remainingExistingPublicIds = existingImages.map((img) => img.publicId);
+
+      let newPublicIds: string[] = [];
         //uploadImages
         if (formData.images && formData.images.length > 0) {
           const userId = user?.id;
           const folderPath = `sports/${userId}`;
-          const newUrls = await uploadService.upload(
+          newPublicIds = await uploadService.upload(
             formData.images,
             folderPath,
             userId,
             'session_gallery'
-          );
-          finalImageUrls = [...finalImageUrls, ...newUrls];
+          );         
         }
-        if (finalImageUrls.length) {
+        const finalImages = [...remainingExistingPublicIds, ...newPublicIds];
+          if (finalImages.length === 0) {
+            toast.error('At least one image is required');
+            return;
+          }
+       
           const sessionData = {
             ...formData,
             amenities: formattedAmenities,
             trainerId: profile.id,
-            images: finalImageUrls,
+            images: finalImages,
             timeSlots: groupedSlots,
           };
           if (isEditing && sessionToEdit) {
@@ -318,10 +342,7 @@ const CreateSportSessionModal = ({
           }
           onSuccess();
           onClose();
-        } 
-        else{ toast.error('failed to upload images');
-          return;
-        }
+       
       } catch (error) {
         toast.error(error as string || 'failed to create session');
         return;
@@ -538,6 +559,34 @@ const CreateSportSessionModal = ({
                   <Label> Images</Label>
                   {/* 1. Show existing images from the DB */}
                   {isEditing && existingImages.length > 0 && (
+                      <div className="grid grid-cols-4 gap-2 mb-4">
+                        {existingImages.map((img, index) => (
+                          <div
+                            key={img.publicId}
+                            className="relative group aspect-square rounded-lg overflow-hidden border"
+                          >
+                            <img
+                              // src={img.url}
+                              src={`${img.url}?v=${new Date()}`} 
+                              alt="Session"
+                              className="object-cover w-full h-full"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExistingImages((prev) =>
+                                  prev.filter((_, i) => i !== index)
+                                )
+                              }
+                              className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  {/* {isEditing && existingImages.length > 0 && (
                     <div className="grid grid-cols-4 gap-2 mb-4">
                       {existingImages.map((url, index) => (
                         <div
@@ -563,7 +612,7 @@ const CreateSportSessionModal = ({
                         </div>
                       ))}
                     </div>
-                  )}
+                  )} */}
                   {/* 2. The File Input for NEW images */}
                   <div className="p-4 border border-gray-600 border-dashed rounded-lg text-center cursor-pointer hover:border-2 hover:border-green-800">
                     <ImageIcon className="mx-auto text-slate-300 mb-2" />
@@ -658,7 +707,7 @@ const CreateSportSessionModal = ({
                     const end = watch(`timeSlots.${index}.slots.0.endTime`);
                     // Validation
                     const isWithinHours = checkInWorkingHours(day, start, end);
-                    console.log('isWithinHours  :', isWithinHours);
+                    
                     const hasError = start && end && !isWithinHours;
                     return (
                       <div

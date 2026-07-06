@@ -13,7 +13,7 @@ import {
   formatDateReadable,
   formatTo12Hour,
 } from '@/utils/formatDate';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 import type { IBookedSlot } from '@/features/user/types/user.booking.types';
 import { Label } from '@/components/ui/label';

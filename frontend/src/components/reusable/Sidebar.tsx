@@ -17,7 +17,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '../ui/sheet';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 import { useTrainerStore } from '@/features/trainer/store/useTrainerStore';
 import { useEffect } from 'react';
 import { useUserStore } from '@/features/user/store/useUserStore';
@@ -41,7 +41,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   if (disabled) {
     return (
       <div
-        className="nav-item opacity-50 cursor-not-allowed grayscale-[0.5]"
+        className="nav-item opacity-50 cursor-not-allowed text-sm  grayscale-[0.5]"
         title="Verification Required"
       >
         {icon}
@@ -54,7 +54,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
       <Link
         key={path}
         to={path}
-        className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
+        className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'} p-3`}
       >
         {icon}
         <span>{label}</span>
@@ -90,9 +90,13 @@ const Sidebar = () => {
     if (role === ROLES.TRAINER) fetchTrainer();
     else fetchUser();
   }, []);
+  
   const handleLogout = async () => {
     try {
       await authService.logout();
+      if (user?.id) {
+        localStorage.removeItem(`trainer_onboarding_cache_${user.id}`);
+      }
       clearAuth();
       clearStore();
       navigate('/login');
@@ -117,7 +121,7 @@ const Sidebar = () => {
             <SidebarItem
               key={item.label}
               path={item.path}
-              icon={<item.icon className="h-4.5 w-4.5" />}
+              icon={<item.icon className="h-4 w-4" />}
               label={item.label}
               isActive={pathname === item.path}
               disabled={isDisabled}
@@ -138,13 +142,8 @@ const Sidebar = () => {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-72 p-0 flex flex-col">
-            <SheetHeader className="p-6 border-b">
-              <div className="flex flex-col items-center">
-                <ProfilePic />
-                <SheetTitle className="mt-2 italic font-black text-primary">
-                  {user?.name}
-                </SheetTitle>
-              </div>
+            <SheetHeader className="text-start border-b">              
+                <ProfilePic />  
             </SheetHeader>
 
             <div className="flex-1 overflow-y-auto p-2">
@@ -166,20 +165,9 @@ const Sidebar = () => {
 
       {/* DESKTOP SIDEBAR  */}
       {/* <aside className="sticky sidebar-container top-16 h-[calc(100vh-4rem)] hidden md:block overflow-y-auto"> */}
-      <aside className="fixed top-16  w-64 h-[calc(100vh-4rem)] hidden md:flex flex-col  border-r  border-zinc-800 bg-black/80">
-        <div className="p-5 flex flex-col items-center">
-          <ProfilePic />
-          <h1 className="text-xl font-black italic tracking-tighter text-primary">
-            {user?.role === ROLES.ADMIN ? (
-              'Admin'
-            ) : (
-              <span
-                className={` ${user?.role === ROLES.TRAINER}? "text-amber-900":"text-primary" `}
-              >
-                {user?.name}
-              </span>
-            )}
-          </h1>
+      <aside className="relative top-16  w-64 h-[calc(100vh-4rem)] hidden md:flex flex-col  border-r ">
+        <div className=" flex  items-center  text-center border-b-2">
+          <ProfilePic />    
         </div>
         <NavLinksList />
 

@@ -5,8 +5,8 @@ import {
   type FieldArrayPath,
   type FieldPath,
 } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import {
   Card,
@@ -18,7 +18,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { X, Plus, Languages, Trash2,  CornerDownLeftIcon } from 'lucide-react';
 import type { TrainerOnboardingFormValues } from '../../types/trainerprofile.types';
-import { SPECIALTY_SUGGESTIONS } from '@/constants/constants';
+import { FILE_RULES } from '@/utils/fileValidation';
+import { COMMON_LANGUAGES, DISCIPLINE_SPECIALTIES } from '@/constants/constants';
+
 
 interface ProfessionalInfoFormProps {
   onNext: (fields: any[]) => void;
@@ -49,10 +51,18 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
  
   const [newSpecialty, setNewSpecialty] = useState('');
   const [newLang, setNewLang] = useState('');
- 
 
   const specialties = watch('specialties') || [];
   const languages = watch('languages') || [];
+
+  const coreDiscipline = watch('coreDiscipline')||'';
+  const suggestions = (
+    DISCIPLINE_SPECIALTIES[coreDiscipline?.toLowerCase()] || []
+  ).filter((s) => !specialties.includes(s));
+
+  const languageSuggestions = COMMON_LANGUAGES.filter(
+  (l) => !languages.includes(l)
+);
   
 
   //  to add to arrays in form state
@@ -63,7 +73,8 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
   ) => {
     const currentArray = getValues(field) || [];
     if (value.trim() && !currentArray.includes(value.trim())) {
-      setValue(field, [...currentArray, value.trim()], {
+      const val=value.trim()[0].toUpperCase() + value.trim().slice(1);
+      setValue(field, [...currentArray, val, ],{
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -104,6 +115,8 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
             <Input
               id="experience"
               type="number"
+              min={0}
+              max={60}
               {...register('experience', {
                 valueAsNumber: true,
                 required: 'Required',
@@ -123,7 +136,28 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
         {/* Specialties Section */}
         <div className="space-y-3">
           <Label>Specialties</Label>
-
+          {/*  Suggestions based on coreDiscipline */}
+            {suggestions.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Suggested for {coreDiscipline}:</p>
+                <div className="flex flex-wrap gap-2">
+                  {suggestions.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() =>
+                        addToArray('specialties', suggestion, setNewSpecialty)
+                      }
+                      className="px-2 py-1 text-xs rounded-full border border-dashed 
+                                border-muted-foreground text-muted-foreground 
+                                hover:border-primary hover:text-primary transition-colors"
+                    >
+                      + {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           <div className="flex gap-2">
             <Input
               value={newSpecialty}
@@ -179,6 +213,26 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
           <Label className="flex items-center gap-2">
             <Languages className="h-4 w-4" /> Languages Spoken
           </Label>
+          {/* language suggestions */}
+           {languageSuggestions.length > 0 && (
+            <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Suggestions:</p>
+                <div className="flex flex-wrap gap-2">
+                  {languageSuggestions.map((lang) => (
+                    <button
+                      key={lang}
+                      type="button"
+                      onClick={() => addToArray('languages', lang, setNewLang)}
+                      className="px-2 py-1 text-xs rounded-full border border-dashed
+                                border-muted-foreground text-muted-foreground
+                                hover:border-primary hover:text-primary transition-colors"
+                    >
+                      + {lang}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           <div className="flex gap-2">
             <Input
               value={newLang}
@@ -201,16 +255,21 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
           </div>
           <div className="flex flex-wrap gap-2">
             {languages.map((l) => (
-              <Badge
-                key={l}
+              <Badge  key={l}
                 variant="outline"
-                className="border-primary/30 text-primary"
+                className="border-primary/30 "
+              >{l}
+                <button
+                type="button" 
+                onClick={(e) => {
+                  e.preventDefault(); 
+                  e.stopPropagation(); 
+                  removeFromArray('languages', l);
+                }}
+                className="ml-1 focus:outline-none"
               >
-                {l}{' '}
-                <X
-                  className="ml-1 h-3 w-3 cursor-pointer"
-                  onClick={() => removeFromArray('languages', l)}
-                />
+                  <X className="h-3 w-3 cursor-pointer hover:text-destructive" />
+                </button>                
               </Badge>
             ))}
           </div>
@@ -221,7 +280,7 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
             <Label>Certifications & Licenses</Label>
             {errors.certificationInfo && (
               <p className="text-xs text-red-500 mt-1">
-               upload Certificates or check Dates
+               upload Certificates and  enter details
               </p>
             )}
             <Button
@@ -271,7 +330,7 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
                       `certificationInfo.documents.${index}.issuedAt` as FieldPath<TrainerOnboardingFormValues>,
                       { required: 'Issue date is required' }
                     )}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white"
+                    className="w-full pl-12 pr-4 py-3  [&::-webkit-calendar-picker-indicator]:invert rounded-xl bg-secondary/60 border border-[#454c59] text-white"
                   />
                 </div>
                 {/* Valid upto */}
@@ -284,17 +343,32 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
                       `certificationInfo.documents.${index}.validUpto` as FieldPath<TrainerOnboardingFormValues>,
                       { required: 'Expiry date is required'}
                     )}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/60 border border-[#454c59] text-white"
+                    className="w-full pl-12 pr-4 py-3 rounded-xl [&::-webkit-calendar-picker-indicator]:invert bg-secondary/60 border border-[#454c59] text-white"
                   />
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Input
                   type="file"
-                  accept=".pdf,image/*"
+                  accept={FILE_RULES.certification.accept}
                   {...register(
                     `certificationInfo.documents.${index}.file` as FieldPath<TrainerOnboardingFormValues>,
-                    { required: 'file is required' }
+                    { required: 'file is required',
+                      validate: {
+                        fileType: (value) => {
+                          const fileList = value as FileList | null;
+                          const file = fileList?.[0];
+                          if (!file) return true;
+                          return file.type==='application/pdf'|| 'Only  pdf  files are allowed';
+                        },
+                        fileSize: (value) => {
+                          const fileList = value as FileList | null;
+                          const file = fileList?.[0];
+                          if (!file) return true;
+                          return file.size <= 5 * 1024 * 1024 || 'File must be under 5MB';
+                        },
+                      },
+                     }
                   )}
                 />
               </div>

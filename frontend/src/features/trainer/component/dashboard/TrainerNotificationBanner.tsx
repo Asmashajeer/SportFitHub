@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { AlertCircle } from 'lucide-react';
 import { useTrainerStore } from '../../store/useTrainerStore';
 import { useEffect } from 'react';

@@ -1,5 +1,5 @@
 import { TrainerProfileResponseDTO } from '@/dtos/response/trainer/trainer.response.dto';
-import { PendingTrainersBasicDTO } from '@/dtos/response/trainer/trainerApprovals.response';
+import { PendingTrainersBasicDTO } from '@/dtos/response/admin/trainer.response.dto';
 import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { ITrainerProfile, ICertification } from '@/models/trainerProfile.model';
 import { formatInTimeZone } from 'date-fns-tz';
@@ -54,7 +54,10 @@ export const toPendingTrainersBasicData = (
     },
     // Administrative State
     status: profile.status,
-
+    verificationRemarks: {
+    fields: profile.verificationRemarks?.fields,
+    changedAt: profile.verificationRemarks?.changedAt?.toString(),
+    },
     // Timestamps
     createdAt: profile.createdAt.toISOString(),
     certCount: profile.certificationInfo.documents.length,
@@ -87,6 +90,7 @@ export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO
 
     certificationInfo: {
       documents: (trainer.certificationInfo?.documents || []).map((doc: ICertification) => ({
+        id:doc._id.toString(),
         name: doc.name,
         url: doc.url,
         validUpto: doc.validUpto?.toString(),
@@ -115,12 +119,19 @@ export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO
     },
 
     status: trainer.status,
+    verificationRemarks: {
+    fields: trainer.verificationRemarks?.fields,
+    changedAt: trainer.verificationRemarks?.changedAt?.toString(),
+    },
     suspensionReason: trainer.suspensionReason,
-    suspendedAt: trainer.suspendedAt?.toISOString(),
+    suspendedAt: trainer.suspendedAt?formatInTimeZone(trainer.suspendedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'):"",
     rejectionReason: trainer.rejectionReason,
-    rejectedAt: trainer.rejectedAt?.toISOString(),
+    rejectedAt: trainer.rejectedAt?formatInTimeZone(trainer.rejectedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'):"",
     applicationCount: trainer.applicationCount || 0,
-
+    penalty:trainer.penalty,
+    strikePoints:trainer.strikePoints,
+    cancellationCount: trainer.cancellationCount,
+    lastStrikeDate:trainer.lastStrikeDate?formatInTimeZone(trainer.lastStrikeDate,timezone, 'yyyy-MM-dd HH:mm:ssXXX'):"",
     createdAt: formatInTimeZone(trainer.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
 
     updatedAt: formatInTimeZone(trainer.updatedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),

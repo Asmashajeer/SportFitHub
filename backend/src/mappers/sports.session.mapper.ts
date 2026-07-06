@@ -3,6 +3,7 @@ import { ISportsSessionDetailsPopulated, ISportsSessionPopulated } from "@/dtos/
 import { ISportsSession } from "@/models/sportsSession.model"
 import { formatInTimeZone } from 'date-fns-tz';
 import { getTimezone } from "@/context/timezone.context";
+import { getSignedFileUrl } from "@/utils/cloudinary";
 
 export const toSportsSessionResponseDTO=(session:Partial<ISportsSession>)=>{
     const timezone = getTimezone();
@@ -28,14 +29,47 @@ export const toSportsSessionResponseDTO=(session:Partial<ISportsSession>)=>{
         isActive: session.  isActive,
         isDeleted: session.  isDeleted,
         isApproved: session. isApproved,
-        images:session.  images,
+        images:(session.images ?? []).map(publicId => getSignedFileUrl(publicId, 'image', 'upload')),
         rating:session. rating,
         createdAt: formatInTimeZone(session.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
         updatedAt: formatInTimeZone(session.updatedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
     }
 
 }
-
+export const toSportsSessionUpdateResponseDTO=(session:Partial<ISportsSession>)=>{
+     const timezone = getTimezone();
+         
+    return{
+        id:session._id.toString(),
+        trainerId:session.trainerId.toString(),
+        sessionName:session.sessionName,
+        slug:session.slug,
+        sportCategory: session.sportCategory.toString(),
+        description:session.  description,
+        duration:session. duration,
+        ageGroup:session.  ageGroup,
+        sessionType:session.  sessionType,
+        maxCapacity:session. maxCapacity ,
+        enrolledCount:session.  enrolledCount,        
+        venue:session. venue,
+        amenities:session.  amenities,
+        timeSlots:session.  timeSlots,
+        pricing:session. pricing,
+        cancellationPolicy:session.cancellationPolicy,
+        cancellationWindow:session.cancellationWindow,
+         bookingDeadline:session.bookingDeadline,
+        isActive: session.  isActive,
+        isDeleted: session.  isDeleted,
+        isApproved: session. isApproved,
+        images:(session.images ?? []).map(publicId => ({
+            publicId,
+            url: getSignedFileUrl(publicId, 'image', 'upload'),
+            })),
+        rating:session. rating,
+        createdAt: formatInTimeZone(session.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
+        updatedAt: formatInTimeZone(session.updatedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
+    }
+}
 
 
 export const toSportSessionPublicDTO=(session:ISportsSessionPopulated)=>{
@@ -68,7 +102,7 @@ export const toSportSessionPublicDTO=(session:ISportsSessionPopulated)=>{
         isActive: session.  isActive,
         isDeleted: session.  isDeleted,
         isApproved: session. isApproved,
-        images:session.  images,
+        images:(session.images ?? []).map(publicId => getSignedFileUrl(publicId, 'image', 'upload')),
         rating:session. rating,
         createdAt: formatInTimeZone(session.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
         updatedAt: formatInTimeZone(session.updatedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
@@ -84,7 +118,7 @@ export const toSportSessionDetailedPublicDTO=(session:ISportsSessionDetailsPopul
         trainer:session.trainerId?{
             id: session.trainerId._id.toString(),
            displayName: session.trainerId.displayName,
-            profilePic:session.trainerId.profilePic,
+            profilePic:(session.trainerId.profilePic? getSignedFileUrl(session.trainerId.profilePic, 'image', 'upload'):null),
            coreDiscipline:session.trainerId.coreDiscipline,
             specialties:session.trainerId.specialties,
            experience :session.trainerId.experience,
@@ -117,7 +151,7 @@ export const toSportSessionDetailedPublicDTO=(session:ISportsSessionDetailsPopul
         isActive: session.  isActive,
         isDeleted: session.  isDeleted,
         isApproved: session. isApproved,
-        images:session.  images,
+       images:(session.images ?? []).map(publicId => getSignedFileUrl(publicId, 'image', 'upload')),
         rating:session. rating,
        createdAt: formatInTimeZone(session.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
         updatedAt: formatInTimeZone(session.updatedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),

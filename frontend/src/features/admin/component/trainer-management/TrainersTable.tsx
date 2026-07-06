@@ -1,8 +1,5 @@
 import {
-    BOOKING_STATUS,
-  BOOKING_TYPE,
   PAGINATION_DEFAULT_LIMIT,
-  PAYLOAD_MODEL,
   TRAINER_CATEGORY,
   TRAINER_STATUS,
 } from '@/constants/constants';
@@ -21,12 +18,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Pagination from '@/components/reusable/Pagination';
-
-
-
 import { formatDateDDMMYY } from '@/utils/formatDate';
 import { trainerManagementService } from '../../service/trainerManagementService';
 import type { AdminTrainersData } from '../../store/types/trainer.types';
+import TrainerDetailModal from './TrainerDetailModal';
+
 
 
 interface TrainersDataState {
@@ -37,7 +33,7 @@ interface TrainersDataState {
 }
 
 const TrainersTable = () => {
-  const [trainersData, setTrainersData] = useState<TrainersDataState >({
+  const [trainersData, setTrainersData] = useState<TrainersDataState>({
    trainers: [],
     totalPages: 0,
     total: 0,
@@ -49,7 +45,7 @@ const TrainersTable = () => {
   const [category, setCategory] = useState('all');
   const [refreshKey, setRefreshKey] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-
+  const  [selectedTrainer,setSelectedTrainer]= useState< string|null>(null);
  
 
   type trainerStatusKey = 'confirmed' | 'cancelled' | 'completed' | 'pending';
@@ -82,7 +78,7 @@ const TrainersTable = () => {
     getTrainers();
   }, [currentPage, search, statusFilter,  refreshKey, category]);
 
-  
+
 
   const filterBtn = (active: boolean) =>
     `text-xs px-3 py-1.5 rounded-full border transition-all font-medium ${
@@ -96,7 +92,8 @@ const TrainersTable = () => {
   const tdCls = 'px-4 py-3 text-sm whitespace-nowrap';
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 bg-zinc-800/70 border p-2 rounded-xl">
+      <p className="text-sm border-b py-1 ">All Trainers</p>
       {/* Toolbar */}
       <div className="flex flex-wrap gap-2 items-center justify-between">
         <div className="flex gap-2 flex-wrap items-center">
@@ -163,7 +160,7 @@ const TrainersTable = () => {
                 <th className={thCls}>CoreDiscipline</th>
                 <th className={thCls}>Specialties</th>
                 <th className={thCls}> Experience</th>
-                <th className={thCls}>  Languages</th>
+               
                 <th className={thCls}> Certs</th>
                 <th className={thCls}>ID</th>
                 <th className={thCls}>Status</th>
@@ -210,13 +207,7 @@ const TrainersTable = () => {
                       <span className="text-zinc-400 capitalize">{trainer.experience} yr</span>
                     </td>
 
-                    {/* language */}
-                    <td className={tdCls}>
-                      <span className="text-zinc-300">
-                    {trainer.languages.join(" ")}
-                      </span>
-                      
-                    </td>
+                   
 
                     {/* cert Verified*/}
                     <td className={tdCls}>
@@ -247,13 +238,27 @@ const TrainersTable = () => {
                         {formatDateDDMMYY(trainer.createdAt)}
                       </span>
                     </td>
-
+                    <td className={tdCls}>
+                       <button onClick={() =>setSelectedTrainer(trainer.id)}
+                            className="p-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition-colors"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                        </button>
+                    </td>
                     
                   </tr>
+                  
                 ))
               )}
             </tbody>
           </table>
+          
+          {selectedTrainer &&
+            <TrainerDetailModal
+              trainerId={selectedTrainer}             
+              onClose={() => setSelectedTrainer(null)}              
+            />
+          } 
         </div>
 
         {/* Pagination */}

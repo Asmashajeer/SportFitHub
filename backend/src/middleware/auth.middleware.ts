@@ -4,14 +4,15 @@ import type { Request, Response, NextFunction } from 'express';
 import AppError from '../utils/AppError';
 import { UserRole } from '@/constants/enums';
 const { JsonWebTokenError, TokenExpiredError } = jwt;
-
-export interface AuthRequest extends Request {
-  user?: {
+export interface AuthUser{ 
     id: string;
     email:string;
     role: UserRole;    
     timezone:string
-  };
+  }
+
+export interface AuthRequest extends Request {
+  user?:AuthUser
 }
 
 export const protect = (req: AuthRequest, res: Response, next: NextFunction) => {

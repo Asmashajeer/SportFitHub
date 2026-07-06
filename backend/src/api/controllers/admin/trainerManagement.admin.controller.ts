@@ -1,5 +1,6 @@
 import { STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import { ITrainerManagementService } from '@/interfaces/services/admin/ITrainerManagementService';
+import { AuthRequest } from '@/middleware/auth.middleware';
 import Logger from '@/utils/logger';
 
 import { NextFunction, Request, Response } from 'express';
@@ -16,9 +17,9 @@ export class TrainerManagementController {
     const search=req.query.search as string;
     const status=req.query.status as string;
     const category=req.query.category as string;    
-
+     const { user } = req as AuthRequest;
     try {
-      const trainers = await this._trainerManagementService.getTrainers({page,limit,search,status,category});
+      const trainers = await this._trainerManagementService.getTrainers({page,limit,search,status,category},user);
       if (!trainers) {
         res.status(STATUS_CODE.SUCCESS.OK).json({ success: true, message: 'No  trainers found',
           trainers: [],
@@ -38,8 +39,9 @@ export class TrainerManagementController {
     res: Response,
     next: NextFunction
   ): Promise<void> => {
+     const { user } = req as AuthRequest;
     try {
-      const pendingTrainers = await this._trainerManagementService.getPendingTrainers();
+      const pendingTrainers = await this._trainerManagementService.getPendingTrainers(user);
       if (!pendingTrainers || pendingTrainers.length === 0) {
         res.status(STATUS_CODE.SUCCESS.OK).json({
           success: true,
@@ -61,8 +63,9 @@ export class TrainerManagementController {
   // Get a trainer
   trainerDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const id = req.params.id;
+    const { user } = req as AuthRequest;
     try {
-      const trainerData = await this._trainerManagementService.trainerDetailsById(id);
+      const trainerData = await this._trainerManagementService.trainerDetailsById(id,user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         message: SUCCESS_MESSAGES.TRAINER.TRAINER_FETCH_SUCCESS,
@@ -75,12 +78,14 @@ export class TrainerManagementController {
 
   updateFileStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id, targetField, status, reason } = req.body;
+     const { user } = req as AuthRequest;
     try {
       const trainerData = await this._trainerManagementService.updateFileStatus(
         id,
         targetField,
         status,
-        reason
+        reason,
+        user
       );
 
       Logger.info(`Admin updated Trainer ${targetField} Status to ${status}`, {
@@ -100,11 +105,13 @@ export class TrainerManagementController {
 
   updateTrainerStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id, status, reason } = req.body;
+     const { user } = req as AuthRequest;
     try {
       const trainerData = await this._trainerManagementService.updateTrainerStatus(
         id,
         status,
-        reason
+        reason,
+        user
       );
       Logger.info(`Admin updated Trainer status to ${status} for ID: ${id}`, {
         trainerId: id,

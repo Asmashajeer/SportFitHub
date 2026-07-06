@@ -13,6 +13,7 @@ export interface UserInfo {
 export interface Payload {
   user?: UserInfo;
   sessionId: string;
+  trainerId:string;
   sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
   bookingType: (typeof BOOKING_TYPE)[keyof typeof BOOKING_TYPE];
   venue: IVenueAddress;

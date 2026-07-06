@@ -10,7 +10,8 @@ export interface UserInfo extends Pick<IUser, 'id'|'name'|'email'> {};
 
 
 export interface PayloadDTO {
-  user: UserInfo,  
+  user: UserInfo, 
+  trainerId: string,
   sessionId:string,
   sessionType:SESSION_TYPE,
   sessionsToBook:IBookedSlot[]

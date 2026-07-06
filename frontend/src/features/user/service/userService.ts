@@ -22,4 +22,10 @@ export const userService = {
     });
     return response.data;
   },
+  updateProfilePic:async (id: string, profilePic: string) => {
+    const response = await api.patch(USER_ROUTES.UPDATE_PROFILE_PIC+`/${id}`, {
+      profilePic,
+    });
+    return response.data;
+  },
 };

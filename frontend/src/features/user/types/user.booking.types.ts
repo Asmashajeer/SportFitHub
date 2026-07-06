@@ -42,6 +42,11 @@ export interface UserBookingResponseData {
   createdAt: string;
 }
 
+export interface  UserBookingResponseDatawithStatusCount extends UserBookingResponseData{
+    scheduledCount:number,
+    cancelledCount :number,
+    completedCount:number  
+}
 export interface PopulatedSessionData {
   sessionId: string;
   trainerId: string;

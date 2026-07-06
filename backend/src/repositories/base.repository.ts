@@ -26,7 +26,16 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
   async findOneAndUpdate(id: string | Types.ObjectId, data: UpdateQuery<T>): Promise<T | null> {
     return await this.model.findByIdAndUpdate(id, data, { new: true, runValidators: true }).exec();
   }
+  async updateMany(filter: FilterQuery<T>, data: UpdateQuery<T>): Promise<void> {
+    await this.model.updateMany(filter, data).exec();
+  }
 
+  async softDelete(id: string | Types.ObjectId): Promise<boolean> {
+    const result = await this.model.findByIdAndUpdate(id, { $set: { isDeleted: true } }, { new: true })
+      .exec();
+    return result !== null;
+  }
+  
   async delete(id: string | Types.ObjectId): Promise<boolean> {
     const result = await this.model.findByIdAndDelete(id).exec();
     return result !== null;

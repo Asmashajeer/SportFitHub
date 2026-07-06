@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Briefcase, Award } from 'lucide-react';
@@ -16,6 +16,8 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { TrainerApprovalView } from './TrainerApprovalView';
+import { formatDateReadable } from '@/utils/formatDate';
+import { TRAINER_STATUS } from '@/constants/constants';
 
 const Approvals = () => {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -32,8 +34,8 @@ const Approvals = () => {
       setTrainerLoading(true);
       try {
         const Data = await trainerManagementService.getPendingTrainers();
-
         setPendingTrainers(Data.pendingTrainers);
+        console.log(Data.pendingTrainers);
       } catch (error) {
         toast.error(error?.toString() || 'Something went wrong');
       } finally {
@@ -41,7 +43,7 @@ const Approvals = () => {
       }
     };
     loadPendingTrainers();
-  }, []);
+  }, [isReviewOpen]);
 
   const handleReviewDetails = async (trainer: TrainerOverView) => {
     setActiveTrainer(trainer);
@@ -50,12 +52,12 @@ const Approvals = () => {
   if(pendingTrainers?.length===0) return;
   return (
     <>
-      <div className="p-2 mb-4 max-w-6xl mx-auto bg-card border ">       
+      <div className="p-4 mb-4 max-w-6xl mx-auto bg-zinc-800/80 border rounded-xl ">       
        
-          <div className="bg-card text-start  shadow-sm rounded-xl">
-            <h3 className="text-xl  tracking-tight">
+          <div className=" text-start  shadow-sm rounded-xl">
+            <h6 className="text-lg  tracking-tight">
               Approvals
-            </h3>
+            </h6>
             <p className="text-muted-foreground mt-1">
               Review and verify trainer applications to maintain platform quality.
             </p>
@@ -67,10 +69,11 @@ const Approvals = () => {
               <Card className="border-none shadow-none bg-transparent">
                 <CardContent className="p-0 space-y-4">
                   {/* Individual Trainer Approval Card */}
-                  <Card className="w-full transition-all hover:shadow-md border  border-amber-800">
-                    <div className="flex flex-col md:flex-row items-center pl-4 gap-4">
+                  <Card className=" relative w-full transition-all hover:shadow-md border  border-amber-800">
+                  { trainer.status===TRAINER_STATUS.SUBMITTED && <Badge  className="absolute rounded-none top-0 left-0.5 text-xs bg-green-600 text-gray-100 z-10">New</Badge>}
+                    <div className="flex flex-wrap gap-3 items-start">
                       {/* 1. Identity Section */}
-                      <div className="flex-1 min-w-50">
+                      <div className="flex-1 min-w-35">
                         <div className="flex flex-col items-center  ">
                           <CardTitle className="text-md">
                             {trainer?.personalInfo.fullName}
@@ -84,14 +87,18 @@ const Approvals = () => {
                         </div>
 
                         <div className="flex items-center text-sm  text-muted-foreground">
-                          <CalendarDays className="mr-1 h-3 w-3" />
-                          Applied:{' '}
-                          {formatDistanceToNow(new Date(trainer.createdAt))} ago
+                          {trainer.status!==TRAINER_STATUS.VARIFICATION_REQUIRED &&
+                          <>
+                            <CalendarDays className="mr-1 h-3 w-3" />
+                            Applied:{' '}
+                            {formatDistanceToNow(new Date(trainer.createdAt))} ago
+                          </>
+                          }  
                         </div>
                       </div>
 
                       {/* 2. Professional Summary Section */}
-                      <div className="flex-[1.5] flex flex-wrap gap-3 border-l border-r px-6">
+                      <div className="flex-2 min-w-45 flex flex-wrap gap-3 border-l border-r px-3 max-sm:border-l-0 max-sm:border-r-0 max-sm:border-t max-sm:border-b max-sm:py-2 max-sm:w-full max-sm:px-0">
                         <div className="flex flex-col gap-1">
                           <span className="text-xs font-semibold uppercase text-muted-foreground">
                             Experience
@@ -131,29 +138,30 @@ const Approvals = () => {
                       </div>
 
                       {/* 3. Action Section */}
-                      <div className="flex items-center gap-2 ml-auto">
+                      {/* <div className="flex items-center gap-2 ml-auto"> */}
+                        <div className="ml-auto max-sm:ml-0 max-sm:w-full">   
                         <Button
+                         className="max-sm:w-full"
                           variant="outline"
                           size="sm"
                           onClick={() => handleReviewDetails(trainer)}
                         >
                           Review Details
                         </Button>
-                        {/* <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:bg-destructive/10"
-                        >
-                          <XCircle className="mr-2 h-4 w-4" /> Reject
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          <CheckCircle2 className="mr-2 h-4 w-4" /> Approve
-                        </Button> */}
+                        
                       </div>
                     </div>
+                    {trainer?.verificationRemarks?.fields.length>0 &&
+                      <div className='mx-4 p-2 text-start text-xs bg-zinc-800/40 border'>
+                        <p>* {trainer.status}</p>
+                        <div className='flex items-center gap-2 text-amber-500  px-4'>
+                           
+                            <p className='font-medium '>{trainer?.verificationRemarks?.fields.join('  , ')}</p>
+                            <p className='text-xs font-light  '>Updated at : {formatDateReadable ( trainer?.verificationRemarks?.changedAt)}</p>
+                        </div>
+                       
+                      </div>
+                    }
                   </Card>
                 </CardContent>
               </Card>
@@ -166,8 +174,8 @@ const Approvals = () => {
       <Sheet open={isReviewOpen} onOpenChange={setIsReviewOpen}>
         <SheetContent side="right" className="sm:max-w-250 overflow-y-auto">
           <SheetHeader className="mb-6">
-            <SheetTitle className="text-2xl">
-              Verification: {activeTrainer?.personalInfo?.fullName}
+            <SheetTitle className="text-center p-2 text-xl">
+              Pending Approval
             </SheetTitle>
           </SheetHeader>
 

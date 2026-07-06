@@ -1,3 +1,6 @@
+export const AppName="SportFitHub"
+export const AppEmail="sportfit.hub@gmail.com"
+
 export enum UserRole {
   ADMIN = 'admin',
   TRAINER = 'trainer',
@@ -47,12 +50,17 @@ export enum DOC_VERIFY_STATUS {
   REJECTED = 'rejected',
 }
 
+export enum DocumentType {
+    CERTIFICATE = 'certificate',
+    ID_ATTACHMENT='id-attachment'
+}
 export enum TRAINER_STATUS {
   SUBMITTED = 'submitted',
   UNDER_REVIEW = 'under review',
   APPROVED = 'approved',
   REJECTED = 'rejected',
   SUSPENDED = 'suspended',
+  VARIFICATION_REQUIRED= 'Need Verification'
 }
 
 export const CURRENCIES = {

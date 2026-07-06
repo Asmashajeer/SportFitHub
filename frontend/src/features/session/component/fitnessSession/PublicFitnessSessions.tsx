@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MapPin, Search, SlidersHorizontal, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import {
   AGE_GROUP,
   LOCATION_RADIUS,

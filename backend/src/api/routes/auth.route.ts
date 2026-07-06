@@ -30,7 +30,7 @@ router.post('/google-login', authController.googleLogin);
 
 router.patch('/updateRole', protect, validateBody(updateRoleSchema), authController.updateRole);
 router.get('/authMe', protect, authController.authMe);
-
+router.post('/fcm-token', protect,authController.updateFcmToken);
 router.post(
   '/logout',
   protect,

@@ -6,7 +6,7 @@ import TrainersTable from "../component/trainer-management/TrainersTable";
 
 const AdminTrainers = () => {
   return (
-    <div className="min-h-screen bg-zinc-900 text-zinc-100 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-black text-zinc-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

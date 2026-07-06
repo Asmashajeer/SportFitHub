@@ -72,4 +72,8 @@ export const authService = {
     const response = await api.post(AUTH_ROUTES.REFRESH_TOKEN);
     return response.data;
   },
+  fcmToken:async (token:string)=>{
+    const response=await api.post('/auth/fcm-token', { fcmToken: token });
+    return response.data;
+  }
 };

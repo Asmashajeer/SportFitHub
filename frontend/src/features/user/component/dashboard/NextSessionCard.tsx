@@ -25,7 +25,7 @@ const NextSessionCard = ({ nextSession }: Props) => {
           </div>
 
           <h2 className="text-2xl md:text-xl font-black text-white leading-tight">
-            {nextSession.sessionName}
+            {nextSession.session.sessionName}
           </h2>
         </div>
       )}

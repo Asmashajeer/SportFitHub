@@ -1,10 +1,10 @@
 import React from 'react';
 import { Menu, X, User, LogOut, LogIn } from 'lucide-react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import {  NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import Avatar from '../reusable/Avatar';
 import { authService } from '@/features/auth/service/authService';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 import { ROLES } from '@/constants/constants';
 
 const Header = () => {
@@ -18,23 +18,23 @@ const Header = () => {
     clearAuth();
   };
   return (
-    <header className="fixed top-0 left-0 z-50 w-full shrink-0 px-.5  border-border bg-background/80 backdrop-blur-md transition-all">
-      <div className="section-container flex h-16 md:h-20 items-center  justify-between">
+    <header className="fixed top-0 left-0 z-50 w-full shrink-0 p-0 border-border bg-background/80 backdrop-blur-md transition-all">
+      <div className="section-container px-4  flex h-16 md:h-20 items-center  justify-between">
        <div   
-          className="flex items-center justify-center  cursor-pointer group"
+          className="flex items-center justify-around   cursor-pointer group"
           onClick={() => navigate('/')}
         >
           <img 
               src="/sportfithub_logo.png" 
               alt="SportFitHub" 
-              className="h-10 w-auto   object-contain transition-transform group-hover:scale-105"
-          />      
+              className="h-10 w-auto  px-4 object-contain transition-transform group-hover:scale-105"
+          />   
           
         </div>
 
         {user?.role !== ROLES.TRAINER && (
           <nav className="hidden md:flex items-center space-x-10 justify-evenly">
-            {['Sports', 'Fitness', 'Trainer'].map((item) => (
+            {['Sports', 'Fitness'].map((item) => (
                  <NavLink
                 key={item}
                 to={`/${item.toLowerCase()}`}

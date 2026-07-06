@@ -1,15 +1,23 @@
 import {
   CalendarDays,
   CircleUser,
+  Layers,
   LayoutDashboard,
   MessageCircle,
   MessageSquare,
   MessageSquareDiff,
+  Settings,
+  ShieldCheck,
   Ticket,
   UserCheck,
+  Users,
   Wallet,
   Wallet2,
 } from 'lucide-react';
+
+
+export const AppName="SportFitHub"
+export const AppEmail="sportfit.hub@gmail.com"
 
 export const ROLES = {
   ADMIN: 'admin',
@@ -91,6 +99,7 @@ export const TRAINER_STATUS = {
   APPROVED: 'approved',
   REJECTED: 'rejected',
   SUSPENDED: 'suspended',
+  VARIFICATION_REQUIRED: 'Need Verification'
 };
 export type Trainer_status_type =
   (typeof TRAINER_STATUS)[keyof typeof TRAINER_STATUS];
@@ -111,6 +120,18 @@ export const DAYS_OF_WEEK = [
   'Sunday',
 ] as const;
 export type DayName = (typeof DAYS_OF_WEEK)[number];
+export const  adminNavLinks= [
+    {path:"/admin/dashboard"         , icon:LayoutDashboard ,label:"Dashboard"  },
+    {path:"/admin/category-management", icon: Layers ,         label:"Categories"  },
+    {path:"/admin/user-management"   , icon: Users ,          label:"Users"      },
+    {path:"/admin/trainer-management", icon: ShieldCheck ,    label:"Trainers"   },
+    {path:"/admin/session-management", icon: Ticket ,         label:"Sessions"   },
+    {path:"/admin/bookings-management"   , icon: CalendarDays ,   label:"Bookings"       },
+    {path:"/admin/payment-management"   , icon: CalendarDays ,   label:"Payments"       },      
+    {path:"/admin/camp-management"   , icon:CalendarDays ,   label:"Camps"       },
+    {path:"/admin/coupons"           , icon:Ticket ,         label:"Coupons"     },
+    {path:"/admin/settings"          , icon: Settings ,       label:"Settings"   },
+]  
 export const userNavLinks = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/user/dashboard' },
   { label: 'My Sessions', icon: CalendarDays, path: '/user/my-sessions' },
@@ -138,6 +159,8 @@ export const trainerNavLinks = [
   },
   { label: 'Profile', icon: CircleUser, path: 'trainer/profile' },
 ];
+
+
 
 export const AGE_GROUP = {
   KIDS: 'Kids',
@@ -223,3 +246,18 @@ export const TRANSACTION_STATUS = {
   COMPLETED: 'completed',
   FAILED: 'failed',
 };
+
+
+ export const DISCIPLINE_SPECIALTIES: Record<string, string[]> = {
+  football: ['Dribbling', 'Passing', 'Shooting', 'Defending', 'Goalkeeping', 'Fitness'],
+  basketball: ['Shooting', 'Dribbling', 'Defense', 'Rebounding', 'Playmaking'],
+  yoga: ['Hatha', 'Vinyasa', 'Ashtanga', 'Yin Yoga', 'Pranayama', 'Meditation'],
+  fitness: ['Weight Loss', 'Muscle Building', 'HIIT', 'Cardio', 'Strength Training'],
+  swimming: ['Freestyle', 'Butterfly', 'Backstroke', 'Breaststroke', 'Endurance'],
+  badminton:['Footwork & Movement','Smash Technique','Net Play & Drop Shots','Doubles Strategy','Singles Strategy','Serve & Return Mastery','Deception & Shot Disguise']
+};
+
+export const COMMON_LANGUAGES = [
+   'Hindi', 'Malayalam', 'Tamil', 'Telugu', 'Kannada',
+ 'Urdu', 'Arabic',  'French', 'Spanish', 'German',  'Japanese', 'Korean'
+];

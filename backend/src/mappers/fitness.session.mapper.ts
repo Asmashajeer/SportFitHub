@@ -2,6 +2,7 @@ import { IFitnessSessionDetailsPopulated, IFitnessSessionPopulated } from "@/dto
 import { IFitnessSession } from "@/models/fitnessSession.model"
 import { formatInTimeZone } from 'date-fns-tz';
 import { getTimezone } from "@/context/timezone.context";
+import { getSignedFileUrl } from "@/utils/cloudinary";
 
 export const toFitnessSessionResponseDTO=(session:Partial<IFitnessSession>)=>{
     const timezone = getTimezone();
@@ -32,7 +33,7 @@ export const toFitnessSessionResponseDTO=(session:Partial<IFitnessSession>)=>{
         isActive: session.  isActive,
         isDeleted: session.  isDeleted,
         isApproved: session. isApproved,
-        images:session.  images,
+        images:(session.images ?? []).map(publicId => getSignedFileUrl(publicId, 'image', 'upload')),
         rating:session. rating,
         createdAt: formatInTimeZone(session.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
         updatedAt: formatInTimeZone(session.updatedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
@@ -77,7 +78,7 @@ export const toFitnessSessionPublicDTO=(session:IFitnessSessionPopulated)=>{
         isActive: session.  isActive,
         isDeleted: session.  isDeleted,
         isApproved: session. isApproved,
-        images:session.  images,
+        images:(session.images ?? []).map(publicId => getSignedFileUrl(publicId, 'image', 'upload')),
         rating:session. rating,
         createdAt: formatInTimeZone(session.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
         updatedAt: formatInTimeZone(session.updatedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
@@ -131,7 +132,7 @@ export const toFitnessSessionDetailedPublicDTO=(session:IFitnessSessionDetailsPo
         isActive: session.  isActive,
         isDeleted: session.  isDeleted,
         isApproved: session. isApproved,
-        images:session.  images,
+        images:(session.images ?? []).map(publicId => getSignedFileUrl(publicId, 'image', 'upload')),
         rating:session. rating,
         createdAt: formatInTimeZone(session.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
         updatedAt: formatInTimeZone(session.updatedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
