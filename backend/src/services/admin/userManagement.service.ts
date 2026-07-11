@@ -63,9 +63,9 @@ export class UserManagementService implements IUserManagementService {
       query.isActive = false;
     }
     if (!role || role === 'all') {
-      query.role = { $ne: 'admin' };
+      query.roles = { $ne: 'admin' };
     } else {
-      query.role = role;
+      query.roles = role;
     }
 
     const [usersData, totalCount] = await Promise.all([
@@ -96,14 +96,14 @@ export class UserManagementService implements IUserManagementService {
     const user = await this._userRepo.findById(id);
     if (!user) throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);   
     if(!user.isBlocked ){
-        if(user.role===UserRole.TRAINER){
+        if(user.roles.includes(UserRole.TRAINER)){
           const trainer=await this._trainerRepo.findByUserId(user.id); 
           const skip=0;
           const limit=0;           
           const  sessions = await this._bookingSessionRepo.findBookedSessionsPopulatedUser({ trainerId:trainer.id, status:BOOKING_SESSION_STATUS.SCHEDULED },{skip,limit}) ;
           if(sessions.length>0) throw new AppError("Cannot block trainer,who's session is booked by user."); 
         }   
-        else if(user.role===UserRole.USER){
+        if(user.roles.includes(UserRole.USER)){
             const sessions = await this._bookingSessionRepo.find({ userId:user.id, status:BOOKING_SESSION_STATUS.SCHEDULED }) ;
             if(sessions.length>0) throw new AppError("Cannot block user with scheduled sessions."); 
         } 
@@ -144,7 +144,7 @@ export class UserManagementService implements IUserManagementService {
     const user = await this._userRepo.findById(id);
     if (!user) throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
 
-    if(user.role===UserRole.USER){
+    if(user.roles.includes(UserRole.USER)){
       const [sessions,wallet]=await Promise.all([
           this._bookingSessionRepo.find({ userId:user.id, status:BOOKING_SESSION_STATUS.SCHEDULED }) ,
           this._walletRepo.findByUserId(user._id),
@@ -153,9 +153,9 @@ export class UserManagementService implements IUserManagementService {
           throw new AppError("Cannot delete user with scheduled sessions.");         
         } else if(wallet &&wallet.balance>0){
         throw new AppError("Cannot delete user with remaining wallet balance. Refund first..");         
-        }
-   }
-   else if(user.role===UserRole.TRAINER){       
+          }
+    }
+    if(user.roles.includes(UserRole.TRAINER)){       
         const trainer=await this._trainerRepo.findByUserId(user.id);          
         const [sessions,wallet]=await Promise.all([         
         this._bookingSessionRepo.findBookedSessionsPopulatedUser({ trainerId:trainer.id, status:BOOKING_SESSION_STATUS.SCHEDULED }) ,
@@ -169,7 +169,7 @@ export class UserManagementService implements IUserManagementService {
     const dbSession = await mongoose.startSession();
     dbSession.startTransaction();
       try {
-        if (user.role === UserRole.TRAINER) {
+        if (user.roles.includes(UserRole.TRAINER)) {
           const trainer = await this._trainerRepo.findByUserId(user.id);
           await Promise.all([
             this._sportsSessionRepo.updateMany({trainerId:trainer.id},{isDeleted:true,isActive:false}),
@@ -179,7 +179,7 @@ export class UserManagementService implements IUserManagementService {
         }
         const data = await this._userRepo.softDeleteUser(user._id);
         if (!data) {
-            throw new AppError(`Failed to delete ${user.role}. Please try again.`);
+            throw new AppError(`Failed to deleteuser with roles ${user.roles}. Please try again.`);
         }
         await dbSession.commitTransaction();
         const userData = toUsersResponseData(data);
@@ -217,7 +217,7 @@ export class UserManagementService implements IUserManagementService {
     const user = await this._userRepo.findById(id);
     if (!user) throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
 
-    const data = await this._userRepo.updateRole(user._id, role);
+    const data = await this._userRepo.setActiveRole(user._id, role);
     const userData = toUsersResponseData(data);
     return userData;
   };

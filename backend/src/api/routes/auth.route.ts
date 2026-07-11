@@ -21,16 +21,18 @@ router.post('/resendOtp', authController.resendOtp);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword', authController.resetPassword);
 router.post('/login', validateBody(LoginSchema), authController.login);
-
-router.patch('/updateRole', protect, validateBody(updateRoleSchema), authController.updateRole);
+// router.patch('/updateRole', protect, validateBody(updateRoleSchema), authController.updateRole);
 
 router.post('/refresh', authController.refresh);
 
 router.post('/google-login', authController.googleLogin);
+router.patch('/setActiveRole', protect, validateBody(updateRoleSchema), authController.setActiveRole);
 
-router.patch('/updateRole', protect, validateBody(updateRoleSchema), authController.updateRole);
+
 router.get('/authMe', protect, authController.authMe);
 router.post('/fcm-token', protect,authController.updateFcmToken);
+
+
 router.post(
   '/logout',
   protect,

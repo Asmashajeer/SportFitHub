@@ -76,4 +76,43 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
         return sessions;
     }
    
+    async autoCompleteExpiredSessions() {
+
+        return await this.model.updateMany(
+            {
+            status: 'scheduled',
+            endDateTime: { $lt: new Date() },
+            },
+            { $set: { status: 'completed' } }
+        );
+     }
+
+
+    //--------------------find sessionOccurance by trainerId
+    async findOccuredSessions(filter:FilterQuery<IBookingSession> ,options: { skip?: number; limit?: number }={skip:0,limit:0}){
+            const {trainerId,date,status}=filter;
+        return await this.model.find({
+            trainerId,
+            date:{$lte:date},
+            status
+        })
+        // .populate('userId', '_id name email')
+        .populate<{ userId: { _id: Types.ObjectId; name: string; email: string } }>('userId')
+        .populate<{sessionId:{_id:Types.ObjectId; sessionName: string; sessionType: string}}>('sessionId')
+        .sort({ startTime: 1 })
+        .skip(options?.skip)
+        .limit(options?.limit)
+        .exec(); 
+    }
+    async markAttendance(sessionId:string,bookingSessionId:string,attendance:boolean){
+      
+        return await this.model.findOneAndUpdate(
+            { 
+                _id: new Types.ObjectId(bookingSessionId),
+                sessionId: new Types.ObjectId(sessionId),
+            },
+            {attendance} ,{new:true}    
+        ) .populate<{ userId: { _id: Types.ObjectId; name: string; email: string } }>('userId')
+         .populate<{sessionId:{_id:Types.ObjectId; sessionName: string; sessionType: string}}>('sessionId')
+    }
 }

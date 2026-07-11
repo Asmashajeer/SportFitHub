@@ -9,8 +9,8 @@ export const toUsersResponseData = (user: IUser): usersResposeDTO => {
     id: user._id.toString(),
     name: user.name,
     email: user.email,
-
-    role: user.role,
+    roles: user.roles,
+    activeRole: user.activeRole,
     googleId: user.googleId || ' ',
     isVerified: user.isVerified,
     isBlocked: user.isBlocked,

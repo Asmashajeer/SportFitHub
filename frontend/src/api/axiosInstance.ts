@@ -70,7 +70,7 @@ api.interceptors.response.use(
             }
             break;
           case 404:
-            errorMessage = ' Not found.';
+            errorMessage = error.response.data?.message || ' Not found.';
             break;
           case 422:
             errorMessage = error.response.data?.message || 'Validation failed.';

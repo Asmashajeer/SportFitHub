@@ -173,3 +173,10 @@ export const PENALTY = {
 
   STRIKE_RESET_DAYS: 90,   // strikes reset after 90 days 
 } as const;
+
+
+export enum AttendanceStatus {
+  PRESENT = 'present',
+  ABSENT = 'absent',
+  NOT_MARKED = 'not_marked'
+}

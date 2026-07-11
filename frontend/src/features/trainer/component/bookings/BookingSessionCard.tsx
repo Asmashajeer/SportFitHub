@@ -1,6 +1,7 @@
 import { formatDateDDMMYY, formatTo12Hour } from '@/utils/formatDate';
 import type { BookedSessionResponseDataWithUserInfo } from '../../types/trainer.bookings.types';
 import { useState } from 'react';
+
 interface ParticipantsProps {
   userId: string;
   userName: string;
@@ -27,7 +28,17 @@ function BookingSessionCard({
     userEmail: s.userEmail,
     status: s.status,
   }));
+  const isAttendanceMarkable=(session:BookedSessionResponseDataWithUserInfo)=>{
+    const now =new Date();
+    const [endHour,endMin]=session.endTime.split(":").map(Number);
+    const sessionEnd=new Date(session.date);
+    sessionEnd.setHours(endHour,endMin,0,0);
+    const endOfDay=new Date (first.date);
+    endOfDay.setHours(23,59,59,999);
 
+    return now >= sessionEnd && now <= endOfDay;
+  }
+  
   return (
     <div className="bg-zinc-800/40 hover:bg-zinc-800/70 border border-zinc-700/40 hover:border-zinc-600/60 rounded-xl p-4 transition-all duration-200">
       {/* Top */}
@@ -85,6 +96,7 @@ function BookingSessionCard({
         {/* <button className="text-xs px-3 py-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors">
           Cancel session
         </button> */}
+       
       </div>
       {showParticipant && participants.length > 0 && (
         <div className="px-4 pb-4 pt-2 border-t border-gray-100 space-y-2">

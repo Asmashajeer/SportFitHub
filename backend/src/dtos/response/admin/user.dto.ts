@@ -4,8 +4,8 @@ export interface usersResposeDTO {
   id: string;
   name: string;
   email: string;
-
-  role: UserRole;
+  roles: UserRole[];
+  activeRole: UserRole;
   googleId?: string;
   isVerified: boolean;
   isBlocked: boolean;

@@ -32,6 +32,7 @@ import {
   RegisterDataDTO,
 } from '@/dtos/response/auth.response.dto.js';
 import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
+import { IUser } from '@/models/user.model';
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export class AuthService implements IAuthService {
@@ -94,17 +95,17 @@ export class AuthService implements IAuthService {
     const userData: UserDataDTO = toUserData(verifiedUser);
 
     let profileCount = 0;
-    if (user.role === UserRole.USER) {
+    if (user.activeRole === UserRole.USER) {
       profileCount = await this._profileRepo.count({ userId: user._id.toString() });
     }
-    if (user.role === UserRole.TRAINER) {
+    if (user.activeRole === UserRole.TRAINER) {
       profileCount = await this._trainerRepo.count({ userId: user._id.toString() });
     }
 
     const hasProfile = profileCount !== 0;
     userData.hasProfile = hasProfile;
-    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.role,user.timezone);
-    const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
+    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.activeRole,user.timezone);
+    const refreshToken = this.generateRefreshToken(user._id.toString(), user.activeRole);
 
     return {
       success: true,
@@ -174,15 +175,15 @@ export class AuthService implements IAuthService {
 
     // CHECK FOR PROFILE existence
     let profileCount = 0;
-    if (user.role === UserRole.USER) {
+    if (user.activeRole === UserRole.USER) {
       profileCount = await this._profileRepo.count({ userId: user._id.toString() });
     }
-    if (user.role === UserRole.TRAINER) {
+    if (user.activeRole === UserRole.TRAINER) {
       profileCount = await this._trainerRepo.count({ userId: user._id.toString() });
     }
     userData.hasProfile = profileCount !== 0;
-    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.role,user.timezone);
-    const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
+    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.activeRole,user.timezone);
+    const refreshToken = this.generateRefreshToken(user._id.toString(), user.activeRole);
     console.log('user logged in');
     return {
       success: true,
@@ -210,7 +211,8 @@ export class AuthService implements IAuthService {
         googleId: sub,
         name: name,
         email: email,
-        role: UserRole.PENDING,
+        roles:[],
+        activeRole: UserRole.PENDING,
         password: `google_${Date.now()}`,
         isVerified: true,
       });
@@ -220,15 +222,15 @@ export class AuthService implements IAuthService {
     
     const userData: UserDataDTO = toUserData(user);
     let profileCount = 0;
-    if (user.role === UserRole.USER) {
+    if (user.activeRole === UserRole.USER) {
       profileCount = await this._profileRepo.count({ userId: user._id.toString() });
     }
-    if (user.role === UserRole.TRAINER) {
+    if (user.activeRole === UserRole.TRAINER) {
       profileCount = await this._trainerRepo.count({ userId: user._id.toString() });
     }
     userData.hasProfile = profileCount !== 0;
-    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.role,user.timezone);
-    const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
+    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.activeRole,user.timezone);
+    const refreshToken = this.generateRefreshToken(user._id.toString(), user.activeRole);
     return {
       success: true,
       message: SUCCESS_MESSAGES.AUTH.LOGIN_SUCCESS,
@@ -241,7 +243,7 @@ export class AuthService implements IAuthService {
   };
 
   //add role of user
-  updateRole = async (data: UpdateRoleDTO): Promise<UserResponseDTO> => {
+  setActiveRole = async (data: UpdateRoleDTO): Promise<UserResponseDTO> => {
     const Data = await this._userRepo.findByEmail(data.email);
     if (!Data) {
       console.log('No user Data');
@@ -249,21 +251,24 @@ export class AuthService implements IAuthService {
     }
 
     const userId = Data._id.toString();
-    const user = await this._userRepo.findOneAndUpdate(userId, { role: data.role });
-
+    let user:IUser|null;
+    if(!Data.roles.length)
+         user = await this._userRepo.findOneAndUpdate(userId, { roles:[data.role],activeRole: data.role });
+    else
+       user = await this._userRepo.setActiveRole(userId,data.role);
     if (!user) throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     const userData: UserDataDTO = toUserData(user);
     let profileCount = 0;
-    if (user.role === UserRole.USER) {
+    if (user.activeRole === UserRole.USER) {
       profileCount = await this._profileRepo.count({ userId: user._id.toString() });
     }
-    if (user.role === UserRole.TRAINER) {
+    if (user.activeRole === UserRole.TRAINER) {
       profileCount = await this._trainerRepo.count({ userId: user._id.toString() });
     }
     const hasProfile = profileCount !== 0;
     userData.hasProfile = hasProfile;
-    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.role,user.timezone);
-    const refreshToken = this.generateRefreshToken(user._id.toString(), user.role);
+    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.activeRole,user.timezone);
+    const refreshToken = this.generateRefreshToken(user._id.toString(), user.activeRole);
 
     return {
       success: true,
@@ -283,10 +288,10 @@ export class AuthService implements IAuthService {
       throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
     }
     let profileCount = 0;
-    if (user.role === UserRole.USER) {
+    if (user.activeRole === UserRole.USER) {
       profileCount = await this._profileRepo.count({ userId: user._id.toString() });
     }
-    if (user.role === UserRole.TRAINER) {
+    if (user.activeRole === UserRole.TRAINER) {
       profileCount = await this._trainerRepo.count({ userId: user._id.toString() });
     }
 
@@ -368,4 +373,20 @@ export class AuthService implements IAuthService {
     console.log('verification code sent to your mail. Please verify your email.');
     return true;
   };
+
+
+
+
+   //  public method — 
+  public generateTokensForUser(
+    id: string,
+    email: string,
+    role: string,
+    timezone: string
+  ): { accessToken: string; refreshToken: string } {
+    const accessToken = this.generateAccessToken(id, email, role, timezone);
+    const refreshToken = this.generateRefreshToken(id, role);
+    return { accessToken, refreshToken };
+  }
 }
+

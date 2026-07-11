@@ -17,5 +17,6 @@ export const AUTH_ROUTES = {
 
   //  roles
 
-  ADD_ROLE: '/auth/updateRole',
+  // SET_ROLE: '/auth/updateRole',
+  SET_ROLE:'/auth/setActiveRole'
 } as const;

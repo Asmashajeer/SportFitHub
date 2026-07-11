@@ -72,8 +72,8 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
       .findByIdAndUpdate(id, { $set: { password: password } }, { new: true })
       .exec();
   }
-  async updateRole(id: string | Types.ObjectId, role: UserRole): Promise<IUser | null> {
-    return await this.model.findByIdAndUpdate(id, { $set: { role: role } }, { new: true }).exec();
+  async setActiveRole(id: string | Types.ObjectId, role: UserRole): Promise<IUser | null> {
+    return await this.model.findByIdAndUpdate(id, { $set: { activeRole: role } }, { new: true }).exec();
   }
   async softDeleteUser(id: string | Types.ObjectId): Promise<IUser | null> {
     return await this.model
@@ -91,4 +91,9 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
       const user = await this.model.findById(userId).select('fcmToken');
       return user?.fcmToken ?? null;
     }
+
+    async addRole(userId:string,role:UserRole):Promise<IUser|null>{
+        return await this.model.findByIdAndUpdate(userId,{ $addToSet:{roles:role} }, { new: true }).exec();
+    }
+    
 }

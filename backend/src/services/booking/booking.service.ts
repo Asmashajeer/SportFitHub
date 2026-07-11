@@ -203,8 +203,9 @@ export class BookingService implements IBookingService {
       const AllSessionsToBoook=await Promise.all(sessionsToBook.map(async(S)=>{
 
             //convert to utc date 
-            const utcDate = toUTC_Date(S.date,S.startTime);
-
+            const utcDate = toUTC_Date(S.date,S.startTime);   
+            const endDateTime = toUTC_Date(S.date,S.endTime);
+          
             await this._bookingSessionRepo.createSessionBooking({        
                   bookingId: booking._id,
                   userId:    new Types.ObjectId (userId),
@@ -215,6 +216,7 @@ export class BookingService implements IBookingService {
                   date:     utcDate,
                   startTime:  S.startTime,
                   endTime:S.endTime, 
+                  endDateTime:endDateTime,
                   status: BOOKING_SESSION_STATUS.SCHEDULED,                  
                   
                 }, dbSession)
@@ -780,6 +782,7 @@ export class BookingService implements IBookingService {
       const AllSessionsToBoook=await Promise.all(payload.sessionsToBook.map(async (S)=>{
             //convert to utc date 
             const utcDate = toUTC_Date(S.date,S.startTime);
+            const endDateTime = toUTC_Date(S.date,S.endTime);
            return await this._bookingSessionRepo.createSessionBooking({        
                   bookingId: booking._id,
                   userId:    new Types.ObjectId (userId),
@@ -788,7 +791,8 @@ export class BookingService implements IBookingService {
                   slotId:   S.slotId,  
                   date:     utcDate,
                   startTime:  S.startTime,
-                  endTime: S.endTime, 
+                  endTime: S.endTime,
+                  endDateTime:endDateTime, 
                   status: BOOKING_SESSION_STATUS.SCHEDULED,                  
                   
                 }, dbSession)
@@ -849,6 +853,13 @@ export class BookingService implements IBookingService {
 
  }
 
+
+ async autoCompleteSessions() {
+
+  const result = await this._bookingSessionRepo.autoCompleteExpiredSessions();
+  console.log(`Auto-completed ${result.modifiedCount} sessions`);
+  return result;
+}
       
   
 
@@ -881,14 +892,14 @@ export class BookingService implements IBookingService {
       //  ----------- function to check isWithinCancellationWindow--------------
       isWithinCancellationWindow(date: string, time: string,cancellationWindow:number): boolean {
       
-      const sessionDateTime=toUTC_Date(date,time);
-      const now = new Date();
-      const diffMs = sessionDateTime.getTime() - now.getTime();
-      const diffHours = diffMs / (1000 * 60 * 60);
+        const sessionDateTime=toUTC_Date(date,time);
+        const now = new Date();
+        const diffMs = sessionDateTime.getTime() - now.getTime();
+        const diffHours = diffMs / (1000 * 60 * 60);
 
-      // Within window = session is less than 24hrs away
-      return diffHours <= cancellationWindow;
-    }
+        // Within window = session is less than 24hrs away
+        return diffHours <= cancellationWindow;
+      }
 
 
 

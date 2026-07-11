@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../service/authService';
 import toast from 'react-hot-toast';
 import { EmailSchema } from '../types/auth.schema';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate();

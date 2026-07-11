@@ -1,6 +1,6 @@
 import {  PAYLOAD_MODEL, SESSION_TYPE } from "@/constants/enums";
 import { IBookedSlot } from "@/models/booking.model";
-import { IBookedSessionPopulate } from "@/models/booking.session.model";
+import { IBookedSessionPopulate, IBookingSession } from "@/models/booking.session.model";
 import { IUser } from "@/models/user.model";
 import { Types } from "mongoose";
 
@@ -60,4 +60,16 @@ export interface BookingSessionRequestfilterDTO{
   date:string,
   status:string, 
   limit:number
+}
+export interface IBookedSessionPopulateUser extends Omit<IBookingSession,'userId' |'sessionId'>{
+  userId:{
+      _id:Types.ObjectId
+      name:string,
+      email:string
+   },
+   sessionId:{
+    _id:Types.ObjectId,
+    sessionName:string,
+    sessionType:string
+   }
 }

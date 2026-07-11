@@ -14,8 +14,9 @@ export interface IUserRepository extends BaseRepository<IUser> {
   updateVerificationStatus(id: string | Types.ObjectId, status: boolean): Promise<IUser | null>;
   updatePassword(id: string | Types.ObjectId, password: string): Promise<IUser | null>;
   blockUser(id: string | Types.ObjectId, isBlocked: boolean): Promise<IUser | null>;
-  updateRole(id: string | Types.ObjectId, role: UserRole): Promise<IUser | null>;
+  setActiveRole(id: string | Types.ObjectId, role: UserRole): Promise<IUser | null>;
   softDeleteUser(id: string | Types.ObjectId): Promise<IUser | null>;
    updateFcmToken(userId: string, fcmToken: string): Promise<void>
    findFcmTokenByUserId(userId: string): Promise<string | null> 
+   addRole(userId:string,role:UserRole):Promise<IUser|null>
 }

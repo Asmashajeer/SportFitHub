@@ -11,6 +11,7 @@ import {
 import Logger from '@/utils/logger';
 import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import { AuthRequest } from '@/middleware/auth.middleware';
+import { setAuthCookies } from '@/utils/set.cookies';
 
 export default class AuthController {
   private _authService: IAuthService;
@@ -25,7 +26,7 @@ export default class AuthController {
       Logger.info('Account created successfully', {
         userId: result.user.id,
         action: 'registration',
-        role: result.user.role,
+        role: result.user.activeRole,
       });
       res.status(result.statusCode).json(result);
     } catch (error) {
@@ -38,7 +39,7 @@ export default class AuthController {
     try {
       const result: UserResponseDTO = await this._authService.verifyEmail(req.body);
       const { refreshToken, accessToken, ...user } = result;
-      this._setAuthCookies(res, accessToken, refreshToken);
+      setAuthCookies(res, accessToken, refreshToken);
       res.status(result.statusCode).json(user);
     } catch (error) {
       next(error);
@@ -93,7 +94,7 @@ export default class AuthController {
       const result = await this._authService.login({ email, password,timezone });
       Logger.info(`User logged in`, { userId: result.user.id, email: email,timezone:timezone });
       const { refreshToken, accessToken, ...data } = result;
-      this._setAuthCookies(res, accessToken, refreshToken);
+      setAuthCookies(res, accessToken, refreshToken);
       
       res.status(STATUS_CODE.SUCCESS.OK).json(data);
 
@@ -113,7 +114,7 @@ export default class AuthController {
         email: result.user.email,
       });
       const { refreshToken, accessToken, ...user } = result;
-      this._setAuthCookies(res, accessToken, refreshToken);
+      setAuthCookies(res, accessToken, refreshToken);
       res.status(STATUS_CODE.SUCCESS.OK).json(user);
     } catch (error) {
       console.error('Google Auth Error:', error.message);
@@ -122,7 +123,7 @@ export default class AuthController {
   };
 
   //-----------------update userRole
-  updateRole = async (req: Request, res: Response, next: NextFunction) => {
+  setActiveRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const authReq = req as AuthRequest;
       const CurrUser = authReq.user
@@ -133,13 +134,13 @@ export default class AuthController {
         throw new AppError(ERROR_MESSAGES.AUTH.ROLE_INVALID, STATUS_CODE.ERROR.BAD_REQUEST);
       }
       const chosenRole = role as UserRole.TRAINER | UserRole.USER;
-      const data: UserResponseDTO = await this._authService.updateRole({
+      const data: UserResponseDTO = await this._authService.setActiveRole({
         email: email,
         role: chosenRole,
       });
       Logger.warn(`Role updated for user`, { targetEmail: email, newRole: role, updatedBy: id });
       const { refreshToken, accessToken, ...user } = data;
-      this._setAuthCookies(res, accessToken, refreshToken);
+      setAuthCookies(res, accessToken, refreshToken);
       res.status(STATUS_CODE.SUCCESS.OK).json(user);
     } catch (error) {
       next(error);
@@ -173,7 +174,7 @@ export default class AuthController {
 
       const { accessToken, refreshToken } =
         await this._authService.refreshAccessToken(refreshTokenExisted);
-      this._setAuthCookies(res, accessToken, refreshToken);
+      setAuthCookies(res, accessToken, refreshToken);
       res.status(STATUS_CODE.SUCCESS.OK).json({ success: true });
     } catch (error) {
       next(error);
@@ -212,23 +213,23 @@ export default class AuthController {
 
 
 // -----------------------Set Cookies---------------
-  private _setAuthCookies(res: Response, accessToken: string, refreshToken?: string) {
-    const isProd = process.env.NODE_ENV === 'production';
+  // private _setAuthCookies(res: Response, accessToken: string, refreshToken?: string) {
+  //   const isProd = process.env.NODE_ENV === 'production';
 
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: 'lax',
-      maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
-    });
+  //   res.cookie('accessToken', accessToken, {
+  //     httpOnly: true,
+  //     secure: isProd,
+  //     sameSite: 'lax',
+  //     maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
+  //   });
 
-    if (refreshToken) {
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: 'lax',
-        maxAge: Number(process.env.REFRESH_TOKEN_MAXAGE),
-      });
-    }
-  }
+  //   if (refreshToken) {
+  //     res.cookie('refreshToken', refreshToken, {
+  //       httpOnly: true,
+  //       secure: isProd,
+  //       sameSite: 'lax',
+  //       maxAge: Number(process.env.REFRESH_TOKEN_MAXAGE),
+  //     });
+  //   }
+  // }
 }

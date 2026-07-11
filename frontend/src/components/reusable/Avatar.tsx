@@ -19,17 +19,17 @@ function Avatar() {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
   const alias =
-    user?.role !== ROLES.ADMIN ? user?.name?.[0].toUpperCase() : <UserCog />;
+    user?.activeRole !== ROLES.ADMIN ? user?.name?.[0].toUpperCase() : <UserCog />;
   const [menu, setMenu] = useState(false);
 
   useEffect(() => {
     const loadProfilePic = async () => {
       try {
         if (user?.id && !user.profilePic) {
-          if (user?.role === ROLES.USER) {
+          if (user?.activeRole === ROLES.USER) {
             const data = await userService.getProfilePic(user?.id);                        
             setUser({ ...user, profilePic: data?.profilePic });
-          } else if (user?.role === ROLES.TRAINER) {
+          } else if (user?.activeRole === ROLES.TRAINER) {
             const data = await trainerService.getProfilePic();
             
             setUser({ ...user, profilePic: data?.profilePic });
@@ -59,7 +59,7 @@ function Avatar() {
   };
 
 
-  const ToDashboard = () => user && navigate(`/${user.role}/dashboard`);
+  const ToDashboard = () => user && navigate(`/${user.activeRole}/dashboard`);
 
   return (
     <div className="flex items-center gap-3  ">
@@ -68,7 +68,7 @@ function Avatar() {
         className="p-1 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors group"
       >
         <Bell
-          className={`w-5 h-5 ${user?.role === ROLES.TRAINER ? 'text-trainer-primary  group-hover:text-trainer-primary' : 'text-primary  group-hover:text-primary'} transition-colors`}
+          className={`w-5 h-5 ${user?.activeRole === ROLES.TRAINER ? 'text-trainer-primary  group-hover:text-trainer-primary' : 'text-primary  group-hover:text-primary'} transition-colors`}
         />
       </Button>
 
@@ -84,7 +84,7 @@ function Avatar() {
           />
         ) : (
           <div
-            className={`flex items-center justify-center w-full h-full rounded-full ${user?.role === ROLES.TRAINER ? 'bg-trainer-primary' : 'bg-primary'}  text-white text-xs`}
+            className={`flex items-center justify-center w-full h-full rounded-full ${user?.activeRole === ROLES.TRAINER ? 'bg-trainer-primary' : 'bg-primary'}  text-white text-xs`}
           >
             {alias}
           </div>

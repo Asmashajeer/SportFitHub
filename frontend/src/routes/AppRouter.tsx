@@ -14,6 +14,7 @@ import UserRoleSelector from '../features/auth/component/UserRoleSelector';
 
 import VerifyEmail from '../features/auth/component/VerifyEmail';
 import MainLayout from '../components/layout/MainLayout';
+import TrainerProfileForm from '../features/trainer/page/TrainerOnboarding';
 import AdminRoutes from './AdminRoutes';
 
 import Register from '@/features/auth/component/Register';
@@ -63,7 +64,9 @@ function AppRouter() {
                 </ProtectedRoute>
               }
             />
-
+            <Route path="/trainer/add-Profile"  element={
+               <ProtectedRoute allowedRoles={[ROLES.USER,ROLES.TRAINER]}> <TrainerProfileForm /> </ProtectedRoute>}
+             />
             {/* Trainer Routes */}
             <Route
               path="/trainer/*"

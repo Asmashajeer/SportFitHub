@@ -5,6 +5,7 @@ import type { Request, Response, NextFunction } from 'express';
 
 import Logger from '@/utils/logger';
 import { AuthRequest } from '@/middleware/auth.middleware';
+import { setAuthCookies } from '@/utils/set.cookies';
 
 export class ProfileController {
   private _profileService: IProfileService;
@@ -16,8 +17,12 @@ export class ProfileController {
     try {
            const { user } = req as AuthRequest;
      
-      const profileData = await this._profileService.addProfile({ userId:user.id, ...req.body });
+      const result = await this._profileService.addProfile({ userId:user.id, ...req.body });
       Logger.info('User completed the profile', { 'user id': user.id });
+      if(result.tokens){
+              setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
+            }
+      const {tokens,...profileData}=result;
       res.status(STATUS_CODE.SUCCESS.CREATED).json({
         message: SUCCESS_MESSAGES.USER.PROFILE_CREATED,
         profileData,

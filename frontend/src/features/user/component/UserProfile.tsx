@@ -40,8 +40,10 @@ import { uploadService } from '@/service/upload.service';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import toast from 'react-hot-toast';
 import { CreateProfileSchema } from '../types/user.schema';
+import { useNavigate } from 'react-router-dom';
 
 export const UserProfile = () => {
+  const navigate=useNavigate();
   const { user, setUser } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
   const { profile, fetchProfile, setProfile } = useUserStore();
@@ -203,39 +205,43 @@ return (
       </CardHeader>
 
       <CardContent className="pt-6 space-y-8">
-
-        {/* Avatar Row */}
-        <div className="flex items-center gap-5 pb-6 border-b border-border/50">
-          <div className="relative">
-            <Avatar className="h-16 w-16 border border-border">
-              <AvatarImage      src={`${userData.profilePic}?v=${imageVersion}`}   alt="Profile" /> 
-              <AvatarFallback className="bg-muted">
-                <User2Icon size={28} className="text-muted-foreground" />
-              </AvatarFallback>
-            </Avatar>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-background border border-border flex items-center justify-center hover:bg-muted transition-colors"
-            >
-              <Camera className="h-3 w-3 text-muted-foreground" />
-            </button>
-           {isLoading && <Loader2 className="animate-spin h-4 w-4" />}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleImageUpload}
-            />            
+        <div  className="flex items-center justify-between">                     
+            {/* Avatar Row */}
+            <div className="flex items-center gap-5 pb-6 border-b border-border/50">
+              <div className="relative">
+                <Avatar className="h-16 w-16 border border-border">
+                  <AvatarImage      src={`${userData.profilePic}?v=${imageVersion}`}   alt="Profile" /> 
+                  <AvatarFallback className="bg-muted">
+                    <User2Icon size={28} className="text-muted-foreground" />
+                  </AvatarFallback>
+                </Avatar>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-background border border-border flex items-center justify-center hover:bg-muted transition-colors"
+                >
+                  <Camera className="h-3 w-3 text-muted-foreground" />
+                </button>
+              {isLoading && <Loader2 className="animate-spin h-4 w-4" />}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />            
+              </div>          
+              <div className='text-start'>
+                <h3 className="text-base font-semibold">{userData.fullName}</h3>
+                <p className="text-sm text-muted-foreground">Member</p>
+                <p className="text-sm text-primary " >{user?.email}</p>
+              </div> 
+            </div>
+            {!user?.roles.includes('trainer') && (
+              <div className='text-end right-0'>              
+                  <Button  onClick={()=>navigate('/trainer/add-Profile')}>Become a Trainer</Button>                
+                </div> 
+              )}
           </div>
-          
-          <div className='text-start'>
-            <h3 className="text-base font-semibold">{userData.fullName}</h3>
-            <p className="text-sm text-muted-foreground">Member</p>
-            <p className="text-sm text-primary " >{user?.email}</p>
-          </div>
-        </div>
-
         {/* Two Column Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
 

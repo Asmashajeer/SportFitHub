@@ -4,4 +4,5 @@ const router=Router();
 router.get('/:trainerId',bookingController.getBookedSessionsByTrainer);
 router.get('/booked-sessions/:sessionId',bookingController.getBookedSessionsBySessionId);
 
+
 export default router;

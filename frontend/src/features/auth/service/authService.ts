@@ -61,8 +61,9 @@ export const authService = {
       return response.data;
   
   },
-  updateRole: async (email: string, selectedRole: UserRole) => {
-    const response = await api.patch(AUTH_ROUTES.ADD_ROLE, {
+  // set role After google login
+  setActiveRole: async (email: string, selectedRole: UserRole) => {
+    const response = await api.patch(AUTH_ROUTES.SET_ROLE, {
       email,
       role: selectedRole,
     });
@@ -75,5 +76,7 @@ export const authService = {
   fcmToken:async (token:string)=>{
     const response=await api.post('/auth/fcm-token', { fcmToken: token });
     return response.data;
-  }
+  },
+ 
+   
 };

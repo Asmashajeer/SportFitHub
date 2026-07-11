@@ -7,7 +7,7 @@ import { stream } from './utils/logger';
 import rootRouter from './api/routes';
 import webhookRoutes from './api/routes/booking/webhook.route'
 import './config/firebase.admin.config'
-
+import cron from 'node-cron';
 
 const app = express();
 app.use(
@@ -35,7 +35,12 @@ app.use(function (req, res, next) {
 app.use(morgan('combined', { stream }));
 
 
+
+
 app.use('/api/v1', rootRouter);
+
+
+
 app.use(errorHandler);
 
 export default app;

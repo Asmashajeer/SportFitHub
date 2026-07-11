@@ -6,19 +6,18 @@ import { restrictTo } from '@/middleware/role.middleware';
 import { uploadMiddleware } from '@/middleware/upload.middleware';
 import sessionRoute from '../trainer/session.route';
 import bookingsRoute from './bookings.route'
+import attendanceRoute from './attendance.route'
+
 const upload = uploadMiddleware();
 import { Router } from 'express';
 import { validateBody } from '@/middleware/validate.middleware';
-import { AvailabilityPricingSchema, BasicInfoSchema, CertificatesSchema, DocumentsInfoSchema, IdVerificationSchema, PaymentInfoSchema, PersonalInfoSchema } from '@/dtos/request/trainer/trainer.profile.request.dto';
+import { AvailabilityPricingSchema, BasicInfoSchema, CertificatesSchema,  IdVerificationSchema, PaymentInfoSchema, PersonalInfoSchema } from '@/dtos/request/trainer/trainer.profile.request.dto';
 
 
 const router = Router();
 router.use(protect);
 router.use(isBlocked);
 router.use(timezoneMiddleware); 
-router.use(restrictTo([UserRole.TRAINER]));
-router.use('/sessions', sessionRoute);
-router.use('/bookings', bookingsRoute);
 
 router.post(
   '/add-profile',
@@ -29,6 +28,12 @@ router.post(
   ]),
   trainerController.addProfile
 );
+router.use(restrictTo([UserRole.TRAINER]));
+router.use('/sessions', sessionRoute);
+router.use('/bookings', bookingsRoute);
+router.use('/attendance', attendanceRoute);
+
+
 router.get('/profile_pic', trainerController.getProfilePic);
 router.patch('/profile/profile_pic/:id', trainerController.updateProfilePic);
 router.patch('/profile/:id/basicInfo',validateBody(BasicInfoSchema), trainerController.updateBasicInfo);

@@ -1,4 +1,4 @@
-import { DOC_VERIFY_STATUS, TRAINER_STATUS } from '@/constants/enums';
+import { DOC_VERIFY_STATUS, TRAINER_STATUS, UserRole } from '@/constants/enums';
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 
 import {
@@ -13,6 +13,7 @@ import { TrainerProfileResponseDTO } from '@/dtos/response/trainer/trainer.respo
 import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
 import { IUserRepository } from '@/interfaces/repositories/IUser.repository';
+import { IAuthService } from '@/interfaces/services/IAuth.service';
 import { ITrainerService } from '@/interfaces/services/trainer/Itrainer.service';
 import { toTrainerProfileData, ToTrainerProfileDTO } from '@/mappers/trainer/trainer.mapper';
 import { AuthUser } from '@/middleware/auth.middleware';
@@ -28,9 +29,11 @@ import { Types } from 'mongoose';
 export class TrainerService implements ITrainerService {
   private _trainerRepo: ITrainerRepository;
   private _userRepo:IUserRepository;
-  constructor(trainerRepo: ITrainerRepository,userRepo:IUserRepository) {
+  private _authService:IAuthService;
+  constructor(trainerRepo: ITrainerRepository,userRepo:IUserRepository,authService:IAuthService) {
     this._trainerRepo = trainerRepo;
-     this._userRepo=userRepo;
+    this._userRepo=userRepo;
+    this._authService=authService;
   }
 
   async checkExistingProfile(userId: Types.ObjectId|string): Promise<void> {
@@ -39,12 +42,26 @@ export class TrainerService implements ITrainerService {
       throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_EXISTS, STATUS_CODE.ERROR.CONFLICT);
   }
 
-  async addProfile(profileData: Partial<ITrainerProfile>,user:AuthUser): Promise<TrainerProfileResponseDTO> {
+  async addProfile(profileData: Partial<ITrainerProfile>,user:AuthUser): Promise<TrainerProfileResponseDTO & {tokens?:{ accessToken: string; refreshToken: string }}> {
     await this.checkExistingProfile(profileData.userId);
     const data = await this._trainerRepo.create(profileData);
     const trainerData=serializeTrainerProfile(data, { id: user?.id, role:user?.role })
     const profile: TrainerProfileResponseDTO = toTrainerProfileData(trainerData);
     const userData=await this._userRepo.findById(user.id.toString());
+
+    let tokens: { accessToken: string; refreshToken: string } | undefined;
+    //user become a trainer too
+    if(user.role===UserRole.USER &&! userData.roles.includes(UserRole.TRAINER)){
+      await this._userRepo.addRole(user.id,UserRole.TRAINER);    
+      const updatedUser=await this._userRepo.setActiveRole(user.id,UserRole.TRAINER);
+      tokens = this._authService.generateTokensForUser(
+        updatedUser._id.toString(),
+        updatedUser.email,
+        updatedUser.activeRole,
+        updatedUser.timezone
+      );
+    }
+
     await sendNotificationEmail({
         to: user.email,
         title: "We've received your application",
@@ -64,11 +81,11 @@ export class TrainerService implements ITrainerService {
           body: `We're reviewing your trainer application. We'll notify you once it's complete.`,
           data: {
             type: TRAINER_STATUS.SUBMITTED,
-            trainerId: trainerData.id.toString(),
+            trainerId: trainerData._id.toString(),
           },
         });
       }
-    return profile;
+    return { ...profile, tokens };
   }
 
   async getTrainer(user:AuthUser): Promise<TrainerProfileDTO> {

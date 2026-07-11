@@ -5,6 +5,7 @@ import { AuthRequest } from '@/middleware/auth.middleware';
 
 import Logger from '@/utils/logger';
 import { serializeTrainerProfile } from '@/utils/serializeTrainerProfile';
+import { setAuthCookies } from '@/utils/set.cookies';
 
 import { Request, Response, NextFunction } from 'express';
 
@@ -21,17 +22,20 @@ export class TrainerController {
      
       await this._trainerService.checkExistingProfile(user.id);
 
-      const profile = {
+      const profileData = {
         userId:user.id,
         ...req.body,
       };
-      const result = await this._trainerService.addProfile(profile,user);
+      const result = await this._trainerService.addProfile(profileData,user);
       Logger.info('Trainer created an application', { id: user.id });
-      
+      if(result.tokens){
+        setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
+      }
+      const {tokens,...profile}=result;
       res.status(STATUS_CODE.SUCCESS.CREATED).json({
         success: true,
         message: SUCCESS_MESSAGES.USER.PROFILE_CREATED,
-        profileData:  result,
+        profileData:  profile,
       });
     } catch (error) {
       next(error);

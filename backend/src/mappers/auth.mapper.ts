@@ -7,7 +7,8 @@ export const toRegisterData = (user: IUser): RegisterDataDTO => {
     id: user._id.toString(),
     name: user.name,
     email: user.email || '',
-    role: user.role,
+    roles: user.roles,
+    activeRole :user.activeRole,
     timezone:user.timezone,
     isVerified: user.isVerified,
   };
@@ -19,7 +20,8 @@ export const toUserData = (user: IUser): UserDataDTO => {
     id: user._id.toString(),
     name: user.name,
     email: user.email,
-    role: user.role,
+    roles: user.roles,
+    activeRole :user.activeRole,
     timezone:user.timezone,
     isVerified: user.isVerified,
   };
@@ -28,7 +30,7 @@ export const toUserData = (user: IUser): UserDataDTO => {
    return{
       id: user.id.toString(),
       email: user.email,
-      role: user.role,
+      role: user.activeRole,
       timezone: user.timezone,
    }
  }

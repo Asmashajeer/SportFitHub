@@ -3,6 +3,7 @@ import { STATUS_CODE } from "@/constants/messages";
 import { getTimezone } from "@/context/timezone.context";
 import { CheckAvailabilityDTO } from "@/dtos/request/booking/booking.request.dto";
 import { IBookingService } from "@/interfaces/services/booking/IBooking.service";
+import { IAttendanceService } from "@/interfaces/services/trainer/IAttendance.service";
 import { AuthRequest } from "@/middleware/auth.middleware";
 import AppError from "@/utils/AppError";
 
@@ -11,8 +12,10 @@ import { STATUS_CODES } from "http";
 
 export class BookingController{
     private _bookingService:IBookingService;
+   
     constructor(bookingService:IBookingService){
         this._bookingService=bookingService;
+       
     }
 
  
@@ -182,4 +185,6 @@ export class BookingController{
             next(error);
         }
    }
+
+   
 }

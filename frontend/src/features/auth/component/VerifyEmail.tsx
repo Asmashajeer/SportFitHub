@@ -9,8 +9,8 @@ import {
   OTP_TYPE,
   ROLES,
 } from '../../../constants/constants';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 const VerifyEmail = () => {
   const OTP_EXPIRATION_MS = OTP_EXPIRATION_MINUTES * 60 * 1000;
@@ -87,7 +87,7 @@ const VerifyEmail = () => {
       console.log(userData);
       toast.success('Verification successful!');
       setUser(userData.user);
-      const userRole = userData.user.role;
+      const userRole = userData.user.activeRole;
       if (userRole === ROLES.USER) navigate('/user/add-Profile');
       else if (userRole === ROLES.TRAINER) navigate('/trainer/add-Profile');
       else navigate('/update-role');

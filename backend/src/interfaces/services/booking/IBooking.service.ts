@@ -21,4 +21,5 @@ export interface IBookingService{
     createBookingWithWallet(userId:string,payload:PayloadDTO ):Promise<BookingConfirmResponseDTO>
     getBookedSessionsBySessionId(sessionId:string):Promise<UserSessionsResponseDTOwithPopulatedSession[]>
     isWithinCancellationWindow(date: string, time: string,cancellationWindow:number): boolean
+     autoCompleteSessions() 
 }

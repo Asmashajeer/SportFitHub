@@ -7,7 +7,8 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  roles: UserRole[];
+  activeRole: UserRole;
   timezone:string;
   hasProfile: boolean;
   isVerified: boolean;

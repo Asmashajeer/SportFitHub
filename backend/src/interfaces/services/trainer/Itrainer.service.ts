@@ -15,7 +15,7 @@ import { Types } from 'mongoose';
 
 export interface ITrainerService {
   checkExistingProfile(userId: Types.ObjectId|string): Promise<void>;
-  addProfile(profileData: Partial<ITrainerProfile>,user:AuthUser): Promise<TrainerProfileResponseDTO>;
+  addProfile(profileData: Partial<ITrainerProfile>,user:AuthUser): Promise<TrainerProfileResponseDTO & {tokens?:{ accessToken: string; refreshToken: string }}>;
 
   // by trainer and admin
   getTrainer(user:AuthUser): Promise<TrainerProfileDTO>;

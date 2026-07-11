@@ -6,7 +6,8 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  role: UserRole;
+  roles: UserRole[];
+  activeRole:UserRole;
   googleId?: string;
   timezone:string;
   isVerified: boolean;
@@ -29,7 +30,12 @@ const UserSchema = new mongoose.Schema(
       unique: true,
     },
     password: { type: String, default: '' },
-    role: {
+    roles: {
+      type: [String],
+      enum: Object.values(UserRole),
+      default: ['user'],
+    },
+    activeRole: {
       type: String,
       enum: Object.values(UserRole),
       default: 'user',

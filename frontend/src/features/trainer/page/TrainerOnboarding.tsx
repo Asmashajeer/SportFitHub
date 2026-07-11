@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import {
   AppName,
   GENDER,
-  GOVT_ID_TYPE,
+  GOVT_ID_TYPE,  
   TRAINER_CATEGORY,
   UPLOAD_TYPE,
+  USER_ROLES,
 } from '@/constants/constants';
 import type {
   DocumentValues,
@@ -25,6 +26,8 @@ import { AddTrainerProfileSchema } from '../types/trainer.profile.schema';
 import { uploadService } from '@/service/upload.service';
 
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/Button';
+import { X } from 'lucide-react';
 
 const TrainerOnboarding = () => {
   const navigate = useNavigate();
@@ -250,7 +253,9 @@ const TrainerOnboarding = () => {
         localStorage.removeItem(CACHE_KEY);
         toast.success('Application submitted successfully!');
         setHasProfile(true);
+        
         navigate('/trainer/dashboard');
+
       }
     } catch (error) {
       toast.error((error as string) || 'Something went wrong');
@@ -262,6 +267,7 @@ const TrainerOnboarding = () => {
     <div className="max-w-2xl mx-auto p-6">
       {/* 3. Wrap everything in FormProvider */}
       <FormProvider {...form}>
+        {user?.activeRole===USER_ROLES.USER && <Button  variant='ghost'onClick={()=>navigate('/user/dashboard')} className='flex justify-start'> <X className="w-6 h-6" />Close</Button>}
         <div className="space-y-6">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold tracking-tight mb-2">

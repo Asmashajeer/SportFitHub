@@ -8,18 +8,22 @@ import { CreateUserProfileDTO } from '@/dtos/request/user/profile.request.dto';
 import { toProfileResponseData } from '@/mappers/profile.mapper';
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 import { AuthUser } from '@/middleware/auth.middleware';
+import { UserRole } from '@/constants/enums';
+import { IAuthService } from '@/interfaces/services/IAuth.service';
 
 
 export class ProfileService {
   private _profileRepo: IProfileRepository;
   private _userRepo: IUserRepository;
-  constructor(profileRepository: IProfileRepository, userRepository: IUserRepository) {
+  private _authService:IAuthService;
+  constructor(profileRepository: IProfileRepository, userRepository: IUserRepository,authService:IAuthService) {
     this._profileRepo = profileRepository;
     this._userRepo = userRepository;
+    this._authService=authService;
   }
 
   //-------------Create a profile
-  async addProfile(data: CreateUserProfileDTO): Promise<ProfileResponseDataDTO> {    
+  async addProfile(data: CreateUserProfileDTO): Promise<ProfileResponseDataDTO & {tokens?:{ accessToken: string; refreshToken: string }}> {    
     const { userId: inputUserId } = data;
     const profileCount = await this._profileRepo.count({ userId: inputUserId });
     const isPrimary = profileCount === 0;
@@ -62,7 +66,22 @@ export class ProfileService {
       throw new AppError(ERROR_MESSAGES.GENERAL.FAILED, STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
 
     const profileData: ProfileResponseDataDTO = toProfileResponseData(result);
-    return profileData;
+     
+     let tokens: { accessToken: string; refreshToken: string } | undefined;
+      const user=await this._userRepo.findById(data.userId);
+        //user become a trainer too
+        if(user.activeRole===UserRole.TRAINER &&! user.roles.includes(UserRole.USER)){
+          await this._userRepo.addRole(user.id,UserRole.TRAINER);    
+          const updatedUser=await this._userRepo.setActiveRole(user.id,UserRole.TRAINER);
+          tokens = this._authService.generateTokensForUser(
+            updatedUser._id.toString(),
+            updatedUser.email,
+            updatedUser.activeRole,
+            updatedUser.timezone
+          );
+        }
+        return { ...profileData, tokens };
+    
   }
 
   // ----------------to get a primary profile by userId

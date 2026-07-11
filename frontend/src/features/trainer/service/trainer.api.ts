@@ -9,10 +9,19 @@ export const TRAINER_ROUTES = {
   },
   UPDATE_PROFILE_PIC: {
       BY_ID: (profileId: string) => `trainer/profile/profile_pic/${profileId}`,
+
+
+
     },
   //------------Booking------------
   GET_BOOKINGS: '/trainer/bookings',
   GET_BOOKED_SESSIONS:'/trainer/bookings/booked-sessions',
+ 
+}
+
+export const TRAINER_ATTENDACE_ROUTE={
+   GET_BOOKED_SESSIONS_OCCURANCES:'/trainer/attendance/booked-sessions-occurances',
+   MARK_ATTENDANCE:(sessionId:string)=>`/trainer/attendance/${sessionId}/mark-attendance`
 }
   
 export const SPORTS_SESSION_ROUTE = {

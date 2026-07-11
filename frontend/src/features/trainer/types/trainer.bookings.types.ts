@@ -37,3 +37,26 @@ export interface queryParamsOptions {
   date?: string;
   status?: string;
 }
+
+
+interface participants{  
+      bookingSessionId:string,
+      userId:string,
+      name:string,
+      email:string,
+      attendance:boolean
+  }
+
+export interface SessionOccuranceResponseData{
+  sessionId:string,
+  sessionModel: typeof PAYLOAD_MODEL[keyof typeof PAYLOAD_MODEL];
+  sessionName:string,
+  sessionType:string,
+  slotId: string,
+  date: string,
+  startTime: string,
+  endTime: string,
+  isbookedSessionGroup:boolean,
+  participants:participants[]
+}
+

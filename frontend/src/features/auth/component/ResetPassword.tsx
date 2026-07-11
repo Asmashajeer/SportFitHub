@@ -12,8 +12,8 @@ import {
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { OTP_TYPE } from '@/constants/constants';
 
 // import { ResetPasswordSchema } from "../types/auth.schema";

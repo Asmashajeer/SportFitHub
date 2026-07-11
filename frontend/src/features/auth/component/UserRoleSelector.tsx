@@ -5,7 +5,7 @@ import { authService } from '../service/authService';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import {
   Select,
   SelectContent,
@@ -30,13 +30,13 @@ const UserRoleSelector: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const data = await authService.updateRole(email, selectedRole);
+      const data = await authService.setActiveRole(email, selectedRole);
       setUser(data.user);
-      const { role } = data.user;
+      const { activeRole } = data.user;
       if (!user.hasProfile) {
-        navigate(`/${role}/add-Profile`);
-      } else if (role) {
-        navigate(`/${role}/dashboard`);
+        navigate(`/${activeRole}/add-Profile`);
+      } else if (activeRole) {
+        navigate(`/${activeRole}/dashboard`);
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -96,20 +96,7 @@ const UserRoleSelector: React.FC = () => {
                     ))}
                 </SelectContent>
               </Select>
-              {/* <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-                className="w-full px-4 py-3 pr-10 rounded-xl bg-secondary/60 border border-[#454c59] text-white appearance-none focus:ring-2 focus:ring-primary outline-none transition-all duration-200 cursor-pointer"
-              >
-                {Object.values(ROLES)
-                  .filter((role) => role !== ROLES.ADMIN)
-                  .map((role) => (
-                    <option key={role} value={role}>
-                      {role.charAt(0).toUpperCase() + role.slice(1)}
-                    </option>
-                  ))}
-              </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" /> */}
+              
             </div>
           </div>
 

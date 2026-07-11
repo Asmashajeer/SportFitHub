@@ -21,7 +21,8 @@ export const passwordSchema = z
 export const LoginSchema = z.object({
   email: EmailSchema,
   password: passwordSchema,
-  role: z.enum(ROLES),
+  roles: z.array(z.enum(ROLES)),
+  activeRole: z.enum(ROLES),
   timezone:z.string()
 });
 

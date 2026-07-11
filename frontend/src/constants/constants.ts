@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  CheckCircle,
   CircleUser,
   Layers,
   LayoutDashboard,
@@ -25,6 +26,11 @@ export const ROLES = {
   USER: 'user',
 } as const;
 
+export const USER_ROLES = {
+  TRAINER: ROLES.TRAINER,
+  USER: ROLES.USER,
+} as const;
+ 
 export type UserRole = (typeof ROLES)[keyof typeof ROLES];
 
 export const OTP_EXPIRATION_MINUTES = 1;
@@ -146,6 +152,7 @@ export const trainerNavLinks = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/trainer/dashboard' },
   { label: 'Sessions', icon: CalendarDays, path: '/trainer/sessions' },
   { label: 'Bookings ', icon: UserCheck, path: '/trainer/bookings' },
+  { label: 'Attandance', icon: CheckCircle, path: '/trainer/attendance' },
   { label: 'Earnings', icon: Wallet2, path: '/camps' },
   {
     label: 'Communication',
@@ -197,6 +204,8 @@ export const INTENSITY_LEVEL = {
 };
 export type Intensity_level_type =
   (typeof INTENSITY_LEVEL)[keyof typeof INTENSITY_LEVEL];
+
+  
 export const PAYLOAD_MODEL = {
   SPORT_SESSION: 'SportsSession',
   FITNESS_SESSION: 'FitnessSession',
@@ -261,3 +270,9 @@ export const COMMON_LANGUAGES = [
    'Hindi', 'Malayalam', 'Tamil', 'Telugu', 'Kannada',
  'Urdu', 'Arabic',  'French', 'Spanish', 'German',  'Japanese', 'Korean'
 ];
+
+
+export const ATTENDANCE_STATUS={
+  PRESENT:true,
+  ABSENT:false
+} as const

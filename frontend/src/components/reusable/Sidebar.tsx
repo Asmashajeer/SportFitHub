@@ -79,7 +79,7 @@ const Sidebar = () => {
   const user = useAuthStore((state) => state.user);
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const clearStore = UseAdminStore((state) => state.clearAdminData);
-  const role = user?.role;
+  const role = user?.activeRole;
   const navLinks = role === ROLES.USER ? userNavLinks : trainerNavLinks;
   const trainerProfile = useTrainerStore((state) => state.profile);
   const fetchTrainer = useTrainerStore((state) => state.fetchProfile);

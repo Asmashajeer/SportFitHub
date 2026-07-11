@@ -31,7 +31,8 @@ const Login = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: ROLES.USER as UserRole,
+    roles: [ROLES.USER as UserRole],
+    activeRole: ROLES.USER as UserRole,
     timezone:"UTC"
   });
   const payload = useBookingStore((state) => state.payload);
@@ -39,12 +40,12 @@ const Login = () => {
   
   useEffect(() => {
     if (isAuthenticated && user?.isVerified) {
-      if (from && payload && user.role===ROLES.USER) {
+      if (from && payload && user.activeRole===ROLES.USER) {
         navigate('/checkout');
         return;
       }
-      const dashboardPath = Object.values(ROLES).includes(user.role)
-        ? `/${user.role}/dashboard`
+      const dashboardPath = Object.values(ROLES).includes(user.activeRole)
+        ? `/${user.activeRole}/dashboard`
         : '/update-role';
       navigate(dashboardPath, { replace: true });
     }
@@ -90,26 +91,26 @@ const Login = () => {
       return;
     }
    
-    const { email, password, role,timezone } = result.data;
+    const { email, password,roles,activeRole,timezone } = result.data;
     
     try {
-      const data = await authService.login({ email, password, role,timezone });
+      const data = await authService.login({ email, password,roles,activeRole,timezone });
       if(!data) {
         toast.error("Invalid email or password")
         return;
       }
 
       const user = data.user;
-      const user_Role = user.role;
+      const user_Role = user.activeRole;
       setUser(data.user);     
 
       if (!user.isVerified) {
         console.log('Navigating to verifyEmail');
         return navigate('/verifyEmail', { state: data.user });
-      } else if (user.role === ROLES.ADMIN) {
+      } else if (user.activeRole === ROLES.ADMIN) {
         setHasProfile(true);
         return navigate('/admin/dashboard', { replace: true });
-      } else if (!Object.values(ROLES).includes(user.role)) {
+      } else if (!Object.values(ROLES).includes(user.activeRole)) {
         return navigate('/update-role');
       } else if (!user.hasProfile && user.isVerified) {
         if (user_Role === ROLES.TRAINER) {
@@ -117,7 +118,7 @@ const Login = () => {
         } else if (user_Role === ROLES.USER) {         
           return navigate('/user/add-Profile', { replace: true });
         }
-      } else if (user.role === ROLES.USER && user.isVerified) {
+      } else if (user.activeRole === ROLES.USER && user.isVerified) {
         setHasProfile(user.hasProfile);
 
         if (payload) {

@@ -35,14 +35,15 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: ROLES.USER as UserRole,
+    roles: [ROLES.USER as UserRole],
+    activeRole: ROLES.USER as UserRole,
     timezone:'UTC',
   });
 
   useEffect(() => {
     if (isAuthenticated && user?.isVerified) {
-    const dashboardPath = Object.values(ROLES).includes(user.role)
-          ? `/${user.role}/dashboard`
+    const dashboardPath = Object.values(ROLES).includes(user.activeRole)
+          ? `/${user.activeRole}/dashboard`
           : '/update-role';
         navigate(dashboardPath, { replace: true });
     }
@@ -83,10 +84,10 @@ const Register = () => {
       return;
     }
 
-    const { name, email, password, role,timezone } = result.data;
+    const { name, email, password, roles,activeRole,timezone } = result.data;
 
     try {
-      const data = await authService.register({ name, email, password, role ,timezone});
+      const data = await authService.register({ name, email, password, roles,activeRole ,timezone});
       const userData = data.user;
       setUser({ ...userData, hasProfile: false });
       toast.success(data.message);
@@ -250,11 +251,12 @@ const Register = () => {
                   Role
                 </legend>
                 <Select
-                  value={formData.role}
+                  value={formData.activeRole}
                   onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      role: value as UserRole,
+                      roles:[value as UserRole],
+                      activeRole: value as UserRole,
                     })
                   }
                 >

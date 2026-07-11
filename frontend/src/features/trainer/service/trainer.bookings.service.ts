@@ -32,5 +32,24 @@ export const trainerBookingsService = {
      const res = await api.get(TRAINER_ROUTES.GET_BOOKED_SESSIONS + `/${sessionId}`);
     return res.data;
   },
+
+  // getSessionOccurance:async (trainerId:string,queryParams:queryParamsOptions )=>{
+  //   const params: queryParamsOptions = {
+  //     page: queryParams.page,
+  //     limit: PAGINATION_DEFAULT_LIMIT,
+  //   };
+  //   if (queryParams?.sessionModel) {
+  //     params.sessionModel = queryParams.sessionModel;
+  //   }
+  //   if (queryParams?.date) {
+  //     params.date = queryParams.date;
+  //   }
+  //   if (queryParams?.status) {
+  //     params.status = queryParams.status;
+  //   }
+    
+  //   const res = await api.get(TRAINER_ROUTES.GET_BOOKED_SESSIONS_OCCURANCES ,{params:{...params,trainerId}});
+  //   return res.data;
+  // }
   
 };

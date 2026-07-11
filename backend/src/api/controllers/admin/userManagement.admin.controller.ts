@@ -65,7 +65,7 @@ export class UserManagementController {
     try {
       const id = req.params.id;
       const user = await this._userManagementService.deleteUser(id);
-      Logger.info(`Admin deleted the  user ${user.role} `, {
+      Logger.info(`Admin deleted the  user with roles ${user.roles} `, {
         userId: id,
         name: user.name,
         email: user.email,
