@@ -7,9 +7,9 @@ export interface ProgramResponseDTO {
   isActive: boolean;
 }
 
-export interface FitnessProgramResponseDTOWithPagination{
-  programs: ProgramResponseDTO[],
-  total: number,
-  totalPages: number,
-  page:number
+export interface FitnessProgramResponseDTOWithPagination {
+  programs: ProgramResponseDTO[];
+  total: number;
+  totalPages: number;
+  page: number;
 }

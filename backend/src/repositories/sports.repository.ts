@@ -7,10 +7,7 @@ export class SportsRepository extends BaseRepository<ISports> implements ISports
   constructor(model: Model<ISports>) {
     super(model);
   }
-    async findAll(query:FilterQuery<ISports>,options: { skip:number, limit:number }){
-        return await this.model.find(query)        
-        .sort({sportsName:1})
-        .skip(options.skip)
-        .limit(options.limit);
-    }
+  async findAll(query: FilterQuery<ISports>, options: { skip: number; limit: number }) {
+    return await this.model.find(query).sort({ sportsName: 1 }).skip(options.skip).limit(options.limit);
+  }
 }

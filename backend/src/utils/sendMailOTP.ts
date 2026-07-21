@@ -1,18 +1,14 @@
-
-
 import { transporter } from '@/utils/mailer';
 
- 
-
 export const sendEmailOTP = async (email: string, otp: string) => {
-console.log("GMAIL_USER:", process.env.EMAIL_FROM);
- console.log("GMAIL_APP_PASSWORD:", !!process.env.GMAIL_APP_PASSWORD);
-  try{  
+  console.log('GMAIL_USER:', process.env.EMAIL_FROM);
+  console.log('GMAIL_APP_PASSWORD:', !!process.env.GMAIL_APP_PASSWORD);
+  try {
     await transporter.sendMail({
-        from: process.env.EMAIL_FROM,
-        to: email,
-        subject: 'Email Verification',
-        html: `<div class="bg-gray-100 p-0 m-0">
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: 'Email Verification',
+      html: `<div class="bg-gray-100 p-0 m-0">
                         <div class="bg-gray-100 py-10 sm:py-16">
                             <div class="max-w-xl mx-auto bg-white p-6 sm:p-10 rounded-lg shadow-xl">
                                 
@@ -53,7 +49,7 @@ console.log("GMAIL_USER:", process.env.EMAIL_FROM);
     });
     console.log(`OTP sent successfully to ${email}`);
   } catch (error) {
-    console.error("Email send failed:", error);
-    throw new Error("Failed to send email");
+    console.error('Email send failed:', error);
+    throw new Error('Failed to send email');
   }
 };

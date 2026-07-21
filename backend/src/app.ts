@@ -5,9 +5,8 @@ import errorHandler from './middleware/errorHandler';
 import morgan from 'morgan';
 import { stream } from './utils/logger';
 import rootRouter from './api/routes';
-import webhookRoutes from './api/routes/booking/webhook.route'
-import './config/firebase.admin.config'
-import cron from 'node-cron';
+import webhookRoutes from './api/routes/booking/webhook.route';
+import './config/firebase.admin.config';
 
 const app = express();
 app.use(
@@ -26,20 +25,12 @@ app.use(express.json({ limit: '50mb' }));
 app.use(cookieParser());
 
 app.use(function (req, res, next) {
-  res.set(
-    'Cache-Control',
-    'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0'
-  );
+  res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
   next();
 });
 app.use(morgan('combined', { stream }));
 
-
-
-
 app.use('/api/v1', rootRouter);
-
-
 
 app.use(errorHandler);
 

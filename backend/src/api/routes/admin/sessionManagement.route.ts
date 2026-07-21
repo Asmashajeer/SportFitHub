@@ -1,4 +1,3 @@
-
 import { sessionManagementController } from '@/container';
 import { Router } from 'express';
 const router = Router();

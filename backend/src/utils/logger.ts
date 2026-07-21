@@ -32,7 +32,7 @@ const consoleFormat = winston.format.combine(
   winston.format.colorize({ all: true }),
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.errors({ stack: true }),
-  winston.format.printf(info => {
+  winston.format.printf((info) => {
     const { timestamp, level, message, stack, ...meta } = info;
 
     let log = `${timestamp} [${level}]: ${message}`;

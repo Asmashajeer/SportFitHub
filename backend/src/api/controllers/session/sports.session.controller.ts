@@ -1,4 +1,3 @@
-
 import { PAGINATION_LIMIT, UserRole } from '@/constants/enums';
 import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import { ISportsSessionService } from '@/interfaces/services/session/ISports.session.service';
@@ -29,11 +28,10 @@ export class SportsSessionController {
     }
   };
   getSportSessiontoUpdate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    
-    const id=req.params.id;
-     try {
+    const id = req.params.id;
+    try {
       const session = await this._sportsSessionService.getSessionsToUpdate(id);
-       res.status(STATUS_CODE.SUCCESS.CREATED).json({
+      res.status(STATUS_CODE.SUCCESS.CREATED).json({
         success: true,
         message: SUCCESS_MESSAGES.SESSION.SESSION_CREATED,
         session,
@@ -41,14 +39,14 @@ export class SportsSessionController {
     } catch (error) {
       next(error);
     }
-  }
+  };
   //---------------update session---------
   updateSportSession = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const data = req.body;
-    const id=req.params.id;
+    const id = req.params.id;
     try {
-      const session = await this._sportsSessionService.updateSportSession(id,data);
-      
+      const session = await this._sportsSessionService.updateSportSession(id, data);
+
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         message: SUCCESS_MESSAGES.SESSION.SESSION_UPDATED,
@@ -59,67 +57,60 @@ export class SportsSessionController {
     }
   };
 
-
   //----------------delete session----------
-    deleteSportSession = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-       
-        const id=req.params.id;
-        const userRole=req.user.role;
-        try {
-          if(userRole===UserRole.TRAINER){
-            const session = await this._sportsSessionService.deleteSportSession(id,userRole);          
-            res.status(STATUS_CODE.SUCCESS.OK).json({
-              success: true,
-              message: SUCCESS_MESSAGES.SESSION.SESSION_DELETED,
-              session,
-            });
-          }
-          else if (userRole === UserRole.USER) {        
-          res.status(STATUS_CODE.ERROR.FORBIDDEN).json({
-            success: false,
-            message: ERROR_MESSAGES.USER.USER_FORBIDDEN+' delete the session',
-          });
-        } else {
-          res.status(STATUS_CODE.ERROR.FORBIDDEN).json({
-            success: false,
-            message: ERROR_MESSAGES.AUTH.FORBIDDEN,
-          });
-        }
+  deleteSportSession = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    const id = req.params.id;
+    const userRole = req.user.role;
+    try {
+      if (userRole === UserRole.TRAINER) {
+        const session = await this._sportsSessionService.deleteSportSession(id, userRole);
+        res.status(STATUS_CODE.SUCCESS.OK).json({
+          success: true,
+          message: SUCCESS_MESSAGES.SESSION.SESSION_DELETED,
+          session,
+        });
+      } else if (userRole === UserRole.USER) {
+        res.status(STATUS_CODE.ERROR.FORBIDDEN).json({
+          success: false,
+          message: ERROR_MESSAGES.USER.USER_FORBIDDEN + ' delete the session',
+        });
+      } else {
+        res.status(STATUS_CODE.ERROR.FORBIDDEN).json({
+          success: false,
+          message: ERROR_MESSAGES.AUTH.FORBIDDEN,
+        });
+      }
+    } catch (error) {
+      next(error);
+    }
+  };
 
-        } catch (error) {
-          next(error);
-        }
-      };
-
-
-//-----------------get session by trainer---------------------------------
+  //-----------------get session by trainer---------------------------------
   getTrainerSessions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const authReq=req as AuthRequest
-    const user = authReq.user ;
+    const authReq = req as AuthRequest;
+    const user = authReq.user;
     const userId = user.id;
     const page = parseInt(req.query.page as string) || 1;
-    const search = req.query.search as string || "";
-    const limit=req.query.limit as string || 10;
+    const search = (req.query.search as string) || '';
+    const limit = (req.query.limit as string) || 10;
 
     try {
-      const result = await this._sportsSessionService.getSessionsByTrainer(userId,{page,search,limit});
+      const result = await this._sportsSessionService.getSessionsByTrainer(userId, { page, search, limit });
 
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         message: SUCCESS_MESSAGES.GENERAL.FETCHED,
-        sessions: result.sessions,       
-        pagination: result.pagination
+        sessions: result.sessions,
+        pagination: result.pagination,
       });
     } catch (error) {
       next(error);
     }
   };
 
-
   // -----------------get all Sports Session-public------------------------
   getAllSessions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-   const { 
-      page = '1',limit = PAGINATION_LIMIT,search,sport,sessionType,ageGroup,lat, lng,radius } = req.query;
+    const { page = '1', limit = PAGINATION_LIMIT, search, sport, sessionType, ageGroup, lat, lng, radius } = req.query;
     const filters = {
       page: parseInt(page as string),
       limit: parseInt(limit as string),
@@ -127,51 +118,49 @@ export class SportsSessionController {
       sport: sport as string,
       sessionType: sessionType as string,
       ageGroup: ageGroup as string,
-      lat :parseFloat(lat as string),
-      lng :parseFloat(lng as string),
-      radius :parseInt(radius as string)||0,
+      lat: parseFloat(lat as string),
+      lng: parseFloat(lng as string),
+      radius: parseInt(radius as string) || 0,
     };
-    console.log( "getlocation",lat,lng,radius);
+    console.log('getlocation', lat, lng, radius);
     try {
       const result = await this._sportsSessionService.getAllSessions(filters);
 
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         message: SUCCESS_MESSAGES.GENERAL.FETCHED,
-        sessions: result.sessions,       
-        pagination: result.pagination
-        
+        sessions: result.sessions,
+        pagination: result.pagination,
       });
     } catch (error) {
       next(error);
     }
   };
 
-// ---------------------------get a session by session ID--------------------
+  // ---------------------------get a session by session ID--------------------
 
-  getSportSession=async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try{
-      const sessionId=req.params.id;
+  getSportSession = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const sessionId = req.params.id;
       const session = await this._sportsSessionService.getASession(sessionId);
       res.status(STATUS_CODE.SUCCESS.OK).json({
-          success: true,
-          message: SUCCESS_MESSAGES.GENERAL.FETCHED,
-          session, 
-        })
-      } catch (error) {
+        success: true,
+        message: SUCCESS_MESSAGES.GENERAL.FETCHED,
+        session,
+      });
+    } catch (error) {
       next(error);
     }
-  }
-
+  };
 
   // ----------------------------make active/Inactive a session----------------
-  
-updateSessionVisibility=async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
+  updateSessionVisibility = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const isActive = req.body.isActive;
-    const id=req.params.id;
+    const id = req.params.id;
     try {
-      const session = await this._sportsSessionService.updateSessionVisibility(id,isActive);
-      
+      const session = await this._sportsSessionService.updateSessionVisibility(id, isActive);
+
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         message: SUCCESS_MESSAGES.SESSION.SESSION_UPDATED,

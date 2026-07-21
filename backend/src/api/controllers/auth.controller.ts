@@ -3,11 +3,7 @@ import { UserRole, OtpType } from '@/constants/enums';
 import AppError from '../../utils/AppError';
 import { IAuthService } from '../../interfaces/services/IAuth.service';
 
-import {
-  AuthMeResponseDto,
-  RegisterResponseDTO,
-  UserResponseDTO,
-} from '../../dtos/response/auth.response.dto';
+import { AuthMeResponseDto, RegisterResponseDTO, UserResponseDTO } from '../../dtos/response/auth.response.dto';
 import Logger from '@/utils/logger';
 import { ERROR_MESSAGES, STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import { AuthRequest } from '@/middleware/auth.middleware';
@@ -46,7 +42,6 @@ export default class AuthController {
     }
   };
 
-
   //----------------resend OTP
   resendOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -57,7 +52,6 @@ export default class AuthController {
       next(error);
     }
   };
-
 
   //-------------------forgot Password
   forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -73,7 +67,6 @@ export default class AuthController {
     }
   };
 
-
   //------------------reset PASSWORD
   resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -86,18 +79,16 @@ export default class AuthController {
     }
   };
 
-
   //----------------user Login-----------------
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { email, password,timezone } = req.body;
-      const result = await this._authService.login({ email, password,timezone });
-      Logger.info(`User logged in`, { userId: result.user.id, email: email,timezone:timezone });
+      const { email, password, timezone } = req.body;
+      const result = await this._authService.login({ email, password, timezone });
+      Logger.info(`User logged in`, { userId: result.user.id, email: email, timezone: timezone });
       const { refreshToken, accessToken, ...data } = result;
       setAuthCookies(res, accessToken, refreshToken);
-      
-      res.status(STATUS_CODE.SUCCESS.OK).json(data);
 
+      res.status(STATUS_CODE.SUCCESS.OK).json(data);
     } catch (error) {
       next(error);
     }
@@ -126,8 +117,8 @@ export default class AuthController {
   setActiveRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const authReq = req as AuthRequest;
-      const CurrUser = authReq.user
-                    
+      const CurrUser = authReq.user;
+
       const id = CurrUser.id;
       const { email, role } = req.body;
       if (!Object.values(UserRole).includes(role)) {
@@ -147,14 +138,12 @@ export default class AuthController {
     }
   };
 
-
-
   // -------------------------Authentication
   authMe = async (req: Request, res: Response, next: NextFunction) => {
     try {
-     const authReq = req as AuthRequest;
-     const userId = authReq.user.id;
-     const data: AuthMeResponseDto = await this._authService.authMe(userId);
+      const authReq = req as AuthRequest;
+      const userId = authReq.user.id;
+      const data: AuthMeResponseDto = await this._authService.authMe(userId);
 
       res.status(STATUS_CODE.SUCCESS.OK).json(data);
     } catch (error) {
@@ -166,14 +155,9 @@ export default class AuthController {
   refresh = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const refreshTokenExisted = req.cookies.refreshToken;
-      if (!refreshTokenExisted)
-        throw new AppError(
-          ERROR_MESSAGES.AUTH.REFRESH_TOKEN_INVALID,
-          STATUS_CODE.ERROR.UNAUTHORIZED
-        );
+      if (!refreshTokenExisted) throw new AppError(ERROR_MESSAGES.AUTH.REFRESH_TOKEN_INVALID, STATUS_CODE.ERROR.UNAUTHORIZED);
 
-      const { accessToken, refreshToken } =
-        await this._authService.refreshAccessToken(refreshTokenExisted);
+      const { accessToken, refreshToken } = await this._authService.refreshAccessToken(refreshTokenExisted);
       setAuthCookies(res, accessToken, refreshToken);
       res.status(STATUS_CODE.SUCCESS.OK).json({ success: true });
     } catch (error) {
@@ -194,25 +178,22 @@ export default class AuthController {
       httpOnly: true,
       expires: new Date(0),
     });
-    Logger.info(`User logged out`, { userId:userId });
-    res
-      .status(STATUS_CODE.SUCCESS.OK)
-      .json({ success: true, message: SUCCESS_MESSAGES.GENERAL.LOGGED_OUT });
+    Logger.info(`User logged out`, { userId: userId });
+    res.status(STATUS_CODE.SUCCESS.OK).json({ success: true, message: SUCCESS_MESSAGES.GENERAL.LOGGED_OUT });
   };
 
   // ---------------------------Add FCM token for pushNotification
- updateFcmToken=async(req: AuthRequest, res: Response, next: NextFunction): Promise<void>=> {
-  try {
-    const { fcmToken } = req.body;
-    await this._authService.updateFcmToken(req.user.id, fcmToken);
-    res.status(STATUS_CODE.SUCCESS.OK).json({ success: true });
-  } catch (error) {
-    next(error);
-  }
-}
+  updateFcmToken = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { fcmToken } = req.body;
+      await this._authService.updateFcmToken(req.user.id, fcmToken);
+      res.status(STATUS_CODE.SUCCESS.OK).json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  };
 
-
-// -----------------------Set Cookies---------------
+  // -----------------------Set Cookies---------------
   // private _setAuthCookies(res: Response, accessToken: string, refreshToken?: string) {
   //   const isProd = process.env.NODE_ENV === 'production';
 

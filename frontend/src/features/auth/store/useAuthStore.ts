@@ -60,7 +60,7 @@ export const useAuthStore = create<AuthState>()(
           user: state.user
           ? { ...state.user, profilePic: undefined } // don't persist the signed URL
           : null,
-          // user: state.user,
+          
           isAuthenticated: state.isAuthenticated,
         }),
       }

@@ -1,9 +1,5 @@
 import { getAllUsersRequestDTO } from '@/dtos/request/admin/admin.user.request.dto';
-import {
-  getAllusersResponseDTO,
-  usersResposeDTO,
-  userStatsResponseDTO,
-} from '@/dtos/response/admin/user.dto';
+import { getAllusersResponseDTO, usersResposeDTO, userStatsResponseDTO } from '@/dtos/response/admin/user.dto';
 import { UserRole } from '@/constants/enums';
 
 export interface IUserManagementService {

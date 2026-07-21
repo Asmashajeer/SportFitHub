@@ -15,14 +15,14 @@ export class ProfileController {
 
   addProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-           const { user } = req as AuthRequest;
-     
-      const result = await this._profileService.addProfile({ userId:user.id, ...req.body });
+      const { user } = req as AuthRequest;
+
+      const result = await this._profileService.addProfile({ userId: user.id, ...req.body });
       Logger.info('User completed the profile', { 'user id': user.id });
-      if(result.tokens){
-              setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
-            }
-      const {tokens,...profileData}=result;
+      if (result.tokens) {
+        setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
+      }
+      const { tokens, ...profileData } = result;
       res.status(STATUS_CODE.SUCCESS.CREATED).json({
         message: SUCCESS_MESSAGES.USER.PROFILE_CREATED,
         profileData,
@@ -33,7 +33,7 @@ export class ProfileController {
   };
   getAllProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-            const { user } = req as AuthRequest;
+      const { user } = req as AuthRequest;
 
       const profiles = await this._profileService.getProfiles(user.id);
       res.status(STATUS_CODE.SUCCESS.OK).json({
@@ -48,7 +48,7 @@ export class ProfileController {
     try {
       const { user } = req as AuthRequest;
 
-      const id=req.params.id;
+      const id = req.params.id;
       const profile = await this._profileService.getPrimaryProfile(user.id);
       const profilePic = profile.profilePic;
       res.status(STATUS_CODE.SUCCESS.OK).json({
@@ -62,9 +62,7 @@ export class ProfileController {
   getProfile = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { user } = req as AuthRequest;
-
       const profile = await this._profileService.getPrimaryProfile(user.id);
-
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profile,
@@ -95,7 +93,7 @@ export class ProfileController {
 
       const id = req.params.id;
       const profilePic = req.body.profilePic;
-      const profileData = await this._profileService.updateProfile(id,{profilePic:profilePic});
+      const profileData = await this._profileService.updateProfile(id, { profilePic: profilePic });
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profileData,

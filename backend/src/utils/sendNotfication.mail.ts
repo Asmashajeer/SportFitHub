@@ -1,5 +1,3 @@
-
-
 import { transporter } from '@/utils/mailer';
 
 interface NotificationEmailProps {
@@ -10,20 +8,14 @@ interface NotificationEmailProps {
   closingLine: string;
 }
 
-export const sendNotificationEmail = async ({
-  to,
-  title,
-  description,
-  details,
-  closingLine,
-}: NotificationEmailProps): Promise<void> => {
-    const buildDetailsRows = (details: Record<string, any>): string => {
-       return Object.entries(details)
-        .filter(([key, value]) => key !== 'userName' && value !== undefined && value !== null)
-        .map(([key, value]) => `<p style="margin: 4px 0;"><strong>${key}:</strong> ${value}</p>`)
-        .join('');
-    };
- try{ 
+export const sendNotificationEmail = async ({ to, title, description, details, closingLine }: NotificationEmailProps): Promise<void> => {
+  const buildDetailsRows = (details: Record<string, any>): string => {
+    return Object.entries(details)
+      .filter(([key, value]) => key !== 'userName' && value !== undefined && value !== null)
+      .map(([key, value]) => `<p style="margin: 4px 0;"><strong>${key}:</strong> ${value}</p>`)
+      .join('');
+  };
+  try {
     await transporter.sendMail({
       from: `"SportFitHub" <${process.env.GMAIL_USER}>`,
       to,
@@ -43,8 +35,7 @@ export const sendNotificationEmail = async ({
         </div>`,
     });
     console.log(`Email sent successfully to ${to}`);
- }
- catch(error){
-    console.error("Email send failed:", error);
- }
+  } catch (error) {
+    console.error('Email send failed:', error);
+  }
 };

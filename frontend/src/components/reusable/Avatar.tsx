@@ -11,6 +11,9 @@ import { userService } from '@/features/user/service/userService';
 
 import { trainerService } from '@/features/trainer/service/trainerService';
 import { Button } from '../ui/Button';
+import { chatService } from '@/features/chat/service/chatService';
+import { useChatStore } from '@/features/chat/store/useChatStore';
+import { Badge } from '../ui/badge';
 
 function Avatar() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -18,6 +21,7 @@ function Avatar() {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const {unreadMessageCountInbox,setUnreadMessageCountInbox}=useChatStore();
   const alias =
     user?.activeRole !== ROLES.ADMIN ? user?.name?.[0].toUpperCase() : <UserCog />;
   const [menu, setMenu] = useState(false);
@@ -26,10 +30,10 @@ function Avatar() {
     const loadProfilePic = async () => {
       try {
         if (user?.id && !user.profilePic) {
-          if (user?.activeRole === ROLES.USER) {
+          if (user?.activeRole === ROLES.USER && user.hasProfile) {
             const data = await userService.getProfilePic(user?.id);                        
             setUser({ ...user, profilePic: data?.profilePic });
-          } else if (user?.activeRole === ROLES.TRAINER) {
+          } else if (user?.activeRole === ROLES.TRAINER && user.hasProfile) {
             const data = await trainerService.getProfilePic();
             
             setUser({ ...user, profilePic: data?.profilePic });
@@ -39,8 +43,14 @@ function Avatar() {
         console.log(error);
       }
     };
+    const loadMessageCount=async()=>{
+        const unreadCount= await chatService.getUnreadMessageCount();
+        setUnreadMessageCountInbox(unreadCount)
+    }
+
     loadProfilePic();
-  }, [user?.hasProfile, user?.profilePic]);
+    loadMessageCount();
+  }, [user?.hasProfile, user?.profilePic,unreadMessageCountInbox]);
 
   const handleLogout = async () => {
     try {
@@ -65,11 +75,14 @@ function Avatar() {
     <div className="flex items-center gap-3  ">
       <Button
         variant="ghost"
-        className="p-1 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors group"
+        className="relative p-1 flex  justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors group hover:cursor-pointer"
+        onClick={()=>navigate(`/${user?.activeRole}/messages`)}
       >
-        <Bell
-          className={`w-5 h-5 ${user?.activeRole === ROLES.TRAINER ? 'text-trainer-primary  group-hover:text-trainer-primary' : 'text-primary  group-hover:text-primary'} transition-colors`}
+        <Bell 
+          className={`w-5 h-5 ${user?.activeRole === ROLES.TRAINER ? 'text-trainer-primary  group-hover:text-trainer-primary' : 'text-primary  group-hover:text-primary'} transition-colors`}        
         />
+        <Badge className="absolute text-[8px] text-white px-1 right-0 top-0">{unreadMessageCountInbox}</Badge>
+        
       </Button>
 
       <div

@@ -49,6 +49,7 @@ import BookingService from '@/features/booking/service/bookingService';
 import { useCheckAvailability } from '@/hooks/useCheckAvailability';
 import TimeSlotPicker from '../TimeSlotPicker';
 import { MapView } from '@/components/reusable/MapView';
+import { ChatDrawer } from '@/features/chat/component/ChatDrawer';
 
 const FitnessSessionDetail = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -156,7 +157,7 @@ const FitnessSessionDetail = () => {
       toast.custom('Select Date, Timeslot and Price plan to book');
       return;
     }
-   if(user && user.role===ROLES.TRAINER){
+   if(user && user.activeRole===ROLES.TRAINER){
       toast.error('Trainers cannot book sessions. Switch to a user account to make bookings');
       return;
    }
@@ -448,7 +449,7 @@ const FitnessSessionDetail = () => {
               <div className="flex-col m-1">
                 <div className="h-16 w-24 justify-center mx-auto rounded-2xl bg-zinc-800 overflow-hidden border border-zinc-700 group-hover:border-emerald-500/50 transition-colors">
                   <img
-                    src={session.trainer?.profilePic || '/coach-placeholder.jpg'}
+                    src={`${session.trainer?.profilePic}?v={${new Date()}}` || '/coach-placeholder.jpg'}
                     className="w-full h-full object-cover"
                     alt="Coach"
                   />
@@ -489,6 +490,12 @@ const FitnessSessionDetail = () => {
                         #{item.replace(/\s+/g, '')}
                       </span>
                     ))}
+                    <ChatDrawer
+                      userId={session.trainer.userId}
+                      trainerName={session.trainer.displayName}
+                      contextSessionId={session.id}
+                      contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION}
+                    />
                   </div>
                 </div>
               </div>

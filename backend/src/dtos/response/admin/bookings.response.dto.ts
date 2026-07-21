@@ -1,38 +1,34 @@
-import { BOOKING_SESSION_STATUS, BOOKING_STATUS, PAYLOAD_MODEL } from "@/constants/enums";
-import { IPricePlan, IVenue } from "@/models/booking.model";
-import { PaginationResponseDTO } from "../pagination.response.dto";
+import { BOOKING_SESSION_STATUS, BOOKING_STATUS, PAYLOAD_MODEL } from '@/constants/enums';
+import { IPricePlan, IVenue } from '@/models/booking.model';
+import { PaginationResponseDTO } from '../pagination.response.dto';
 
-
-export interface BookingsStatsResponseDTO{
-    total: number,
-    pending: number,
-    completed: number,
-    cancelled: number,
-    confirmed: number,
+export interface BookingsStatsResponseDTO {
+  total: number;
+  pending: number;
+  completed: number;
+  cancelled: number;
+  confirmed: number;
 }
 
-
-export interface AdminBookingsResponseDTO{  
+export interface AdminBookingsResponseDTO {
   bookingId: string;
-  bookingUId:string;
-  userId:string,
+  bookingUId: string;
+  userId: string;
   userName: string;
-  userEmail: string; 
+  userEmail: string;
   sessionId: string;
-  trainerId:string;
-  sessionName:string,
-  sessionType:string,
-  sessionModel: typeof PAYLOAD_MODEL[keyof typeof PAYLOAD_MODEL ];  
+  trainerId: string;
+  sessionName: string;
+  sessionType: string;
+  sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
   pricePlan: IPricePlan;
-  status: typeof BOOKING_STATUS[keyof typeof BOOKING_STATUS ];   
+  status: (typeof BOOKING_STATUS)[keyof typeof BOOKING_STATUS];
   venue: IVenue;
   createdAt: string;
 }
-export interface AdminBookingsResponseDTOwithPagination extends PaginationResponseDTO{
-    bookings: AdminBookingsResponseDTO[],
-   
+export interface AdminBookingsResponseDTOwithPagination extends PaginationResponseDTO {
+  bookings: AdminBookingsResponseDTO[];
 }
-
 
 // full detail admin view
 export interface AdminBookingDetailDTO extends AdminBookingsResponseDTO {
@@ -44,7 +40,7 @@ export interface AdminBookingDetailDTO extends AdminBookingsResponseDTO {
 // individual session slots
 export interface AdminBookingSessionDTO {
   bookingSessionId: string;
-  date:string;
+  date: string;
   startTime: string;
   endTime: string;
   status: BOOKING_SESSION_STATUS;
@@ -53,6 +49,6 @@ export interface AdminBookingSessionDTO {
   refundAmount: number;
   cancellationReason?: string;
 }
-  export interface adminBookingSessionDTOwithUserId extends AdminBookingSessionDTO {
-    userId:string;
-  }
+export interface adminBookingSessionDTOwithUserId extends AdminBookingSessionDTO {
+  userId: string;
+}

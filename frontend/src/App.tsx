@@ -3,10 +3,13 @@ import './App.css';
 import AppRouter from './routes/AppRouter';
 import { useAuth } from './features/auth/hook/useAuth';
 import { LoadingScreen } from './components/reusable/LoadingScreen';
+import { useSocketConnection } from './hooks/useSocketConnection';
+import { useInitSocketListeners } from './hooks/useInitSocketListeners ';
 
 function App() {
   const { isLoading } = useAuth(); // Initialize here
-
+  useSocketConnection();
+  useInitSocketListeners();
   if (isLoading) {
     return (
       <div>

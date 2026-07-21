@@ -1,10 +1,13 @@
-import { ATTENDANCE_STATUS, PAYLOAD_MODEL, SESSION_TYPE } from "@/constants/constants";
+import { ATTENDANCE_STATUS, SESSION_TYPE } from "@/constants/constants";
 import type { SessionOccuranceResponseData } from "../../types/trainer.bookings.types";
 import { useEffect, useState } from "react";
 import { trainerAttendanceService } from "../../service/trainer.attendance.service";
+import { formatTo12Hour } from "@/utils/formatDate";
+import { Button } from "@/components/ui/Button";
+
 
  interface AttendanceModalProps {
-  session: SessionOccuranceResponseData
+  session:SessionOccuranceResponseData
   slotId: string;
   onClose: () => void;
   onSaved?: () => void;
@@ -13,10 +16,11 @@ export function AttendanceModal({ session, slotId, onClose, onSaved }: Attendanc
     const [data, setData] = useState<SessionOccuranceResponseData>(session);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-        useEffect(()=>{
-            setData(session);
-        },[session]);
+   
+        useEffect(()=>{         
+            setData(session);         
+            if(data )setLoading(false);
+        },[]);
 
     const setStatus = (bookingSessionId: string, status: boolean) => {
         setData(prev =>
@@ -61,232 +65,117 @@ export function AttendanceModal({ session, slotId, onClose, onSaved }: Attendanc
         }
     };
     return (
-        <div
-        style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.45)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-        }}
-        onClick={onClose}
-        >
-        <div
-            style={{
-            background: 'var(--surface-2)',
-            borderRadius: 12,
-            width: 480,
-            maxWidth: '92%',
-            border: '0.5px solid var(--border)',
-            overflow: 'hidden',
-            }}
-            onClick={e => e.stopPropagation()}
-        >
-            <div
-            style={{
-                padding: '1rem 1.25rem',
-                borderBottom: '0.5px solid var(--border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-            }}
-            >
-            <div>
-                <p style={{ fontWeight: 500, fontSize: 16, margin: 0 }}>Mark attendance</p>
-                {data && (
-                <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0' }}>
-                    {data.startTime} - {data.endTime}
-                </p>
-                )}
-            </div>
-            <button
-                onClick={onClose}
-                aria-label="Close"
-                style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 20 }}
-            >
-                &times;
-            </button>
-            </div>
-    
-            {loading ? (
-            <div style={{ padding: '2rem 1.25rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                Loading participants...
-            </div>
-            ) : error && !data ? (
-            <div style={{ padding: '2rem 1.25rem', textAlign: 'center', color: 'var(--text-danger)' }}>
-                {error}
-            </div>
-            ) : (
-            data && (
-                <>
-                <div
-                    style={{
-                    padding: '0.75rem 1.25rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    borderBottom: '0.5px solid var(--border)',
-                    background: 'var(--surface-1)',
-                    }}
-                >
-                    <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                    {data.participants.length} participant{data.participants.length !== 1 ? 's' : ''}
-                    </span>
-                    {data.sessionType===SESSION_TYPE.GROUP && (
-                    <button onClick={markAllPresent} style={{ fontSize: 13, padding: '6px 12px', height: 'auto' }}>
-                        Mark all present
-                    </button>
-                    )}
-                </div>
-    
-                <div style={{ maxHeight: 320, overflowY: 'auto' }}>
-                    {data.participants.map(p => (
-                    <div
-                        key={p.bookingSessionId}
-                        style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '0.75rem 1.25rem',
-                        borderBottom: '0.5px solid var(--border)',
-                        }}
-                    >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                        {/* <div
-                            style={{
-                            width: 36,
-                            height: 36,
-                            flexShrink: 0,
-                            borderRadius: '50%',
-                            background: 'var(--bg-accent)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontWeight: 500,
-                            fontSize: 13,
-                            color: 'var(--text-accent)',
-                            }}
-                        >
-                            {getInitials(p.name)}
-                        </div> */}
-                        <div style={{ minWidth: 0 }}>
-                            <p
-                            style={{
-                                fontSize: 14,
-                                fontWeight: 500,
-                                margin: 0,
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                            }}
-                            >
-                            {p.name}
-                            </p>
-                            <p
-                            style={{
-                                fontSize: 12,
-                                color: 'var(--text-secondary)',
-                                margin: '2px 0 0',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                            }}
-                            >
-                            {p.email}
-                            </p>
-                            <p
-                            style={{
-                                fontSize: 11,
-                                color: 'var(--text-muted)',
-                                margin: '2px 0 0',
-                                fontFamily: 'var(--font-mono)',
-                            }}
-                            >
-                            {p.userId}
-                            </p>
-                        </div>
-                        </div>
-    
-                        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                        <button
-                            onClick={() => setStatus(p.bookingSessionId, ATTENDANCE_STATUS.PRESENT)}
-                            style={{
-                            fontSize: 12,
-                            padding: '5px 10px',
-                            height: 'auto',
-                            ...(p.attendance === ATTENDANCE_STATUS.PRESENT
-                                ? {
-                                    background: 'var(--bg-success)',
-                                    borderColor: 'var(--border-success)',
-                                    color: 'var(--text-success)',
-                                }
-                                : {}),
-                            }}
-                        >
-                            Present
-                        </button>
-                        <button
-                            onClick={() => setStatus(p.bookingSessionId, ATTENDANCE_STATUS.ABSENT)}
-                            style={{
-                            fontSize: 12,
-                            padding: '5px 10px',
-                            height: 'auto',
-                            ...(p.attendance === ATTENDANCE_STATUS.ABSENT
-                                ? {
-                                    background: 'var(--bg-danger)',
-                                    borderColor: 'var(--border-danger)',
-                                    color: 'var(--text-danger)',
-                                }
-                                : {}),
-                            }}
-                        >
-                            Absent
-                        </button>
-                        </div>
+       <div className="fixed inset-0 bg-zinc-800/70 flex items-center justify-center z-1000"
+            onClick={onClose}            >
+            <div className=" bg-zinc-700 rounded-xl w-120 max-w-[92%] border-[0.5px] border-border overflow-hidden"
+                onClick={(e) => e.stopPropagation()}            >
+                <div className="px-5 py-4 border-b-[0.5px] border-border flex items-center justify-between">
+                    <div>
+                        <p className="font-medium text-base m-0">Mark attendance</p>
+                        {data && (
+                            <div className="flex items-center justify-between  gap-2 text-[13px]  mt-1 mb-0">
+                                <p className="text-green-600 text-sm font-bold">{data.sessionName}</p>
+                                <p>{formatTo12Hour( data.startTime)} - {formatTo12Hour(data.endTime)}</p>                            
+                            </div>
+                        )}
                     </div>
-                    ))}
-                </div>
-    
-                {error && (
-                    <p style={{ color: 'var(--text-danger)', fontSize: 13, padding: '8px 1.25rem 0', margin: 0 }}>
-                    {error}
-                    </p>
-                )}
-    
-                <div
-                    style={{
-                    padding: '1rem 1.25rem',
-                    borderTop: '0.5px solid var(--border)',
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    gap: 8,
-                    }}
-                >
-                    <button onClick={onClose} 
-                    // disabled={saving} 
-                    style={{ fontSize: 14 }}>
-                    Cancel
-                    </button>
                     <button
-                    onClick={handleSave}
-                    //   disabled={saving}
-                    style={{
-                        fontSize: 14,
-                        background: 'var(--fill-primary)',
-                        color: 'var(--on-primary)',
-                        border: 'none',
-                    }}
+                        onClick={onClose}
+                        aria-label="Close"
+                        className="border-none bg-transparent cursor-pointer text-xl"
                     >
-                    {/* {saving ? 'Saving...' : 'Save attendance'} */}
-                    Save attendanc
+                        &times;
                     </button>
                 </div>
-                </>
-            )
-            )}
-        </div>
+    
+                {loading ? (
+                <div style={{ padding: '2rem 1.25rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    Loading participants...
+                </div>
+                ) : error && !data ? (
+                    <div style={{ padding: '2rem 1.25rem', textAlign: 'center', color: 'var(--text-danger)' }}>
+                        {error}
+                    </div>
+                ) : (
+                data && (
+                        <>
+                            <div className="px-5 py-3 flex items-center justify-between border-b-[0.5px] border-[var(--border)] bg-[var(--surface-1)]">
+                            <span className="text-[13px] text-[var(--text-secondary)]">
+                                {data.participants.length} participant{data.participants.length !== 1 ? 's' : ''}
+                            </span>
+                            {data.sessionType === SESSION_TYPE.GROUP && (
+                                <button onClick={markAllPresent} className="text-[13px] h-auto px-3 py-1.5">
+                                Mark all present
+                                </button>
+                            )}
+                            </div>
+
+                            <div className="max-h-80 overflow-y-auto">
+                            {data.participants.map((p) => (
+                            <div
+                                key={p.bookingSessionId}
+                                className="flex items-center justify-between px-5 py-3 border-b-[0.5px] border-[var(--border)]"
+                                >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="min-w-0">
+                                    <p className="text-sm font-medium m-0 whitespace-nowrap overflow-hidden text-ellipsis">
+                                        {p.name}
+                                    </p>
+                                    <p className="text-xs text-[var(--text-secondary)] mt-0.5 mb-0 whitespace-nowrap overflow-hidden text-ellipsis">
+                                        {p.email}
+                                    </p>
+                                    <p className="text-[11px] text-[var(--text-muted)] mt-0.5 mb-0 font-mono">
+                                        {/* {p.userId} */}
+                                    </p>
+                                    </div>
+                                </div>
+
+                              <div className="flex gap-1.5 flex-shrink-0">
+                                <button
+                                    onClick={() => setStatus(p.bookingSessionId, ATTENDANCE_STATUS.PRESENT)}
+                                    className={`text-xs h-auto px-2.5 py-[5px] rounded border ${
+                                    p.attendance === ATTENDANCE_STATUS.PRESENT
+                                        ? 'bg-green-100 border-green-500 text-green-700'
+                                        : 'bg-transparent border-zinc-700 text-zinc-400'
+                                    }`}
+                                >
+                                    Present
+                                </button>
+                                <button
+                                    onClick={() => setStatus(p.bookingSessionId, ATTENDANCE_STATUS.ABSENT)}
+                                    className={`text-xs h-auto px-2.5 py-[5px] rounded border ${
+                                    p.attendance === ATTENDANCE_STATUS.ABSENT
+                                        ? 'bg-red-100 border-red-500 text-red-700'
+                                        : 'bg-transparent border-zinc-700 text-zinc-400'
+                                    }`}
+                                >
+                                    Absent
+                                </button>
+                              </div>
+                            </div>
+                            ))}
+                            </div>
+
+                            {error && (
+                            <p className="text-[var(--text-danger)] text-[13px] px-5 pt-2 m-0">
+                                {error}
+                            </p>
+                            )}
+
+                            <div className="px-5 py-4 border-t-[0.5px] border-[var(--border)] flex justify-end gap-2">
+                            <Button variant={'secondary'} onClick={onClose} className="text-sm">
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleSave}
+                                className="text-sm  border-none text-white"
+                            >
+                                Save attendance
+                            </Button>
+                            </div>
+                        </>
+                    ))}
+            </div>
         </div>
     );
 }

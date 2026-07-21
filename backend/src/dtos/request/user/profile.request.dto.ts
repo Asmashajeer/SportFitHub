@@ -9,11 +9,7 @@ export const CreateUserProfileSchema = z.object({
   fullName: z.string(),
   DOB: z.coerce.date(),
   gender: z.enum(GENDER),
-  phone: z
-    .string()
-    .min(10, { message: 'Phone number is too short' })
-    .max(15, { message: 'Phone number is too long' })
-    .regex(phoneRegex, { message: 'Invalid phone number format' }),
+  phone: z.string().min(10, { message: 'Phone number is too short' }).max(15, { message: 'Phone number is too long' }).regex(phoneRegex, { message: 'Invalid phone number format' }),
   relationship: z.enum(RELATIONSHIP),
   street: z.string().optional(),
   city: z.string().optional(),

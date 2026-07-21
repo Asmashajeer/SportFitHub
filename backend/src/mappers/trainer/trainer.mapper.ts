@@ -3,18 +3,15 @@ import { PendingTrainersBasicDTO } from '@/dtos/response/admin/trainer.response.
 import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { ITrainerProfile, ICertification } from '@/models/trainerProfile.model';
 import { formatInTimeZone } from 'date-fns-tz';
-import { getTimezone } from "@/context/timezone.context";
+import { getTimezone } from '@/context/timezone.context';
 
-export const toTrainerProfileData = (
-  profile: Partial<ITrainerProfile>
-): TrainerProfileResponseDTO => {
+export const toTrainerProfileData = (profile: Partial<ITrainerProfile>): TrainerProfileResponseDTO => {
   {
     // const timezone = getTimezone();
     return {
       basicInfo: {
         displayName: profile.displayName,
         profilePic: profile.profilePic,
-       
       },
       verification: {
         overallStatus: profile.status,
@@ -33,9 +30,7 @@ export const toTrainerProfileData = (
 };
 
 //trainerManagement admin Approvals Basic Data
-export const toPendingTrainersBasicData = (
-  profile: Partial<ITrainerProfile>
-): PendingTrainersBasicDTO => {
+export const toPendingTrainersBasicData = (profile: Partial<ITrainerProfile>): PendingTrainersBasicDTO => {
   // const timezone = getTimezone();
   return {
     id: profile._id.toString(),
@@ -55,8 +50,8 @@ export const toPendingTrainersBasicData = (
     // Administrative State
     status: profile.status,
     verificationRemarks: {
-    fields: profile.verificationRemarks?.fields,
-    changedAt: profile.verificationRemarks?.changedAt?.toString(),
+      fields: profile.verificationRemarks?.fields,
+      changedAt: profile.verificationRemarks?.changedAt?.toString(),
     },
     // Timestamps
     createdAt: profile.createdAt.toISOString(),
@@ -65,7 +60,6 @@ export const toPendingTrainersBasicData = (
 };
 
 export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO => {
- 
   const timezone = getTimezone();
   return {
     id: trainer._id.toString(),
@@ -90,7 +84,7 @@ export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO
 
     certificationInfo: {
       documents: (trainer.certificationInfo?.documents || []).map((doc: ICertification) => ({
-        id:doc._id.toString(),
+        id: doc._id.toString(),
         name: doc.name,
         url: doc.url,
         validUpto: doc.validUpto?.toString(),
@@ -111,29 +105,29 @@ export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO
 
     currentLocation: trainer.currentLocation ? { ...trainer.currentLocation } : undefined,
     availability: trainer.availability ? { ...trainer.availability } : undefined,
-   
+
     paymentInfo: {
       bankAccount: trainer.paymentInfo?.bankAccount ? { ...trainer.paymentInfo.bankAccount } : {},
-       
+
       upiId: trainer.paymentInfo?.upiId,
     },
 
     status: trainer.status,
     verificationRemarks: {
-    fields: trainer.verificationRemarks?.fields,
-    changedAt: trainer.verificationRemarks?.changedAt?.toString(),
+      fields: trainer.verificationRemarks?.fields,
+      changedAt: trainer.verificationRemarks?.changedAt?.toString(),
     },
     suspensionReason: trainer.suspensionReason,
-    suspendedAt: trainer.suspendedAt?formatInTimeZone(trainer.suspendedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'):"",
+    suspendedAt: trainer.suspendedAt ? formatInTimeZone(trainer.suspendedAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX') : '',
     rejectionReason: trainer.rejectionReason,
-    rejectedAt: trainer.rejectedAt?formatInTimeZone(trainer.rejectedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'):"",
+    rejectedAt: trainer.rejectedAt ? formatInTimeZone(trainer.rejectedAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX') : '',
     applicationCount: trainer.applicationCount || 0,
-    penalty:trainer.penalty,
-    strikePoints:trainer.strikePoints,
+    penalty: trainer.penalty,
+    strikePoints: trainer.strikePoints,
     cancellationCount: trainer.cancellationCount,
-    lastStrikeDate:trainer.lastStrikeDate?formatInTimeZone(trainer.lastStrikeDate,timezone, 'yyyy-MM-dd HH:mm:ssXXX'):"",
-    createdAt: formatInTimeZone(trainer.createdAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
+    lastStrikeDate: trainer.lastStrikeDate ? formatInTimeZone(trainer.lastStrikeDate, timezone, 'yyyy-MM-dd HH:mm:ssXXX') : '',
+    createdAt: formatInTimeZone(trainer.createdAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
 
-    updatedAt: formatInTimeZone(trainer.updatedAt,timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
+    updatedAt: formatInTimeZone(trainer.updatedAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
   };
 };

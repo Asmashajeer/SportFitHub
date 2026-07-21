@@ -6,9 +6,8 @@ import userRoutes from './userManagment.route';
 import trainerRoutes from './trainerManagement.route';
 import { UserRole } from '@/constants/enums';
 import categoryRoute from './categoryManagement.route';
-import sessionRoute from './sessionManagement.route'
-import  bookingRoute from './bookingManagement.route'
-
+import sessionRoute from './sessionManagement.route';
+import bookingRoute from './bookingManagement.route';
 
 const adminRouter = Router();
 adminRouter.use(protect);

@@ -1,5 +1,5 @@
 export interface PaginationResponseDTO {
-  page: number;  
+  page: number;
   total: number;
-  totalPages: number;  
+  totalPages: number;
 }

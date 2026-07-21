@@ -7,23 +7,22 @@ import { IProfileRepository } from '@/interfaces/repositories/IProfile.repositor
 import { CreateUserProfileDTO } from '@/dtos/request/user/profile.request.dto';
 import { toProfileResponseData } from '@/mappers/profile.mapper';
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
-import { AuthUser } from '@/middleware/auth.middleware';
+
 import { UserRole } from '@/constants/enums';
 import { IAuthService } from '@/interfaces/services/IAuth.service';
-
 
 export class ProfileService {
   private _profileRepo: IProfileRepository;
   private _userRepo: IUserRepository;
-  private _authService:IAuthService;
-  constructor(profileRepository: IProfileRepository, userRepository: IUserRepository,authService:IAuthService) {
+  private _authService: IAuthService;
+  constructor(profileRepository: IProfileRepository, userRepository: IUserRepository, authService: IAuthService) {
     this._profileRepo = profileRepository;
     this._userRepo = userRepository;
-    this._authService=authService;
+    this._authService = authService;
   }
 
   //-------------Create a profile
-  async addProfile(data: CreateUserProfileDTO): Promise<ProfileResponseDataDTO & {tokens?:{ accessToken: string; refreshToken: string }}> {    
+  async addProfile(data: CreateUserProfileDTO): Promise<ProfileResponseDataDTO & { tokens?: { accessToken: string; refreshToken: string } }> {
     const { userId: inputUserId } = data;
     const profileCount = await this._profileRepo.count({ userId: inputUserId });
     const isPrimary = profileCount === 0;
@@ -31,8 +30,7 @@ export class ProfileService {
       fullName: data.fullName,
       userId: inputUserId,
     });
-    if (existing)
-      throw new AppError(ERROR_MESSAGES.USER.PROFILE_EXISTS, STATUS_CODE.ERROR.CONFLICT);
+    if (existing) throw new AppError(ERROR_MESSAGES.USER.PROFILE_EXISTS, STATUS_CODE.ERROR.CONFLICT);
 
     //the Location Object (GeoJSON format)
     let location = null;
@@ -62,33 +60,23 @@ export class ProfileService {
     };
 
     const result = await this._profileRepo.create(profile);
-    if (!result)
-      throw new AppError(ERROR_MESSAGES.GENERAL.FAILED, STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
+    if (!result) throw new AppError(ERROR_MESSAGES.GENERAL.FAILED, STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
 
     const profileData: ProfileResponseDataDTO = toProfileResponseData(result);
-     
-     let tokens: { accessToken: string; refreshToken: string } | undefined;
-      const user=await this._userRepo.findById(data.userId);
-        //user become a trainer too
-        if(user.activeRole===UserRole.TRAINER &&! user.roles.includes(UserRole.USER)){
-          await this._userRepo.addRole(user.id,UserRole.TRAINER);    
-          const updatedUser=await this._userRepo.setActiveRole(user.id,UserRole.TRAINER);
-          tokens = this._authService.generateTokensForUser(
-            updatedUser._id.toString(),
-            updatedUser.email,
-            updatedUser.activeRole,
-            updatedUser.timezone
-          );
-        }
-        return { ...profileData, tokens };
-    
+
+    let tokens: { accessToken: string; refreshToken: string } | undefined;
+    const user = await this._userRepo.findById(data.userId);
+    //user become a trainer too
+    if (user.activeRole === UserRole.TRAINER && !user.roles.includes(UserRole.USER)) {
+      await this._userRepo.addRole(user.id, UserRole.TRAINER);
+      const updatedUser = await this._userRepo.setActiveRole(user.id, UserRole.TRAINER);
+      tokens = this._authService.generateTokensForUser(updatedUser._id.toString(), updatedUser.email, updatedUser.activeRole, updatedUser.timezone);
+    }
+    return { ...profileData, tokens };
   }
 
   // ----------------to get a primary profile by userId
-  async getPrimaryProfile(
-   userId:string,
-    isPrimary: boolean = true
-  ): Promise<ProfileResponseDataDTO | null> {
+  async getPrimaryProfile(userId: string, isPrimary: boolean = true): Promise<ProfileResponseDataDTO | null> {
     const result = await this._profileRepo.findOne({ userId, isPrimary });
     const profileData: ProfileResponseDataDTO = toProfileResponseData(result);
     return profileData;
@@ -100,20 +88,15 @@ export class ProfileService {
     return profileData;
   }
   //------------- to get All profile by userId
-  async getProfiles(userId:string): Promise<ProfileResponseDataDTO[]> {
+  async getProfiles(userId: string): Promise<ProfileResponseDataDTO[]> {
     const profiles = await this._profileRepo.AllProfiles(userId);
-    const allProfiles: ProfileResponseDataDTO[] = profiles.map(profile =>
-      toProfileResponseData(profile)
-    );
+    const allProfiles: ProfileResponseDataDTO[] = profiles.map((profile) => toProfileResponseData(profile));
     if (!allProfiles) throw new Error(ERROR_MESSAGES.GENERAL.NOT_FOUND);
     return allProfiles;
   }
 
   //---------------- Update Profile
-  async updateProfile(
-    profileId: string,
-    updateData: Partial<IProfile>,   
-  ): Promise<ProfileResponseDataDTO> {
+  async updateProfile(profileId: string, updateData: Partial<IProfile>): Promise<ProfileResponseDataDTO> {
     const updated = await this._profileRepo.findOneAndUpdate(profileId, updateData);
 
     if (!updated) throw new Error(ERROR_MESSAGES.USER.PROFILE_NOT_FOUND);

@@ -1,17 +1,5 @@
-import {
-  LoginDTO,
-  RegisterRequestDTO,
-  UpdateRoleDTO,
-  VerifyEmailDTO,
-  VerifyOtpDTO,
-  ResetPasswordDTO,
-} from '@/dtos/request/auth.request.dto';
-import {
-  RegisterResponseDTO,
-  UserResponseDTO,
-  BaseResponseDTO,
-  AuthMeResponseDto,
-} from '@/dtos/response/auth.response.dto.js';
+import { LoginDTO, RegisterRequestDTO, UpdateRoleDTO, VerifyEmailDTO, VerifyOtpDTO, ResetPasswordDTO } from '@/dtos/request/auth.request.dto';
+import { RegisterResponseDTO, UserResponseDTO, BaseResponseDTO, AuthMeResponseDto } from '@/dtos/response/auth.response.dto.js';
 import { OtpType } from '@/constants/enums';
 
 export interface IAuthService {
@@ -25,11 +13,6 @@ export interface IAuthService {
   setActiveRole(data: UpdateRoleDTO): Promise<UserResponseDTO>;
   authMe(userId: string): Promise<AuthMeResponseDto>;
   refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }>;
-  updateFcmToken(userId: string, fcmToken: string): Promise<void> 
-   generateTokensForUser(
-    id: string,
-    email: string,
-    role: string,
-    timezone: string
-  ): { accessToken: string; refreshToken: string }
+  updateFcmToken(userId: string, fcmToken: string): Promise<void>;
+  generateTokensForUser(id: string, email: string, role: string, timezone: string): { accessToken: string; refreshToken: string };
 }

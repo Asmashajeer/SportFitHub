@@ -31,7 +31,7 @@ import {
   BOOKING_TYPE,
   PAYLOAD_MODEL,
   ROLES,
-  SESSION_MODE,
+  
 } from '@/constants/constants';
 import GetMapsLink from '@/components/reusable/GetMapsLink';
 
@@ -49,6 +49,7 @@ import type { BookingSlot, Payload } from '@/features/booking/store/payment.type
 import { MapView } from '@/components/reusable/MapView';
 
 import { useCheckAvailability } from '@/hooks/useCheckAvailability';
+import { ChatDrawer } from '@/features/chat/component/ChatDrawer';
 
 const SessionDetail = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -78,7 +79,7 @@ const SessionDetail = () => {
       try {
         const data = await sportSessionService.getSessionById(sessionId!);
         setSession(data.session);
-        console.log(data.session);
+       
         if (data.session && data.session.timeSlots) {
           const availableDays = data.session.timeSlots.map((slot: TimeSlot) =>
             slot.day.toLowerCase()
@@ -152,7 +153,7 @@ const SessionDetail = () => {
       toast.custom('Select Date, Timeslot and Price plan to book');
       return;
     }
-    if(user && user.role===ROLES.TRAINER){
+    if(user && user.activeRole===ROLES.TRAINER){
       toast.error('Trainers cannot book sessions. Switch to a user account to make bookings');
       return;
    }
@@ -473,6 +474,12 @@ const SessionDetail = () => {
                         #{item.replace(/\s+/g, '')}
                       </span>
                     ))}
+                    <ChatDrawer
+                      userId={session.trainer.userId}
+                      trainerName={session.trainer.displayName}
+                      contextSessionId={session.id}
+                      contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION}
+                    />
                   </div>
                 </div>
               </div>

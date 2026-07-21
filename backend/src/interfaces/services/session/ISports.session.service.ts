@@ -1,16 +1,21 @@
 import { UserRole } from '@/constants/enums';
-import { GetSessionsResponseDTO, PaginatedSportsSessionsResponseDTO, SportSessionDetailedPublicDTO,  SportSessionUpdateResponseDTO,  SportsSessionResponseDTO } from '@/dtos/response/session/sports.session.response.dto';
+import {
+  GetSessionsResponseDTO,
+  PaginatedSportsSessionsResponseDTO,
+  SportSessionDetailedPublicDTO,
+  SportSessionUpdateResponseDTO,
+  SportsSessionResponseDTO,
+} from '@/dtos/response/session/sports.session.response.dto';
 import { ISportsSession } from '@/models/sportsSession.model';
 import { FilterQuery, Types } from 'mongoose';
 
 export interface ISportsSessionService {
   createSportSession(sessionData: Partial<ISportsSession>): Promise<SportsSessionResponseDTO>;
-  getSessionsToUpdate( id: string   ): Promise<SportSessionUpdateResponseDTO>
-  updateSportSession(id: string | Types.ObjectId,sessionData: Partial<ISportsSession>): Promise<SportSessionUpdateResponseDTO>;
-  deleteSportSession(id: string | Types.ObjectId,cancelledBy:UserRole): Promise<SportsSessionResponseDTO>
- updateSessionVisibility( id: string | Types.ObjectId,isActive:boolean):Promise<SportsSessionResponseDTO>
-  getSessionsByTrainer(userId: string | Types.ObjectId,filters: FilterQuery<ISportsSession>): Promise<PaginatedSportsSessionsResponseDTO> 
-  getAllSessions(filters: FilterQuery<ISportsSession>): Promise<GetSessionsResponseDTO>
-  getASession(id:string|Types.ObjectId):Promise<SportSessionDetailedPublicDTO>
-  
+  getSessionsToUpdate(id: string): Promise<SportSessionUpdateResponseDTO>;
+  updateSportSession(id: string | Types.ObjectId, sessionData: Partial<ISportsSession>): Promise<SportSessionUpdateResponseDTO>;
+  deleteSportSession(id: string | Types.ObjectId, cancelledBy: UserRole): Promise<SportsSessionResponseDTO>;
+  updateSessionVisibility(id: string | Types.ObjectId, isActive: boolean): Promise<SportsSessionResponseDTO>;
+  getSessionsByTrainer(userId: string | Types.ObjectId, filters: FilterQuery<ISportsSession>): Promise<PaginatedSportsSessionsResponseDTO>;
+  getAllSessions(filters: FilterQuery<ISportsSession>): Promise<GetSessionsResponseDTO>;
+  getASession(id: string | Types.ObjectId): Promise<SportSessionDetailedPublicDTO>;
 }

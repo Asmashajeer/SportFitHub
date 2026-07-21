@@ -1,5 +1,4 @@
-export interface AdminBookingsFilterDTO{
-   
+export interface AdminBookingsFilterDTO {
   page: number;
   limit: number;
   search: string;

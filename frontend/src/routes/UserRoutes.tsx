@@ -8,6 +8,7 @@ import ReschedulePage from '@/features/user/page/ReschedulePage';
 import MyBookings from '@/features/user/component/myBookings/MyBookings';
 import MyPayments from '@/features/user/component/myPayments/MyPayments';
 import MyWallet from '@/features/user/page/MyWallet';
+import { ChatInboxPage } from '@/features/chat/page/ChatInboxPage';
 
 function UserRoutes() {
   return (
@@ -23,6 +24,7 @@ function UserRoutes() {
       <Route path="/my-bookings" element={<MyBookings />} />
       <Route path="/my-payments" element={<MyPayments />} />
       <Route path="/my-wallet" element={<MyWallet />} />
+      <Route path="/messages" element={<ChatInboxPage />} />
     </Routes>
   );
 }

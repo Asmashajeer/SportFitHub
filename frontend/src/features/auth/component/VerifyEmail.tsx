@@ -91,6 +91,7 @@ const VerifyEmail = () => {
       if (userRole === ROLES.USER) navigate('/user/add-Profile');
       else if (userRole === ROLES.TRAINER) navigate('/trainer/add-Profile');
       else navigate('/update-role');
+      
     } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error(error.message || 'Invalid OTP');

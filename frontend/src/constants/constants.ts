@@ -155,9 +155,9 @@ export const trainerNavLinks = [
   { label: 'Attandance', icon: CheckCircle, path: '/trainer/attendance' },
   { label: 'Earnings', icon: Wallet2, path: '/camps' },
   {
-    label: 'Communication',
+    label: 'Messages',
     icon: MessageCircle,
-    path: '/trainer/communication',
+    path: '/trainer/messages',
   },
   {
     label: 'feedback Rating',

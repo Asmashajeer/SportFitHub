@@ -29,9 +29,9 @@ export class FitnessManagementController {
     const page = parseInt(req.query.page as string) || 1;
     const search = req.query.search as string;
     const status = req.query.status as string;
-    const limit=PAGINATION_LIMIT;
+    const limit = PAGINATION_LIMIT;
     try {
-      const fitnessData = await this._fitnessManagementService.getPrograms({ page,limit, search, status });
+      const fitnessData = await this._fitnessManagementService.getPrograms({ page, limit, search, status });
 
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,

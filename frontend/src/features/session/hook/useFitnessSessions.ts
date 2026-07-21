@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 
 import { fitnessSessionService } from '../service/fitnessSessionService ';
 import { PAGINATION_DEFAULT_LIMIT } from '@/constants/constants';
+import { TrainerFitnessSessionService } from '@/features/trainer/service/sessionService/trainer.fitness.session.service';
 
 export const useFitnessSessions = (
   initialFetch = true,
@@ -23,7 +24,7 @@ export const useFitnessSessions = (
     setLoading(true);
     setError(null);
     try {
-      const data = await fitnessSessionService.getTrainerSessions({
+      const data = await TrainerFitnessSessionService.getTrainerSessions({
         page,
         search,
       });

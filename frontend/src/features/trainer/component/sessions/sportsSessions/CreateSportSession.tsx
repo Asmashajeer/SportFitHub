@@ -344,7 +344,7 @@ const CreateSportSessionModal = ({
           onClose();
        
       } catch (error) {
-        toast.error(error as string || 'failed to create session');
+        toast.error(error instanceof Error ? error.message : 'An error occurred');
         return;
       }
     }

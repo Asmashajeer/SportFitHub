@@ -17,21 +17,17 @@ export class SportsManagementService implements ISportsManagementService {
 
   async addSports(data: SportRequestDTO): Promise<SportsResponseDTO> {
     const existing = await this._sportsRepository.findOne({ sportName: data.sportName });
-    if (existing)
-      throw new AppError(
-        `sports Name +${ERROR_MESSAGES.GENERAL.EXISTED}`,
-        STATUS_CODE.ERROR.CONFLICT
-      );
+    if (existing) throw new AppError(`sports Name +${ERROR_MESSAGES.GENERAL.EXISTED}`, STATUS_CODE.ERROR.CONFLICT);
     const newSport = await this._sportsRepository.create(data);
     const sport = toSportsResponseDTO(newSport);
     return sport;
   }
 
   async getSports(filter: getQueryDTO): Promise<SportsResponseDTOWithPagination> {
-    const {page,limit, search, status } = filter;
+    const { page, limit, search, status } = filter;
     const query: FilterQuery<ISports> = {};
-    
-    const skip=(page-1)*limit
+
+    const skip = (page - 1) * limit;
     if (search) {
       query.sportName = { $regex: search, $options: 'i' };
     }
@@ -40,23 +36,17 @@ export class SportsManagementService implements ISportsManagementService {
     } else if (status === 'inactive') {
       query.isActive = false;
     }
-    
-     const [sportsData, totalCount] = await Promise.all([
-              await this._sportsRepository.findAll(query,{skip, limit}),
-              await this._sportsRepository.count(query),
-            ]);
+
+    const [sportsData, totalCount] = await Promise.all([await this._sportsRepository.findAll(query, { skip, limit }), await this._sportsRepository.count(query)]);
     if (!sportsData.length) throw new AppError(ERROR_MESSAGES.GENERAL.NOT_FOUND);
-    const sports = sportsData.map(sport => toSportsResponseDTO(sport));
+    const sports = sportsData.map((sport) => toSportsResponseDTO(sport));
     return {
       sports,
       total: totalCount,
       totalPages: Math.ceil(totalCount / limit),
-      page, 
-    }
+      page,
+    };
   }
-
-
-
 
   async getSport(id: string | Types.ObjectId): Promise<SportsResponseDTO> {
     const data = await this._sportsRepository.findById(id);
@@ -74,10 +64,7 @@ export class SportsManagementService implements ISportsManagementService {
     return updatedSport;
   }
 
-  async updateSport(
-    id: string | Types.ObjectId,
-    sportData: SportRequestDTO
-  ): Promise<SportsResponseDTO> {
+  async updateSport(id: string | Types.ObjectId, sportData: SportRequestDTO): Promise<SportsResponseDTO> {
     const data = await this._sportsRepository.findOneAndUpdate(id, sportData);
     if (!data) throw new AppError(ERROR_MESSAGES.GENERAL.NOT_FOUND);
     const updatedSport = toSportsResponseDTO(data);
@@ -89,6 +76,4 @@ export class SportsManagementService implements ISportsManagementService {
     if (!result) throw new AppError(ERROR_MESSAGES.GENERAL.NOT_FOUND);
     return result;
   }
-
- 
 }

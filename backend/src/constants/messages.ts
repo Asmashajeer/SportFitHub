@@ -29,16 +29,16 @@ export const SUCCESS_MESSAGES = {
     TRAINER_FETCH_SUCCESS: 'Trainer details fetched successfully',
     TRAINER_DOC_STATUS_UPDATED: 'Trainer Documents status updated',
   },
-  SESSION:{
-    SESSION_CREATED:'New session created',
-    SESSION_UPDATED:' session Updated',
-    SESSION_DELETED:' session Updated'
+  SESSION: {
+    SESSION_CREATED: 'New session created',
+    SESSION_UPDATED: ' session Updated',
+    SESSION_DELETED: ' session Updated',
   },
-  BOOKING:{
-    CHECKOUT_SESSION_CREATED:"Checkout session created successfully",
+  BOOKING: {
+    CHECKOUT_SESSION_CREATED: 'Checkout session created successfully',
   },
   GENERAL: {
-    CREATED:'CREATED sUCCESSFULLY',
+    CREATED: 'CREATED sUCCESSFULLY',
     FETCHED: ' Data fetched successfully',
     LOGGED_OUT: 'logged out successfully',
     DELETED: ' deleted successfully',
@@ -51,7 +51,7 @@ export const ERROR_MESSAGES = {
   AUTH: {
     DB_CONN_ERROR: 'Cant connect with database',
     USER_EXISTS: 'User already exists',
-    USER_DELETED:"This account no longer exists",
+    USER_DELETED: 'This account no longer exists',
     BLOCKED_USER: 'Your account has been suspended',
     INVALID_CREDENTIALS: 'Invalid credentials ',
     OTP_INVALID: 'Invalid or expired code.Please request new one',
@@ -61,13 +61,13 @@ export const ERROR_MESSAGES = {
     REFRESH_TOKEN_INVALID: 'Invalid token',
     USER_NOT_FOUND: 'User not found',
     GOOGLE_EMAIL_MISSING: 'No email provided by Google',
-    FORBIDDEN:'Unauthorized action.'
+    FORBIDDEN: 'Unauthorized action.',
   },
   USER: {
     PROFILE_EXISTS: 'Profile for this user already exists',
     PROFILE_NOT_FOUND: 'Profile for this user NOT exists',
     STATS_ERROR: 'Cannot fetch stats details',
-    USER_FORBIDDEN:'USER CANNOT  '
+    USER_FORBIDDEN: 'USER CANNOT  ',
   },
   GENERAL: {
     EXISTED: ' Already exist',
@@ -80,22 +80,25 @@ export const ERROR_MESSAGES = {
     TRAINER_NOT_FOUND: 'trainer not found',
     TRAINER_EXISTS: 'Profile for this TRAINER already exists',
   },
-  CERT:{
-      NOT_FOUND:'Certificate Not Found',
-      FORBIDDEN:'unAuthorized Access'
+  CERT: {
+    NOT_FOUND: 'Certificate Not Found',
+    FORBIDDEN: 'unAuthorized Access',
   },
-  ID_VERIFICATION:{
-     NOT_FOUND:'Identity document  Not Found',
+  ID_VERIFICATION: {
+    NOT_FOUND: 'Identity document  Not Found',
   },
   SESSION: {
-        CREATE_FAILED: "We couldn't schedule your  session. Please  try again.",
-         UPDATE_FAILED: "We couldn't update your  session. Please  try again.",
-        NOT_FOUND:"Session not found"
-    },
-  BOOKING:{
-      NOT_FOUND:"Booking not found"
-
-  }
+    CREATE_FAILED: "We couldn't schedule your  session. Please  try again.",
+    UPDATE_FAILED: "We couldn't update your  session. Please  try again.",
+    NOT_FOUND: 'Session not found',
+  },
+  BOOKING: {
+    NOT_FOUND: 'Booking not found',
+  },
+  CHAT: {
+    NOT_FOUND: 'Conversation not found',
+    UNAUTHORIZED: 'Unauthorized: not a participant in this conversation',
+  },
 } as const;
 
 // ---------------------STATUS CODE--------------

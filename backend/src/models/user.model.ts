@@ -7,13 +7,13 @@ export interface IUser extends Document {
   email: string;
   password: string;
   roles: UserRole[];
-  activeRole:UserRole;
+  activeRole: UserRole;
   googleId?: string;
-  timezone:string;
+  timezone: string;
   isVerified: boolean;
   isBlocked: boolean;
   isActive: boolean;
-  fcmToken: string
+  fcmToken: string;
   createdAt: Date;
 }
 
@@ -41,7 +41,7 @@ const UserSchema = new mongoose.Schema(
       default: 'user',
     },
     googleId: { type: String },
-     timezone: { type: String, default: 'UTC' },
+    timezone: { type: String, default: 'UTC' },
     isVerified: { type: Boolean, default: false },
     isBlocked: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },

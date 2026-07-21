@@ -1,10 +1,4 @@
-import {
-  DOC_VERIFY_STATUS,
-  GENDER,
-  GOVT_ID_TYPE,
-  TRAINER_CATEGORY,
-  TRAINER_STATUS,
-} from '@/constants/enums';
+import { DOC_VERIFY_STATUS, GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY, TRAINER_STATUS } from '@/constants/enums';
 
 // get single trainer by admin
 
@@ -40,7 +34,6 @@ export interface TrainerProfileDTO {
   profilePic: string;
   pricing: {
     sessionCharge: number;
-    
   };
 
   // Personal Info
@@ -104,18 +97,18 @@ export interface TrainerProfileDTO {
   // Administrative State
   status: TRAINER_STATUS;
   verificationRemarks: {
-    fields: string[],
-    changedAt: string, 
-  },
+    fields: string[];
+    changedAt: string;
+  };
   suspensionReason?: string;
   suspendedAt?: string;
   rejectionReason?: string;
   rejectedAt?: string;
   applicationCount: number;
-  penalty:number
-  strikePoints:number;
-  cancellationCount: number,
-  lastStrikeDate?:string
+  penalty: number;
+  strikePoints: number;
+  cancellationCount: number;
+  lastStrikeDate?: string;
   // Timestamps
   createdAt: string;
   updatedAt: string;

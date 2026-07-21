@@ -39,7 +39,7 @@ const Login = () => {
   const from = location.state?.from || '';
   
   useEffect(() => {
-    if (isAuthenticated && user?.isVerified) {
+    if (isAuthenticated && user?.isVerified ) {
       if (from && payload && user.activeRole===ROLES.USER) {
         navigate('/checkout');
         return;
@@ -47,9 +47,10 @@ const Login = () => {
       const dashboardPath = Object.values(ROLES).includes(user.activeRole)
         ? `/${user.activeRole}/dashboard`
         : '/update-role';
+       
       navigate(dashboardPath, { replace: true });
     }
-  }, [isAuthenticated, user, navigate, location, payload]);
+  }, [isAuthenticated, user, navigate , location, payload]);
 
   const handleRegister = () => {
     navigate('/register');
@@ -107,25 +108,30 @@ const Login = () => {
       if (!user.isVerified) {
         console.log('Navigating to verifyEmail');
         return navigate('/verifyEmail', { state: data.user });
-      } else if (user.activeRole === ROLES.ADMIN) {
+      }
+       else if (user.activeRole === ROLES.ADMIN) {
         setHasProfile(true);
         return navigate('/admin/dashboard', { replace: true });
-      } else if (!Object.values(ROLES).includes(user.activeRole)) {
+      }
+       else if (!Object.values(ROLES).includes(user.activeRole)) {
         return navigate('/update-role');
-      } else if (!user.hasProfile && user.isVerified) {
-        if (user_Role === ROLES.TRAINER) {
-          return navigate('/trainer/add-Profile', { replace: true });
-        } else if (user_Role === ROLES.USER) {         
-          return navigate('/user/add-Profile', { replace: true });
-        }
-      } else if (user.activeRole === ROLES.USER && user.isVerified) {
+      }
+       else if (!user.hasProfile && user.isVerified) {
+          if (user_Role === ROLES.TRAINER) {
+            console.log('user_Role:',user_Role);
+            return navigate('/trainer/add-Profile', { replace: true });
+          } else if (user_Role === ROLES.USER) {         
+            return navigate('/user/add-Profile', { replace: true });
+          }
+      }
+       else if (user.activeRole === ROLES.USER && user.isVerified) {
         setHasProfile(user.hasProfile);
 
         if (payload) {
           return navigate('/checkout');
         }
-
-        navigate(`${user_Role}/dashboard`, { replace: true });
+        
+        navigate(`/${user_Role}/dashboard`, { replace: true });
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'An error occurred');

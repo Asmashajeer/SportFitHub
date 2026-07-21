@@ -10,9 +10,10 @@ import {
 import type {
   SessionOccuranceResponseData,
 } from '../types/trainer.bookings.types';
-import Pagination from '@/components/reusable/Pagination';
+
 import { AttendanceModal } from '../component/attendance/AttendanceModel';
 import { trainerAttendanceService } from '../service/trainer.attendance.service';
+import { formatTo12Hour } from '@/utils/formatDate';
 
 interface SessionsDataProps {
   sessions: SessionOccuranceResponseData[] | [];
@@ -27,14 +28,15 @@ const Attendance = () => {
   const [filters, setFilters] = useState({
     sessionModel: '',
     date:"",
-    status: BOOKING_SESSION_STATUS.SCHEDULED,
+    status: BOOKING_SESSION_STATUS.COMPLETED,
   });
-  const [sessionsData, setSessionsData] = useState<SessionsDataProps>({
-    sessions: [],
-    totalPages: 0,
-    total: 0,
-    page: 1,
-  });
+  // const [sessionsData, setSessionsData] = useState<SessionsDataProps>({
+  //   sessions: [],
+  //   totalPages: 0,
+  //   total: 0,
+  //   page: 1,
+  // });
+  const [sessions, setSessions] = useState<SessionOccuranceResponseData[]|[]>([]);
   const [activeSession, setActiveSession] =
     useState<SessionOccuranceResponseData | null>(null);
 
@@ -50,9 +52,9 @@ const Attendance = () => {
             ...filters,
           }
         );
-
-        setSessionsData(data);
-        setCurrentPage(sessionsData.page);
+        console.log(data);
+        setSessions(data);
+        // setCurrentPage(sessionsData.page);
       }
     };
     getBookedSessions();
@@ -104,11 +106,11 @@ const Attendance = () => {
 
       {loading ? (
         <p>Loading sessions...</p>
-      ) : sessionsData?.sessions?.length === 0 ? (
+      ) :  sessions?.length === 0 ?  (
         <p>No sessions found.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {sessionsData?.sessions?.map((session) => (
+          {sessions?.map((session) => (
             <div
               key={`${session.sessionId}_${session.slotId}`}
               style={{
@@ -121,13 +123,16 @@ const Attendance = () => {
               }}
             >
               <div>
+                <p>{session.sessionName}</p>
+              </div>
+              <div>
                 <p style={{ margin: 0, fontWeight: 500 }}>
                   {session.sessionModel === PAYLOAD_MODEL.SPORT_SESSION
                     ? PAYLOAD_MODEL.SPORT_SESSION
                     : PAYLOAD_MODEL.FITNESS_SESSION}
                   {session.sessionType === SESSION_TYPE.GROUP
                     ? ` · ${session.participants.length} participants`
-                    : ' · 1:1'}
+                    : ' · 1 :1'}
                 </p>
                 <p
                   style={{
@@ -137,7 +142,7 @@ const Attendance = () => {
                   }}
                 >
                   {new Date(session.date).toLocaleDateString()} ·{' '}
-                  {session.startTime} - {session.endTime}
+                  {formatTo12Hour( session.startTime)} - {formatTo12Hour(session.endTime)}
                 </p>
               </div>
 

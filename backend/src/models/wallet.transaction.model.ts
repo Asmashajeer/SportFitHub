@@ -1,27 +1,27 @@
-import { TRANSACTION_REASON, TRANSACTION_STATUS, TRANSACTION_TYPE } from "@/constants/enums";
-import mongoose, { Document, Schema, Types } from "mongoose";
+import { TRANSACTION_REASON, TRANSACTION_STATUS, TRANSACTION_TYPE } from '@/constants/enums';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
-export interface IWalletTransaction  extends Document{
-    userId: Types.ObjectId,
-    transactionType:TRANSACTION_TYPE,
-    amount:number,
-    walletTransactionReason :TRANSACTION_REASON,
-    status:TRANSACTION_STATUS,
-    description:string,    
-    balanceAfter:number,
-    // OPTIONAL 
-    // when transaction is booking-related 
-    bookingId?:Types.ObjectId,
-    bookingSessionId?:Types.ObjectId,
-    createdAt: Date,
-    updatedAt: Date,
+export interface IWalletTransaction extends Document {
+  userId: Types.ObjectId;
+  transactionType: TRANSACTION_TYPE;
+  amount: number;
+  walletTransactionReason: TRANSACTION_REASON;
+  status: TRANSACTION_STATUS;
+  description: string;
+  balanceAfter: number;
+  // OPTIONAL
+  // when transaction is booking-related
+  bookingId?: Types.ObjectId;
+  bookingSessionId?: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const WalletTransactionSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     transactionType: {
@@ -32,7 +32,7 @@ const WalletTransactionSchema = new Schema(
     amount: {
       type: Number,
       required: true,
-      min: [0, "Amount cannot be negative"],
+      min: [0, 'Amount cannot be negative'],
     },
     walletTransactionReason: {
       type: String,
@@ -57,17 +57,16 @@ const WalletTransactionSchema = new Schema(
     // Optional — only when booking-related
     bookingId: {
       type: Schema.Types.ObjectId,
-      ref: "Booking",
+      ref: 'Booking',
       default: null,
     },
     bookingSessionId: {
       type: Schema.Types.ObjectId,
-      ref: "BookingSession",
+      ref: 'BookingSession',
       default: null,
     },
   },
   { timestamps: true }
 );
 
-
-export default  mongoose.model<IWalletTransaction>('WalletTRansaction',WalletTransactionSchema);
+export default mongoose.model<IWalletTransaction>('WalletTRansaction', WalletTransactionSchema);

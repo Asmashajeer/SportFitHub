@@ -54,8 +54,13 @@ function AppRouter() {
           <Route path="/update-role" element={<UserRoleSelector />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-          <Route element={<MainLayout />}>
-            {/* user Routes */}
+          <Route element={<MainLayout />}>           
+
+             <Route path="/trainer/add-Profile"  element={
+               <ProtectedRoute allowedRoles={[ROLES.USER,ROLES.TRAINER]}> <TrainerProfileForm /> </ProtectedRoute>}
+             />
+
+              {/* user Routes */}
             <Route
               path="/user/*"
               element={
@@ -64,9 +69,8 @@ function AppRouter() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/trainer/add-Profile"  element={
-               <ProtectedRoute allowedRoles={[ROLES.USER,ROLES.TRAINER]}> <TrainerProfileForm /> </ProtectedRoute>}
-             />
+           
+             
             {/* Trainer Routes */}
             <Route
               path="/trainer/*"
@@ -97,7 +101,7 @@ function AppRouter() {
               </ProtectedRoute>
             }
           />
-          <Route path="/*" element={<NotFound />} />
+          {/* <Route path="/*" element={<NotFound />} /> */}
         </Routes>
       </Router>
     </div>

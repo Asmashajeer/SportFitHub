@@ -25,7 +25,7 @@ import toast from 'react-hot-toast';
 import { fitnessSessionService } from '../../service/fitnessSessionService ';
 import FitnessSessionCard from './FitnessSessionCard';
 import type { FitnessSessionPublicResponseData } from '../../store/fitness.session.types';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import Pagination from '@/components/reusable/Pagination';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { userService } from '@/features/user/service/userService';

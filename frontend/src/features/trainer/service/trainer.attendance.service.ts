@@ -12,7 +12,7 @@ export const trainerAttendanceService = {
     },
 
     markAttendance:async(sessionId:string,attendanceData:AttendanceMarkingData[])=>{
-         const res = await api.patch(TRAINER_ATTENDACE_ROUTE.MARK_ATTENDANCE(sessionId) ,{attendanceData});
+         const res = await api.patch(TRAINER_ATTENDACE_ROUTE.MARK_ATTENDANCE(sessionId) ,{records:attendanceData});
         return res.data;
     }
 

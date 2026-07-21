@@ -1,4 +1,4 @@
-import {  GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY, TRAINER_STATUS } from '@/constants/enums';
+import { GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY, TRAINER_STATUS } from '@/constants/enums';
 import z from 'zod';
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 // 1.
@@ -48,7 +48,6 @@ const daySchema = z.object({
 export const AvailabilityPricingSchema = z.object({
   pricing: z.object({
     sessionCharge: z.number(),
-   
   }),
 
   availability: z.object({
@@ -61,7 +60,6 @@ export const AvailabilityPricingSchema = z.object({
     Saturday: daySchema,
     Sunday: daySchema,
   }),
-  
 });
 
 export type AvailabiltyPricingReqDTO = z.infer<typeof AvailabilityPricingSchema>;
@@ -79,12 +77,12 @@ export const PaymentInfoSchema = z.object({
 });
 export type PaymentInfoReqDTO = z.infer<typeof PaymentInfoSchema>;
 
-export const IdVerificationSchema= z.object({
-    idType: z.enum(GOVT_ID_TYPE),
-    idNumber: z.string().min(1, 'ID Number is required'),
-    idAttachment: z.string(),
-  });
-  export type idVerificationReqDTO=z.infer<typeof IdVerificationSchema>
+export const IdVerificationSchema = z.object({
+  idType: z.enum(GOVT_ID_TYPE),
+  idNumber: z.string().min(1, 'ID Number is required'),
+  idAttachment: z.string(),
+});
+export type idVerificationReqDTO = z.infer<typeof IdVerificationSchema>;
 // export interface idVerificationReqDTO {
 //   idType: GOVT_ID_TYPE;
 //   idNumber: string;
@@ -105,7 +103,7 @@ export const DocumentsInfoSchema = z
     issuedAt: z.coerce.date(),
   })
   .refine(
-    data => {
+    (data) => {
       //check for validity of document
       return data.validUpto > new Date();
     },
@@ -114,10 +112,10 @@ export const DocumentsInfoSchema = z
       path: ['validUpto'],
     }
   );
-  export const CertificatesSchema=z.object({
-    documents:z.array(DocumentsInfoSchema),
-  });
-  export type  CertificationReqDTO=z.infer<typeof CertificatesSchema>;
+export const CertificatesSchema = z.object({
+  documents: z.array(DocumentsInfoSchema),
+});
+export type CertificationReqDTO = z.infer<typeof CertificatesSchema>;
 
 export const AddTrainerProfileSchema = z.object({
   // --- Basic Info ---
@@ -176,11 +174,7 @@ export const AddTrainerProfileSchema = z.object({
     Sunday: dayAvailabilitySchema,
   }),
   pricing: z.object({
-    sessionCharge: z.coerce
-      .number()
-      .min(1, 'Price must be at least 1')
-      .max(10000, 'Price seems too high'),
-   
+    sessionCharge: z.coerce.number().min(1, 'Price must be at least 1').max(10000, 'Price seems too high'),
   }),
 
   paymentInfo: z
@@ -196,45 +190,43 @@ export const AddTrainerProfileSchema = z.object({
       upiId: z.string().optional(),
     })
     .optional(),
-     status:z.enum(TRAINER_STATUS),
-      verificationRemarks: z.object({
-        fields: z.array(z.string()), // which fields changed
-        changedAt: z.coerce.date(), 
-      }),    
-      applicationCount: z.number(),
-      penalty:z.number(),
-      strikePoints:z.number(),
-      cancellationCount:z.number(),      
-      isDeleted:z.boolean(),
+  status: z.enum(TRAINER_STATUS),
+  verificationRemarks: z.object({
+    fields: z.array(z.string()), // which fields changed
+    changedAt: z.coerce.date(),
+  }),
+  applicationCount: z.number(),
+  penalty: z.number(),
+  strikePoints: z.number(),
+  cancellationCount: z.number(),
+  isDeleted: z.boolean(),
 });
 export type AddTrainerProfileDTO = z.infer<typeof AddTrainerProfileSchema>;
 
-
 export const BasicInfoSchema = z.object({
-  displayName:z.string().min(3, 'Display name must be at least 3 characters'),       
+  displayName: z.string().min(3, 'Display name must be at least 3 characters'),
   category: z.enum(TRAINER_CATEGORY),
   coreDiscipline: z.string().min(1, 'Main discipline is required'),
-  bio:z.string().min(10, 'Bio should be at least 10 characters').max(500),
-  specialties:z.array(z.string()).min(1, 'Select at least one specialty'),
-  experience:z.number().min(0, 'Experience cannot be negative'),
-   languages: z.array(z.string()).min(1, 'Select at least one language'),
+  bio: z.string().min(10, 'Bio should be at least 10 characters').max(500),
+  specialties: z.array(z.string()).min(1, 'Select at least one specialty'),
+  experience: z.number().min(0, 'Experience cannot be negative'),
+  languages: z.array(z.string()).min(1, 'Select at least one language'),
 });
 export type BasicInfoReqDTO = z.infer<typeof BasicInfoSchema>;
 
+export const PersonalInfoSchema = z.object({
+  fullName: z.string().min(3),
+  DOB: z.coerce.date(), // Automatically converts date strings to Date objects
+  gender: z.enum(GENDER),
+  phone: z.string().min(10),
+  address: z
+    .object({
+      street: z.string().optional(),
+      city: z.string().optional(),
+      state: z.string().optional(),
+      zip: z.string().optional(),
+    })
+    .optional(),
+});
 
-export const  PersonalInfoSchema= z.object({
-    fullName: z.string().min(3),
-    DOB: z.coerce.date(), // Automatically converts date strings to Date objects
-    gender: z.enum(GENDER),
-    phone: z.string().min(10),
-    address: z
-      .object({
-        street: z.string().optional(),
-        city: z.string().optional(),
-        state: z.string().optional(),
-        zip: z.string().optional(),
-      })
-      .optional(),
-  });
-
-  export type PersonalInfoReqDTO = z.infer<typeof PersonalInfoSchema>;
+export type PersonalInfoReqDTO = z.infer<typeof PersonalInfoSchema>;

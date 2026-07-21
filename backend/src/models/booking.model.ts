@@ -15,55 +15,53 @@ export interface IVenue {
     coordinates: [number, number]; // [longitude, latitude]
   };
 }
-export interface IBookedSlot{
-    slotId: string;
-    startTime: string;
-    endTime: string;
-    date: string;
-  }; 
-  export interface IPricePlan {
-    planId?: string;
-    totalSessions: number;
-    pricePaid: number;  
-    unitPrice: number, 
-  };
+export interface IBookedSlot {
+  slotId: string;
+  startTime: string;
+  endTime: string;
+  date: string;
+}
+export interface IPricePlan {
+  planId?: string;
+  totalSessions: number;
+  pricePaid: number;
+  unitPrice: number;
+}
 export interface IBooking extends Document {
-  bookingUId: string; 
-  userId: Types.ObjectId;           
+  bookingUId: string;
+  userId: Types.ObjectId;
   sessionId: Types.ObjectId;
-  sessionModel:typeof PAYLOAD_MODEL[keyof typeof PAYLOAD_MODEL] , //SportsSession or FitnessSession
-  stripeSessionId?: string
-  bookingType:BOOKING_TYPE,      
-  pricePlan:IPricePlan,   
-  venue?: IVenue;    
-  status: BOOKING_STATUS,
-  paymentId: Types.ObjectId;        // Reference to the Payment document
+  sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL]; //SportsSession or FitnessSession
+  stripeSessionId?: string;
+  bookingType: BOOKING_TYPE;
+  pricePlan: IPricePlan;
+  venue?: IVenue;
+  status: BOOKING_STATUS;
+  paymentId: Types.ObjectId; // Reference to the Payment document
   createdAt: Date;
   updatedAt: Date;
 }
 
-
-
-const BookingSchema = new Schema({
-  
-  bookingUId: {
+const BookingSchema = new Schema(
+  {
+    bookingUId: {
       type: String,
       unique: true,
       index: true,
-      default: generateBookingUId,   // ✅ Auto-generated on every new booking
+      default: generateBookingUId, // ✅ Auto-generated on every new booking
     },
-  userId: { type: Schema.Types.ObjectId, ref: 'User' ,index: true},
-  sessionId: { type: Schema.Types.ObjectId,  refPath: "sessionModel",required: true }, 
-  sessionModel:{type:String ,enum:Object.values(PAYLOAD_MODEL),required:true},
-  stripeSessionId: { type: String, unique: true, sparse: true },
-  bookingType:{ type: String, enum: Object.values(BOOKING_TYPE) },
-  pricePlan:{
-    planId: { type: String, required: true },
-    totalSessions: { type: Number, required: true },
-    pricePaid: { type: Number, required: true },
-    unitPrice: { type: Number, required: true },
-  },  
-   venue:{
+    userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+    sessionId: { type: Schema.Types.ObjectId, refPath: 'sessionModel', required: true },
+    sessionModel: { type: String, enum: Object.values(PAYLOAD_MODEL), required: true },
+    stripeSessionId: { type: String, unique: true, sparse: true },
+    bookingType: { type: String, enum: Object.values(BOOKING_TYPE) },
+    pricePlan: {
+      planId: { type: String, required: true },
+      totalSessions: { type: Number, required: true },
+      pricePaid: { type: Number, required: true },
+      unitPrice: { type: Number, required: true },
+    },
+    venue: {
       name: { type: String, required: true },
       address: { type: String, required: true },
       location: {
@@ -78,11 +76,11 @@ const BookingSchema = new Schema({
         },
       },
     },
-  status: { type: String, enum: Object.values(BOOKING_STATUS) },
-  paymentId: { type: Schema.Types.ObjectId, ref: 'Payment' } // Cross-reference
-},
-{ 
-    timestamps: true ,
+    status: { type: String, enum: Object.values(BOOKING_STATUS) },
+    paymentId: { type: Schema.Types.ObjectId, ref: 'Payment' }, // Cross-reference
+  },
+  {
+    timestamps: true,
   }
 );
 

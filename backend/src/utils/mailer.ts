@@ -6,5 +6,4 @@ export const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_FROM,
     pass: process.env.GMAIL_APP_PASSWORD,
   },
- 
 });

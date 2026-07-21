@@ -12,8 +12,6 @@ interface Viewer {
 }
 
 export const serializeTrainerProfile = (trainer: ITrainerProfile | ITrainerPopulated, viewer: Viewer = {}) => {
-
-
   const isOwner = viewer.id === trainer.userId.toString();
   const isAdmin = viewer.role === UserRole.ADMIN;
   const canSeePrivate = isOwner || isAdmin;
@@ -21,16 +19,16 @@ export const serializeTrainerProfile = (trainer: ITrainerProfile | ITrainerPopul
 
   return {
     ...plain,
-    profilePic: getSignedFileUrl(plain.profilePic,'image', 'upload'),
-    idVerification: { 
-          ...plain.idVerification,
-      idAttachment: canSeePrivate ? plain.idVerification.idAttachment : undefined,           
+    profilePic: getSignedFileUrl(plain.profilePic, 'image', 'upload'),
+    idVerification: {
+      ...plain.idVerification,
+      idAttachment: canSeePrivate ? plain.idVerification.idAttachment : undefined,
     },
     certificationInfo: {
       ...plain.certificationInfo,
       documents: canSeePrivate
         ? plain.certificationInfo.documents.map((doc: ICertification) => ({
-            ...doc           
+            ...doc,
           }))
         : [],
     },

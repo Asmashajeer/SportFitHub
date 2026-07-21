@@ -1,4 +1,4 @@
-import { IOtp} from '@/models/otp.model';
+import { IOtp } from '@/models/otp.model';
 import { OtpType } from '@/constants/enums';
 import { IBaseRepository } from './IBase.repository';
 

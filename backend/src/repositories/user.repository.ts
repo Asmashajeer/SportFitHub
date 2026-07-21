@@ -37,63 +37,41 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
     return await this.model.find(query).exec();
   }
 
-  async findAll(
-    filter: FilterQuery<IUser> = {},
-    options: { skip: number; limit: number }
-  ): Promise<IUser[]> {
-    return await this.model
-      .find(filter)
-      .sort({ createdAt: -1 })
-      .skip(options.skip)
-      .limit(options.limit)
-      .exec();
+  async findAll(filter: FilterQuery<IUser> = {}, options: { skip: number; limit: number }): Promise<IUser[]> {
+    return await this.model.find(filter).sort({ createdAt: -1 }).skip(options.skip).limit(options.limit).exec();
   }
   async countOfUsers(FilterQuery: object = {}): Promise<number> {
     const query: FilterQuery<IUser> = { ...FilterQuery, role: { $ne: 'admin' } };
     return await this.model.countDocuments(query);
   }
 
-  async updateVerificationStatus(
-    id: string | Types.ObjectId,
-    status: boolean
-  ): Promise<IUser | null> {
-    return await this.model
-      .findByIdAndUpdate(id, { $set: { isVerified: status } }, { new: true })
-      .exec();
+  async updateVerificationStatus(id: string | Types.ObjectId, status: boolean): Promise<IUser | null> {
+    return await this.model.findByIdAndUpdate(id, { $set: { isVerified: status } }, { new: true }).exec();
   }
   async blockUser(id: string | Types.ObjectId, isBlocked: boolean): Promise<IUser | null> {
-    return await this.model
-      .findByIdAndUpdate(id, { $set: { isBlocked: isBlocked } }, { new: true })
-      .exec();
+    return await this.model.findByIdAndUpdate(id, { $set: { isBlocked: isBlocked } }, { new: true }).exec();
   }
 
   async updatePassword(id: string | Types.ObjectId, password: string): Promise<IUser | null> {
-    return await this.model
-      .findByIdAndUpdate(id, { $set: { password: password } }, { new: true })
-      .exec();
+    return await this.model.findByIdAndUpdate(id, { $set: { password: password } }, { new: true }).exec();
   }
   async setActiveRole(id: string | Types.ObjectId, role: UserRole): Promise<IUser | null> {
     return await this.model.findByIdAndUpdate(id, { $set: { activeRole: role } }, { new: true }).exec();
   }
   async softDeleteUser(id: string | Types.ObjectId): Promise<IUser | null> {
-    return await this.model
-      .findByIdAndUpdate(id, { $set: { isActive: false,isBlocked:true } }, { new: true })
-      .exec();
+    return await this.model.findByIdAndUpdate(id, { $set: { isActive: false, isBlocked: true } }, { new: true }).exec();
   }
 
+  async updateFcmToken(userId: string, fcmToken: string): Promise<void> {
+    await this.model.findByIdAndUpdate(userId, { fcmToken });
+  }
 
-    async updateFcmToken(userId: string, fcmToken: string): Promise<void> {
-       await this.model.findByIdAndUpdate(userId, { fcmToken });
-    }
+  async findFcmTokenByUserId(userId: string): Promise<string | null> {
+    const user = await this.model.findById(userId).select('fcmToken');
+    return user?.fcmToken ?? null;
+  }
 
-
-    async findFcmTokenByUserId(userId: string): Promise<string | null> {
-      const user = await this.model.findById(userId).select('fcmToken');
-      return user?.fcmToken ?? null;
-    }
-
-    async addRole(userId:string,role:UserRole):Promise<IUser|null>{
-        return await this.model.findByIdAndUpdate(userId,{ $addToSet:{roles:role} }, { new: true }).exec();
-    }
-    
+  async addRole(userId: string, role: UserRole): Promise<IUser | null> {
+    return await this.model.findByIdAndUpdate(userId, { $addToSet: { roles: role } }, { new: true }).exec();
+  }
 }

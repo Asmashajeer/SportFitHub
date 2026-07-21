@@ -31,11 +31,10 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
   }
 
   async softDelete(id: string | Types.ObjectId): Promise<boolean> {
-    const result = await this.model.findByIdAndUpdate(id, { $set: { isDeleted: true } }, { new: true })
-      .exec();
+    const result = await this.model.findByIdAndUpdate(id, { $set: { isDeleted: true } }, { new: true }).exec();
     return result !== null;
   }
-  
+
   async delete(id: string | Types.ObjectId): Promise<boolean> {
     const result = await this.model.findByIdAndDelete(id).exec();
     return result !== null;

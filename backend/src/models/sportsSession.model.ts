@@ -12,10 +12,10 @@ interface IVenue {
 
 interface ITimeSlot {
   day: DAY;
- slots:{
-          startTime: string; // "09:00"
-          endTime: string;   // "10:00"
-  }[],
+  slots: {
+    startTime: string; // "09:00"
+    endTime: string; // "10:00"
+  }[];
 }
 
 interface IPricing {
@@ -28,29 +28,28 @@ export interface ISportsSession extends Document {
   trainerId: Types.ObjectId;
   sportCategory: Types.ObjectId;
   sessionName: string;
-  slug:string;
+  slug: string;
   description: string;
   duration: number;
   ageGroup: AGE_GROUP;
   sessionType: SESSION_TYPE;
   enrolledCount: number;
   maxCapacity: number;
-  venue?: IVenue;      
-  amenities?: string[];   
+  venue?: IVenue;
+  amenities?: string[];
   timeSlots: ITimeSlot[];
   pricing: IPricing[];
-   cancellationPolicy: string; 
-  cancellationWindow:  number,
+  cancellationPolicy: string;
+  cancellationWindow: number;
   bookingDeadline: number;
   isActive: boolean;
   isDeleted: boolean;
   isApproved: boolean;
   images: string[];
-  rating:number,
+  rating: number;
   createdAt: Date;
   updatedAt: Date;
 }
-
 
 const SportsSessionSchema = new mongoose.Schema<ISportsSession>(
   {
@@ -61,7 +60,7 @@ const SportsSessionSchema = new mongoose.Schema<ISportsSession>(
     },
     sportCategory: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:'SportsModel',
+      ref: 'SportsModel',
       required: true,
     },
 
@@ -101,16 +100,16 @@ const SportsSessionSchema = new mongoose.Schema<ISportsSession>(
       type: Number,
       default: 0,
     },
-   
+
     venue: {
       name: {
         type: String,
-        required:true,
+        required: true,
         trim: true,
       },
       address: {
         type: String,
-         required: true,
+        required: true,
       },
 
       location: {
@@ -122,14 +121,11 @@ const SportsSessionSchema = new mongoose.Schema<ISportsSession>(
         },
         coordinates: {
           type: [Number], // [longitude, latitude]
-           required: true,
+          required: true,
         },
       },
-      
     },
-    amenities:{ type:[String],
-      required: true 
-    },
+    amenities: { type: [String], required: true },
 
     // 4. SCHEDULE (Weekly  slots)
     timeSlots: [
@@ -137,21 +133,20 @@ const SportsSessionSchema = new mongoose.Schema<ISportsSession>(
         day: {
           type: String,
           enum: DAY,
-          required: true 
+          required: true,
         },
-       slots: [
-        {
-          startTime: { 
-            type: String, 
-            required: true 
-          }, // Format: "HH:mm" (24hr)
-          endTime: { 
-            type: String, 
-            required: true 
-          },   // Format: "HH:mm" (24hr)
-        }
-      ],
-        
+        slots: [
+          {
+            startTime: {
+              type: String,
+              required: true,
+            }, // Format: "HH:mm" (24hr)
+            endTime: {
+              type: String,
+              required: true,
+            }, // Format: "HH:mm" (24hr)
+          },
+        ],
       },
     ],
 
@@ -161,13 +156,13 @@ const SportsSessionSchema = new mongoose.Schema<ISportsSession>(
         price: { type: Number, required: true }, // e.g., 300
       },
     ],
-    cancellationPolicy: { 
-    type: String, 
-    default: "Full refund if cancelled at least 24 hours before the session starts. No-shows are non-refundable.",
-    trim: true
+    cancellationPolicy: {
+      type: String,
+      default: 'Full refund if cancelled at least 24 hours before the session starts. No-shows are non-refundable.',
+      trim: true,
     },
 
-  // OPTIONAL: A numeric cancellation window for automated logic
+    // OPTIONAL: A numeric cancellation window for automated logic
     cancellationWindow: {
       type: Number,
       default: 24, // hours
@@ -176,7 +171,7 @@ const SportsSessionSchema = new mongoose.Schema<ISportsSession>(
     //  ADMIN CONTROLS
     isActive: {
       type: Boolean,
-      default:false,
+      default: false,
     },
     isDeleted: {
       type: Boolean,
@@ -187,11 +182,11 @@ const SportsSessionSchema = new mongoose.Schema<ISportsSession>(
       default: false,
     },
 
-    images: [String], 
-    // URLs  images 
-    rating:{type:Number,default:0}
+    images: [String],
+    // URLs  images
+    rating: { type: Number, default: 0 },
   },
- 
+
   {
     timestamps: true,
   }
@@ -201,4 +196,4 @@ SportsSessionSchema.index({ trainerId: 1 });
 SportsSessionSchema.index({ sportCategory: 1 });
 SportsSessionSchema.index({ 'venue.location': '2dsphere' });
 
-export default  mongoose.model<ISportsSession>('SportsSession', SportsSessionSchema);
+export default mongoose.model<ISportsSession>('SportsSession', SportsSessionSchema);

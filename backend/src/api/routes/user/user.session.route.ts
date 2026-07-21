@@ -1,7 +1,7 @@
-import { sessionController } from "@/container";
-import { Router } from "express";
+import { sessionController } from '@/container';
+import { Router } from 'express';
 
-const router=Router();
-router.get('/:sessionModel/:id',sessionController.getSessionDetails);
+const router = Router();
+router.get('/:sessionModel/:id', sessionController.getSessionDetails);
 
 export default router;

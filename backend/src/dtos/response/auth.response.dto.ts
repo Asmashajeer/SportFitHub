@@ -12,7 +12,7 @@ export interface RegisterDataDTO {
   email: string;
   roles: UserRole[];
   activeRole: UserRole;
-  timezone:string;
+  timezone: string;
   isVerified: boolean;
 }
 

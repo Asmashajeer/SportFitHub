@@ -1,10 +1,9 @@
-
 import { STATUS_CODE, SUCCESS_MESSAGES } from '@/constants/messages';
 import { ITrainerService } from '@/interfaces/services/trainer/Itrainer.service';
 import { AuthRequest } from '@/middleware/auth.middleware';
 
 import Logger from '@/utils/logger';
-import { serializeTrainerProfile } from '@/utils/serializeTrainerProfile';
+
 import { setAuthCookies } from '@/utils/set.cookies';
 
 import { Request, Response, NextFunction } from 'express';
@@ -18,24 +17,24 @@ export class TrainerController {
 
   addProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-         const { user } = req as AuthRequest;
-     
+      const { user } = req as AuthRequest;
+
       await this._trainerService.checkExistingProfile(user.id);
 
       const profileData = {
-        userId:user.id,
+        userId: user.id,
         ...req.body,
       };
-      const result = await this._trainerService.addProfile(profileData,user);
+      const result = await this._trainerService.addProfile(profileData, user);
       Logger.info('Trainer created an application', { id: user.id });
-      if(result.tokens){
+      if (result.tokens) {
         setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
       }
-      const {tokens,...profile}=result;
+      const { tokens, ...profile } = result;
       res.status(STATUS_CODE.SUCCESS.CREATED).json({
         success: true,
         message: SUCCESS_MESSAGES.USER.PROFILE_CREATED,
-        profileData:  profile,
+        profileData: profile,
       });
     } catch (error) {
       next(error);
@@ -46,7 +45,7 @@ export class TrainerController {
   getProfilePic = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { user } = req as AuthRequest;
-     
+
       const profile = await this._trainerService.getTrainerByUserId(user);
       const profilePic = profile.profilePic;
       res.status(STATUS_CODE.SUCCESS.OK).json({
@@ -58,11 +57,11 @@ export class TrainerController {
     }
   };
 
-  //------------get profile 
+  //------------get profile
   getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { user } = req as AuthRequest;
-       console.log(user);
+      console.log(user);
       const profile = await this._trainerService.getTrainerByUserId(user);
 
       res.status(STATUS_CODE.SUCCESS.OK).json({
@@ -79,7 +78,7 @@ export class TrainerController {
 
       const id = req.params.id;
       const profilePic = req.body.profilePic;
-      const profileData = await this._trainerService.updateProfilePic(id,profilePic,user);
+      const profileData = await this._trainerService.updateProfilePic(id, profilePic, user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profileData,
@@ -94,7 +93,7 @@ export class TrainerController {
       const data = req.body;
       const { user } = req as AuthRequest;
 
-      const profile = await this._trainerService.updateBasicInfo(id, data,user);
+      const profile = await this._trainerService.updateBasicInfo(id, data, user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profile,
@@ -109,7 +108,7 @@ export class TrainerController {
       const data = req.body;
       const { user } = req as AuthRequest;
 
-      const profile = await this._trainerService.updatePersonalInfo(id, data,user);
+      const profile = await this._trainerService.updatePersonalInfo(id, data, user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profile,
@@ -122,10 +121,10 @@ export class TrainerController {
   updateCertificates = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const {documents} = req.body;
+      const { documents } = req.body;
       const { user } = req as AuthRequest;
 
-      const profile = await this._trainerService.updateCertificate(id, documents,user);
+      const profile = await this._trainerService.updateCertificate(id, documents, user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profile,
@@ -140,7 +139,7 @@ export class TrainerController {
       const data = req.body;
       const { user } = req as AuthRequest;
 
-      const profile = await this._trainerService.updateIdVerification(id, data,user);
+      const profile = await this._trainerService.updateIdVerification(id, data, user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profile,
@@ -149,17 +148,13 @@ export class TrainerController {
       next(error);
     }
   };
-  updateAvailabilityPricing = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  updateAvailabilityPricing = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
       const data = req.body;
       const { user } = req as AuthRequest;
 
-      const profile = await this._trainerService.updateAvailabilityPricing(id, data,user);
+      const profile = await this._trainerService.updateAvailabilityPricing(id, data, user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profile,
@@ -175,7 +170,7 @@ export class TrainerController {
       const data = req.body;
       const { user } = req as AuthRequest;
 
-      const profile = await this._trainerService.updatePaymentInfo(id, data,user);
+      const profile = await this._trainerService.updatePaymentInfo(id, data, user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
         profile,
@@ -186,12 +181,11 @@ export class TrainerController {
   };
 
   updateStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-   
-    const { id } = req.params;    
+    const { id } = req.params;
     const { status } = req.body;
-   const { user } = req as AuthRequest;
+    const { user } = req as AuthRequest;
     try {
-      const profile = await this._trainerService.resubmitApplicaion(id, status,user);
+      const profile = await this._trainerService.resubmitApplicaion(id, status, user);
       Logger.info(`Resubmitted the application  for ID: ${id}`, {
         trainerId: id,
         newStatus: status,

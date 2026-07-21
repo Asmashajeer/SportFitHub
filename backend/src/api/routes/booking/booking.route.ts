@@ -10,23 +10,21 @@ import { UserRole } from '@/constants/enums';
 
 router.use(protect);
 router.use(isBlocked);
-router.use(timezoneMiddleware); 
+router.use(timezoneMiddleware);
+
 router.use(restrictTo([UserRole.USER]));
 
-router.get('/checkSlotAvailability',bookingController.checkAvailability);
-router.post('/check-duplicate-booking',bookingController.checkDuplicateBooking);
+router.get('/checkSlotAvailability', bookingController.checkAvailability);
+router.post('/check-duplicate-booking', bookingController.checkDuplicateBooking);
 
-router.post('/payment/create-checkout-session',  paymentController.createCheckoutSession);
-router.post('/wallet/create-booking',  bookingController.bookingWithWallet);
-router.get ('/status/:stripeSessionId',bookingController.getBookingStatus);
-router.get('/my-bookings',bookingController.getUserBookings);
-router.get('/my-sessions',bookingController.getUserSessions);
-router.get('/my-payments',paymentController.getUserPayments);
-router.get('/payment/invoice/:invoiceId',paymentController.getInvoice);
-router.put('/sessions/:sessionBookingId/reschedule',bookingController.rescheduleBookedSession)
-router.patch('/sessions/:sessionBookingId',bookingController.cancelBookedSession)
-
-
-
+router.post('/payment/create-checkout-session', paymentController.createCheckoutSession);
+router.post('/wallet/create-booking', bookingController.bookingWithWallet);
+router.get('/status/:stripeSessionId', bookingController.getBookingStatus);
+router.get('/my-bookings', bookingController.getUserBookings);
+router.get('/my-sessions', bookingController.getUserSessions);
+router.get('/my-payments', paymentController.getUserPayments);
+router.get('/payment/invoice/:invoiceId', paymentController.getInvoice);
+router.put('/sessions/:sessionBookingId/reschedule', bookingController.rescheduleBookedSession);
+router.patch('/sessions/:sessionBookingId', bookingController.cancelBookedSession);
 
 export default router;

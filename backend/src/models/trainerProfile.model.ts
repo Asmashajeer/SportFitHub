@@ -1,12 +1,5 @@
 import mongoose, { Document, Types } from 'mongoose';
-import {
-
-  DOC_VERIFY_STATUS,
-  GENDER,
-  GOVT_ID_TYPE,
-  TRAINER_CATEGORY,
-  TRAINER_STATUS,
-} from '@/constants/enums';
+import { DOC_VERIFY_STATUS, GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY, TRAINER_STATUS } from '@/constants/enums';
 
 interface IAddress {
   street?: string;
@@ -18,7 +11,7 @@ interface IAddress {
 export interface ICertification {
   _id: Types.ObjectId;
   name: string;
-  url: string; // Cloudinary public_id, 
+  url: string; // Cloudinary public_id,
   validUpto: Date;
   issuedAt: Date;
 }
@@ -43,7 +36,7 @@ export interface ITrainerProfile extends Document {
   languages: string[];
   profilePic: string;
   pricing: {
-    sessionCharge: number;    
+    sessionCharge: number;
   };
 
   // rating
@@ -61,7 +54,6 @@ export interface ITrainerProfile extends Document {
 
   // certificates & Verification
   certificationInfo: {
-    
     documents: ICertification[];
     verified: boolean;
     status: DOC_VERIFY_STATUS;
@@ -73,7 +65,7 @@ export interface ITrainerProfile extends Document {
   idVerification: {
     idType: GOVT_ID_TYPE;
     idNumber: string;
-    idAttachment: string;// Cloudinary public_id, 
+    idAttachment: string; // Cloudinary public_id,
     verified: boolean;
     status: DOC_VERIFY_STATUS;
     verifiedAt?: Date;
@@ -112,37 +104,39 @@ export interface ITrainerProfile extends Document {
   // Administrative State
   status: TRAINER_STATUS;
   verificationRemarks: {
-    fields: [string],  // which fields changed
-    changedAt: Date,
+    fields: [string]; // which fields changed
+    changedAt: Date;
   };
   suspensionReason?: string;
   suspendedAt?: Date;
   rejectionReason?: string;
   rejectedAt?: Date;
   applicationCount: number;
-  penalty:number
-  strikePoints:number;
-  cancellationCount: number,
-  lastStrikeDate?:Date,
-  isDeleted:boolean,
+  penalty: number;
+  strikePoints: number;
+  cancellationCount: number;
+  lastStrikeDate?: Date;
+  isDeleted: boolean;
   // Timestamps
   createdAt: Date;
   updatedAt: Date;
 }
 
 // -------------------SCHEMA---------
-const verificationRemarksSchema = new mongoose.Schema({
+const verificationRemarksSchema = new mongoose.Schema(
+  {
     fields: {
-        type: [String],
-        enum: ['experience', 'fullName', 'bankAccount', 'upiId', 'certificationInfo', 'idVerification'],
-        default: []
+      type: [String],
+      enum: ['experience', 'fullName', 'bankAccount', 'upiId', 'certificationInfo', 'idVerification'],
+      default: [],
     },
     changedAt: {
-        type: Date,
-        default: null
-    }
-}, { _id: false });
-
+      type: Date,
+      default: null,
+    },
+  },
+  { _id: false }
+);
 
 const TrainerProfileSchema = new mongoose.Schema(
   {
@@ -159,7 +153,7 @@ const TrainerProfileSchema = new mongoose.Schema(
     profilePic: { type: String, required: true },
 
     pricing: {
-      sessionCharge: { type: Number, default: 0, min: 1 },     
+      sessionCharge: { type: Number, default: 0, min: 1 },
     },
     // --- Rating ---
     averageRating: {
@@ -241,7 +235,6 @@ const TrainerProfileSchema = new mongoose.Schema(
         available: { type: Boolean, default: false },
         startTime: String,
         endTime: String,
-        
       },
       Sunday: { available: { type: Boolean, default: false }, startTime: String, endTime: String },
     },
@@ -263,9 +256,9 @@ const TrainerProfileSchema = new mongoose.Schema(
       enum: Object.values(TRAINER_STATUS),
       default: TRAINER_STATUS.SUBMITTED,
     },
-   verificationRemarks: {
-        type: verificationRemarksSchema,
-        default: { fields: [], changedAt: null }
+    verificationRemarks: {
+      type: verificationRemarksSchema,
+      default: { fields: [], changedAt: null },
     },
     suspensionReason: String,
     suspendedAt: Date,
@@ -274,9 +267,9 @@ const TrainerProfileSchema = new mongoose.Schema(
     applicationCount: { type: Number, default: 1 },
     penalty: { type: Number, default: 0 },
     strikePoints: { type: Number, default: 0 },
-    cancellationCount: { type: Number, default: 0 }, 
+    cancellationCount: { type: Number, default: 0 },
     lastStrikeDate: { type: Date, default: null },
-    isDeleted:{type:Boolean,dafault:false}
+    isDeleted: { type: Boolean, dafault: false },
   },
   { timestamps: true }
 );

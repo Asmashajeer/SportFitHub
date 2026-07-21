@@ -113,6 +113,7 @@ export interface FitnessSessionPublicResponseData extends Omit<
 
 interface PopulatedTrainer {
   id: string;
+  userId:string;
   displayName: string;
   profilePic: string;
   coreDiscipline: string;

@@ -13,24 +13,8 @@ import { OtpType } from '@/constants/enums';
 import { IAuthService } from '../interfaces/services/IAuth.service';
 import { OAuth2Client } from 'google-auth-library';
 import { toRegisterData, toUserData } from '../mappers/auth.mapper';
-import {
-  LoginDTO,
-  RegisterRequestDTO,
-  UpdateRoleDTO,
-  VerifyEmailDTO,
-  VerifyOtpDTO,
-  ResetPasswordDTO,
-} from '@/dtos/request/auth.request.dto';
-import {
-  RegisterResponseDTO,
-  UserResponseDTO,
-  BaseResponseDTO,
-  UserDataDTO,
-  RefreshTokensResponse,
-  AuthMeResponseDto,
-  LoginResponseDTO,
-  RegisterDataDTO,
-} from '@/dtos/response/auth.response.dto.js';
+import { LoginDTO, RegisterRequestDTO, UpdateRoleDTO, VerifyEmailDTO, VerifyOtpDTO, ResetPasswordDTO } from '@/dtos/request/auth.request.dto';
+import { RegisterResponseDTO, UserResponseDTO, BaseResponseDTO, UserDataDTO, RefreshTokensResponse, AuthMeResponseDto, LoginResponseDTO, RegisterDataDTO } from '@/dtos/response/auth.response.dto.js';
 import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
 import { IUser } from '@/models/user.model';
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -41,12 +25,7 @@ export class AuthService implements IAuthService {
   private _profileRepo: IProfileRepository;
   private _trainerRepo: ITrainerRepository;
 
-  constructor(
-    userRepo: IUserRepository,
-    otpRepo: IOtpRepository,
-    profileRepo: IProfileRepository,
-    trainerRepo: ITrainerRepository
-  ) {
+  constructor(userRepo: IUserRepository, otpRepo: IOtpRepository, profileRepo: IProfileRepository, trainerRepo: ITrainerRepository) {
     this._userRepo = userRepo;
     this._otpRepo = otpRepo;
     this._profileRepo = profileRepo;
@@ -63,11 +42,7 @@ export class AuthService implements IAuthService {
     const RegisterData: RegisterDataDTO = toRegisterData(newUser);
 
     const otpContext = OtpType.VERIFICATION;
-    const isEmailSent = this.generateOtpAndSendMail(
-      newUser._id.toString(),
-      newUser.email,
-      otpContext
-    );
+    const isEmailSent = this.generateOtpAndSendMail(newUser._id.toString(), newUser.email, otpContext);
     console.log('Registration successful. ');
     return {
       success: true,
@@ -104,7 +79,7 @@ export class AuthService implements IAuthService {
 
     const hasProfile = profileCount !== 0;
     userData.hasProfile = hasProfile;
-    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.activeRole,user.timezone);
+    const accessToken = this.generateAccessToken(user._id.toString(), user.email, user.activeRole, user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.activeRole);
 
     return {
@@ -158,20 +133,15 @@ export class AuthService implements IAuthService {
   //------------------------Login
   login = async (data: LoginDTO): Promise<LoginResponseDTO> => {
     const user = await this._userRepo.findByEmail(data.email);
-    if (!user || !user.password)
-      throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
+    if (!user || !user.password) throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     const isMatch = await bcrypt.compare(data.password, user.password);
-    if (!isMatch)
-      throw new AppError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, STATUS_CODE.ERROR.UNAUTHORIZED);
-     if (!user.isActive )
-      throw new AppError(ERROR_MESSAGES.AUTH.USER_DELETED, STATUS_CODE.ERROR.FORBIDDEN);  
-    if (user.isBlocked )
-      throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
-    
-     const userWithTimezone = await this._userRepo.findOneAndUpdate(user._id, { timezone:data.timezone } );
-     const userData: UserDataDTO = toUserData(userWithTimezone);
-    if (!user.isVerified)
-      this.generateOtpAndSendMail(user._id.toString(), user.email, OtpType.VERIFICATION);
+    if (!isMatch) throw new AppError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, STATUS_CODE.ERROR.UNAUTHORIZED);
+    if (!user.isActive) throw new AppError(ERROR_MESSAGES.AUTH.USER_DELETED, STATUS_CODE.ERROR.FORBIDDEN);
+    if (user.isBlocked) throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
+
+    const userWithTimezone = await this._userRepo.findOneAndUpdate(user._id, { timezone: data.timezone });
+    const userData: UserDataDTO = toUserData(userWithTimezone);
+    if (!user.isVerified) this.generateOtpAndSendMail(user._id.toString(), user.email, OtpType.VERIFICATION);
 
     // CHECK FOR PROFILE existence
     let profileCount = 0;
@@ -182,7 +152,7 @@ export class AuthService implements IAuthService {
       profileCount = await this._trainerRepo.count({ userId: user._id.toString() });
     }
     userData.hasProfile = profileCount !== 0;
-    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.activeRole,user.timezone);
+    const accessToken = this.generateAccessToken(user._id.toString(), user.email, user.activeRole, user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.activeRole);
     console.log('user logged in');
     return {
@@ -205,21 +175,20 @@ export class AuthService implements IAuthService {
     const { email, sub, name } = ticket.getPayload();
 
     let user = await this._userRepo.findByEmail(email);
-  
+
     if (!user) {
       user = await this._userRepo.create({
         googleId: sub,
         name: name,
         email: email,
-        roles:[],
+        roles: [],
         activeRole: UserRole.PENDING,
         password: `google_${Date.now()}`,
         isVerified: true,
       });
     }
-    if (user.isBlocked)
-      throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
-    
+    if (user.isBlocked) throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
+
     const userData: UserDataDTO = toUserData(user);
     let profileCount = 0;
     if (user.activeRole === UserRole.USER) {
@@ -229,7 +198,7 @@ export class AuthService implements IAuthService {
       profileCount = await this._trainerRepo.count({ userId: user._id.toString() });
     }
     userData.hasProfile = profileCount !== 0;
-    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.activeRole,user.timezone);
+    const accessToken = this.generateAccessToken(user._id.toString(), user.email, user.activeRole, user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.activeRole);
     return {
       success: true,
@@ -251,11 +220,9 @@ export class AuthService implements IAuthService {
     }
 
     const userId = Data._id.toString();
-    let user:IUser|null;
-    if(!Data.roles.length)
-         user = await this._userRepo.findOneAndUpdate(userId, { roles:[data.role],activeRole: data.role });
-    else
-       user = await this._userRepo.setActiveRole(userId,data.role);
+    let user: IUser | null;
+    if (!Data.roles.length) user = await this._userRepo.findOneAndUpdate(userId, { roles: [data.role], activeRole: data.role });
+    else user = await this._userRepo.setActiveRole(userId, data.role);
     if (!user) throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     const userData: UserDataDTO = toUserData(user);
     let profileCount = 0;
@@ -267,7 +234,7 @@ export class AuthService implements IAuthService {
     }
     const hasProfile = profileCount !== 0;
     userData.hasProfile = hasProfile;
-    const accessToken = this.generateAccessToken(user._id.toString(),user.email, user.activeRole,user.timezone);
+    const accessToken = this.generateAccessToken(user._id.toString(), user.email, user.activeRole, user.timezone);
     const refreshToken = this.generateRefreshToken(user._id.toString(), user.activeRole);
 
     return {
@@ -310,14 +277,13 @@ export class AuthService implements IAuthService {
   refreshAccessToken = async (refreshToken: string): Promise<RefreshTokensResponse> => {
     const decoded = jwt.verify(refreshToken, authConfig.refresh_secret) as {
       id: string;
-      email:string;
+      email: string;
       role: string;
-      timezone:string
+      timezone: string;
     };
-    if (!decoded)
-      throw new AppError(ERROR_MESSAGES.AUTH.REFRESH_TOKEN_INVALID, STATUS_CODE.ERROR.UNAUTHORIZED);
+    if (!decoded) throw new AppError(ERROR_MESSAGES.AUTH.REFRESH_TOKEN_INVALID, STATUS_CODE.ERROR.UNAUTHORIZED);
 
-    const accessToken = this.generateAccessToken(decoded.id, decoded.email,decoded.role,decoded.timezone) as string;
+    const accessToken = this.generateAccessToken(decoded.id, decoded.email, decoded.role, decoded.timezone) as string;
     refreshToken = this.generateRefreshToken(decoded.id, decoded.role) as string;
     return { accessToken, refreshToken };
   };
@@ -325,8 +291,6 @@ export class AuthService implements IAuthService {
   async updateFcmToken(userId: string, fcmToken: string): Promise<void> {
     await this._userRepo.updateFcmToken(userId, fcmToken);
   }
-
-
 
   verifyOTPInternal = async (data: VerifyOtpDTO) => {
     const savedOtp = await this._otpRepo.findOtp(data.userId, data.otpContext);
@@ -342,8 +306,8 @@ export class AuthService implements IAuthService {
   };
 
   //access Token
-  private generateAccessToken(id: string,email:string, role: string,timezone:string): string {
-    return jwt.sign({ id,email,role,timezone }, authConfig.secret!, {
+  private generateAccessToken(id: string, email: string, role: string, timezone: string): string {
+    return jwt.sign({ id, email, role, timezone }, authConfig.secret!, {
       expiresIn: authConfig.secret_expires_in,
     } as SignOptions);
   }
@@ -366,27 +330,18 @@ export class AuthService implements IAuthService {
       await sendEmailOTP(email, OTP);
       console.log('Verification code sent to:', email);
     } catch (error) {
-       console.log(error)   ;
-      throw new AppError("Failed to send verification email", STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
-    } 
-    
+      console.log(error);
+      throw new AppError('Failed to send verification email', STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
+    }
+
     console.log('verification code sent to your mail. Please verify your email.');
     return true;
   };
 
-
-
-
-   //  public method — 
-  public generateTokensForUser(
-    id: string,
-    email: string,
-    role: string,
-    timezone: string
-  ): { accessToken: string; refreshToken: string } {
+  //  public method —
+  public generateTokensForUser(id: string, email: string, role: string, timezone: string): { accessToken: string; refreshToken: string } {
     const accessToken = this.generateAccessToken(id, email, role, timezone);
     const refreshToken = this.generateRefreshToken(id, role);
     return { accessToken, refreshToken };
   }
 }
-

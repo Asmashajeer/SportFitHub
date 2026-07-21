@@ -25,19 +25,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (!isAuthenticated) return <Navigate to="/login" />;
 
-  const userRole = user?.role?.toLowerCase();
+  const userRole = user?.activeRole?.toLowerCase();
   if (
     user &&
-    user.role !== ROLES.ADMIN &&
+    user.activeRole !== ROLES.ADMIN &&
     !user.hasProfile &&
     user.isVerified &&
     location.pathname !== `/${userRole}/add-Profile`
   ) {
-    return <Navigate to={`/${user.role}/add-Profile`} replace />;
+    return <Navigate to={`/${user.activeRole}/add-Profile`} replace />;
   }
 
   //  Role-based check
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && user && !allowedRoles.includes(user.activeRole)) {
     <Navigate to="/unathorized" />;
   }
 

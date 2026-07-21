@@ -4,34 +4,28 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '@/config/cloudinaryConfig';
 import { getDeliveryType } from '@/utils/cloudinaryAccess';
 
-
 export const uploadMiddleware = () => {
   const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
-      const { uploadType} = req.body;
-       const userId = (req as any).user?.id;
+      const { uploadType } = req.body;
+      const userId = (req as any).user?.id;
       const folderName = req.body.folder || 'misc_assets';
 
       let publicId;
       let overwrite = false;
-  
 
       if (uploadType === 'profile_pic') {
         publicId = `profile_${userId}_main`;
         overwrite = true; //ONE main profile pic
-      } 
-      else if (uploadType === 'id_attachment') {
+      } else if (uploadType === 'id_attachment') {
         publicId = `ID_${userId}_main`;
         overwrite = true; //one ID
-      }
-      else if (uploadType === 'session_gallery') {
-       
+      } else if (uploadType === 'session_gallery') {
         const orderNumber = Math.floor(Math.random() * 1000) + 1;
         publicId = `session_${userId}_${Date.now()}_${orderNumber}`;
-        overwrite = false;  
-     }
-      else {
+        overwrite = false;
+      } else {
         // Certificates need to be unique so they don't delete each other
         publicId = `cert_${Date.now()}_${file.originalname.split('.')[0]}`;
         overwrite = false;
@@ -44,7 +38,7 @@ export const uploadMiddleware = () => {
         overwrite: overwrite,
         invalidate: true, //to refresh globally
         resource_type: 'auto', // Automatically detects if it's an image or PDF
-         type:getDeliveryType(uploadType),
+        type: getDeliveryType(uploadType),
         format: file.mimetype === 'application/pdf' ? 'pdf' : undefined,
       };
     },
@@ -57,12 +51,8 @@ export const uploadMiddleware = () => {
       if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
         cb(null, true);
       } else {
-        cb(
-          new Error('Invalid file type. Only images and PDFs are allowed!') as unknown as null,
-          false
-        );
+        cb(new Error('Invalid file type. Only images and PDFs are allowed!') as unknown as null, false);
       }
     },
   });
 };
-

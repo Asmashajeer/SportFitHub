@@ -14,27 +14,21 @@ export const RegisterSchema = z.object({
     .regex(/[0-9]/, 'Password must contain at least one number'),
   roles: z.array(z.enum(UserRole)),
   activeRole: z.enum(UserRole),
-  timezone:z.string(),
+  timezone: z.string(),
 });
 export type RegisterRequestDTO = z.infer<typeof RegisterSchema>;
 
 //verifyEmailDTO
 export const VerifyEmailSchema = z.object({
   email: z.email('Invalid email format'),
-  otp: z
-    .string()
-    .length(6, 'OTP must be exactly 6 digits')
-    .regex(/^\d+$/, 'OTP must only contain numbers'), // Ensures it's a numeric string
+  otp: z.string().length(6, 'OTP must be exactly 6 digits').regex(/^\d+$/, 'OTP must only contain numbers'), // Ensures it's a numeric string
 });
 export type VerifyEmailDTO = z.infer<typeof VerifyEmailSchema>;
 
 //verify OTP DTO
 export const VerifyOtpSchema = z.object({
   userId: z.string(),
-  otp: z
-    .string()
-    .length(6, 'OTP must be exactly 6 digits')
-    .regex(/^\d+$/, 'OTP must only contain numbers'),
+  otp: z.string().length(6, 'OTP must be exactly 6 digits').regex(/^\d+$/, 'OTP must only contain numbers'),
   otpContext: z.enum(OtpType),
 });
 export type VerifyOtpDTO = z.infer<typeof VerifyOtpSchema>;
@@ -42,10 +36,7 @@ export type VerifyOtpDTO = z.infer<typeof VerifyOtpSchema>;
 //resetPassword DTO
 export const ResetPasswordSchema = z.object({
   email: z.email(),
-  otp: z
-    .string()
-    .length(6, 'OTP must be exactly 6 digits')
-    .regex(/^\d+$/, 'OTP must only contain numbers'),
+  otp: z.string().length(6, 'OTP must be exactly 6 digits').regex(/^\d+$/, 'OTP must only contain numbers'),
   newPassword: z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -59,7 +50,7 @@ export type ResetPasswordDTO = z.infer<typeof ResetPasswordSchema>;
 export const LoginSchema = z.object({
   email: z.email('Invalid email format').min(1, 'Email is required'),
   password: z.string().min(1, 'Password is required'),
-  timezone:z.string(),
+  timezone: z.string(),
 });
 export type LoginDTO = z.infer<typeof LoginSchema>;
 

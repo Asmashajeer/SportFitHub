@@ -7,17 +7,16 @@ export interface trainerStatusDTO {
   rejectionReason?: string;
   rejectedAt?: Date;
   verificationRemarks?: {
-    fields: string[],
-    changedAt: string|null, 
-  },
+    fields: string[];
+    changedAt: string | null;
+  };
 }
 export type DocumentUpdateDTO = Record<string, string | boolean | Date | null>;
 
-
-export interface TrainerFilterRequestDTO{
-   page:number,
-   limit:number,
-   search:string,
-   status:string,
-   category:string
+export interface TrainerFilterRequestDTO {
+  page: number;
+  limit: number;
+  search: string;
+  status: string;
+  category: string;
 }

@@ -1,6 +1,6 @@
 export interface getQueryDTO {
   page: number;
-  limit:number;
+  limit: number;
   search: string;
   status?: string;
 }

@@ -12,10 +12,10 @@ interface IVenue {
 
 interface ITimeSlot {
   day: DAY;
-  slots:{
-          startTime: string; // "09:00"
-          endTime: string;   // "10:00"
-  }[],
+  slots: {
+    startTime: string; // "09:00"
+    endTime: string; // "10:00"
+  }[];
 }
 
 interface IPricing {
@@ -24,35 +24,35 @@ interface IPricing {
 }
 
 export interface IFitnessSession extends Document {
-   _id: Types.ObjectId;
+  _id: Types.ObjectId;
   trainerId: Types.ObjectId;
   fitnessCategory: Types.ObjectId;
   sessionName: string;
-  slug:string;
+  slug: string;
   description: string;
   duration: number;
   ageGroup: AGE_GROUP;
-  gender:GENDER,
+  gender: GENDER;
   sessionType: SESSION_TYPE;
   maxCapacity: number;
   enrolledCount: number;
-  intensityLevel: INTENSITY_LEVEL;  
-  mode:SESSION_MODE,
-  meetingLink?:string,
+  intensityLevel: INTENSITY_LEVEL;
+  mode: SESSION_MODE;
+  meetingLink?: string;
   venue?: IVenue;
   amenities: string[];
   requirements: string[];
   timeSlots: ITimeSlot[];
   pricing: IPricing[];
-  cancellationPolicy: string; 
-  cancellationWindow:  number,
+  cancellationPolicy: string;
+  cancellationWindow: number;
   bookingDeadline: number;
   isActive: boolean;
   isDeleted: boolean;
   isApproved: boolean;
   images: string[];
 
-  rating:number,
+  rating: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -66,7 +66,7 @@ const FitnessSessionSchema = new mongoose.Schema<IFitnessSession>(
     },
     fitnessCategory: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:'FitnessProgramModal',
+      ref: 'FitnessProgramModal',
       required: true,
     },
 
@@ -106,49 +106,61 @@ const FitnessSessionSchema = new mongoose.Schema<IFitnessSession>(
       type: Number,
       default: 0,
     },
-    intensityLevel: { 
-      type: String, 
-      enum:Object.values(INTENSITY_LEVEL),
-      default: INTENSITY_LEVEL.BEGINNER
+    intensityLevel: {
+      type: String,
+      enum: Object.values(INTENSITY_LEVEL),
+      default: INTENSITY_LEVEL.BEGINNER,
     },
-    mode: { 
-        type: String, 
-        enum: Object.values(SESSION_MODE), 
-        default: SESSION_MODE.OFFLINE 
+    mode: {
+      type: String,
+      enum: Object.values(SESSION_MODE),
+      default: SESSION_MODE.OFFLINE,
+    },
+    meetingLink: {
+      type: String,
+      required: function () {
+        return this.mode === SESSION_MODE.ONLINE;
+      },
+    },
+    venue: {
+      name: {
+        type: String,
+        required: function () {
+          return this.mode === SESSION_MODE.OFFLINE;
         },
-        meetingLink: { 
-          type: String, 
-          required: function() { return this.mode === SESSION_MODE.ONLINE; } 
+        trim: true,
+      },
+      address: {
+        type: String,
+        required: function () {
+          return this.mode === SESSION_MODE.OFFLINE;
         },
-        venue: {
-          name: {
-            type: String,
-             required: function() { return this.mode === SESSION_MODE.OFFLINE; },
-            trim: true,
+      },
+
+      location: {
+        type: {
+          type: String,
+          enum: ['Point'],
+          required: function () {
+            return this.mode === SESSION_MODE.OFFLINE;
           },
-          address: {
-            type: String,
-             required: function() { return this.mode === SESSION_MODE.OFFLINE; },
-          },
-    
-          location: {
-            type: {
-              type: String,
-              enum: ['Point'],
-               required: function() { return this.mode === SESSION_MODE.OFFLINE; },
-              default: 'Point',
-            },
-            coordinates: {
-              type: [Number], // [longitude, latitude]
-              required: function() { return this.mode === SESSION_MODE.OFFLINE; },
-            },
-          },
-         
+          default: 'Point',
         },
-        amenities:{ type:[String],
-          required: function() { return this.mode === SESSION_MODE.OFFLINE; } 
+        coordinates: {
+          type: [Number], // [longitude, latitude]
+          required: function () {
+            return this.mode === SESSION_MODE.OFFLINE;
+          },
         },
-        requirements: [{ type: String }],
+      },
+    },
+    amenities: {
+      type: [String],
+      required: function () {
+        return this.mode === SESSION_MODE.OFFLINE;
+      },
+    },
+    requirements: [{ type: String }],
 
     // 4. SCHEDULE (Weekly  slots)
     timeSlots: [
@@ -158,17 +170,17 @@ const FitnessSessionSchema = new mongoose.Schema<IFitnessSession>(
           enum: DAY,
         },
         slots: [
-        {
-          startTime: { 
-            type: String, 
-            required: true 
-          }, // Format: "HH:mm" (24hr)
-          endTime: { 
-            type: String, 
-            required: true 
-          },   // Format: "HH:mm" (24hr)
-        }
-      ],
+          {
+            startTime: {
+              type: String,
+              required: true,
+            }, // Format: "HH:mm" (24hr)
+            endTime: {
+              type: String,
+              required: true,
+            }, // Format: "HH:mm" (24hr)
+          },
+        ],
       },
     ],
 
@@ -178,13 +190,13 @@ const FitnessSessionSchema = new mongoose.Schema<IFitnessSession>(
         price: { type: Number, required: true }, // e.g., 300
       },
     ],
-    cancellationPolicy: { 
-    type: String, 
-    default: "Full refund if cancelled at least 24 hours before the session starts. No-shows are non-refundable.",
-    trim: true
+    cancellationPolicy: {
+      type: String,
+      default: 'Full refund if cancelled at least 24 hours before the session starts. No-shows are non-refundable.',
+      trim: true,
     },
 
-  // OPTIONAL: A numeric cancellation window for automated logic
+    // OPTIONAL: A numeric cancellation window for automated logic
     cancellationWindow: {
       type: Number,
       default: 24, // hours
@@ -204,11 +216,11 @@ const FitnessSessionSchema = new mongoose.Schema<IFitnessSession>(
       default: false,
     },
 
-    images: [String], 
-    // URLs  images 
-    rating:{type:Number,default:0}
+    images: [String],
+    // URLs  images
+    rating: { type: Number, default: 0 },
   },
- 
+
   {
     timestamps: true,
   }
