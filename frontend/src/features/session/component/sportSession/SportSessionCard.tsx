@@ -1,18 +1,35 @@
 import type { SportsSessionPublicResponseData } from '../../store/session.types';
 import { Clock, MapPin, Star, Users, Zap } from 'lucide-react';
-import { CURRENCY, SESSION_MODE } from '@/constants/constants';
+import { CURRENCY, Review_Type, SESSION_MODE } from '@/constants/constants';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { reviewService } from '@/features/review/service/reviewService';
 
 const SportSessionCard = ({
-  session,
+  session
 }: {
   session: SportsSessionPublicResponseData;
+  
 }) => {
   const navigate = useNavigate();
   const handleCardClick = () => navigate(`/sports/sessions/${session.id}`);
 
   const startingPrice = Math.min(...session.pricing.map((p) => p.price));
-
+ const [ratingReview,setRatingReview]=useState({
+    avgRating:0,
+    reviewCount:0
+  })
+  useEffect(()=>{
+    const getRating=async()=>{
+      try {
+        const ratingData = await reviewService.getAvgRatingAndCount(session.id, Review_Type.SPORTS_SESSION);
+        setRatingReview({ avgRating: ratingData.averageRating, reviewCount: ratingData.totalReviews });
+      } catch (err) {
+        console.error('Failed to fetch rating:', err);
+      }
+    }    
+      getRating();
+  },[session.id]);
 
   return (
     <div
@@ -50,7 +67,7 @@ const SportSessionCard = ({
         <div className="absolute bottom-3 left-3">
           <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-amber-400/90 text-amber-900">
             <Star size={10} fill="currentColor" />
-            {session.rating}
+            {ratingReview.avgRating ?? 0}
           </span>
         </div>
       </div>

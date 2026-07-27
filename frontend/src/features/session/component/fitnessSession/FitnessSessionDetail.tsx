@@ -24,6 +24,7 @@ import toast from 'react-hot-toast';
 import {
   BOOKING_TYPE,
   PAYLOAD_MODEL,
+  Review_Type,
   ROLES,
   SESSION_MODE,
 } from '@/constants/constants';
@@ -50,9 +51,13 @@ import { useCheckAvailability } from '@/hooks/useCheckAvailability';
 import TimeSlotPicker from '../TimeSlotPicker';
 import { MapView } from '@/components/reusable/MapView';
 import { ChatDrawer } from '@/features/chat/component/ChatDrawer';
+import { SessionReviews } from '@/features/review/components/SessionReviews';
+import { reviewService } from '@/features/review/service/reviewService';
 
 const FitnessSessionDetail = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
+  
+  const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 });
   const { user, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -134,8 +139,21 @@ const FitnessSessionDetail = () => {
         setLoading(false);
       }
     };
-
-    if (sessionId) fetchSession();
+ const getRating = async () => {
+      try {
+        if(!sessionId)return;
+        const ratingData = await reviewService.getAvgRatingAndCount(sessionId, Review_Type.SPORTS_SESSION);
+         setRatingReview({ avgRating: ratingData.averageRating, reviewCount: ratingData.totalReviews });
+         
+         
+      } catch (err) {
+        console.error('Failed to fetch rating:', err);
+      }
+    };
+    if (sessionId){
+      fetchSession();
+       getRating();
+    } 
   }, [sessionId]);
 
   useEffect(() => {
@@ -318,7 +336,9 @@ const FitnessSessionDetail = () => {
               </div>
               <div className="flex items-center gap-2 sm:gap-3">
                 <Star size={20} className="text-yellow-500" fill="currentColor" />
-                <span className="font-bold text-white tracking-tight text-sm">{session.rating || 'NEW'}</span>
+                <span className="font-bold text-zinc-400 tracking-tight text-sm">
+                  {ratingReview.avgRating || 'NEW'}
+                </span>
               </div>
             </div>
           </section>
@@ -519,7 +539,10 @@ const FitnessSessionDetail = () => {
             <span className="text-zinc-300">{session.cancellationWindow} hrs before</span>
           </div>
         </div>
-       
+           {/* Reviews summary */}
+                     <div className="mt-3 pt-3 border-t border-zinc-800">
+                      <SessionReviews reviewableId={sessionId!} reviewableType={Review_Type.FITNESS_SESSION} />
+                     </div>         
           <StickyBookingBar
             sessionId={session.id}
             selectedDate={

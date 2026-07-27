@@ -174,6 +174,7 @@ export class BookingService implements IBookingService {
           )
         )
       );
+      console.log('AvailabilityResults  ',availabilityResults);
       const occupiedSlots = availabilityResults
         .map((result, index) => ({ result, slot: sessionsToBook[index] }))
         .filter(
@@ -183,7 +184,7 @@ export class BookingService implements IBookingService {
           ...slot,
           remainingCount: result.status === 'fulfilled' ? result.value.remainingCount : 0,
         }));
-
+        console.log('occupaiedSlots----------',occupiedSlots,occupiedSlots.length);
       // 3. If any occupied — throw with summary
       if (occupiedSlots.length > 0) {
         const summary = occupiedSlots.map((slot) => `${slot.date} [${formatTo12Hour(slot.startTim)}- ${formatTo12Hour(slot.endTime)}]`).join(', ');
@@ -233,7 +234,7 @@ export class BookingService implements IBookingService {
         sessionsToBook.map(async (S) => {
           //convert to utc date
           const utcDate = toUTC_Date(S.date, S.startTime);
-          const endDateTime = toUTC_Date(S.date, S.endTime);
+          const endDateTime = toUTC_Date(utcDate.toString(), S.endTime);
 
           await this._bookingSessionRepo.createSessionBooking(
             {
@@ -315,7 +316,7 @@ export class BookingService implements IBookingService {
   // ------------------find by stripe sessionId-------------
   async findBySessionId(stripeSessionId: string): Promise<UserBookingResponseDTO> {
     const bookingData = await this._bookingRepo.findBySessionId(stripeSessionId);
-    if (!bookingData) {
+    if (!bookingData) {      
       throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     }
     const booking = toUserBookingResponseDTO(bookingData);

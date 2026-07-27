@@ -20,5 +20,5 @@ export class SportsController {
     } catch (error) {
       next(error);
     }
-  };
+  }; 
 }

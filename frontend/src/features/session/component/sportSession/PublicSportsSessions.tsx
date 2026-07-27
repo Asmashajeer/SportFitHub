@@ -16,6 +16,7 @@ import {
   AGE_GROUP,
   LOCATION_RADIUS,
   PAGINATION_DEFAULT_LIMIT,
+  Review_Type,
   SESSION_TYPE,
 } from '@/constants/constants';
 import SportSessionCard from './SportSessionCard';
@@ -29,6 +30,7 @@ import { Button } from '@/components/ui/Button';
 import { userService } from '@/features/user/service/userService';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import Pagination from '@/components/reusable/Pagination';
+import { reviewService } from '@/features/review/service/reviewService';
 
 interface PaginationProps {
   totalPages: number;
@@ -46,7 +48,7 @@ const PublicSportsSessions = () => {
     sessions: [],
     pagination: { totalPages: 0, total: 0, page: 1 },
   });
-
+ 
   const { user, isAuthenticated } = useAuthStore();
   const [sports, setSports] = useState<SportData[] | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -95,6 +97,7 @@ const PublicSportsSessions = () => {
         });
         setSessionsData(data);
         setCurrentPage(sessionsData.pagination.page);
+        
       } catch (error) {
         console.error(error);
         toast.error('Failed to fetch sessions');
@@ -278,16 +281,7 @@ const PublicSportsSessions = () => {
           />
         </div>
 
-        {/* <Button
-          type="button"
-          variant="outline"
-          onClick={getCurrentLocation}
-          className="flex items-center gap-2 rounded-full border-primary/30 text-xs whitespace-nowrap shrink-0"
-        >
-          <MapPin className="w-4 h-4 text-primary" />
-          <span className="hidden sm:inline">Nearby {LOCATION_RADIUS} km</span>
-          <span className="sm:hidden">Nearby</span>
-        </Button> */}
+      
 
         {/* Mobile: Filters toggle button */}
         <Button
@@ -327,7 +321,7 @@ const PublicSportsSessions = () => {
             <>
               <div id='sessions' className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {sessionsData.sessions.map((session) => (
-                  <SportSessionCard key={session.id} session={session} />
+                  <SportSessionCard key={session.id} session={session}  />
                 ))}
               </div>
               <Pagination

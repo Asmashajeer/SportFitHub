@@ -6,7 +6,7 @@ import { AuthenticatedSocket } from '../socket/socket.types';
 import { parse } from 'cookie';
 
 export const SocketAuthMiddleware = (socket: AuthenticatedSocket, next: (error?: Error) => void) => {
-  console.log('hello socketmiddleware');
+
   const rawCookies = socket.handshake.headers.cookie;
   if (!rawCookies) {
     console.log('Unauthorized: no cookies sent');

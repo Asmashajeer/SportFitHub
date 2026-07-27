@@ -8,6 +8,7 @@ import publicRoute from './public.route';
 import bookingRoute from './booking/booking.route';
 import documentsRoute from './documents.route';
 import chatRoute from './chat.route';
+import reviewRoute from './review.route'
 const rootRouter = Router();
 
 rootRouter.use('/', publicRoute);
@@ -19,5 +20,5 @@ rootRouter.use('/upload', uploadRoute);
 rootRouter.use('/booking', bookingRoute);
 rootRouter.use('/documents', documentsRoute);
 rootRouter.use('/chat', chatRoute);
-
+rootRouter.use('/review',reviewRoute)
 export default rootRouter;

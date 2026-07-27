@@ -36,6 +36,7 @@ export interface queryParamsOptions {
   sessionModel?: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
   date?: string;
   status?: string;
+  attendanceMarked:boolean
 }
 
 

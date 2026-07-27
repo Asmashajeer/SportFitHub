@@ -1,33 +1,46 @@
 import { BOOKING_SESSION_STATUS, PAGINATION_LIMIT } from '@/constants/enums';
 import { IBookedSessionPopulateUser } from '@/dtos/request/booking/booking.request.dto';
 import { AttendanceMarkingRequestDTO, SessionOccuranceRequestDTO } from '@/dtos/request/trainer/trainer.attendance.request';
-import { SessionOccuranceResponseDTO } from '@/dtos/response/booking/booking.response.dto';
+import { MarkAttendanceResponseDTO, SessionOccuranceResponseDTO } from '@/dtos/response/attendance/attendance.response.dto';
+
+import { IReviewService } from '@/interfaces/services/review/IReview.service';
 import { IAttendanceService } from '@/interfaces/services/trainer/IAttendance.service';
-import { toSessionOccuranceResponseDTO } from '@/mappers/booking/booking.mapper';
+import { toMarkAttendanceResponseDTO, toSessionOccuranceResponseDTO } from '@/mappers/attendance.mappers';
+import { toSessionReviewPromptRequestDTO } from '@/mappers/review.mapper';
+import { IBookingSession } from '@/models/booking.session.model';
 import { BookingSessionRepository } from '@/repositories/booking.session.repository';
 import AppError from '@/utils/AppError';
 
+import { FilterQuery } from 'mongoose';
+
 export class AttendanceService implements IAttendanceService {
   private _bookingSessionRepo: BookingSessionRepository;
-
-  constructor(bookingSessionRepo: BookingSessionRepository) {
+  private _reviewService:IReviewService;
+  constructor(bookingSessionRepo: BookingSessionRepository,reviewService:IReviewService) {
     this._bookingSessionRepo = bookingSessionRepo;
+     this._reviewService=reviewService;
   }
+
+
+
+  //------------------------get completed sessions to mark participants attandance----
   async getSessionOccurrences(data: SessionOccuranceRequestDTO): Promise<SessionOccuranceResponseDTO[]> {
-    const { trainerId, page, sessionModel, date, status } = data;
+    const { trainerId, page, sessionModel, attendanceMarked } = data;
     const limit = PAGINATION_LIMIT;
     const skip = (page - 1) * limit;
 
-    const today = new Date();
-    const bookings = await this._bookingSessionRepo.findOccuredSessions(
-      {
-        trainerId,
-        date: date ? date : today,
-        status: status ? status : BOOKING_SESSION_STATUS.COMPLETED,
-        attendance: null,
-      },
-      { skip, limit }
-    );
+     let query: FilterQuery<IBookingSession>= {
+        trainerId,       
+        status:BOOKING_SESSION_STATUS.COMPLETED,            
+      }
+      if( sessionModel){
+        query.sessionModel=sessionModel;
+      }
+      if(!attendanceMarked ){
+        query.attendance=null
+      }
+    
+    const bookings = await this._bookingSessionRepo.findOccuredSessions( query, { skip, limit }  );
     if (!bookings || bookings.length === 0) {
       throw new AppError('No completed sessions to mark attendance');
     }
@@ -42,22 +55,24 @@ export class AttendanceService implements IAttendanceService {
     return groupedSessions;
   }
 
-  async markAttendance(data: AttendanceMarkingRequestDTO): Promise<SessionOccuranceResponseDTO[]> {
+
+
+  //------------------mark Attendance of participants-----------
+  async markAttendance(data: AttendanceMarkingRequestDTO): Promise<MarkAttendanceResponseDTO[]> {
     const sessionId = data.sessionId;
 
     const bookings = await Promise.all(data.records.map((r) => this._bookingSessionRepo.markAttendance(sessionId, r.bookingSessionId, r.attendance)));
-
+    
     if (bookings.some((b) => b === null)) {
       throw new AppError('One or more bookings not found');
     }
-
-    const grouped = new Map<string, IBookedSessionPopulateUser[]>();
-    for (const booking of bookings) {
-      const key = `${booking.sessionId._id}-${booking.date}-${booking.slotId}`;
-      if (!grouped.has(key)) grouped.set(key, []);
-      (grouped.get(key) as typeof bookings).push(booking);
+    const attendedSessions=bookings.filter((booking)=>(booking.attendance===true));
+    const participants=attendedSessions.map((booking)=>toSessionReviewPromptRequestDTO(booking)); 
+    console.log("----------",participants)  ; 
+    for(const participant of participants){
+      this._reviewService.sendReviewPromptforSession(participant).catch((err)=>console.log('Failed to send review prompt:', err))
     }
-    const groupedSessions = Array.from(grouped.values()).map((group) => toSessionOccuranceResponseDTO(group));
-    return groupedSessions;
+    const updatedRecords=bookings.map((booking)=>toMarkAttendanceResponseDTO(booking))   
+    return updatedRecords;
   }
 }

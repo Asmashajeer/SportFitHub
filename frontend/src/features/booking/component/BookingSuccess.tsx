@@ -13,7 +13,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { BOOKING_STATUS } from '@/constants/constants';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { formatDateReadable, formatTo12Hour } from '@/utils/formatDate';
 
 const BookingSuccess = () => {
@@ -28,6 +28,7 @@ const BookingSuccess = () => {
 
     if (!stripeSessionId) {
       setStatus('error');
+      console.log("no stripeSessionId");
       return;
     }
     const verifyPayment = async () => {

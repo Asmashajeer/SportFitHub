@@ -100,7 +100,7 @@ export function AttendanceModal({ session, slotId, onClose, onSaved }: Attendanc
                 data && (
                         <>
                             <div className="px-5 py-3 flex items-center justify-between border-b-[0.5px] border-[var(--border)] bg-[var(--surface-1)]">
-                            <span className="text-[13px] text-[var(--text-secondary)]">
+                            <span className="text-[13px] text-(--text-secondary)">
                                 {data.participants.length} participant{data.participants.length !== 1 ? 's' : ''}
                             </span>
                             {data.sessionType === SESSION_TYPE.GROUP && (
@@ -121,19 +121,19 @@ export function AttendanceModal({ session, slotId, onClose, onSaved }: Attendanc
                                     <p className="text-sm font-medium m-0 whitespace-nowrap overflow-hidden text-ellipsis">
                                         {p.name}
                                     </p>
-                                    <p className="text-xs text-[var(--text-secondary)] mt-0.5 mb-0 whitespace-nowrap overflow-hidden text-ellipsis">
+                                    <p className="text-xs text-(--text-secondary) mt-0.5 mb-0 whitespace-nowrap overflow-hidden text-ellipsis">
                                         {p.email}
                                     </p>
-                                    <p className="text-[11px] text-[var(--text-muted)] mt-0.5 mb-0 font-mono">
+                                    <p className="text-[11px] text-(--text-muted) mt-0.5 mb-0 font-mono">
                                         {/* {p.userId} */}
                                     </p>
                                     </div>
                                 </div>
 
-                              <div className="flex gap-1.5 flex-shrink-0">
+                              <div className="flex gap-1.5 shrink-0">
                                 <button
                                     onClick={() => setStatus(p.bookingSessionId, ATTENDANCE_STATUS.PRESENT)}
-                                    className={`text-xs h-auto px-2.5 py-[5px] rounded border ${
+                                    className={`text-xs h-auto px-2.5 py-1.25 rounded border ${
                                     p.attendance === ATTENDANCE_STATUS.PRESENT
                                         ? 'bg-green-100 border-green-500 text-green-700'
                                         : 'bg-transparent border-zinc-700 text-zinc-400'
@@ -143,7 +143,7 @@ export function AttendanceModal({ session, slotId, onClose, onSaved }: Attendanc
                                 </button>
                                 <button
                                     onClick={() => setStatus(p.bookingSessionId, ATTENDANCE_STATUS.ABSENT)}
-                                    className={`text-xs h-auto px-2.5 py-[5px] rounded border ${
+                                    className={`text-xs h-auto px-2.5 py-1.25 rounded border ${
                                     p.attendance === ATTENDANCE_STATUS.ABSENT
                                         ? 'bg-red-100 border-red-500 text-red-700'
                                         : 'bg-transparent border-zinc-700 text-zinc-400'
@@ -157,12 +157,12 @@ export function AttendanceModal({ session, slotId, onClose, onSaved }: Attendanc
                             </div>
 
                             {error && (
-                            <p className="text-[var(--text-danger)] text-[13px] px-5 pt-2 m-0">
+                            <p className="text-(--text-danger) text-[13px] px-5 pt-2 m-0">
                                 {error}
                             </p>
                             )}
 
-                            <div className="px-5 py-4 border-t-[0.5px] border-[var(--border)] flex justify-end gap-2">
+                            <div className="px-5 py-4 border-t-[0.5px] border-border flex justify-end gap-2">
                             <Button variant={'secondary'} onClick={onClose} className="text-sm">
                                 Cancel
                             </Button>

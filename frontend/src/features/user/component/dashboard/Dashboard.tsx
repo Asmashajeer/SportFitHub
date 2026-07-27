@@ -7,6 +7,7 @@ import NextSessionCard from './NextSessionCard';
 import { BOOKING_SESSION_STATUS } from '@/constants/constants';
 import { useNavigate } from 'react-router-dom';
 import { useFCMToken } from '@/hooks/useFCMToken';
+import { PendingReviewsBanner } from '@/features/review/components/PendingReviewsBanner';
 
 const Dashboard = () => {
   const { userSessions, userBookings, fetchBookings } = useUserDashboardStore();
@@ -40,7 +41,9 @@ const Dashboard = () => {
         ) : (
           <EmptyState />
         )}
+          <PendingReviewsBanner />
       </div>
+    
 
       {/* Side list for the rest of the week */}
       {upcoming.length > 1 && (

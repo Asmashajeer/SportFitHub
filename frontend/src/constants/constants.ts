@@ -276,3 +276,12 @@ export const ATTENDANCE_STATUS={
   PRESENT:true,
   ABSENT:false
 } as const
+
+export const Review_Type={
+  SPORTS_SESSION:'SportsSession',
+  FITNESS_SESSION:'FitnessSession',
+  TRAINER:'TrainerProfile'  
+}as const
+export type ReviewType=typeof Review_Type[keyof typeof Review_Type]
+
+export const STAR_LABELS = ['Poor', 'Fair', 'Good', 'Great', 'Excellent'];

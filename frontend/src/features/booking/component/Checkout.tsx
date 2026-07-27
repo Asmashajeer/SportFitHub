@@ -8,7 +8,7 @@ import { useBookingStore } from '../store/useBookingStore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import BookingService from '../service/bookingService';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 import { ArrowLeft, Info } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
@@ -43,7 +43,7 @@ const CheckoutPage = () => {
   
   useEffect(() => {
     if (!payload) return;
-    console.log(payload);
+    
     const selectedSlots: BookingSlot[] = payload.sessionsToBook.map((slot) => ({
       sessionId: payload?.sessionId,
       slotId: slot.slotId,
@@ -60,9 +60,9 @@ const CheckoutPage = () => {
   useEffect(() => {
     const isAvailable = async () => {
       if (bookingSlots && payload) {
-        const { occupiedSlots } = await checkAvailability(bookingSlots);
-          console.log('occupaidSlots :',occupiedSlots);
-        if (occupiedSlots.length > 0) {
+        const { occupiedSlots ,remainingSlots} = await checkAvailability(bookingSlots);        
+         console.log("---bookingSlot  :",bookingSlots);
+        if ( occupiedSlots.length > 0) {
           const occupiedSummary = occupiedSlots
             .map(
               (slot) =>
@@ -116,6 +116,8 @@ const CheckoutPage = () => {
     if (!payload || !user) return;
     if (bookingSlots) {
       const { occupiedSlots } = await checkAvailability(bookingSlots);
+       console.log("bookingSlot---  :",bookingSlots);
+       console.log('occupaidSlots :',occupiedSlots.length);
       if (occupiedSlots.length > 0) {
         const occupiedSummary = occupiedSlots
           .map(

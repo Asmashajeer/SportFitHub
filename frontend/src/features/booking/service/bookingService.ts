@@ -39,6 +39,7 @@ const BookingService = {
       BOOKING_ROUTE.GET_BOOKING_STATUS.BY_STRIPE_SESSIONID(stripeSessionId)
     );
     return res.data;
+    
   },
   //------------------- get  user bookings
   getMyBookings: async () => {

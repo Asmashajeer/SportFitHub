@@ -14,7 +14,6 @@ export enum OtpType {
 }
 
 export const PAGINATION_LIMIT = 10;
-
 export enum GENDER {
   MALE = 'Male',
   FEMALE = 'Female',
@@ -172,7 +171,14 @@ export const PENALTY = {
 } as const;
 
 export enum AttendanceStatus {
-  PRESENT = 'present',
-  ABSENT = 'absent',
-  NOT_MARKED = 'not_marked',
+  PRESENT = 'true',
+  ABSENT = 'false', 
 }
+
+
+export enum Review_Type{
+  SPORT_SESSION='SportsSession',
+  FITNESS_SESSION='FitnessSession',
+  TRAINER='TrainerProfile'  
+}
+

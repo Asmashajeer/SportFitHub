@@ -13,7 +13,7 @@ import type {
   Venue,
 } from '@/features/session/store/session.types';
 import type { FitnessSessionDetailedPublicResponseData } from '@/features/session/store/fitness.session.types';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { formatDateReadable, formatTo12Hour } from '@/utils/formatDate';
 
 import { MapView } from '@/components/reusable/MapView';

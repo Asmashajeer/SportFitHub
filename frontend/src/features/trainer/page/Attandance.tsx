@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTrainerStore } from '../store/useTrainerStore';
 
 import {
-  BOOKING_SESSION_STATUS,
+ 
   PAGINATION_DEFAULT_LIMIT,
   PAYLOAD_MODEL,
   SESSION_TYPE,
@@ -14,6 +14,7 @@ import type {
 import { AttendanceModal } from '../component/attendance/AttendanceModel';
 import { trainerAttendanceService } from '../service/trainer.attendance.service';
 import { formatTo12Hour } from '@/utils/formatDate';
+import { AttendanceDisplayModal } from '../component/attendance/AttendanceDisplayModal';
 
 interface SessionsDataProps {
   sessions: SessionOccuranceResponseData[] | [];
@@ -25,42 +26,48 @@ const Attendance = () => {
   const { profile } = useTrainerStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [filters, setFilters] = useState({
-    sessionModel: '',
-    date:"",
-    status: BOOKING_SESSION_STATUS.COMPLETED,
-  });
+ 
   // const [sessionsData, setSessionsData] = useState<SessionsDataProps>({
   //   sessions: [],
   //   totalPages: 0,
   //   total: 0,
   //   page: 1,
   // });
+   const [filters, setFilters] = useState({
+    sessionModel: '',   
+    attendanceMarked:false,
+  });
   const [sessions, setSessions] = useState<SessionOccuranceResponseData[]|[]>([]);
-  const [activeSession, setActiveSession] =
-    useState<SessionOccuranceResponseData | null>(null);
+
+  const [activeSession, setActiveSession] =  useState<SessionOccuranceResponseData | null>(null);
 
   useEffect(() => {
     if (!profile) return;
     const getBookedSessions = async () => {
+      setLoading(true);
       if (profile) {
-        const data = await trainerAttendanceService.getSessionOccurance(
-          profile.id,
-          {
-            page: currentPage,
-            limit: PAGINATION_DEFAULT_LIMIT,
-            ...filters,
-          }
-        );
-        console.log(data);
-        setSessions(data);
-        // setCurrentPage(sessionsData.page);
+        try{
+          const data = await trainerAttendanceService.getSessionOccurance(
+            profile.id,
+            {
+              page: currentPage,
+              limit: PAGINATION_DEFAULT_LIMIT,            
+              ...filters,
+            }
+          );     
+          setSessions(data);
+          setLoading(false);
+        }
+        catch(error){
+          setSessions([]);
+           setLoading(false);
+        }
       }
     };
     getBookedSessions();
-  }, [currentPage, filters, profile]);
-
-
+  }, [currentPage, filters, profile,activeSession]);
+    
+    const activeSessionNeedsMarking =    activeSession?.participants.some((p) => p.attendance === null) ?? false;
 
   return (
     <div className="bg-card min-h-screen p-6">
@@ -76,9 +83,8 @@ const Attendance = () => {
         <button
           onClick={() =>
             setFilters({
-              sessionModel: '',
-              date:"",
-              status: BOOKING_SESSION_STATUS.SCHEDULED,
+              sessionModel: '',             
+              attendanceMarked:false
             })
           }
           className={`text-xs px-4 py-2 rounded-full border transition-all duration-150 font-medium ${
@@ -102,57 +108,72 @@ const Attendance = () => {
             {p}
           </button>
         ))}
+        <button
+            onClick={() => setFilters({ ...filters,attendanceMarked:true})}
+            className={`text-xs px-4 py-2 rounded-full border transition-all duration-150 font-medium ${
+              filters.attendanceMarked === true
+                ? 'bg-zinc-100 text-zinc-900 border-zinc-100'
+                : 'bg-transparent text-zinc-400 border-zinc-700 hover:border-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+          marked Sessions
+        </button>
       </div>
 
       {loading ? (
         <p>Loading sessions...</p>
       ) :  sessions?.length === 0 ?  (
         <p>No sessions found.</p>
-      ) : (
+      ) : (       
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {sessions?.map((session) => (
-            <div
-              key={`${session.sessionId}_${session.slotId}`}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '12px 16px',
-                border: '0.5px solid var(--border)',
-                borderRadius: 8,
-              }}
-            >
-              <div>
-                <p>{session.sessionName}</p>
+          {sessions?.map((session) => {
+                  const shouldMarkAttendace= session.participants.some((p)=>p.attendance===null);
+                  
+            return(
+              <div
+                key={`${session.sessionId}_${session.slotId}`}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px 16px',
+                  border: '0.5px solid var(--border)',
+                  borderRadius: 8,
+                }}
+              >
+                <div>
+                  <p>{session.sessionName}</p>
+                </div>
+                <div>
+                  <p style={{ margin: 0, fontWeight: 500 }}>
+                    {session.sessionModel === PAYLOAD_MODEL.SPORT_SESSION
+                      ? PAYLOAD_MODEL.SPORT_SESSION
+                      : PAYLOAD_MODEL.FITNESS_SESSION}
+                    {session.sessionType === SESSION_TYPE.GROUP
+                      ? ` · ${session.participants.length} participants`
+                      : ' · 1 :1'}
+                  </p>
+                  <p
+                    style={{
+                      margin: '4px 0 0',
+                      fontSize: 13,
+                      color: 'var(--text-secondary)',
+                    }}
+                  >
+                    {new Date(session.date).toLocaleDateString()} ·{' '}
+                    {formatTo12Hour( session.startTime)} - {formatTo12Hour(session.endTime)}
+                  </p>
+                </div>
+                {shouldMarkAttendace?
+                  <button onClick={() => setActiveSession(session)}>Mark Attendance</button>
+                :
+                  <button onClick={() => setActiveSession(session)}>show Attendance</button>
+                }             
+                
+                      
               </div>
-              <div>
-                <p style={{ margin: 0, fontWeight: 500 }}>
-                  {session.sessionModel === PAYLOAD_MODEL.SPORT_SESSION
-                    ? PAYLOAD_MODEL.SPORT_SESSION
-                    : PAYLOAD_MODEL.FITNESS_SESSION}
-                  {session.sessionType === SESSION_TYPE.GROUP
-                    ? ` · ${session.participants.length} participants`
-                    : ' · 1 :1'}
-                </p>
-                <p
-                  style={{
-                    margin: '4px 0 0',
-                    fontSize: 13,
-                    color: 'var(--text-secondary)',
-                  }}
-                >
-                  {new Date(session.date).toLocaleDateString()} ·{' '}
-                  {formatTo12Hour( session.startTime)} - {formatTo12Hour(session.endTime)}
-                </p>
-              </div>
-
-              {/* {/* {isToday(session.date) ? ( */}
-                        <button onClick={() => setActiveSession(session)}>Mark attendance</button>
-                    {/* ) : (
-                        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Available on session day</span>
-                    )}*/}
-            </div>
-          ))}
+            )}
+          )}
         </div>
       )}
 
@@ -165,13 +186,18 @@ const Attendance = () => {
         label="Sessions"
       /> */}
 
-      {activeSession && (
+      {activeSession && activeSessionNeedsMarking ?(
             <AttendanceModal
             session={activeSession}
             slotId={activeSession.slotId}
             onClose={() => setActiveSession(null)}
             />
-        )}
+        ):(
+         activeSession &&(<AttendanceDisplayModal
+            session={activeSession}            
+            onClose={() => setActiveSession(null)}
+          />)
+        ) }
     </div>
   );
 };

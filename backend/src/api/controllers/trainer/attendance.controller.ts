@@ -15,11 +15,12 @@ export class AttendanceController {
     const trainerId = req.query.trainerId as string;
     const page = parseInt(req.query.page as string) || 1;
     const sessionModel = req.query.sessionModel as PAYLOAD_MODEL;
-    const date = req.query.date ? (req.query.date as string) : '';
-    const status = req.query.status as string;
-
+    
+    // const status = req.query.status as string;
+    const attendanceMarked=req.query.attendanceMarked ==='true';
+    console.log("----",typeof req.query.attendanceMarked,typeof attendanceMarked,"----");
     try {
-      const bookings = await this._attendanceService.getSessionOccurrences({ trainerId, page, sessionModel, date, status });
+      const bookings = await this._attendanceService.getSessionOccurrences({ trainerId, page, sessionModel, attendanceMarked });
       res.status(STATUS_CODE.SUCCESS.OK).json(bookings);
     } catch (error) {
       next(error);

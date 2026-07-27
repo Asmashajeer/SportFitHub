@@ -1,7 +1,9 @@
 import { Clock, MapPin, Star, Users, User, Zap } from 'lucide-react';
-import { CURRENCY, SESSION_MODE } from '@/constants/constants';
+import { CURRENCY, Review_Type, SESSION_MODE } from '@/constants/constants';
 import { useNavigate } from 'react-router-dom';
 import type { FitnessSessionPublicResponseData } from '../../store/fitness.session.types';
+import { useEffect, useState } from 'react';
+import { reviewService } from '@/features/review/service/reviewService';
 
 const FitnessSessionCard = ({
   session,
@@ -19,6 +21,21 @@ const FitnessSessionCard = ({
     Medium: 'text-amber-500 bg-amber-50 border-amber-200',
     High: 'text-red-500 bg-red-50 border-red-200',
   };
+   const [ratingReview,setRatingReview]=useState({
+      avgRating:0,
+      reviewCount:0
+    })
+    useEffect(()=>{
+      const getRating=async()=>{
+        try {
+          const ratingData = await reviewService.getAvgRatingAndCount(session.id, Review_Type.FITNESS_SESSION);
+          setRatingReview({ avgRating: ratingData.averageRating, reviewCount: ratingData.totalReviews });
+        } catch (err) {
+          console.error('Failed to fetch rating:', err);
+        }
+      }    
+        getRating();
+    },[session.id]);
 
   return (
     <div
@@ -76,7 +93,7 @@ const FitnessSessionCard = ({
         <div className="absolute bottom-3 left-3">
           <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-amber-400/90 text-amber-900">
             <Star size={10} fill="currentColor" />
-            {session.rating}
+            {ratingReview.avgRating ?? 0}
           </span>
         </div>
       </div>

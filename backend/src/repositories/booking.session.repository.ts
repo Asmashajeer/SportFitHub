@@ -14,15 +14,22 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
   async enrolledCount(filter: FilterQuery<IBookingSession>): Promise<number> {
     return await this.model.countDocuments(filter);
   }
+
+
   async createSessionBooking(data: Partial<IBookingSession>, session: ClientSession) {
     // Note: When using sessions, .create() must take an array
     const [bookingSession] = await this.model.create([data], { session });
     return bookingSession;
   }
+
+
+
   async findByBookingSessionId(id: string | Types.ObjectId) {
     const bookedSession = await this.model.findById(id).populate('sessionId', '_id trainerId sessionName').lean().exec();
     return bookedSession;
   }
+
+
   async findUserSessions(filter: FilterQuery<IBookingSession>) {
     const sessions = await this.model
       .find(filter)
@@ -83,22 +90,31 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
     );
   }
 
-  //--------------------find sessionOccurance by trainerId
-  async findOccuredSessions(filter: FilterQuery<IBookingSession>, options: { skip?: number; limit?: number } = { skip: 0, limit: 0 }) {
-    const { date } = filter;
-    return await this.model
-      .find({
-        ...filter,
-        date: { $lte: date },
-      })
-      // .populate('userId', '_id name email')
+  //--------------------find completed Sessions  by trainerId
+  async findOccuredSessions(query: FilterQuery<IBookingSession>, options: { skip?: number; limit?: number } = { skip: 0, limit: 0 }) {  
+    const cutoff = new Date();
+     console.log(query)
+    cutoff.setHours(0,0,0,0);
+    console.log(cutoff);
+    const filter={
+      ...query,
+       date: { $lte:cutoff },
+    }
+    console.log(filter);
+   const  sessions= await this.model.find(filter)
       .populate<{ userId: { _id: Types.ObjectId; name: string; email: string } }>('userId')
       .populate<{ sessionId: { _id: Types.ObjectId; sessionName: string; sessionType: string } }>('sessionId')
       .sort({ startTime: 1 })
       .skip(options?.skip)
       .limit(options?.limit)
       .exec();
+      console.log(sessions);
+      return sessions
   }
+
+
+
+  //------------mark Attendance-----------------
   async markAttendance(sessionId: string, bookingSessionId: string, attendance: boolean) {
     return await this.model
       .findOneAndUpdate(
@@ -109,7 +125,15 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
         { attendance },
         { new: true }
       )
-      .populate<{ userId: { _id: Types.ObjectId; name: string; email: string } }>('userId')
-      .populate<{ sessionId: { _id: Types.ObjectId; sessionName: string; sessionType: string } }>('sessionId');
+      .populate<{ userId: { _id: Types.ObjectId; name: string; email: string ,fcmToken:string} }>('userId')
+      .populate<{ sessionId: { _id: Types.ObjectId; sessionName: string; sessionType: string } }>('sessionId')
+      .populate<{ trainerId: { _id: Types.ObjectId; displayName: string} }>('trainerId');
   }
+  async findOneSession(userId:string | Types.ObjectId, sessionId:string | Types.ObjectId,attendance:boolean){
+      return await this.model.findOne({userId,sessionId,attendance})
+      .populate('sessionId', '_id sessionName')
+      .populate('trainerId', '_id displayName')
+      .exec();
+  }
+  
 }

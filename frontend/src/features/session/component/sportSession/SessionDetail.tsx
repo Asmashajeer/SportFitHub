@@ -30,6 +30,7 @@ import type {
 import {
   BOOKING_TYPE,
   PAYLOAD_MODEL,
+  Review_Type,
   ROLES,
   
 } from '@/constants/constants';
@@ -50,9 +51,16 @@ import { MapView } from '@/components/reusable/MapView';
 
 import { useCheckAvailability } from '@/hooks/useCheckAvailability';
 import { ChatDrawer } from '@/features/chat/component/ChatDrawer';
+import { reviewService } from '@/features/review/service/reviewService';
+import type { ReviewResponseData } from '@/features/review/types/review.types';
+import { SessionReviews } from '@/features/review/components/SessionReviews';
 
 const SessionDetail = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
+
+const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 });
+
+
   const { user, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -130,8 +138,21 @@ const SessionDetail = () => {
         setLoading(false);
       }
     };
-
-    if (sessionId) fetchSession();
+    const getRating = async () => {
+      try {
+        if(!sessionId)return;
+        const ratingData = await reviewService.getAvgRatingAndCount(sessionId, Review_Type.SPORTS_SESSION);
+         setRatingReview({ avgRating: ratingData.averageRating, reviewCount: ratingData.totalReviews });
+         
+         
+      } catch (err) {
+        console.error('Failed to fetch rating:', err);
+      }
+    };
+    if (sessionId){
+      fetchSession();
+       getRating();
+    } 
   }, [sessionId]);
 
   useEffect(() => {
@@ -306,7 +327,7 @@ const SessionDetail = () => {
               <div className="flex items-center gap-2 sm:gap-3">
                 <Star size={20} className="text-yellow-500" fill="currentColor" />
                 <span className="font-bold text-zinc-400 tracking-tight text-sm">
-                  {session.rating || 'NEW'}
+                  {ratingReview.avgRating || 'NEW'}
                 </span>
               </div>
             </div>
@@ -503,7 +524,11 @@ const SessionDetail = () => {
             <span className="text-zinc-300">{session.cancellationWindow} hrs before</span>
           </div>
         </div>
-
+        
+         {/* Reviews summary */}
+          <div className="mt-3 pt-3 border-t border-zinc-800">
+           <SessionReviews reviewableId={sessionId!} reviewableType={Review_Type.SPORTS_SESSION} />
+          </div>
         <StickyBookingBar
           sessionId={session.id}
           selectedDate={

@@ -180,7 +180,7 @@ export class SportsSessionService implements ISportsSessionService {
     const sessionData = await this._sportsSessionRepo.findBysessionId(id);
 
     const session = toSportSessionDetailedPublicDTO(sessionData);
-    console.log(session);
+   
     return session;
   }
 

@@ -30,6 +30,7 @@ export function useCheckAvailability() {
              console.log("checkAvailability" ,results);
         const occupiedSlots: BookingSlot[] = [];
         const remainingSlots: RemainingSlot[] = [];
+        console.log(results);
         results.forEach((result) => {
           if (result.status === 'fulfilled') {
             if (!result.value.isAvailable) {

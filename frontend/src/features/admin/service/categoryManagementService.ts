@@ -70,4 +70,6 @@ export const CategoryMangementService = {
     const response = await api.delete(ADMIN_ROUTES.DELETE_PROGRAM + '/' + id);
     return response.data;
   },
+
+
 };

@@ -1,8 +1,10 @@
+import { getTimezone } from '@/context/timezone.context';
 import { IconversationPopulatedParticipants } from '@/dtos/request/chat/chat.request.dto';
 import { IConversation } from '@/models/conversation.model';
 import { IMessage } from '@/models/message.model';
 
 export const toConversationResponseDTO = (conversation: Partial<IConversation>) => {
+  const timezone = getTimezone();
   return {
     id: conversation._id.toString(),
     participants: conversation.participants.map((p) => p.toString()),

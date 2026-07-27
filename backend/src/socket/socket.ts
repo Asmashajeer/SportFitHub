@@ -4,7 +4,7 @@ import { io } from '../server';
 import { chatHandler } from '@/container';
 
 export const initSocket = () => {
-  console.log('hello  socket');
+ 
   io.use(SocketAuthMiddleware);
 
   io.on('connection', (socket: AuthenticatedSocket) => {

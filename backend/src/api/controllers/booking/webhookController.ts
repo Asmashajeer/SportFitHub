@@ -37,7 +37,7 @@ export class WebhookController {
       case 'checkout.session.completed': {
         const paymentIntentId = stripeSession.payment_intent as string;
         const invoiceId = stripeSession.invoice as string;
-
+        console.log("payment completed");
         if (!paymentIntentId) {
           console.error(' No PaymentIntent ID found in session');
           return res.status(STATUS_CODE.ERROR.BAD_REQUEST).json({ message: 'No PaymentIntent found' });
@@ -47,7 +47,9 @@ export class WebhookController {
             paymentIntentId as string,
             { expand: ['latest_charge'] } // This allows you to get the receipt_url
           );
-
+          if(!paymentIntent){
+            console.log("no payment intent"); return
+          }
           await this._bookingService.confirmBooking(stripeSession, paymentIntent, invoiceId);
           console.log('booking completed');
           this.releaseLocks(lockKeys);
@@ -62,6 +64,7 @@ export class WebhookController {
       case 'checkout.session.async_payment_failed':
       case 'checkout.session.expired':
         this.releaseLocks(lockKeys);
+        console.log("payment failed");
         res.status(STATUS_CODE.SUCCESS.OK).json({ received: true });
         break;
 

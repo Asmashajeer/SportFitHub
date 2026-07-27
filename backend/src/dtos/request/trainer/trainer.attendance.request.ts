@@ -1,9 +1,8 @@
 export interface SessionOccuranceRequestDTO {
   trainerId: string;
   page: number;
-  sessionModel: string;
-  date: string;
-  status: string;
+  sessionModel: string;  
+  attendanceMarked:boolean
 }
 
 export interface AttendanceMarkingRequestDTO {

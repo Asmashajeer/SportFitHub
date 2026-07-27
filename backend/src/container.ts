@@ -82,6 +82,10 @@ import messageModel from './models/message.model';
 import { ChatService } from './services/chat.service';
 import { createChatHandler } from './socket/handlers/chat.handler';
 import { ChatController } from './api/controllers/chat.controller';
+import reviewModel from './models/review.model';
+import { ReviewRepository } from './repositories/review.repository';
+import { ReviewService } from './services/review/review.service';
+import { ReviewController } from './api/controllers/review/review.controller';
 
 const userRepository = new UserRepository(User);
 const profileRepository = new ProfileRepository(Profile);
@@ -97,48 +101,51 @@ const walletTransactionRepository = new WalletTransactionRepository(walletTransa
 const bookingRepository = new BookingRepository(bookingModel);
 const bookingSessionRepository = new BookingSessionRepository(bookingSessionModel);
 const penaltyRepository = new PenaltyRepository(TrainerProfile);
+const reviewRepository=new ReviewRepository(reviewModel);
+const reviewService=new ReviewService(reviewRepository,bookingSessionRepository);
+export const reviewController=new ReviewController(reviewService);
 
 const userManagementService = new UserManagementService(userRepository, bookingSessionRepository, walletRepository, trainerRepository, sportsSessionRepository, fitnessSessionRepository);
-const userManagementController = new UserManagementController(userManagementService);
-const isBlocked = checkBlocked(userRepository);
+export const userManagementController = new UserManagementController(userManagementService);
+export const isBlocked = checkBlocked(userRepository);
 const authService = new AuthService(userRepository, otpRepository, profileRepository, trainerRepository);
 const profileService = new ProfileService(profileRepository, userRepository, authService);
-const profileController = new ProfileController(profileService);
+export const profileController = new ProfileController(profileService);
 
 const documentsService = new DocumentsService(trainerRepository);
-const documentsController = new DocumentsController(documentsService);
+export const documentsController = new DocumentsController(documentsService);
 
 const trainerManagementService = new TrainerManagementService(trainerRepository, userRepository);
 
-const trainerManagementController = new TrainerManagementController(trainerManagementService);
+export const trainerManagementController = new TrainerManagementController(trainerManagementService);
 
-const authController = new AuthController(authService);
+export const authController = new AuthController(authService);
 const trainerService = new TrainerService(trainerRepository, userRepository, authService);
 
-const trainerController = new TrainerController(trainerService);
+export const trainerController = new TrainerController(trainerService);
 const sportsService = new SportsService(sportsRepository);
-const sportsController = new SportsController(sportsService);
+export const sportsController = new SportsController(sportsService);
 
 const sportsManagementService = new SportsManagementService(sportsRepository);
-const sportManagementController = new SportsManagementController(sportsManagementService);
+export const sportManagementController = new SportsManagementController(sportsManagementService);
 
 const fitnessService = new FitnessService(fitnessRepository);
-const fitnessController = new FitnessController(fitnessService);
+export const fitnessController = new FitnessController(fitnessService);
 
 const fitnessManagementService = new FitnessManagementService(fitnessRepository);
-const fitnessManagementController = new FitnessManagementController(fitnessManagementService);
+export const fitnessManagementController = new FitnessManagementController(fitnessManagementService);
 
 const sessionManagementService = new SessionManagementService(sportsSessionRepository, fitnessSessionRepository);
-const sessionManagementController = new SessionManagementController(sessionManagementService);
+export const sessionManagementController = new SessionManagementController(sessionManagementService);
 
 const paymentService = new PaymentService(paymentRepository, userRepository, sportsSessionRepository, fitnessSessionRepository);
 
-const redisClientService = new RedisClientService();
-const slotLockService = new SlotLockService(redisClientService);
+export const redisClientService = new RedisClientService();
+export const slotLockService = new SlotLockService(redisClientService);
 
 const walletService = new WalletService(walletRepository);
 const walletTransactionService = new WalletTransactionService(walletRepository, walletTransactionRepository);
-const walletController = new WalletController(walletService, walletTransactionService);
+export const walletController = new WalletController(walletService, walletTransactionService);
 
 const penaltyService = new PenaltyService(penaltyRepository, walletService);
 
@@ -155,52 +162,25 @@ export const bookingService = new BookingService(
   userRepository,
   trainerRepository
 );
-const paymentController = new PaymentController(paymentService, bookingService);
-const bookingController = new BookingController(bookingService);
+export const paymentController = new PaymentController(paymentService, bookingService);
+export const bookingController = new BookingController(bookingService);
 
-const webhookController = new WebhookController(bookingService, slotLockService);
+export const webhookController = new WebhookController(bookingService, slotLockService);
 const sportsSessionService = new SportsSessionService(sportsSessionRepository, trainerRepository, bookingService);
-const sportsSessionController = new SportsSessionController(sportsSessionService);
+export const sportsSessionController = new SportsSessionController(sportsSessionService);
 const fitnessSessionService = new FitnessSessionService(fitnessSessionRepository, trainerRepository, bookingService);
-const fitnessSessionController = new FitnessSessionController(fitnessSessionService);
-const sessionController = new SessionController(sportsSessionService, fitnessSessionService);
+export const fitnessSessionController = new FitnessSessionController(fitnessSessionService);
+export const sessionController = new SessionController(sportsSessionService, fitnessSessionService);
 const bookingsManagementService = new BookingsManagementService(bookingRepository, bookingSessionRepository);
-const bookingsManagementController = new BookingsManagementController(bookingsManagementService);
-const attendanceService = new AttendanceService(bookingSessionRepository);
-const attendanceController = new AttendanceController(attendanceService);
+export const bookingsManagementController = new BookingsManagementController(bookingsManagementService);
+const attendanceService = new AttendanceService(bookingSessionRepository,reviewService);
+export const attendanceController = new AttendanceController(attendanceService);
 
 const conversationRepository = new ConversationRepository(conversationModel);
 const messageRepository = new MessageRepository(messageModel);
 
-const chatService = new ChatService(conversationRepository, messageRepository);
+export const chatService = new ChatService(conversationRepository, messageRepository);
 
-const chatHandler = createChatHandler(chatService);
-const chatController = new ChatController(chatService);
-export {
-  authController,
-  isBlocked,
-  profileController,
-  documentsController,
-  trainerController,
-  userManagementController,
-  trainerManagementController,
-  sportsController,
-  fitnessController,
-  sportManagementController,
-  fitnessManagementController,
-  sportsSessionController,
-  fitnessSessionController,
-  sessionController,
-  sessionManagementController,
-  paymentController,
-  webhookController,
-  bookingController,
-  redisClientService,
-  slotLockService,
-  walletController,
-  bookingsManagementController,
-  attendanceController,
-  chatService,
-  chatController,
-  chatHandler,
-};
+export const chatHandler = createChatHandler(chatService);
+export const chatController = new ChatController(chatService);
+
