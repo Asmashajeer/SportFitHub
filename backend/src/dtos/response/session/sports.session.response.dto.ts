@@ -1,4 +1,4 @@
-import { AGE_GROUP, DAY, SESSION_MODE, SESSION_TYPE } from '@/constants/enums';
+import { AGE_GROUP, DAY, SESSION_TYPE } from '@/constants/enums';
 import { ISportsSession } from '@/models/sportsSession.model';
 
 import { Types } from 'mongoose';
@@ -11,9 +11,9 @@ export interface IPopulatedSport {
   slug: string;
 }
 export interface IVenue {
-  name: string;
-  address: string;
-  location: {
+  name?: string;
+  address?: string;
+  location?: {
     type: 'Point';
     coordinates: [number, number]; // [longitude, latitude]
   };
@@ -38,6 +38,7 @@ export interface IPricing {
 export interface ISportsSessionPopulated {
   _id: Types.ObjectId;
   trainerId: Types.ObjectId;
+  timezone:string;
   sportCategory: IPopulatedSport;
   sessionName: string;
   slug: string;
@@ -81,6 +82,7 @@ export interface ISportsSessionDetailsPopulated extends Omit<ISportsSessionPopul
 export interface SportsSessionResponseDTO {
   id: string;
   trainerId: string;
+  timezone:string;
   sportCategory: string;
   sessionName: string;
   slug: string;

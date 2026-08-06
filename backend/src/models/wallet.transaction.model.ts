@@ -12,6 +12,7 @@ export interface IWalletTransaction extends Document {
   // OPTIONAL
   // when transaction is booking-related
   bookingId?: Types.ObjectId;
+  bookingUID:string;
   bookingSessionId?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -58,6 +59,10 @@ const WalletTransactionSchema = new Schema(
     bookingId: {
       type: Schema.Types.ObjectId,
       ref: 'Booking',
+      default: null,
+    },
+    bookingUID: {
+      type:String,      
       default: null,
     },
     bookingSessionId: {

@@ -9,4 +9,5 @@ export interface IReviewRepository extends IBaseRepository<IReview> {
     findReviewedSessionIds(query:FilterQuery<IReview>)
     getAverageRatingAndCount(reviewableType: Review_Type ,reviewableId:string)
     getReviews(reviewableType: Review_Type ,reviewableId:string|Types.ObjectId)
+    getAllReviews(sessionIds:string[])
 }

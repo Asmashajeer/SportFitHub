@@ -2,6 +2,13 @@ import { formatDateDDMMYY, formatTo12Hour } from '@/utils/formatDate';
 import type { BookedSessionResponseDataWithUserInfo } from '../../types/trainer.bookings.types';
 import {  useState } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { SESSION_GRACE_MINUTES,  VIDEO_CALL_STATUS,  } from '@/constants/constants';
+import { toZonedTime } from 'date-fns-tz';
+import { socket } from '@/lib/socket';
+import { useVideoCallStore } from '@/features/videoCall/store/useVideoCallStore';
+import { useNavigate } from 'react-router-dom';
+
 
 interface ParticipantsProps {
   userId: string;
@@ -22,7 +29,9 @@ function BookingSessionCard({
   const bookedCount = sessions.length;
   const isFull = bookedCount >= first.maxCapacity;
   const [showParticipant, setShowParticipant] = useState(false);
- 
+  const userTimezone=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const navigate=useNavigate();
+  const {callStatus}=useVideoCallStore();
 
   const participants: ParticipantsProps[] = sessions.map((s) => ({
     userId: s.userId,
@@ -30,17 +39,24 @@ function BookingSessionCard({
     userEmail: s.userEmail,
     status: s.status,
   }));
-  // const isAttendanceMarkable=(session:BookedSessionResponseDataWithUserInfo)=>{
-  //   const now =new Date();
-  //   const [endHour,endMin]=session.endTime.split(":").map(Number);
-  //   const sessionEnd=new Date(session.date);
-  //   sessionEnd.setHours(endHour,endMin,0,0);
-  //   const endOfDay=new Date (first.date);
-  //   endOfDay.setHours(23,59,59,999);
 
-  //   return now >= sessionEnd && now <= endOfDay;
-  // }
-  // 
+   const targetTimeZone=first.venue ? first.timezone:userTimezone;
+
+  //sessionTime with grace minutes 
+  const canJoinSession=(session:BookedSessionResponseDataWithUserInfo)=>{
+    const now =new Date();   
+    const sessionStartWithGrace=toZonedTime(session.startDateTime,targetTimeZone).getTime()-SESSION_GRACE_MINUTES;  
+    const endOfSession=toZonedTime(session.endDateTime,targetTimeZone);
+    return now.getTime() >= sessionStartWithGrace && now.getTime() <= endOfSession.getTime();
+  }
+  const handleJoinSession=()=>{  
+       const sessionId=first.sessionId;
+         const sessionStartUTC=first.startDateTime
+         console.log(first.startDateTime,sessionStartUTC);
+         console.log("inside handlejoin Session");
+         socket.emit('join-session',{sessionId,sessionStartUTC})
+         navigate('/live-session/join-session',{state:{from:location.pathname}});
+    }
   
   return (
     <div className="bg-zinc-800/40 hover:bg-zinc-800/70 border border-zinc-700/40 hover:border-zinc-600/60 rounded-xl p-4 transition-all duration-200">
@@ -56,7 +72,7 @@ function BookingSessionCard({
             </span>
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500">
-            <span>{first.venue.name}</span>
+            {first.venue ?<span>{first.venue.name}</span>:<span>Live Session</span>}
             <span>{formatDateDDMMYY(first.date)}</span>
             <span>
               {formatTo12Hour(first.startTime)} –{' '}
@@ -89,7 +105,11 @@ function BookingSessionCard({
       </div>
 
       {/* Actions */}
+     
       <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-zinc-700/40">
+      {/* {canJoinSession(first) && */}
+       <Button onClick={handleJoinSession}> {callStatus===VIDEO_CALL_STATUS.WAITING ? 'waiting To Join...': 'Join Session'}</Button>
+      {/* }  */}
         <button
           onClick={() => setShowParticipant((prev) => !prev)}
           className="text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors"

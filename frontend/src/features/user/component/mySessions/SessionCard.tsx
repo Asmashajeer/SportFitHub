@@ -5,12 +5,17 @@ import {
   formatDateReadable,
   formatTo12Hour,
 } from '@/utils/formatDate';
-import { BOOKING_SESSION_STATUS } from '@/constants/constants';
+import { BOOKING_SESSION_STATUS, SESSION_GRACE_MINUTES, VIDEO_CALL_STATUS, } from '@/constants/constants';
 import type { UserBookedSessionsResponseData } from '../../types/user.booking.types';
 import { format } from 'date-fns';
 import ConfirmDialog from '@/components/reusable/ConfirmDialog';
 import { useUserDashboardStore } from '../../store/useUserDashboardStore';
 import { useMemo} from 'react';
+import { Button } from '@/components/ui/Button';
+import { socket } from '@/lib/socket';
+import { toZonedTime } from 'date-fns-tz';
+import { useVideoCallStore } from '@/features/videoCall/store/useVideoCallStore';
+import { useNavigate } from 'react-router-dom';
 
 const STATUS_CONFIG: Record<
   (typeof BOOKING_SESSION_STATUS)[keyof typeof BOOKING_SESSION_STATUS],
@@ -35,12 +40,7 @@ const STATUS_CONFIG: Record<
     actions: ['viewDetails'],
   },
 
-  // rescheduled: {
-  //   label: "",
-  //   badge: "",
-  //   dot: "bg-violet-400",
-  //   actions: ["viewDetails","rescheduledTo"],
-  // },
+ 
 };
 function SessionCard({
  currentSession,
@@ -50,7 +50,9 @@ function SessionCard({
   onAction: (sessionId: string, action: string) => void;
 }) {
   const { userSessions } = useUserDashboardStore();
-
+  const {callStatus}=useVideoCallStore();
+  const userTimezone=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const navigate=useNavigate();
   const baseCfg = STATUS_CONFIG[ currentSession.status] ?? {
     label:  currentSession.status,
     badge: 'bg-zinc-500/10 text-zinc-400 ring-1 ring-zinc-500/20',
@@ -66,8 +68,8 @@ function SessionCard({
     return userSessions.find((s) => s.id ===  currentSession.rescheduledTo) ?? null;
   }, [ currentSession, userSessions]);
 
-
-  const isSlotBookable = (sessionStartTime: string): Boolean => {
+  const targetTimeZone=currentSession.venue ? currentSession.timezone:userTimezone;
+  const isSlotBookable = (sessionStartTime: string): boolean => {
     // check within bookingDeadline
     if (! currentSession?.date) return false;
     const now = new Date();
@@ -78,7 +80,26 @@ function SessionCard({
       (targetDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
     return hoursDiff >  currentSession.session.bookingDeadline;
-  };
+  };  
+
+
+  //sessionTime with grace minutes 
+   const canJoinSession=()=>{
+     const now =new Date();   
+     const sessionStartWithGrace=toZonedTime(currentSession.startDateTime,targetTimeZone).getTime()-SESSION_GRACE_MINUTES;  
+     const endOfSession=toZonedTime(currentSession.endDateTime,targetTimeZone);
+     return now.getTime() >= sessionStartWithGrace && now.getTime() <= endOfSession.getTime();
+   }
+  const handleJoinSession=()=>{
+    const sessionId=currentSession.session.sessionId;
+    const sessionStartUTC=currentSession.startDateTime
+    console.log(currentSession.startDateTime,sessionStartUTC);
+    console.log("inside handlejoin Session");
+    socket.emit('join-session',{sessionId,sessionStartUTC})
+    navigate('/live-session/join-session',{state:{from:location.pathname}});
+  }
+    
+
   // session reached booking deadline
   if (
      currentSession.status === BOOKING_SESSION_STATUS.SCHEDULED &&
@@ -86,7 +107,7 @@ function SessionCard({
   ) {
     cfg.actions = [...cfg.actions.filter((action) => action !== 'reschedule')];
   }
-
+  
   return (
     <div className="group  bg-zinc-800/40 hover:bg-zinc-800/70 border border-zinc-700/40 hover:border-zinc-600/60 rounded-xl p-4  transition-all duration-200">
       <div className="flex flex-col gap-2">
@@ -116,7 +137,7 @@ function SessionCard({
               </span>
               <span className="flex items-center gap-1">
                 <PinIcon />
-                { currentSession.venue.name}, { currentSession.venue.address}
+                { currentSession.venue ? (currentSession.venue.name ,currentSession.venue?.address):'online'}
               </span>
             </div>
            
@@ -144,6 +165,9 @@ function SessionCard({
       )}
       {cfg.actions.length > 0 && (
         <div className="flex justify-end  gap-2">
+          {/* {canJoinSession() && */}
+              <Button onClick={handleJoinSession}> {callStatus===VIDEO_CALL_STATUS.WAITING ? 'waiting To Join...': 'Join Session'}</Button>
+           {/* }   */}
           {cfg.actions.map((a) =>
             a === 'cancel' ? (
               <div className=" px-3 py-1 rounded-lg border border-red-400/30 hover:bg-red-500/10">

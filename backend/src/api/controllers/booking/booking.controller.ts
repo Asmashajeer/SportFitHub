@@ -18,12 +18,9 @@ export class BookingController {
 
   // -----------check availability on a specific date and slot
   checkAvailability = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const timezone = getTimezone();
-      const bookingSlot = req.query as unknown as CheckAvailabilityDTO;
-      bookingSlot.timezone = timezone;
-      const { isAvailable, remainingCount } = await this._bookingService.checkAvailability(bookingSlot);
-      console.log('isAvailable :', isAvailable, 'remainingCount   :', remainingCount, timezone);
+    try {     
+      const bookingSlot = req.query as unknown as CheckAvailabilityDTO;    
+      const { isAvailable, remainingCount } = await this._bookingService.checkAvailability(bookingSlot);      
       res.status(STATUS_CODE.SUCCESS.OK).json({ isAvailable, remainingCount });
     } catch (err) {
       next(err);
@@ -76,6 +73,8 @@ export class BookingController {
   rescheduleBookedSession = async (req: Request, res: Response, next: NextFunction) => {
     const { sessionBookingId } = req.params;
     const { newSlot } = req.body;
+
+    console.log("inside controller");
     try {
       const newBooking = await this._bookingService.rescheduleSession(sessionBookingId, newSlot);
       res.status(STATUS_CODE.SUCCESS.OK).json(newBooking);
@@ -90,8 +89,7 @@ export class BookingController {
     if (!authReq.user) {
       return next(new AppError('Authentication required. Please log in.', STATUS_CODE.ERROR.UNAUTHORIZED));
     }
-    const userRole = authReq.user.role;
-    const userId = authReq.user.id;
+    const userRole = authReq.user.role;   
     const { sessionBookingId } = req.params;
     const { reason } = req.body;
 
@@ -135,10 +133,10 @@ export class BookingController {
 
   //-----------------check duplicate booking----------------
   checkDuplicateBooking = async (req: AuthRequest, res: Response, next: NextFunction) => {
-    const { bookingSlots, sessionId } = req.body;
+    const { bookingSlots, sessionId,timezone } = req.body;
     const userId = req.user.id;
     try {
-      const isDuplicate = await this._bookingService.checkDuplicateBooking(userId, sessionId, bookingSlots);
+      const isDuplicate = await this._bookingService.checkDuplicateBooking(userId, sessionId, bookingSlots,timezone);
       res.status(STATUS_CODE.SUCCESS.OK).json(isDuplicate);
     } catch (error) {
       next(error);

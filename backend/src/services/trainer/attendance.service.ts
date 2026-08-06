@@ -1,4 +1,4 @@
-import { BOOKING_SESSION_STATUS, PAGINATION_LIMIT } from '@/constants/enums';
+import { BOOKING_SESSION_STATUS,  } from '@/constants/enums';
 import { IBookedSessionPopulateUser } from '@/dtos/request/booking/booking.request.dto';
 import { AttendanceMarkingRequestDTO, SessionOccuranceRequestDTO } from '@/dtos/request/trainer/trainer.attendance.request';
 import { MarkAttendanceResponseDTO, SessionOccuranceResponseDTO } from '@/dtos/response/attendance/attendance.response.dto';
@@ -25,11 +25,10 @@ export class AttendanceService implements IAttendanceService {
 
   //------------------------get completed sessions to mark participants attandance----
   async getSessionOccurrences(data: SessionOccuranceRequestDTO): Promise<SessionOccuranceResponseDTO[]> {
-    const { trainerId, page, sessionModel, attendanceMarked } = data;
-    const limit = PAGINATION_LIMIT;
-    const skip = (page - 1) * limit;
+    const { trainerId, sessionModel, attendanceMarked } = data;
+ 
 
-     let query: FilterQuery<IBookingSession>= {
+     const query: FilterQuery<IBookingSession>= {
         trainerId,       
         status:BOOKING_SESSION_STATUS.COMPLETED,            
       }
@@ -40,7 +39,7 @@ export class AttendanceService implements IAttendanceService {
         query.attendance=null
       }
     
-    const bookings = await this._bookingSessionRepo.findOccuredSessions( query, { skip, limit }  );
+    const bookings = await this._bookingSessionRepo.findOccuredSessions( query  );
     if (!bookings || bookings.length === 0) {
       throw new AppError('No completed sessions to mark attendance');
     }

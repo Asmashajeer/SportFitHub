@@ -99,7 +99,7 @@ export function AttendanceModal({ session, slotId, onClose, onSaved }: Attendanc
                 ) : (
                 data && (
                         <>
-                            <div className="px-5 py-3 flex items-center justify-between border-b-[0.5px] border-[var(--border)] bg-[var(--surface-1)]">
+                            <div className="px-5 py-3 flex items-center justify-between border-b-[0.5px] border-border bg-(--surface-1)">
                             <span className="text-[13px] text-(--text-secondary)">
                                 {data.participants.length} participant{data.participants.length !== 1 ? 's' : ''}
                             </span>
@@ -114,7 +114,7 @@ export function AttendanceModal({ session, slotId, onClose, onSaved }: Attendanc
                             {data.participants.map((p) => (
                             <div
                                 key={p.bookingSessionId}
-                                className="flex items-center justify-between px-5 py-3 border-b-[0.5px] border-[var(--border)]"
+                                className="flex items-center justify-between px-5 py-3 border-b-[0.5px] border-border"
                                 >
                                 <div className="flex items-center gap-2.5 min-w-0">
                                     <div className="min-w-0">

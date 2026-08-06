@@ -69,7 +69,7 @@ export class BookingsManagementService implements IBookingsManagementService {
 
   //--------------get bookingSessions By Admin
   async getBookingSessions(userId: string): Promise<adminBookingSessionDTOwithUserId[]> {
-    const sessions = (await this._bookingSessionRepo.find({ userId: userId, status: BOOKING_SESSION_STATUS.SCHEDULED })) as any[];
+    const sessions = (await this._bookingSessionRepo.find({ userId: userId, status: BOOKING_SESSION_STATUS.SCHEDULED })) ;
     const bookedSessions = sessions.map((session) => toAdminBookingSessionDTOwithUserId(session));
     return bookedSessions;
   }

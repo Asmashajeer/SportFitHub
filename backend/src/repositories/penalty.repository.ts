@@ -1,7 +1,6 @@
 import { ITrainerProfile } from '@/models/trainerProfile.model';
-import { TrainerRepository } from './trainer.repository';
-import { TRAINER_STATUS } from '@/constants/enums';
-import { PenaltyRequestData, TrainerProfilewithPopulatedUser } from '@/dtos/request/trainer/trainer.penalty.request.dto';
+
+import { PenaltyRequestData } from '@/dtos/request/trainer/trainer.penalty.request.dto';
 import { BaseRepository } from './base.repository';
 import { IPenaltyRepository } from '@/interfaces/repositories/IPenalty.repository';
 import { Model } from 'mongoose';

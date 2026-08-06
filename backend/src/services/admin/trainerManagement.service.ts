@@ -44,6 +44,7 @@ export class TrainerManagementService implements ITrainerManagementService {
     }
 
     const [trainers, totalCount] = await Promise.all([await this._trainerRepo.findAll(query, { skip, limit }), await this._trainerRepo.count(query)]);
+    console.log(trainers,"-------------------");
     const result = trainers.map((trainer) => serializeTrainerProfile(trainer, { id: user?.id, role: user?.role }));
     const trainersData = result.map((t) => toAdminTrainersResponseDTO(t));
     return {
@@ -128,7 +129,7 @@ export class TrainerManagementService implements ITrainerManagementService {
   }
 
   // ---------function to send Email anfd Push Notification after Document verification
-  private async _sendDocumentStatusNotification(trainer: any, targetField: 'certificationInfo' | 'idVerification', status: string, reason: string) {
+  private async _sendDocumentStatusNotification(trainer: ITrainerProfile, targetField: 'certificationInfo' | 'idVerification', status: string, reason: string) {
     const fieldLabel = targetField === 'certificationInfo' ? 'Certifications' : 'ID Document';
     const isVerified = status === DOC_VERIFY_STATUS.VERIFIED;
     const trainerLoginData = await this._userRepo.findById(trainer.userId.toString());
@@ -185,7 +186,7 @@ export class TrainerManagementService implements ITrainerManagementService {
   }
 
   //----------------function to send Email and push Notification after Application Verifiacation
-  private async _sendTrainerStatusNotification(trainer: any, status: TRAINER_STATUS, reason: string) {
+  private async _sendTrainerStatusNotification(trainer: ITrainerProfile, status: TRAINER_STATUS, reason: string) {
     const userName = trainer.personalInfo?.fullName;
     const trainerLoginData = await this._userRepo.findById(trainer.userId.toString());
     switch (status) {

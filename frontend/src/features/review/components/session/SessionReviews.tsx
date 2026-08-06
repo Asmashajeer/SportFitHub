@@ -1,8 +1,8 @@
 // components/reviews/SessionReviews.tsx
 import { useEffect, useState } from 'react';
-import type { ReviewResponseData } from '../types/review.types';
+import type { ReviewResponseData } from '../../types/review.types';
 import type { ReviewType } from '@/constants/constants';
-import { reviewService } from '../service/reviewService';
+import { reviewService } from '../../service/reviewService';
 
 
 interface SessionReviewsProps {
@@ -44,7 +44,7 @@ export const SessionReviews = ({ reviewableId, reviewableType }: SessionReviewsP
     if (reviewableId) {
         getRating();
         getReviews();
-         setLoading(false) 
+        setLoading(false) 
     }
     
   }, [reviewableId, reviewableType]);

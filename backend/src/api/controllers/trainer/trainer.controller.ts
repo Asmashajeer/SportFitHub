@@ -30,7 +30,7 @@ export class TrainerController {
       if (result.tokens) {
         setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
       }
-      const { tokens, ...profile } = result;
+      const {tokens: _tokens, ...profile } = result;
       res.status(STATUS_CODE.SUCCESS.CREATED).json({
         success: true,
         message: SUCCESS_MESSAGES.USER.PROFILE_CREATED,

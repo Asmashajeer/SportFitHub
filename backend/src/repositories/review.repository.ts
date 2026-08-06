@@ -1,10 +1,11 @@
 import { IReview } from "@/models/review.model";
 import { BaseRepository } from "./base.repository";
-import { FilterQuery, Model } from "mongoose";
+;
 import { Review_Type } from "@/constants/enums";
 import { IRatingAggregateResult } from "@/dtos/response/review/review.response.dto";
 import { IReviewRepository } from "@/interfaces/repositories/IReview.repository";
-import { Types } from "mongoose";
+import { Types, Model } from "mongoose";
+
 
 export class ReviewRepository extends BaseRepository<IReview> implements IReviewRepository {
   constructor(model: Model<IReview>) {
@@ -49,4 +50,12 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
         return await this.model.find({reviewableId,reviewableType})
         .populate('userId','_id name email ');
    }
+   async getAllReviews(sessionIds:string[]){
+      return await this.model.find({ reviewableId: { $in: sessionIds } })
+        .populate('reviewableId', '_id sessionName')
+        .populate('userId', '_id name email')
+        .sort({ createdAt: -1 });        
+   }
+
+
 }

@@ -22,4 +22,8 @@ export class PaymentRepository extends BaseRepository<IPayment> implements IPaym
     return await this.model.find(filter);
     // .populate('paymentId' ,'_id receiptUrl' );
   }
-}
+  async findAll(): Promise<IPayment[] | null> {
+       return await this.model.find().sort({ createdAt: -1 }).exec();
+     }
+  }
+

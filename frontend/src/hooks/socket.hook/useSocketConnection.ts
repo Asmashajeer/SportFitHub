@@ -1,4 +1,4 @@
-import { socket } from "@/socket";
+import { socket } from "@/lib/socket";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { useEffect } from "react";
 

@@ -5,3 +5,4 @@ export interface AdminBookingsFilterDTO {
   status: string;
   sessionModel: string;
 }
+

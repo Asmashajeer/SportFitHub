@@ -18,7 +18,9 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
 
   async createSessionBooking(data: Partial<IBookingSession>, session: ClientSession) {
     // Note: When using sessions, .create() must take an array
+   
     const [bookingSession] = await this.model.create([data], { session });
+  
     return bookingSession;
   }
 
@@ -34,7 +36,9 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
     const sessions = await this.model
       .find(filter)
       .populate('bookingId', ' _id venue')
+      .populate('trainerId', '_id userId displayName')
       .populate('sessionId', '_id trainerId sessionName sessionType maxCapacity bookingDeadline cancellationWindow')
+      .sort({ date: -1 }) 
       .lean()
       .exec();
     return sessions;
@@ -81,6 +85,7 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
   }
 
   async autoCompleteExpiredSessions() {
+    
     return await this.model.updateMany(
       {
         status: 'scheduled',
@@ -91,24 +96,21 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
   }
 
   //--------------------find completed Sessions  by trainerId
-  async findOccuredSessions(query: FilterQuery<IBookingSession>, options: { skip?: number; limit?: number } = { skip: 0, limit: 0 }) {  
-    const cutoff = new Date();
-     console.log(query)
-    cutoff.setHours(0,0,0,0);
-    console.log(cutoff);
+  async findOccuredSessions(query: FilterQuery<IBookingSession>) {  
+    const now = new Date();
+     
+    
     const filter={
       ...query,
-       date: { $lte:cutoff },
+       endDateTime: { $lt:now },
     }
-    console.log(filter);
+   
    const  sessions= await this.model.find(filter)
       .populate<{ userId: { _id: Types.ObjectId; name: string; email: string } }>('userId')
       .populate<{ sessionId: { _id: Types.ObjectId; sessionName: string; sessionType: string } }>('sessionId')
-      .sort({ startTime: 1 })
-      .skip(options?.skip)
-      .limit(options?.limit)
+      .sort({ startTime: 1 })      
       .exec();
-      console.log(sessions);
+   
       return sessions
   }
 
@@ -129,11 +131,15 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
       .populate<{ sessionId: { _id: Types.ObjectId; sessionName: string; sessionType: string } }>('sessionId')
       .populate<{ trainerId: { _id: Types.ObjectId; displayName: string} }>('trainerId');
   }
-  async findOneSession(userId:string | Types.ObjectId, sessionId:string | Types.ObjectId,attendance:boolean){
-      return await this.model.findOne({userId,sessionId,attendance})
+  async findOneSession(filter:FilterQuery<IBookingSession>){
+      return await this.model.findOne(filter)
       .populate('sessionId', '_id sessionName')
-      .populate('trainerId', '_id displayName')
+      .populate('trainerId', '_id  displayName')
       .exec();
   }
   
+
+
+   
+
 }

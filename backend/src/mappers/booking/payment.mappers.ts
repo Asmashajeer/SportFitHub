@@ -6,7 +6,7 @@ export const toUserPaymentResponseDTO = (payment: IPayment) => {
   return {
     id: payment._id.toString(),
     bookingId: payment.bookingId.toString(),
-    bookingUId: payment.bookingUId,
+    bookingUID: payment.bookingUID,
     userId: payment.userId.toString(),
     transactionId: payment.transactionId,
     invoiceId: payment.invoiceId,

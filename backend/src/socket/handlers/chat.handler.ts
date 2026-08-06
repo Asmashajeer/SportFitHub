@@ -55,7 +55,7 @@ export const createChatHandler = (chatService: IChatService) => {
           socket.join(conversationId);
           socket.emit('conversationCreated', { conversationId });
         }
-        console.log('hello');
+                                                                                                                                                                                                                                                                                                                                                                                                                            
         const message = await chatService.sendMessage({ conversationId, sender: userId, text: payload.text.trim(), readBy: [userId] });
         if (isNewConversation) {
           io.to(payload.recipientId).emit('newConversation', { conversationId, message });
@@ -73,6 +73,7 @@ export const createChatHandler = (chatService: IChatService) => {
         await chatService.markAsRead(conversationId, userId);
         socket.to(conversationId).emit('messagesRead', { conversationId, readerId: userId });
       } catch (err) {
+        console.log(err);
         socket.emit('errorMessage', 'Failed to mark messages as read');
       }
     });

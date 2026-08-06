@@ -50,7 +50,7 @@ const ProfileView = () => {
   const {user,setUser}=useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading,setIsLoading]=useState(false);    
-  const [imageVersion, setImageVersion] = useState(Date.now());
+const [imageVersion, setImageVersion] = useState(() => Date.now());
 
   useEffect(() => {
     fetchProfile();    

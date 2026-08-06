@@ -86,6 +86,9 @@ import reviewModel from './models/review.model';
 import { ReviewRepository } from './repositories/review.repository';
 import { ReviewService } from './services/review/review.service';
 import { ReviewController } from './api/controllers/review/review.controller';
+import { createVideoCallHandler } from './socket/handlers/video.call.handler';
+import { PaymentsManagementController } from './api/controllers/admin/paymentManagement.controller';
+import { PaymentsManagementService } from './services/admin/paymentManagement.service';
 
 const userRepository = new UserRepository(User);
 const profileRepository = new ProfileRepository(Profile);
@@ -102,7 +105,7 @@ const bookingRepository = new BookingRepository(bookingModel);
 const bookingSessionRepository = new BookingSessionRepository(bookingSessionModel);
 const penaltyRepository = new PenaltyRepository(TrainerProfile);
 const reviewRepository=new ReviewRepository(reviewModel);
-const reviewService=new ReviewService(reviewRepository,bookingSessionRepository);
+const reviewService=new ReviewService(reviewRepository,bookingSessionRepository,sportsSessionRepository,fitnessSessionRepository);
 export const reviewController=new ReviewController(reviewService);
 
 const userManagementService = new UserManagementService(userRepository, bookingSessionRepository, walletRepository, trainerRepository, sportsSessionRepository, fitnessSessionRepository);
@@ -173,6 +176,8 @@ export const fitnessSessionController = new FitnessSessionController(fitnessSess
 export const sessionController = new SessionController(sportsSessionService, fitnessSessionService);
 const bookingsManagementService = new BookingsManagementService(bookingRepository, bookingSessionRepository);
 export const bookingsManagementController = new BookingsManagementController(bookingsManagementService);
+const paymentsManagementService=new PaymentsManagementService(paymentRepository);
+export const paymentsManagementController=new PaymentsManagementController(paymentsManagementService)
 const attendanceService = new AttendanceService(bookingSessionRepository,reviewService);
 export const attendanceController = new AttendanceController(attendanceService);
 
@@ -183,4 +188,6 @@ export const chatService = new ChatService(conversationRepository, messageReposi
 
 export const chatHandler = createChatHandler(chatService);
 export const chatController = new ChatController(chatService);
+
+export const videoCallHandler=createVideoCallHandler(bookingService);
 

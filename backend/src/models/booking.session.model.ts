@@ -5,6 +5,7 @@ import { IVenue } from './booking.model';
 export interface IBookingSession extends Document {
   _id: Types.ObjectId;
   bookingId: Types.ObjectId;
+  bookingUID:string,
   userId: Types.ObjectId;
   trainerId: Types.ObjectId;
   sessionId: Types.ObjectId;
@@ -13,6 +14,8 @@ export interface IBookingSession extends Document {
   date: Date;
   startTime: string;
   endTime: string;
+  timezone:string
+  startDateTime:Date
   endDateTime: Date;
   status: BOOKING_SESSION_STATUS;
   rescheduledTo: Types.ObjectId;
@@ -21,7 +24,7 @@ export interface IBookingSession extends Document {
   refundedToWallet: boolean;
   refundAmount: number;
 }
-export interface IBookedSessionPopulate extends Omit<IBookingSession, 'sessionId' | 'bookingId'> {
+export interface IBookedSessionPopulate extends Omit<IBookingSession, 'sessionId' | 'bookingId' |'trainerId'> {
   sessionId: {
     _id: Types.ObjectId;
     trainerId: Types.ObjectId;
@@ -35,11 +38,17 @@ export interface IBookedSessionPopulate extends Omit<IBookingSession, 'sessionId
     _id: Types.ObjectId;
     venue: IVenue;
   };
+  trainerId:{
+     _id: Types.ObjectId;
+     userId:Types.ObjectId;
+     displayName:string
+  }
 }
 // const session=
 const BookingSessionSchema = new Schema(
   {
     bookingId: { type: Types.ObjectId, ref: 'Booking', required: true },
+    bookingUID:{ type: String,  required: true, },
     userId: { type: Types.ObjectId, ref: 'User', required: true },
     trainerId: { type: Types.ObjectId, ref: 'TrainerProfile', required: true },
     sessionId: { type: Types.ObjectId, refPath: 'sessionModel', required: true },
@@ -48,7 +57,10 @@ const BookingSessionSchema = new Schema(
     date: { type: Date, required: true },
     startTime: { type: String, required: true },
     endTime: { type: String, required: true },
-    endDateTime: { type: Date, required: true },
+    timezone: { type: String, required: true }, // Saved from session.timezone   
+    startDateTime: { type: Date, required: true, index: true },
+    endDateTime: { type: Date, required: true, index: true },
+  
     status: { type: String, enum: Object.values(BOOKING_SESSION_STATUS) },
     rescheduledTo: { type: Types.ObjectId, refPath: 'BookingSession', default: null },
     attendance: { type: Boolean, default: null },
@@ -59,8 +71,8 @@ const BookingSessionSchema = new Schema(
   { timestamps: true }
 );
 
-BookingSessionSchema.index({ slotId: 1, date: 1 });
-BookingSessionSchema.index({ bookingId: 1 });
-BookingSessionSchema.index({ userId: 1, date: 1 });
+BookingSessionSchema.index({ slotId: 1, startDateTime: 1 });
+BookingSessionSchema.index({ trainerId: 1, startDateTime: 1 });
+BookingSessionSchema.index({ userId: 1, startDateTime: 1 });
 
 export default mongoose.model<IBookingSession>('BookingSession', BookingSessionSchema);

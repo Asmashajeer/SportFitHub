@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Send } from "lucide-react";
@@ -21,9 +21,16 @@ export const MessageInput = ({
   onConversationCreated,
 }: MessageInputProps) => {
   const [text, setText] = useState("");
+    const lastCreatedConversationId = useChatStore((s) => s.lastCreatedConversationId);
+
   const sendMessage = useChatStore((s) => s.sendMessage);
   const [isSending,setIsSending]=useState(false);
-
+  useEffect(() => {
+      if (lastCreatedConversationId && onConversationCreated) {
+          onConversationCreated(lastCreatedConversationId);
+      }
+    }, [lastCreatedConversationId, onConversationCreated]);
+    
   const handleSend = () => {
     if (!text.trim()||isSending) return;
       setIsSending(true);

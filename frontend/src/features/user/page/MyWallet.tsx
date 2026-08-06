@@ -33,7 +33,9 @@ const MyWallet = () => {
   }, [transactions, activeFilter]);
 
   //for pagination
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setCurrentPage(1), [activeFilter]);
+
   const totalPages = Math.ceil(filtered.length / PAGINATION_DEFAULT_LIMIT);
   const paginated = useMemo(() => {
     const start = (currentPage - 1) * PAGINATION_DEFAULT_LIMIT;
@@ -88,7 +90,7 @@ const MyWallet = () => {
                   <div className="flex justify-between text-sm border-b">
                     <span className="text-gray-400">Booking ID</span>
                     <span className="text-emerald-700">
-                      {transaction.bookingId}
+                      {transaction.bookingUID}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm border-b">

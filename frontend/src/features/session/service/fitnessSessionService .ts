@@ -6,6 +6,7 @@ interface queryParamsOptions {
   search?: string;
   program?: string;
   ageGroup?: string;
+  minRating?:number;
   sessionType?: string;
   limit?: number;
 }

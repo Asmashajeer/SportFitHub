@@ -3,13 +3,15 @@ import './App.css';
 import AppRouter from './routes/AppRouter';
 import { useAuth } from './features/auth/hook/useAuth';
 import { LoadingScreen } from './components/reusable/LoadingScreen';
-import { useSocketConnection } from './hooks/useSocketConnection';
-import { useInitSocketListeners } from './hooks/useInitSocketListeners ';
+import { useSocketConnection } from './hooks/socket.hook/useSocketConnection';
+import { useInitSocketListeners } from './features/chat/socket.hooks/useInitSocketListeners ';
+import { useVideoCallSocketListeners } from './features/videoCall/hooks/useVideoCallSocketListeners';
 
 function App() {
   const { isLoading } = useAuth(); // Initialize here
   useSocketConnection();
   useInitSocketListeners();
+  useVideoCallSocketListeners();
   if (isLoading) {
     return (
       <div>

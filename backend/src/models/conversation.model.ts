@@ -1,7 +1,7 @@
 import { PAYLOAD_MODEL } from '@/constants/enums';
 import mongoose, { Schema, Types } from 'mongoose';
 import { Document } from 'mongoose';
-import { threadCpuUsage } from 'node:process';
+
 
 interface ILastMessage {
   text: string;

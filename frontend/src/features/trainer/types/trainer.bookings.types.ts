@@ -11,6 +11,11 @@ export interface BookedSessionResponseDataWithUserInfo {
   userId: string;
   userName: string;
   userEmail: string;
+  trainer:{
+      id:string,
+      userId:string,
+      trainerName:string,
+    },
   sessionId: string;
   sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
   sessionName: string;
@@ -23,9 +28,12 @@ export interface BookedSessionResponseDataWithUserInfo {
   date: string;
   startTime: string;
   endTime: string;
+  startDateTime:string,  //utc
+  endDateTime:string,  //in utc
+  timezone:string,
   status: (typeof BOOKING_SESSION_STATUS)[keyof typeof BOOKING_SESSION_STATUS];
   rescheduledTo: string;
-  attendance: Boolean;
+  attendance: boolean;
   cancellationReason: string;
   refundedToWallet: boolean;
   refundAmount: number;
@@ -36,9 +44,12 @@ export interface queryParamsOptions {
   sessionModel?: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
   date?: string;
   status?: string;
-  attendanceMarked:boolean
+  
 }
-
+export interface queryParamsWithAttendace {
+  sessionModel?: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
+  attendanceMarked:boolean
+} 
 
 interface participants{  
       bookingSessionId:string,

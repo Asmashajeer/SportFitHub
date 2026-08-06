@@ -16,6 +16,7 @@ export function useCheckAvailability() {
             const { isAvailable, remainingCount } =
               await BookingService.checkSlotAvailabilty({
                 sessionId: slot.sessionId,
+                timezone:slot.timezone,
                 date: slot.date,
                 slotId: slot.slotId,
                 maxCapacity: slot.maxCapacity,

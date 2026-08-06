@@ -1,19 +1,14 @@
-import { useEffect, useState } from "react";
-
-
+import {  useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { useConversation } from "../hook/useConversation";
 import { ConversationList } from "../component/ConversationList";
 import { AllMessages } from "../component/AllMessages";
 import { MessageInput } from "../component/MessageInput";
-
 import { useChatStore } from "../store/useChatStore";
 
 export const ChatInboxPage = () => {
-  const { setConversations } = useChatStore();
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-
-  
+ 
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);  
   useConversation(activeConversationId);
 
   return (

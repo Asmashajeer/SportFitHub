@@ -12,7 +12,7 @@ export interface BookingsStatsResponseDTO {
 
 export interface AdminBookingsResponseDTO {
   bookingId: string;
-  bookingUId: string;
+  bookingUID: string;
   userId: string;
   userName: string;
   userEmail: string;
@@ -23,7 +23,7 @@ export interface AdminBookingsResponseDTO {
   sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
   pricePlan: IPricePlan;
   status: (typeof BOOKING_STATUS)[keyof typeof BOOKING_STATUS];
-  venue: IVenue;
+  venue?: IVenue|null;
   createdAt: string;
 }
 export interface AdminBookingsResponseDTOwithPagination extends PaginationResponseDTO {
@@ -40,6 +40,7 @@ export interface AdminBookingDetailDTO extends AdminBookingsResponseDTO {
 // individual session slots
 export interface AdminBookingSessionDTO {
   bookingSessionId: string;
+  bookingUID:string;
   date: string;
   startTime: string;
   endTime: string;

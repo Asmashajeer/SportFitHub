@@ -1,23 +1,30 @@
-import { Review_Type } from "@/constants/enums";
+import {  Review_Type } from "@/constants/enums";
 import { STATUS_CODE } from "@/constants/messages";
 import { ReviewRequestDTO, SessionReviewPromptRequestDTO } from "@/dtos/request/review/review.request.dto";
-import { PendingReviewResponseDTO, RatingAggregateResult, ReviewResponseDTO, ReviewResponsePopulatedUserDTO, SessionResponseForReviewDTO } from "@/dtos/response/review/review.response.dto";
+import { PendingReviewResponseDTO, RatingAggregateResult, ReviewResponseDTO, ReviewResponsePopulatedRevewableIdDTO, ReviewResponsePopulatedUserDTO, SessionResponseForReviewDTO } from "@/dtos/response/review/review.response.dto";
 import { IBookingSessionRepository } from "@/interfaces/repositories/IBook.session.repository";
 import { IReviewRepository } from "@/interfaces/repositories/IReview.repository";
 import { IReviewService } from "@/interfaces/services/review/IReview.service";
-import { toPendingReviewResponseDTO, toRatingAggregateResult,toReviewResponseDTO, toReviewResponsePopulatedUserDTO, toSessionResponseForReviewDTO } from "@/mappers/review.mapper";
-import { IReview } from "@/models/review.model";
+import { toPendingReviewResponseDTO, toRatingAggregateResult,toReviewResponseDTO, toReviewResponsePopulatedRevewableIdDTO, toReviewResponsePopulatedUserDTO, toSessionResponseForReviewDTO } from "@/mappers/review.mapper";
+
 import AppError from "@/utils/AppError";
 import { sendPushNotification } from "@/utils/push-notification.service";
 import { sendNotificationEmail } from "@/utils/sendNotfication.mail";
 import { Types } from "mongoose";
 
+import { ISportsSessionRepository } from "@/interfaces/repositories/ISports.session.repository";
+import { IFitnessSessionRepository } from "@/interfaces/repositories/IFitness.session.repository";
+
 export class ReviewService implements IReviewService {
   private _reviewRepo: IReviewRepository;
   private _bookingSessionRepo:IBookingSessionRepository
-  constructor(reviewRepo: IReviewRepository,bookingSessionRepo:IBookingSessionRepository) {
+  private _sportsSessionRepo:ISportsSessionRepository
+   private _fitnessSessionRepo:IFitnessSessionRepository
+  constructor(reviewRepo: IReviewRepository,bookingSessionRepo:IBookingSessionRepository,sportsSessionRepo:ISportsSessionRepository,fitnessSessionRepo:IFitnessSessionRepository) {
     this._reviewRepo = reviewRepo;
     this._bookingSessionRepo=bookingSessionRepo;
+    this._sportsSessionRepo=sportsSessionRepo;
+    this._fitnessSessionRepo=fitnessSessionRepo
   }
 
 
@@ -86,7 +93,7 @@ getPendingReviewsForUser=  async (userId: string):Promise<PendingReviewResponseD
   async getReviewableSession(userId: string, sessionId: string):Promise<SessionResponseForReviewDTO> {
       // 1. Confirm this user actually attended this session
       const attendance=true;
-      const attendantedSession = await this._bookingSessionRepo.findOneSession(userId, sessionId,attendance );
+      const attendantedSession = await this._bookingSessionRepo.findOneSession({userId, sessionId,attendance} );
       console.log(attendantedSession);
       if (!attendantedSession) {
         throw new AppError(  'You can only review sessions you attended',STATUS_CODE.ERROR.FORBIDDEN       );
@@ -128,7 +135,18 @@ getPendingReviewsForUser=  async (userId: string):Promise<PendingReviewResponseD
         rating: data.rating,
         review: data.review,
       });
-      const review=toReviewResponseDTO(userReview)
+      const review=toReviewResponseDTO(userReview);
+      // update sessionDetails rating
+      const [result]=await this._reviewRepo.getAverageRatingAndCount(review.reviewableType,review.reviewableId);
+      console.log(result.averageRating);
+      switch(review.reviewableType){
+        case Review_Type.SPORT_SESSION:await this._sportsSessionRepo.findOneAndUpdate(review.reviewableId,{rating:result.averageRating});
+        break;
+        case Review_Type.FITNESS_SESSION:await this._fitnessSessionRepo.findOneAndUpdate(review.reviewableId,{rating:result.averageRating});
+        break;
+        default:break;
+      }
+      
       return review;
     }
 
@@ -152,5 +170,18 @@ getPendingReviewsForUser=  async (userId: string):Promise<PendingReviewResponseD
   topReviews= async(reviewableType:Review_Type):Promise<RatingAggregateResult[]>=>{
    const reviews=await this._reviewRepo.TopReviews(reviewableType);
     return reviews.map((review)=>toRatingAggregateResult(review));
+  }
+
+
+
+  //------------------get all Session reviews by a trainer
+  getAllSessionReviews=async(trainerId:string):Promise<ReviewResponsePopulatedRevewableIdDTO[]>=>{
+    const sessions=await  this._bookingSessionRepo.find({trainerId});
+    const sessionIds=[...new Set(sessions.map((s)=>(s.sessionId.toString())))];
+    const allReviews=await this._reviewRepo.getAllReviews(sessionIds);
+    if(!allReviews) throw new Error("no reviews for this trainer.s sessions ")
+    console.log(allReviews);
+    return await allReviews.map((r)=> toReviewResponsePopulatedRevewableIdDTO(r));
+   
   }
 }

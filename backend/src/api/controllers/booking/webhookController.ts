@@ -29,12 +29,13 @@ export class WebhookController {
       console.error(` Webhook Error: ${err.message}`);
       return next(err);
     }
-    const stripeSession = event.data.object as Stripe.Checkout.Session;
-    const lockKeys = stripeSession.metadata.lockKeys;
+
 
     // Handle  payment
     switch (event.type) {
       case 'checkout.session.completed': {
+        const stripeSession = event.data.object as Stripe.Checkout.Session;
+        const lockKeys = stripeSession.metadata.lockKeys;
         const paymentIntentId = stripeSession.payment_intent as string;
         const invoiceId = stripeSession.invoice as string;
         console.log("payment completed");
@@ -62,12 +63,15 @@ export class WebhookController {
         break;
       }
       case 'checkout.session.async_payment_failed':
-      case 'checkout.session.expired':
+      case 'checkout.session.expired':{
+        const stripeSession = event.data.object as Stripe.Checkout.Session;
+        const lockKeys = stripeSession.metadata.lockKeys;
         this.releaseLocks(lockKeys);
         console.log("payment failed");
         res.status(STATUS_CODE.SUCCESS.OK).json({ received: true });
         break;
 
+      }
       default:
         console.log(`Unhandled event type ${event.type}`);
         res.status(STATUS_CODE.SUCCESS.OK).json({ received: true });

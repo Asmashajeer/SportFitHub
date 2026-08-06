@@ -79,3 +79,23 @@ export const toReviewResponsePopulatedUserDTO=(review)=>{
         updatedAt: formatInTimeZone(review.updatedAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
     }
 }
+
+
+export const toReviewResponsePopulatedRevewableIdDTO=(review)=>{
+    const timezone = getTimezone();
+    return{
+        id: review._id.toString(),
+        rating: review.rating ,               
+        review: review.review?review.review:"",
+        user:{
+            id:review.userId._id.toString(),
+            name:review.userId.name,
+            email:review.userId.email
+        } ,               
+        reviewableType: review.reviewableType,
+        sessionId: review.reviewableId._id.toString(),    
+        sessionName:review.reviewableId.sessionName,          
+        createdAt: formatInTimeZone(review.createdAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
+        updatedAt: formatInTimeZone(review.updatedAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
+    }
+}

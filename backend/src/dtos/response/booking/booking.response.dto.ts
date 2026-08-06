@@ -4,14 +4,14 @@ import { UserPaymentResponseDTO } from './payment.response.dto';
 
 export interface UserBookingResponseDTO {
   id: string;
-  bookingUId: string;
+  bookingUID: string;
   userId: string;
   sessionId: string;
   sessionModel: PAYLOAD_MODEL;
   stripeSessionId?: string;
   bookingType: (typeof BOOKING_TYPE)[keyof typeof BOOKING_TYPE];
   pricePlan: IPricePlan;
-  venue: IVenue;
+  venue?: IVenue | null;
   status: BOOKING_STATUS;
   paymentId: string;
 
@@ -35,6 +35,9 @@ export interface BookedSlotPublicResponseData {
   date: string;
   startTime: string;
   endTime: string;
+  // startDateTime:string,
+  // endDateTime:string,
+  // timezone:string,
   status: BOOKING_SESSION_STATUS;
 }
 // export interface BookedSlotPublicResponseData extends Pick<UserBookingResponseDTO,'sessionId'|'bookedSlot'|'status'>{}
@@ -42,6 +45,7 @@ export interface BookedSlotPublicResponseData {
 export interface UserBookedSessionsResponseDTO {
   id: string;
   bookingId: string;
+  bookingUID:string,
   userId: string;
   trainerId: string;
   sessionId: string;
@@ -49,7 +53,10 @@ export interface UserBookedSessionsResponseDTO {
   slotId: string;
   date: string;
   startTime: string;
-  endTime: string;
+  endTime: string; 
+  startDateTime:string,
+  endDateTime:string,
+  timezone:string,
   status: BOOKING_SESSION_STATUS;
   rescheduledTo: string;
   attendance: boolean;
@@ -67,9 +74,14 @@ export interface populatedSession {
   cancellationWindow: number;
 }
 
-export interface UserSessionsResponseDTOwithPopulatedSession extends Omit<UserBookedSessionsResponseDTO, 'sessionId'> {
+export interface UserSessionsResponseDTOwithPopulatedSession extends Omit<UserBookedSessionsResponseDTO, 'sessionId'|'trainerId'> {
   session: populatedSession;
-  venue: IVenue;
+   venue?: IVenue | null;
+   trainer:{
+      id:string,
+      userId:string,
+      trainerName:string,
+    },
 }
 export interface userInfo {
   userId: string;
@@ -89,6 +101,7 @@ export interface BookedSessionTrainerResponseDTO {
 export interface CancelBookedSessionResponseDTO {
   sessionBookingId: string;
   bookingId: string;
+   bookingUID:string,
   refundAmount: number;
   walletBalance: number;
   cancelledAt: string;

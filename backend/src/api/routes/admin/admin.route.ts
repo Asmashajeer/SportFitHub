@@ -8,6 +8,7 @@ import { UserRole } from '@/constants/enums';
 import categoryRoute from './categoryManagement.route';
 import sessionRoute from './sessionManagement.route';
 import bookingRoute from './bookingManagement.route';
+import paymentsRoute from './paymentManagement.route';
 
 const adminRouter = Router();
 adminRouter.use(protect);
@@ -18,4 +19,5 @@ adminRouter.use('/users', userRoutes);
 adminRouter.use('/category', categoryRoute);
 adminRouter.use('/sessions', sessionRoute);
 adminRouter.use('/bookings', bookingRoute);
+adminRouter.use('/payments', paymentsRoute);
 export default adminRouter;

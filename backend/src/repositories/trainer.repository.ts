@@ -2,7 +2,7 @@ import { ITrainerProfile } from '@/models/trainerProfile.model';
 import { BaseRepository } from './base.repository';
 import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
 import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
-import { ITrainerPopulated } from '@/dtos/response/admin/trainer.response.dto';
+
 
 export class TrainerRepository extends BaseRepository<ITrainerProfile> implements ITrainerRepository {
   constructor(model: Model<ITrainerProfile>) {

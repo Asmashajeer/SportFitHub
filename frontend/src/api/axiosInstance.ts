@@ -17,12 +17,14 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const isLoginPath = originalRequest.url.includes('/auth/login');
-
+    const PUBLIC_PATHS = ['/', '/sports', '/fitness', '/login', '/register', /* ... */];
+    const isPublicPath = () => PUBLIC_PATHS.some(p => window.location.pathname===p);
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
       !isLoginPath &&
-      !originalRequest.url.includes('/auth/refresh')
+      !originalRequest.url.includes('/auth/refresh') 
+      //&& !isPublicPath
     ) {
       originalRequest._retry = true;
       try {

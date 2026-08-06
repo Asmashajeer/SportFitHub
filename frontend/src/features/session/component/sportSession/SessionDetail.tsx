@@ -52,8 +52,8 @@ import { MapView } from '@/components/reusable/MapView';
 import { useCheckAvailability } from '@/hooks/useCheckAvailability';
 import { ChatDrawer } from '@/features/chat/component/ChatDrawer';
 import { reviewService } from '@/features/review/service/reviewService';
-import type { ReviewResponseData } from '@/features/review/types/review.types';
-import { SessionReviews } from '@/features/review/components/SessionReviews';
+
+import { SessionReviews } from '@/features/review/components/session/SessionReviews';
 
 const SessionDetail = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -180,13 +180,14 @@ const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 
    }
     const bookingData: Payload = {
       sessionId: session.id,
+      sessionTimezone:session.timezone,
       trainerId:session.trainer.id,
       sessionModel: PAYLOAD_MODEL.SPORT_SESSION,
       bookingType:
         pricePlan?.sessionCount! > 1
           ? BOOKING_TYPE.MULTIPLE
           : BOOKING_TYPE.SINGLE,
-      venue: { name: session.venue.name, address: session.venue.address },
+      venue: { name: session.venue.name, address: session.venue.address,location:session.venue.location },
       planId: pricePlan?._id!,
       numberOfSessions: pricePlan?.sessionCount!,
       amount: pricePlan?.price!,
@@ -217,7 +218,8 @@ const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 
       email: user?.email,
     };
     setPayload({ user: userInfo, ...bookingData });
-    const isDuplicateBooking = await alreadybookedthisDateAndTime(bookingData.sessionId, bookingData.sessionsToBook);
+    console.log("  bookingData---",bookingData)
+    const isDuplicateBooking = await alreadybookedthisDateAndTime(bookingData.sessionId, bookingData.sessionsToBook,bookingData.sessionTimezone);
     if (isDuplicateBooking) {
       toast.error(isDuplicateBooking);
       return;
@@ -464,6 +466,7 @@ const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 
                   <p className="font-black text-white text-xl italic uppercase group-hover:text-emerald-400 transition-colors">
                     {session.trainer?.displayName}
                   </p>
+                 
                 </div>
               </div>
               <div className="space-y-6 text-sm">
@@ -495,12 +498,14 @@ const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 
                         #{item.replace(/\s+/g, '')}
                       </span>
                     ))}
-                    <ChatDrawer
-                      userId={session.trainer.userId}
-                      trainerName={session.trainer.displayName}
-                      contextSessionId={session.id}
-                      contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION}
-                    />
+                    {isAuthenticated &&
+                      <ChatDrawer
+                        userId={session.trainer.userId}
+                        trainerName={session.trainer.displayName}
+                        contextSessionId={session.id}
+                        contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION}
+                      />
+                    }
                   </div>
                 </div>
               </div>
@@ -548,7 +553,7 @@ const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 
 
 export default SessionDetail;
 
-const alreadybookedthisDateAndTime = async (sessionId: string, bookingSlots: IBookedSlot[]) => {
-  const isDuplicate = await BookingService.isDuplicateBooking(sessionId, bookingSlots);
+const alreadybookedthisDateAndTime = async (sessionId: string, bookingSlots: IBookedSlot[],timezone:string) => {
+  const isDuplicate = await BookingService.isDuplicateBooking(sessionId,bookingSlots,timezone);
   return isDuplicate;
 };

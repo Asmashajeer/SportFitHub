@@ -3,7 +3,7 @@ import HomePage from '../pages/HomePage';
 import Login from '../features/auth/component/Login';
 
 import { ROLES } from '../constants/constants';
-// import { LoadingScreen } from '../components/ui/LoadingScreen';
+
 
 import ProtectedRoute from './ProtectedRoute';
 import UserRoutes from './UserRoutes';
@@ -18,7 +18,7 @@ import TrainerProfileForm from '../features/trainer/page/TrainerOnboarding';
 import AdminRoutes from './AdminRoutes';
 
 import Register from '@/features/auth/component/Register';
-import NotFound from '@/pages/NotFound';
+
 import { UnauthorizedPage } from '@/pages/UnauthorizedPage';
 import SportsPage from '@/pages/SportsPage';
 import SessionDetailPage from '@/pages/SessionDetailPage';
@@ -26,6 +26,7 @@ import FitnessPage from '@/pages/FitnessPage';
 import FitnessSessionDetailPage from '@/pages/FitnessSessionDetailPage';
 
 import BookingRoutes from './BookingRoutes';
+import LiveSessionRoutes from './LiveSessionRoutes';
 function AppRouter() {
   return (
     <div className="min-w-[320px]">
@@ -92,6 +93,15 @@ function AppRouter() {
             }
           />
 
+
+          <Route
+            path="/live-session/*"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.USER,ROLES.TRAINER]}>
+                <LiveSessionRoutes />
+              </ProtectedRoute>
+            }
+          />
           {/* Admin Route */}
           <Route
             path="/admin/*"

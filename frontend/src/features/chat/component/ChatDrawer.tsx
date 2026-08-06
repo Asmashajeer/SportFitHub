@@ -3,11 +3,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 
 import { Button } from "@/components/ui/Button";
 import { MessageCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useConversation } from "../hook/useConversation";
 import type { PAYLOAD_MODEL } from "@/constants/constants";
 import { AllMessages } from "./AllMessages";
 import { MessageInput } from "./MessageInput";
+import { useChatStore } from "../store/useChatStore";
 
 interface ChatDrawerProps {
   userId: string;
@@ -17,20 +18,25 @@ interface ChatDrawerProps {
 }
 
 export const ChatDrawer = ({ userId, trainerName, contextSessionId, contextSessionModel }: ChatDrawerProps) => {
+  const lastCreatedConversationId = useChatStore((s) => s.lastCreatedConversationId);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   
 
   // only joins a room / marks read once a real conversationId exists — no-ops while null
   useConversation(conversationId);
-  
+  useEffect(() => {
+    if (lastCreatedConversationId && !conversationId) {
+        setConversationId(lastCreatedConversationId);
+    }
+  }, [lastCreatedConversationId, conversationId]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <MessageCircle className="h-4 w-4" />
-          Chat with Trainer
+      <SheetTrigger asChild className='mx-auto mt-2'>
+        <Button variant="secondary" className="gap-2 border hover:border hover:bg-green-800">
+          <MessageCircle className="h-4 w-4 text-green-400" />
+          Chat with {trainerName} 
         </Button>
       </SheetTrigger>
 

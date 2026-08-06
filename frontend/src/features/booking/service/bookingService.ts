@@ -79,8 +79,8 @@ const BookingService = {
     return res.data;
   },
 
-  isDuplicateBooking:async(sessionId:string,bookingSlots:IBookedSlot[])=>{
-    const res= await api.post(BOOKING_ROUTE.IS_DUPLICATE_BOOKING,{sessionId,bookingSlots},);
+  isDuplicateBooking:async(sessionId:string,bookingSlots:IBookedSlot[],timezone:string)=>{
+    const res= await api.post(BOOKING_ROUTE.IS_DUPLICATE_BOOKING,{sessionId,bookingSlots,timezone},);
     return res.data;
 
   }

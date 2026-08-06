@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type {
-  UserBookedSessionsResponseData,
-  UserBookingResponseData,
+  UserBookedSessionsResponseData,  
   UserBookingResponseDatawithStatusCount,
 } from '../types/user.booking.types';
 import BookingService from '@/features/booking/service/bookingService';

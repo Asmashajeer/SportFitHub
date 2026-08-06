@@ -1,11 +1,10 @@
 import { motion } from 'framer-motion';
-import { Play, Zap, Users, ArrowRight } from 'lucide-react';
+import { Zap,  ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, } from 'react-router-dom';
 const SportsBanner = () => {
   const location = useLocation();
   const isSports = location.pathname.includes('sports');
-  const navigate= useNavigate();
 
 
   // Configuration

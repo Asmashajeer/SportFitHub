@@ -3,13 +3,14 @@ import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '@/config/cloudinaryConfig';
 import { getDeliveryType } from '@/utils/cloudinaryAccess';
+import { AuthRequest } from './auth.middleware';
 
 export const uploadMiddleware = () => {
   const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
       const { uploadType } = req.body;
-      const userId = (req as any).user?.id;
+      const userId = (req as AuthRequest).user?.id;
       const folderName = req.body.folder || 'misc_assets';
 
       let publicId;

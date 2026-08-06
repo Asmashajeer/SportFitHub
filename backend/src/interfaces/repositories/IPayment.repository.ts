@@ -7,4 +7,5 @@ export interface IPaymentRepository extends IBaseRepository<IPayment> {
   createPayment(data: Partial<IPayment>, session: ClientSession);
   updatePayment(id: string, data: Partial<IPayment>, session: ClientSession);
   findByUserId(filter: FilterQuery<IPayment>): Promise<IPayment[] | null>;
+  findAll(): Promise<IPayment[] | null> 
 }

@@ -41,3 +41,10 @@ export interface ReviewResponsePopulatedUserDTO extends Omit<ReviewResponseDTO,'
     email:string
   }
 }
+
+
+
+export interface ReviewResponsePopulatedRevewableIdDTO extends Omit<ReviewResponsePopulatedUserDTO ,'reviewableId'>{   
+    sessionId:string,  //reviewableId
+    sessionName:string   
+}

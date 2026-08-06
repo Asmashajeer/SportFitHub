@@ -100,5 +100,13 @@ export class ReviewController {
             next(error);
         }
     }
-    
+    getAllSessionReviewsByTrainer=async(req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {      
+        const trainerId=req.query.trainerId as string;
+        try{
+            const allReviews=await this._reviewService.getAllSessionReviews(trainerId);
+             res.status(STATUS_CODE.SUCCESS.OK).json(allReviews);
+        } catch (error) {
+            next(error);
+        }
+    }
 }

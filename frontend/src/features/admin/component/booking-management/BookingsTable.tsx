@@ -1,6 +1,6 @@
 import {
     BOOKING_STATUS,
-  BOOKING_TYPE,
+
   PAGINATION_DEFAULT_LIMIT,
   PAYLOAD_MODEL,
 } from '@/constants/constants';

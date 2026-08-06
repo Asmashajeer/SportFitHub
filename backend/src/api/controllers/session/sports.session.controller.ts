@@ -110,7 +110,7 @@ export class SportsSessionController {
 
   // -----------------get all Sports Session-public------------------------
   getAllSessions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { page = '1', limit = PAGINATION_LIMIT, search, sport, sessionType, ageGroup, lat, lng, radius } = req.query;
+    const { page = '1', limit = PAGINATION_LIMIT, search, sport, sessionType, ageGroup,minRating, lat, lng, radius } = req.query;
     const filters = {
       page: parseInt(page as string),
       limit: parseInt(limit as string),
@@ -118,6 +118,7 @@ export class SportsSessionController {
       sport: sport as string,
       sessionType: sessionType as string,
       ageGroup: ageGroup as string,
+      rating:parseInt( minRating as string),
       lat: parseFloat(lat as string),
       lng: parseFloat(lng as string),
       radius: parseInt(radius as string) || 0,

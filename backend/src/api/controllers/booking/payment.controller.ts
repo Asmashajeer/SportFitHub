@@ -31,7 +31,10 @@ export class PaymentController {
         slotId: slot.slotId,
         startTime: slot.startTime,
       }));
-      const lockKeys = await this._bookingService.lockSessionSlots(lockSlotsData);
+
+     
+      
+      const lockKeys = await this._bookingService.lockSessionSlots(lockSlotsData,payload.sessionTimezone);
 
       const stripeSession = await this._paymentService.createCheckoutSession({ userId, lockKeys, ...payload });
 
@@ -68,4 +71,7 @@ export class PaymentController {
       next(err);
     }
   };
+
+
+
 }

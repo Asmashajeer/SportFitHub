@@ -5,6 +5,6 @@ export const REVIEW_ROUTE={
     GET_SESSION:(sessionId:string)=>`/review/session/${sessionId}`,
     SUBMIT_REVIEW:(sessionModel:ReviewType,sessionId:string)=>`/review/${sessionModel}/${sessionId}`,
     GET_AVG_RATING_REVIEW_COUNT:(sessionModel:ReviewType,sessionId:string)=>`/review/rating/${sessionModel}/${sessionId}`,
-    GET_REVIEWS:(sessionModel:ReviewType,sessionId:string)=>`/review/${sessionModel}/${sessionId}`
-    
+    GET_REVIEWS:(sessionModel:ReviewType,sessionId:string)=>`/review/${sessionModel}/${sessionId}`,
+    GET_ALL_REVIEWS:'review/allReviews',
 }

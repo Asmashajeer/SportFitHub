@@ -1,8 +1,9 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { reviewService } from '../service/reviewService';
+
 import type { PAYLOAD_MODEL } from '@/constants/constants';
+import { reviewService } from '../../service/reviewService';
 
 
 interface PendingReview {

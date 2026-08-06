@@ -24,8 +24,8 @@ const MiniBookingCard = ({ session }: Props) => {
 
   useEffect(() => {
     const getSessionData = async () => {
-      let sessionModel = booking.sessionModel;
-      let id = booking.sessionId;
+      const sessionModel = booking.sessionModel;
+      const id = booking.sessionId;
       const data = await sessionService.getSessionDetailsfiltered({
         sessionModel,
         id,

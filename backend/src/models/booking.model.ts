@@ -28,7 +28,7 @@ export interface IPricePlan {
   unitPrice: number;
 }
 export interface IBooking extends Document {
-  bookingUId: string;
+  bookingUID: string;
   userId: Types.ObjectId;
   sessionId: Types.ObjectId;
   sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL]; //SportsSession or FitnessSession
@@ -42,12 +42,31 @@ export interface IBooking extends Document {
   updatedAt: Date;
 }
 
+
+const VenueSchema = new Schema<IVenue>(
+  {
+    name: { type: String, required: false },
+    address: { type: String, required: false },
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number],
+        required: false,
+      },
+    },
+  },
+  { _id: false } 
+);
+
 const BookingSchema = new Schema(
   {
-    bookingUId: {
+    bookingUID: {
       type: String,
-      unique: true,
-      index: true,
+      unique: true,      
       default: generateBookingUId, // ✅ Auto-generated on every new booking
     },
     userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
@@ -62,20 +81,12 @@ const BookingSchema = new Schema(
       unitPrice: { type: Number, required: true },
     },
     venue: {
-      name: { type: String, required: true },
-      address: { type: String, required: true },
-      location: {
-        type: {
-          type: String,
-          enum: ['Point'],
-          default: 'Point',
-        },
-        coordinates: {
-          type: [Number], // [lng, lat]
-          required: true,
-        },
-      },
+      type: VenueSchema,
+      required: false,
+      default: undefined,
     },
+
+  
     status: { type: String, enum: Object.values(BOOKING_STATUS) },
     paymentId: { type: Schema.Types.ObjectId, ref: 'Payment' }, // Cross-reference
   },

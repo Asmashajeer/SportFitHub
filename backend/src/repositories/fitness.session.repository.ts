@@ -25,7 +25,7 @@ export class FitnessSessionRepository extends BaseRepository<IFitnessSession> im
     };
   }
   // ---------------------All Sessions------------
-  async findAll(query: FilterQuery<IFitnessSession> = {}, options: { page: number; limit: number }) {
+  async findAll(query: FilterQuery<IFitnessSession> = {}, options: { page: number; limit: number }) {   
     const { page, limit } = options;
     const skip = (page - 1) * limit;
     const sessions = await this.model.find(query).populate('fitnessCategory', '_id programName  slug').skip(skip).limit(limit).lean().exec();

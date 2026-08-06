@@ -4,7 +4,8 @@ import { IBookedSessionPopulate, IBookingSession } from '@/models/booking.sessio
 import { IUser } from '@/models/user.model';
 import { Types } from 'mongoose';
 
-export interface UserInfo extends Pick<IUser, 'id' | 'name' | 'email'> {}
+
+export type UserInfo =Pick<IUser, 'id' | 'name' | 'email'>;
 
 export interface PayloadDTO {
   user: UserInfo;
@@ -24,10 +25,11 @@ export interface CreateCheckoutSessionDTO extends PayloadDTO {
 }
 export interface CheckAvailabilityDTO {
   sessionId: string;
+  timezone:string;  //sessiontimezone -offline trainertimezone-online
   date: string;
   slotId: string;
   maxCapacity: number;
-  timezone: string;
+  
 }
 
 export interface LockSlotDTO {
@@ -57,6 +59,9 @@ export interface BookingSessionRequestfilterDTO {
   sessionModel: string;
   date: string;
   status: string;
+  // startDateTime:string,
+  // endDateTime:string,
+  // timezone:string,
   limit: number;
 }
 export interface IBookedSessionPopulateUser extends Omit<IBookingSession, 'userId' | 'sessionId'> {

@@ -182,3 +182,10 @@ export enum Review_Type{
   TRAINER='TrainerProfile'  
 }
 
+export enum VIDEO_CALL_STATUS{
+  IDLE='idle' ,
+  RINGING= 'ringing' ,
+  OUTGOING= 'outgoing' ,
+  WAITING='waiting',
+  ACTIVE= 'active'
+}

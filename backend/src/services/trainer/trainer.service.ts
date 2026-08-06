@@ -10,13 +10,13 @@ import { IAuthService } from '@/interfaces/services/IAuth.service';
 import { ITrainerService } from '@/interfaces/services/trainer/Itrainer.service';
 import { toTrainerProfileData, ToTrainerProfileDTO } from '@/mappers/trainer/trainer.mapper';
 import { AuthUser } from '@/middleware/auth.middleware';
-import { ICertification, ITrainerProfile } from '@/models/trainerProfile.model';
+import { ITrainerProfile } from '@/models/trainerProfile.model';
 import AppError from '@/utils/AppError';
 import { formatDateTo } from '@/utils/formatTo';
 import { sendPushNotification } from '@/utils/push-notification.service';
 import { sendNotificationEmail } from '@/utils/sendNotfication.mail';
 import { serializeTrainerProfile } from '@/utils/serializeTrainerProfile';
-import { UpdateQuery } from 'mongoose';
+
 import { Types } from 'mongoose';
 
 export class TrainerService implements ITrainerService {
@@ -255,12 +255,12 @@ export class TrainerService implements ITrainerService {
     if (!updatedDoc) {
       throw new AppError(ERROR_MESSAGES.GENERAL.UPDATE_FAILED, STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
     }
-    const result = serializeTrainerProfile(updatedDoc, { id: user?.id, role: user?.role });
+    serializeTrainerProfile(updatedDoc, { id: user?.id, role: user?.role });
     const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(updatedDoc);
     return trainerData;
   }
 
-  private sendVerificationPendingNotification = async (user: AuthUser, trainer: any, fieldName: string) => {
+  private sendVerificationPendingNotification = async (user: AuthUser, trainer: ITrainerProfile, fieldName: string) => {
     await sendNotificationEmail({
       to: user.email,
       title: 'Your profile update is under review',

@@ -9,6 +9,7 @@ export const toFitnessSessionResponseDTO = (session: Partial<IFitnessSession>) =
   return {
     id: session._id.toString(),
     trainerId: session.trainerId.toString(),
+    timezone:session.timezone,
     sessionName: session.sessionName,
     slug: session.slug,
     fitnessCategory: session.fitnessCategory.toString(),
@@ -102,6 +103,7 @@ export const toFitnessSessionDetailedPublicDTO = (session: IFitnessSessionDetail
           averageRating: session.trainerId.averageRating,
         }
       : null,
+      timezone:session.timezone,
     fitnessCategory: session.fitnessCategory
       ? {
           id: session.fitnessCategory._id.toString(),

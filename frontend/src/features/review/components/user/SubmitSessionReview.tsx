@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { reviewService } from '../service/reviewService';
+
 import type { ReviewType } from '@/constants/constants';
 
 import toast from 'react-hot-toast';
+import { reviewService } from '../../service/reviewService';
 
 
 
@@ -44,6 +45,7 @@ const SubmitSessionReview = () => {
         setSession(data);
       } catch (err) {
         setError('This session could not be found, or you may have already reviewed it.');
+        console.log(err);
       } finally {
         setLoading(false);
       }
@@ -66,6 +68,7 @@ const SubmitSessionReview = () => {
       
       });
       setSubmitted(true);
+
     } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Something went wrong submitting your review. Please try again.')
         setError('Something went wrong submitting your review. Please try again.' );

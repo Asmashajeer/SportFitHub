@@ -55,8 +55,9 @@ export const createUserSlice: StateCreator<UserSlice> = (set) => ({
 export interface Users {
   id: string;
   name: string;
-  email: string;
-  role: UserRole;
+  email: string; 
+  roles: UserRole[];
+  activeRole: UserRole;
   googleId?: string;
   isVerified: boolean;
   isBlocked: boolean;

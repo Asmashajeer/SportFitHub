@@ -28,6 +28,9 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     return await this.model.find(filter).populate('paymentId', '_id receiptUrl');
   }
 
+  async findUserBookings(filter: FilterQuery<IBooking> = {}): Promise<IBooking[]> {
+      return await this.model.find(filter).sort({createdAt:-1}).exec();
+    }
   // ---------------bookings Stats----------------
   async getBookingsStats() {
     const result = await this.model.aggregate([

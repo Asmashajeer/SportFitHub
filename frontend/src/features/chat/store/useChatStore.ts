@@ -1,7 +1,5 @@
 import type { PAYLOAD_MODEL } from "@/constants/constants";
-
-import { socket } from "@/socket";
-
+import { socket } from "@/lib/socket";
 import { create } from "zustand";
 
 export interface Message {
@@ -35,9 +33,10 @@ interface ChatState {
   messages: Record<string, Message[]>; // by conversationId
   activeConversationId: string | null;
   unreadMessageCountInbox:number;
+  lastCreatedConversationId: string | null;
+  setLastCreatedConversation: (id: string) => void;
 
   setConversations: (conversations: Conversation[]) => void;
-//   updateConversations:(conversation:Conversation) => void;
   updateConversationsPreview:(message:Message)=>void;
   setMessages: (conversationId: string, messages: Message[]) => void;
   addMessage: (message: Message) => void;
@@ -55,7 +54,7 @@ export const useChatStore=create<ChatState>((set)=>({
      messages: {},
     activeConversationId:null,
     unreadMessageCountInbox:0,
-
+    lastCreatedConversationId: null,
     setConversations: (conversations) => set( {conversations}),
   
     updateConversationsPreview:(message)=>
@@ -91,6 +90,8 @@ export const useChatStore=create<ChatState>((set)=>({
     joinConversation: (conversationId) => {
         socket.emit('joinConversation',conversationId)
     },
+  
+    setLastCreatedConversation: (id) => set({ lastCreatedConversationId: id }),
     leaveConversation: (conversationId) => {
         socket.emit('leaveConversation',conversationId)
     },

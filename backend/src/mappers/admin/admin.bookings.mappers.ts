@@ -13,7 +13,7 @@ interface BookingUser {
 
 interface AdminIBooking extends Omit<IBooking, 'userId' | 'sessionId'> {
   userId: BookingUser;
-  bookingUId: string;
+  bookingUID: string;
   sessionId: {
     _id: Types.ObjectId;
     trainerId: Types.ObjectId;
@@ -26,7 +26,7 @@ export const toAdminBookingsResponseDTO = (booking: AdminIBooking) => {
   const timezone = getTimezone();
   return {
     bookingId: booking._id.toString(),
-    bookingUId: booking.bookingUId,
+    bookingUID: booking.bookingUID,
     userId: booking.userId._id.toString(),
     userName: booking.userId.name,
     userEmail: booking.userId.email,
@@ -46,9 +46,13 @@ export const toAdminBookingSessionDTO = (bookingSession: IBookingSession) => {
   const timezone = getTimezone();
   return {
     bookingSessionId: bookingSession._id.toString(),
+    bookingUID:bookingSession.bookingUID,
     date: formatInTimeZone(bookingSession.date, timezone, 'yyyy-MM-dd HH:mm:ssXXX').toString(),
     startTime: bookingSession.startTime,
     endTime: bookingSession.endTime,
+    startDateTime:formatInTimeZone(bookingSession.startDateTime, bookingSession.timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
+    endDateTime:formatInTimeZone(bookingSession.endDateTime, bookingSession.timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
+    timezone:bookingSession.timezone,
     status: bookingSession.status,
     attendance: bookingSession.attendance,
     refundedToWallet: bookingSession.refundedToWallet,

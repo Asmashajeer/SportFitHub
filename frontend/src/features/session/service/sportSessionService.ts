@@ -7,6 +7,7 @@ interface queryParamsOptions {
   search?: string;
   sport?: string;
   ageGroup?: string;
+  minRating?:number;
   sessionType?: string;
   limit?: number;
   lat:number,

@@ -51,6 +51,10 @@ export const ADMIN_ROUTES = {
    GET_BOOKINGS:'/admin/bookings',
    GET_BOOKING:{
     BY_ID:(id:string)=>`/admin/bookings/${id}`
-   }
+   },
  
+
+
+
+   GET_PAYMENTS:'/admin/payments',
 } as const;

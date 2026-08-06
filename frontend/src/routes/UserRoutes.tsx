@@ -9,7 +9,8 @@ import MyBookings from '@/features/user/component/myBookings/MyBookings';
 import MyPayments from '@/features/user/component/myPayments/MyPayments';
 import MyWallet from '@/features/user/page/MyWallet';
 import { ChatInboxPage } from '@/features/chat/page/ChatInboxPage';
-import SubmitReview from '@/features/review/components/SubmitSessionReview';
+import SubmitSessionReview from '@/features/review/components/user/SubmitSessionReview';
+
 
 function UserRoutes() {
   return (
@@ -26,7 +27,7 @@ function UserRoutes() {
       <Route path="/my-payments" element={<MyPayments />} />
       <Route path="/my-wallet" element={<MyWallet />} />
       <Route path="/messages" element={<ChatInboxPage />} />
-      <Route path='/review/:sessionModel/:sessionId' element={<SubmitReview/>}/>
+      <Route path='/review/:sessionModel/:sessionId' element={<SubmitSessionReview/>}/>
     </Routes>
   );
 }

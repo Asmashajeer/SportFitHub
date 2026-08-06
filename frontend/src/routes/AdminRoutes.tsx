@@ -4,9 +4,11 @@ import UserManagement from '../features/admin/component/user-management/UserMana
 import AdminMainLayout from '../components/layout/AdminLayout';
 
 import Categories from '@/features/admin/component/category-management/Categories';
-import AdminSessions from '@/features/admin/pages/session.management';
+
 import AdminBookings from '@/features/admin/pages/Bookings.management';
 import AdminTrainers from '@/features/admin/pages/Trainers.management';
+import AdminPayments from '@/features/admin/pages/payment.management';
+import AdminSessions from '@/features/admin/pages/Session.management';
 
 const AdminRoutes = () => {
   return (
@@ -18,6 +20,7 @@ const AdminRoutes = () => {
         <Route path="/category-management" element={<Categories />} />
         <Route path="/session-management" element={<AdminSessions />} />
         <Route path="/bookings-management" element={<AdminBookings />} />
+        <Route path="/payment-management" element={<AdminPayments />} />
       </Route>
     </Routes>
   );

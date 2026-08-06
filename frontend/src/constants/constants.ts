@@ -134,8 +134,8 @@ export const  adminNavLinks= [
     {path:"/admin/session-management", icon: Ticket ,         label:"Sessions"   },
     {path:"/admin/bookings-management"   , icon: CalendarDays ,   label:"Bookings"       },
     {path:"/admin/payment-management"   , icon: CalendarDays ,   label:"Payments"       },      
-    {path:"/admin/camp-management"   , icon:CalendarDays ,   label:"Camps"       },
-    {path:"/admin/coupons"           , icon:Ticket ,         label:"Coupons"     },
+    // {path:"/admin/camp-management"   , icon:CalendarDays ,   label:"Camps"       },
+    // {path:"/admin/coupons"           , icon:Ticket ,         label:"Coupons"     },
     {path:"/admin/settings"          , icon: Settings ,       label:"Settings"   },
 ]  
 export const userNavLinks = [
@@ -154,16 +154,8 @@ export const trainerNavLinks = [
   { label: 'Bookings ', icon: UserCheck, path: '/trainer/bookings' },
   { label: 'Attandance', icon: CheckCircle, path: '/trainer/attendance' },
   { label: 'Earnings', icon: Wallet2, path: '/camps' },
-  {
-    label: 'Messages',
-    icon: MessageCircle,
-    path: '/trainer/messages',
-  },
-  {
-    label: 'feedback Rating',
-    icon: MessageSquareDiff,
-    path: '/trainer/feedback-rating',
-  },
+  { label: 'Messages',    icon: MessageCircle,    path: '/trainer/messages',  },
+  { label: 'Review & Rating', icon: MessageSquareDiff,    path: '/trainer/review-rating',  },
   { label: 'Profile', icon: CircleUser, path: 'trainer/profile' },
 ];
 
@@ -285,3 +277,16 @@ export const Review_Type={
 export type ReviewType=typeof Review_Type[keyof typeof Review_Type]
 
 export const STAR_LABELS = ['Poor', 'Fair', 'Good', 'Great', 'Excellent'];
+
+
+export const VIDEO_CALL_STATUS={
+  IDLE:'idle' ,
+  RINGING: 'ringing' ,
+  OUTGOING: 'outgoing' ,
+  WAITING:'waiting',
+  ACTIVE: 'active'
+} as const
+export type Video_Call_Status_Type=typeof VIDEO_CALL_STATUS[keyof typeof VIDEO_CALL_STATUS];
+
+export const SESSION_GRACE_MINUTES=5*60*1000;   // 5 min
+export const oneDay=1000*60*60*24;

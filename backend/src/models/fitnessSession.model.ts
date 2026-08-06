@@ -2,9 +2,9 @@ import { AGE_GROUP, DAY, GENDER, INTENSITY_LEVEL, SESSION_MODE, SESSION_TYPE } f
 import mongoose, { Document, Types } from 'mongoose';
 
 interface IVenue {
-  name: string;
-  address: string;
-  location: {
+  name?: string;
+  address?: string;
+  location?: {
     type: 'Point';
     coordinates: [number, number]; // [longitude, latitude]
   };
@@ -26,6 +26,7 @@ interface IPricing {
 export interface IFitnessSession extends Document {
   _id: Types.ObjectId;
   trainerId: Types.ObjectId;
+  timezone: string;
   fitnessCategory: Types.ObjectId;
   sessionName: string;
   slug: string;
@@ -63,6 +64,11 @@ const FitnessSessionSchema = new mongoose.Schema<IFitnessSession>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'TrainerProfile',
       required: true,
+    },
+    timezone: {
+      type: String,
+      required: true,
+      default: 'UTC', 
     },
     fitnessCategory: {
       type: mongoose.Schema.Types.ObjectId,

@@ -16,6 +16,7 @@ export interface WalletTransactionResponseData {
   // OPTIONAL
   // when transaction is booking-related
   bookingId?: string;
+  bookingUID:string;
   bookingSessionId?: string;
   createdAt: string;
   updatedAt: string;

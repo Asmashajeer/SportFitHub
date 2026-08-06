@@ -51,7 +51,7 @@ export const UserProfile = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading,setIsLoading]=useState(false);
   
-  const [imageVersion, setImageVersion] = useState(Date.now());
+  const [imageVersion, setImageVersion] = useState(()=>Date.now());
   useEffect(() => {
     fetchProfile();
   }, []);

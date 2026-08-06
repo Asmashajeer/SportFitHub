@@ -3,7 +3,7 @@ import { AvailabiltyPricingReqDTO, BasicInfoReqDTO, CertificationReqDTO, idVerif
 import { TrainerProfileResponseDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { AuthUser } from '@/middleware/auth.middleware';
-import { ICertification, ITrainerProfile } from '@/models/trainerProfile.model';
+import { ITrainerProfile } from '@/models/trainerProfile.model';
 import { Types } from 'mongoose';
 
 export interface ITrainerService {

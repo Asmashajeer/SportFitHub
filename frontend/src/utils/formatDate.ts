@@ -58,3 +58,13 @@ export const formatDateLabel=(dateStr: string): string=> {
 
   return `${day} ${month} ${year}`;
 }
+
+
+export const createDateTime = (date: string, time: string): Date => {
+  // const timezone = getTimezone();
+
+  const localDate = new Date(date);
+  const [hours, minutes] = time.split(':').map(Number);
+  localDate.setHours(hours, minutes, 0, 0); 
+  return localDate
+};

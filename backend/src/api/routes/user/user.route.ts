@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { isBlocked, profileController } from '../../../container';
 import { protect } from '../../../middleware/auth.middleware';
 import { timezoneMiddleware } from '@/middleware/timezone.middleware';
-import { uploadMiddleware } from '@/middleware/upload.middleware';
+
 import { restrictTo } from '@/middleware/role.middleware';
 import { UserRole } from '@/constants/enums';
 import bookingRoute from '../booking/booking.route';
@@ -11,7 +11,7 @@ import walletRoute from './user.wallet.route';
 import { validateBody } from '@/middleware/validate.middleware';
 import { CreateUserProfileSchema } from '@/dtos/request/user/profile.request.dto';
 
-const upload = uploadMiddleware(); // folder name as argument;
+
 
 const router = Router();
 

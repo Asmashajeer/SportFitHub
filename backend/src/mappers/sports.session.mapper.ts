@@ -10,6 +10,7 @@ export const toSportsSessionResponseDTO = (session: Partial<ISportsSession>) => 
   return {
     id: session._id.toString(),
     trainerId: session.trainerId.toString(),
+    timezone:session.timezone,
     sessionName: session.sessionName,
     slug: session.slug,
     sportCategory: session.sportCategory.toString(),
@@ -41,6 +42,7 @@ export const toSportsSessionUpdateResponseDTO = (session: Partial<ISportsSession
   return {
     id: session._id.toString(),
     trainerId: session.trainerId.toString(),
+    timezone:session.timezone,
     sessionName: session.sessionName,
     slug: session.slug,
     sportCategory: session.sportCategory.toString(),
@@ -126,6 +128,7 @@ export const toSportSessionDetailedPublicDTO = (session: ISportsSessionDetailsPo
           averageRating: session.trainerId.averageRating,
         }
       : null,
+      timezone:session.timezone,
     sportCategory: session.sportCategory
       ? {
           id: session.sportCategory._id.toString(),

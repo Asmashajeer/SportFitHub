@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AGE_GROUP, SESSION_TYPE, DAY, SESSION_MODE } from '@/constants/enums';
+import { AGE_GROUP, SESSION_TYPE, DAY } from '@/constants/enums';
 
 const VenueSchema = z.object({
   name: z.string('Venue name is required '),

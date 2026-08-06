@@ -12,7 +12,7 @@ interface Viewer {
 }
 
 export const serializeTrainerProfile = (trainer: ITrainerProfile | ITrainerPopulated, viewer: Viewer = {}) => {
-  const isOwner = viewer.id === trainer.userId.toString();
+  const isOwner = viewer.id === trainer.userId.toString()//|| viewer.id=== trainer.userId._id.toString();
   const isAdmin = viewer.role === UserRole.ADMIN;
   const canSeePrivate = isOwner || isAdmin;
   const plain = trainer.toObject();

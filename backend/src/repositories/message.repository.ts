@@ -9,21 +9,22 @@ export class MessageRepository extends BaseRepository<IMessage> implements IMess
   constructor(model: Model<IMessage>) {
     super(model);
   }
+
   async findMessages(conversationId: string | Types.ObjectId, lastCreatedAt: string): Promise<IMessage[] | null> {
     const query: FilterQuery<IMessage> = { conversationId };
 
     if (lastCreatedAt) {
       query.createdAt = { $lt: new Date(lastCreatedAt) }; // cursor-based pagination
     }
-    return await this.model
-      .find(query)
-
+    return await this.model .find(query)
       .limit(PAGINATION_LIMIT);
   }
 
-  async markAsRead(conversationId: string | Types.ObjectId, userId: string | Types.ObjectId): Promise<any | null> {
+  async markAsRead(conversationId: string | Types.ObjectId, userId: string | Types.ObjectId) {
     return await this.model.updateMany({ conversationId, readBy: { $ne: userId } }, { $push: { readBy: userId } });
   }
+
+  
   async countUnreadByConversationId(conversationId: string | Types.ObjectId, recipientId: string | Types.ObjectId): Promise<number> {
     return await this.model.countDocuments({
       conversationId,

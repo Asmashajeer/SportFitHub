@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import SessionDetailModal from '../component/mySessions/SessionDetailModal';
 import Pagination from '@/components/reusable/Pagination';
 
@@ -40,7 +40,7 @@ export default function MySessions() {
       ? 'bookingId'
       : location.state?.bookingSessionId
         ? 'BookingSessionId'
-        : 'all'
+        : BOOKING_SESSION_STATUS.SCHEDULED
   );
   const { userSessions, fetchBookings } = useUserDashboardStore();
   const [selectedSession, setSelectedSession] =
@@ -107,12 +107,16 @@ export default function MySessions() {
           (s) => s.status !== BOOKING_SESSION_STATUS.RESCHEDULED
         )
       : userSessions.filter((s) => s.status === activeFilter);
-  }, [activeFilter, userSessions]);
+      
+  }, [activeFilter, userSessions,location.state?.bookingId,location.state?.bookingSessionId]);
 
   //for pagination
-  useEffect(() => setCurrentPage(1), [activeFilter]);
+  useEffect(() => {
+    setCurrentPage(1);
+   },[activeFilter]);
 
   const totalPages = Math.ceil(filtered.length / PAGINATION_DEFAULT_LIMIT);
+
   const paginated = useMemo(() => {
     const start = (currentPage - 1) * PAGINATION_DEFAULT_LIMIT;
     return filtered.slice(start, start + PAGINATION_DEFAULT_LIMIT);
@@ -327,7 +331,10 @@ export default function MySessions() {
               No sessions found
             </div>
           ) : (
-            paginated.map((session) => (
+            paginated.sort(
+                (a, b) =>
+                  new Date(a.date).getTime() - new Date(b.date).getTime()
+              ).map((session) => (
               <>
                 <SessionCard
                   key={session.id}

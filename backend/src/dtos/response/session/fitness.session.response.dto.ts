@@ -11,9 +11,9 @@ export interface IPopulatedFitnessPgm {
   description: string;
 }
 interface IVenue {
-  name: string;
-  address: string;
-  location: {
+  name?: string;
+  address?: string;
+  location?: {
     type: 'Point';
     coordinates: [number, number]; // [longitude, latitude]
   };
@@ -37,6 +37,7 @@ interface IPricing {
 export interface IFitnessSessionPopulated {
   _id: Types.ObjectId;
   trainerId: Types.ObjectId;
+  timezone:string;
   fitnessCategory: IPopulatedFitnessPgm;
   sessionName: string;
   slug: string;
@@ -85,6 +86,7 @@ export interface IFitnessSessionDetailsPopulated extends Omit<IFitnessSessionPop
 export interface FitnessSessionResponseDTO {
   id: string;
   trainerId: string;
+  timezone:string;
   fitnessCategory: string;
   sessionName: string;
   slug: string;

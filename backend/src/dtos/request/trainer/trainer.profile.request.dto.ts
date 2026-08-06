@@ -1,6 +1,6 @@
 import { GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY, TRAINER_STATUS } from '@/constants/enums';
 import z from 'zod';
-const MAX_FILE_SIZE = 2 * 1024 * 1024;
+
 // 1.
 // export const step1Schema = z.object({
 //   category: z.enum(['sport', 'fitness', 'both']),

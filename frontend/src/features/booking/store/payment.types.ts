@@ -3,6 +3,9 @@ import type { BOOKING_TYPE, PAYLOAD_MODEL } from '@/constants/constants';
 export interface IVenueAddress {
   name: string;
   address: string;
+  location: {
+    coordinates: [number, number]; // [longitude, latitude]
+  };
 }
 export interface UserInfo {
   userId: string;
@@ -13,6 +16,7 @@ export interface UserInfo {
 export interface Payload {
   user?: UserInfo;
   sessionId: string;
+  sessionTimezone:string;
   trainerId:string;
   sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
   bookingType: (typeof BOOKING_TYPE)[keyof typeof BOOKING_TYPE];
@@ -32,6 +36,7 @@ export interface DisplayData {
 
 export interface BookingSlot {
   sessionId: string;
+  timezone:string;  //sessiontimezone -offline trainertimezone-online
   slotId: string;
   date: string;
   startTime: string;

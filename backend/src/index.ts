@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import config from './config/config';
-import app from './app';
 import connectDB from './config/db';
 import { redisClientService } from './container';
 import { startAutoCompleteSessionsJob } from './jobs/autoCompleteSessions.job';

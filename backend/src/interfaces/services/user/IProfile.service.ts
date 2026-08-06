@@ -1,7 +1,5 @@
 import { CreateUserProfileDTO } from '@/dtos/request/user/profile.request.dto';
-
 import { ProfileResponseDataDTO } from '@/dtos/response/user/profile.response.dto';
-import { AuthUser } from '@/middleware/auth.middleware';
 import { IProfile } from '@/models/profile.model';
 
 export interface IProfileService {

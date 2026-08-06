@@ -9,7 +9,7 @@ import {
   RefreshCwIcon,
   CheckCircleIcon,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 import { formatTo12Hour, formatDateReadable } from '@/utils/formatDate';
 
@@ -71,7 +71,7 @@ export default function ReschedulePage() {
         setSession(session);
 
         if (session?.timeSlots) {
-          const availableDays = session.timeSlots.map((slot: any) =>
+          const availableDays = session.timeSlots.map((slot:any) =>
             slot.day.toLowerCase()
           );
           const off = [0, 1, 2, 3, 4, 5, 6].filter(
@@ -94,6 +94,7 @@ export default function ReschedulePage() {
         }
       } catch (err) {
         toast.error('Failed to load session data');
+        console.log(err);
       } finally {
         setLoading(false);
       }
@@ -118,7 +119,7 @@ export default function ReschedulePage() {
     if (!selectedDate || !session?.timeSlots) return null;
     const dayName = format(selectedDate, 'eeee');
     return session.timeSlots.find(
-      (slot: any) => slot.day.toLowerCase() === dayName.toLowerCase()
+      (slot) => slot.day.toLowerCase() === dayName.toLowerCase()
     );
   };
 

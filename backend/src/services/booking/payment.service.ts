@@ -11,9 +11,10 @@ import { ISportsSessionRepository } from '@/interfaces/repositories/ISports.sess
 import { IUserRepository } from '@/interfaces/repositories/IUser.repository';
 import { IPaymentService } from '@/interfaces/services/booking/IPayment.service';
 import { toUserPaymentResponseDTO } from '@/mappers/booking/payment.mappers';
+import { IPayment } from '@/models/payment.model';
 
 import AppError from '@/utils/AppError';
-import { Types } from 'mongoose';
+import { FilterQuery, Types } from 'mongoose';
 import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -99,4 +100,8 @@ export default class PaymentService implements IPaymentService {
       };
     }
   }
+
+  
+
+
 }

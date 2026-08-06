@@ -12,12 +12,13 @@ import { Button } from '@/components/ui/Button';
 
 import { ArrowLeft, Info } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
-import { formatDateDDMMYY, formatTo12Hour } from '@/utils/formatDate';
+import { createDateTime, formatDateDDMMYY, formatTo12Hour } from '@/utils/formatDate';
 
 import { useCheckAvailability } from '@/hooks/useCheckAvailability';
-import { PAYLOAD_MODEL } from '@/constants/constants';
-import ToastInfo from '@/components/reusable/ToastInfo';
+import { PAYLOAD_MODEL, SESSION_MODE } from '@/constants/constants';
+
 import { useUserDashboardStore } from '@/features/user/store/useUserDashboardStore';
+import { formatInTimeZone } from 'date-fns-tz';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -31,21 +32,26 @@ const CheckoutPage = () => {
     | null
   >(null);
   const [displayData, setDisplayData] = useState<DisplayData | null>(null);
-
+  const[isOnlineSession,setIsOnlineSession]=useState (false);
   const [bookingSlots, setBookingSlots] = useState<BookingSlot[] | null>(null);
   const { checkAvailability, isChecking } = useCheckAvailability();
   const fallback =
-    payload?.sessionModel === PAYLOAD_MODEL.SPORT_SESSION ? '/sports' : '/fitness';
+    payload?.sessionModel === PAYLOAD_MODEL.SPORT_SESSION
+      ? '/sports'
+      : '/fitness';
   const redirectTarget = location.state?.from || fallback;
 
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'wallet'>('stripe');
-  const { fetchWallet,myBalance } = useUserDashboardStore(); // fetch wallet balance
-  
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'wallet'>(
+    'stripe'
+  );
+  const { fetchWallet, myBalance } = useUserDashboardStore(); // fetch wallet balance
+
   useEffect(() => {
     if (!payload) return;
-    
+
     const selectedSlots: BookingSlot[] = payload.sessionsToBook.map((slot) => ({
       sessionId: payload?.sessionId,
+      timezone: payload.sessionTimezone,
       slotId: slot.slotId,
       date: slot.date,
       startTime: slot.startTime,
@@ -56,52 +62,76 @@ const CheckoutPage = () => {
     setBookingSlots(selectedSlots);
     fetchWallet();
   }, []);
-  
+
+
+
   useEffect(() => {
     const isAvailable = async () => {
       if (bookingSlots && payload) {
-        const { occupiedSlots ,remainingSlots} = await checkAvailability(bookingSlots);        
-         console.log("---bookingSlot  :",bookingSlots);
-        if ( occupiedSlots.length > 0) {
+        const { occupiedSlots } = await checkAvailability(bookingSlots);
+        if (occupiedSlots.length > 0) {
           const occupiedSummary = occupiedSlots
-            .map(
-              (slot) =>
-                formatDateDDMMYY(slot.date) +
-                ' [ ' +
-                (formatTo12Hour(slot.startTime).toString() +
-                  ' - ' +
-                  formatTo12Hour(slot.endTime).toString()) +
-                ' ] '
-            ) 
-            .join(', ');
-           console.log(" slots already occupied.",occupiedSummary) ;
+            .map((slot) => formatDateDDMMYY(slot.date) + ' [ ' + (formatTo12Hour(slot.startTime).toString() +   ' - ' + formatTo12Hour(slot.endTime).toString()) +  ' ] '  ) .join(', ');
+         
           toast.custom(
-              <div className="flex items-center gap-2 px-4 py-3 rounded-lg border bg-blue-400 text-blue-950 border-blue-800 text-sm">
-                <Info className="w-4 h-4 shrink-0" />
-                <span>{occupiedSummary} slots already occupied. Please select New slots.</span>
-              </div>
-            );
-            
+            <div className="flex items-center gap-2 px-4 py-3 rounded-lg border bg-blue-400 text-blue-950 border-blue-800 text-sm">
+              <Info className="w-4 h-4 shrink-0" />
+              <span>
+                {occupiedSummary} slots already occupied. Please select New
+                slots.
+              </span>
+            </div>
+          );
           navigate(redirectTarget, { replace: true });
         }
         const filter = {
           id: payload.sessionId,
           sessionModel: payload.sessionModel,
         };
-        console.log("filter :",filter)
+
         try {
           const { session } =
             await sessionService.getSessionDetailsfiltered(filter);
           setSession(session);
+          console.log(session);
+          
+            if(payload.sessionModel === PAYLOAD_MODEL.FITNESS_SESSION &&
+            session.mode === SESSION_MODE.ONLINE){
+                setIsOnlineSession(true);
+            } // check session.is Online
+            console.log("isOnlineSession  :",isOnlineSession);
+          const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+          const formattedSlots = bookingSlots.map((slot) => {
+            if (!isOnlineSession) return slot;
+            const startDateTime =createDateTime(slot.date,slot.startTime);
+            const endDateTime =createDateTime(slot.date,slot.endTime);
+            return {
+              ...slot,
+              // Add formatted strings for UI consumption
+              displayStartTime: formatInTimeZone(
+                startDateTime,
+                userTz,
+                'hh:mm a'
+              ),
+              displayEndTime: formatInTimeZone(
+               endDateTime,
+                userTz,
+                'hh:mm a'
+              ),
+            };
+          });
+
           setDisplayData({
             name: session.sessionName,
-            venue: payload.venue,
+            venue: payload.venue ?? null,
             price: payload.amount,
             sessions: payload.numberOfSessions,
-            bookingSlots: bookingSlots,
+            bookingSlots: formattedSlots,
           });
         } catch (error) {
           toast.error('Failed to load session details.');
+          console.log(error);
           navigate(redirectTarget, { replace: true });
         }
       }
@@ -110,14 +140,14 @@ const CheckoutPage = () => {
     isAvailable();
   }, [payload, bookingSlots]);
 
-  
+  console.log('dis', displayData);
 
   const handleCheckout = async () => {
     if (!payload || !user) return;
     if (bookingSlots) {
       const { occupiedSlots } = await checkAvailability(bookingSlots);
-       console.log("bookingSlot---  :",bookingSlots);
-       console.log('occupaidSlots :',occupiedSlots.length);
+      console.log('bookingSlot---  :', bookingSlots);
+      console.log('occupaidSlots :', occupiedSlots.length);
       if (occupiedSlots.length > 0) {
         const occupiedSummary = occupiedSlots
           .map(
@@ -154,8 +184,6 @@ const CheckoutPage = () => {
       }
     }
   };
-
-  
 
   const handleWalletBooking = async () => {
     if (!payload || !user) return;
@@ -198,7 +226,11 @@ const CheckoutPage = () => {
       {session && displayData ? (
         <>
           <div>
-            <OrderSummary data={displayData} image={session.images[0]} />
+            <OrderSummary
+              data={displayData}
+              image={session.images[0]}
+              isOnline={isOnlineSession}
+            />
             <Button
               variant="secondary"
               onClick={() => {
@@ -216,115 +248,101 @@ const CheckoutPage = () => {
               Back to session page
             </Button>
           </div>
-              {/* RIGHT */}
-          {/* <div className="bg-[#1a1a1a] rounded-2xl p-8 shadow-2xl flex flex-col justify-center items-center text-center">
+
+          <div className="bg-[#1a1a1a] rounded-2xl p-8 shadow-2xl flex flex-col justify-start items-center text-center">
             <h2 className="text-2xl font-bold text-white mb-4">
               Complete Your Booking
             </h2>
-            <p className="text-gray-400 mb-8">
-              You will be redirected to Stripe's secure payment page to complete
-              your transaction with Card or UPI.
-            </p>
 
+            {/* Payment method toggle */}
+            <div className="flex w-full rounded-xl overflow-hidden border border-zinc-700 mb-6">
+              <button
+                onClick={() => setPaymentMethod('stripe')}
+                className={`flex-1 py-3 text-sm font-semibold transition-all ${
+                  paymentMethod === 'stripe'
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                }`}
+              >
+                💳 Card / UPI
+              </button>
+              <button
+                onClick={() => setPaymentMethod('wallet')}
+                className={`flex-1 py-3 text-sm font-semibold transition-all ${
+                  paymentMethod === 'wallet'
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                }`}
+              >
+                Wallet
+              </button>
+            </div>
+
+            {/* Wallet balance info */}
+            {paymentMethod === 'wallet' && (
+              <div
+                className={`w-full mb-6 p-4 rounded-xl border text-sm ${
+                  myBalance >= payload.amount
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                    : 'bg-red-500/10 border-red-500/20 text-red-400'
+                }`}
+              >
+                <p>
+                  Wallet Balance:{' '}
+                  <span className="font-bold">₹{myBalance ?? 0}</span>
+                </p>
+                <p>
+                  Amount to pay:{' '}
+                  <span className="font-bold">₹{payload.amount}</span>
+                </p>
+                {myBalance < payload.amount && (
+                  <p className="mt-1 text-xs">
+                    Insufficient balance. Please use card or top up wallet.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Stripe description */}
+            {paymentMethod === 'stripe' && (
+              <p className="text-gray-400 mb-8 text-sm">
+                You will be redirected to Stripe's secure payment page to
+                complete your transaction with Card or UPI.
+              </p>
+            )}
+
+            {/* Action button */}
             <button
-              onClick={handleCheckout}
-              disabled={isRedirecting}
+              onClick={
+                paymentMethod === 'stripe'
+                  ? handleCheckout
+                  : handleWalletBooking
+              }
+              disabled={
+                isRedirecting ||
+                (paymentMethod === 'wallet' && myBalance < payload.amount)
+              }
               className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-3 disabled:opacity-50"
             >
               {isRedirecting ? (
                 <>
-                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
-                  Redirecting...
+                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                  {paymentMethod === 'wallet'
+                    ? 'Processing...'
+                    : 'Redirecting...'}
                 </>
-              ) : (
+              ) : paymentMethod === 'stripe' ? (
                 'Proceed to Secure Payment'
+              ) : (
+                'Pay with Wallet'
               )}
             </button>
 
             <div className="mt-6 flex gap-4 opacity-50 grayscale">
-            
               <span className="text-xs text-white">🔒 SSL Secured</span>
               <span className="text-xs text-white">💳 Stripe Verified</span>
             </div>
-          </div> */}
-           <div className="bg-[#1a1a1a] rounded-2xl p-8 shadow-2xl flex flex-col justify-start items-center text-center">
-      <h2 className="text-2xl font-bold text-white mb-4">
-        Complete Your Booking
-      </h2>
-
-      {/* Payment method toggle */}
-      <div className="flex w-full rounded-xl overflow-hidden border border-zinc-700 mb-6">
-        <button
-          onClick={() => setPaymentMethod('stripe')}
-          className={`flex-1 py-3 text-sm font-semibold transition-all ${
-            paymentMethod === 'stripe'
-              ? 'bg-emerald-500 text-white'
-              : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-          }`}
-        >
-          💳 Card / UPI
-        </button>
-        <button
-          onClick={() => setPaymentMethod('wallet')}
-          className={`flex-1 py-3 text-sm font-semibold transition-all ${
-            paymentMethod === 'wallet'
-              ? 'bg-emerald-500 text-white'
-              : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-          }`}
-        >
-           Wallet
-        </button>
-      </div>
-
-      {/* Wallet balance info */}
-      {paymentMethod === 'wallet' && (
-        <div className={`w-full mb-6 p-4 rounded-xl border text-sm ${
-          myBalance >= payload.amount
-            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-            : 'bg-red-500/10 border-red-500/20 text-red-400'
-        }`}>
-          <p>Wallet Balance: <span className="font-bold">₹{myBalance ?? 0}</span></p>
-          <p>Amount to pay: <span className="font-bold">₹{payload.amount}</span></p>
-          {myBalance < payload.amount && (
-            <p className="mt-1 text-xs">Insufficient balance. Please use card or top up wallet.</p>
-          )}
-        </div>
-      )}
-
-      {/* Stripe description */}
-      {paymentMethod === 'stripe' && (
-        <p className="text-gray-400 mb-8 text-sm">
-          You will be redirected to Stripe's secure payment page to complete
-          your transaction with Card or UPI.
-        </p>
-      )}
-
-      {/* Action button */}
-      <button
-        onClick={paymentMethod === 'stripe' ? handleCheckout : handleWalletBooking}
-        disabled={
-          isRedirecting ||
-          (paymentMethod === 'wallet' && myBalance< payload.amount)
-        }
-        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-      >
-        {isRedirecting ? (
-          <>
-            <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-            {paymentMethod === 'wallet' ? 'Processing...' : 'Redirecting...'}
-          </>
-        ) : paymentMethod === 'stripe' ? (
-          'Proceed to Secure Payment'
-        ) : (
-          'Pay with Wallet'
-        )}
-      </button>
-
-      <div className="mt-6 flex gap-4 opacity-50 grayscale">
-        <span className="text-xs text-white">🔒 SSL Secured</span>
-        <span className="text-xs text-white">💳 Stripe Verified</span>
-      </div>
-    </div>
+          </div>
         </>
       ) : (
         <div className="text-center p-10">

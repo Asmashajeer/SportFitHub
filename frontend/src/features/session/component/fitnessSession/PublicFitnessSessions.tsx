@@ -59,11 +59,12 @@ const PublicFitnessSessions = () => {
   const [ageGroupFilter, setAgeGroupFilter] = useState('');
   const [radius, setRadius] = useState(0);
   const [location, setLocation] = useState({ lat: 0, lng: 0, radius: 0 });
+  const [ratingFilter, setRatingFilter] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 500);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, programFilter, sessionTypeFilter, ageGroupFilter, location]);
+  }, [debouncedSearch, programFilter, sessionTypeFilter, ageGroupFilter,ratingFilter, location]);
 
   useEffect(() => {
     try {
@@ -87,6 +88,7 @@ const PublicFitnessSessions = () => {
           program: programFilter,
           sessionType: sessionTypeFilter,
           ageGroup: ageGroupFilter,
+          ...(ratingFilter && ratingFilter !== 'all' && { minRating: Number(ratingFilter) }),
           ...(location.lat !== 0 && location.radius !== 0 && {
             lat: location.lat,
             lng: location.lng,
@@ -103,7 +105,7 @@ const PublicFitnessSessions = () => {
       }
     };
     loadSessions();
-  }, [currentPage, debouncedSearch, programFilter, sessionTypeFilter, ageGroupFilter, location]);
+  }, [currentPage, debouncedSearch, programFilter, sessionTypeFilter, ageGroupFilter,ratingFilter,  location]);
 
   useEffect(() => {
     if (radius === 0) return;
@@ -145,12 +147,13 @@ const PublicFitnessSessions = () => {
     setProgramFilter('');
     setSessionTypeFilter('');
     setAgeGroupFilter('');
+     setRatingFilter('');
     setRadius(0);
     setLocation({ lat: 0, lng: 0, radius: 0 });
   };
 
   const activeFilterCount =
-    [programFilter, sessionTypeFilter, ageGroupFilter].filter(
+    [programFilter, sessionTypeFilter, ageGroupFilter,ratingFilter].filter(
       (f) => f && f !== 'all'
     ).length + (location.lat !== 0 ? 1 : 0);
 
@@ -227,7 +230,33 @@ const PublicFitnessSessions = () => {
           </SelectContent>
         </Select>
       </div>
+        {/* Rating */}
 
+       <div className="flex flex-col gap-2">
+        <Label className="text-xs text-muted-foreground uppercase tracking-wide">
+          Rating
+        </Label>
+        <div className="flex gap-1.5">
+          {[4, 3, 2].map((r) => {
+            const isActive = ratingFilter === String(r);
+            return (
+              <Button
+                key={r}
+                type="button"
+                variant="outline"
+                onClick={() => setRatingFilter(isActive ? '' : String(r))}
+                className={`flex items-center gap-1 text-xs h-8 rounded-lg border transition-all duration-150
+                  ${isActive
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                    : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
+                  }`}
+              >
+                {r}★+
+              </Button>
+            );
+          })}
+        </div>
+      </div>
       {/* Location */}
       <div className="flex flex-col gap-2">
         <Label className="text-xs text-muted-foreground uppercase tracking-wide">

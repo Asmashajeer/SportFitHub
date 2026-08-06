@@ -51,7 +51,7 @@ import { useCheckAvailability } from '@/hooks/useCheckAvailability';
 import TimeSlotPicker from '../TimeSlotPicker';
 import { MapView } from '@/components/reusable/MapView';
 import { ChatDrawer } from '@/features/chat/component/ChatDrawer';
-import { SessionReviews } from '@/features/review/components/SessionReviews';
+import { SessionReviews } from '@/features/review/components/session/SessionReviews';
 import { reviewService } from '@/features/review/service/reviewService';
 
 const FitnessSessionDetail = () => {
@@ -156,6 +156,11 @@ const FitnessSessionDetail = () => {
     } 
   }, [sessionId]);
 
+
+  const isOnline=session?.mode === SESSION_MODE.ONLINE;
+  const userTimezone=Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+
   useEffect(() => {
     if (pricePlan) {
       if (
@@ -181,13 +186,14 @@ const FitnessSessionDetail = () => {
    }
     const bookingData: Payload = {
       sessionId: session.id,
+      sessionTimezone:session.timezone,
       trainerId:session.trainer.id,
       sessionModel: PAYLOAD_MODEL.FITNESS_SESSION,
       bookingType:
         pricePlan?.sessionCount! > 1
           ? BOOKING_TYPE.MULTIPLE
           : BOOKING_TYPE.SINGLE,
-      venue: { name: session.venue.name, address: session.venue.address },
+      venue: { name: session.venue.name, address: session.venue.address,location:session.venue.location },
       planId: pricePlan?._id!,
       numberOfSessions: pricePlan?.sessionCount!,
       amount: pricePlan?.price!,
@@ -216,7 +222,7 @@ const FitnessSessionDetail = () => {
       email: user?.email,
     };
     setPayload({ user: userInfo, ...bookingData });
-    const isDuplicateBooking = await alreadybookedthisDateAndTime(bookingData.sessionId, bookingData.sessionsToBook);
+    const isDuplicateBooking = await alreadybookedthisDateAndTime(bookingData.sessionId, bookingData.sessionsToBook,bookingData.sessionTimezone);
     if (isDuplicateBooking) {
       toast.error(isDuplicateBooking);
       return;
@@ -361,6 +367,8 @@ const FitnessSessionDetail = () => {
               filledDates={filledDates}
               bookingSlots={bookingSlots}
               setBookingSlots={setBookingSlots}
+              isOnline={isOnline}
+              userTimezone={userTimezone}
             />
           </section>
 
@@ -561,8 +569,8 @@ const FitnessSessionDetail = () => {
   );
 };
 
-const alreadybookedthisDateAndTime = async (sessionId: string, bookingSlots: IBookedSlot[]) => {
-  const isDuplicate = await BookingService.isDuplicateBooking(sessionId, bookingSlots);
+const alreadybookedthisDateAndTime = async (sessionId: string, bookingSlots: IBookedSlot[],timezone:string) => {
+  const isDuplicate = await BookingService.isDuplicateBooking(sessionId, bookingSlots,timezone);
   return isDuplicate;
 };
 

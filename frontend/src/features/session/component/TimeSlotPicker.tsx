@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-
+import { formatInTimeZone, } from 'date-fns-tz';
 import type {
   ISlots,
   Pricing,
@@ -18,8 +18,7 @@ import toast from 'react-hot-toast';
 import type { IBookedSlot } from '@/features/user/types/user.booking.types';
 import { Label } from '@/components/ui/label';
 import { getRecurringDates } from '@/utils/getRecurringDates';
-import ToastInfo from '@/components/reusable/ToastInfo';
-import { Info } from 'lucide-react';
+import { Info, Globe, MapPin } from 'lucide-react';
 import type { BookingSlot } from '@/features/booking/store/payment.types';
 
 interface props {
@@ -39,6 +38,8 @@ interface props {
   filledDates: Date[];
   bookingSlots: IBookedSlot[];
   setBookingSlots: (slot: IBookedSlot[]) => void;
+  isOnline?:boolean,
+  userTimezone?:string
 }
 
 const MODE = {
@@ -60,22 +61,46 @@ const TimeSlotPicker = ({
   filledDates,
   bookingSlots,
   setBookingSlots,
+  isOnline=false,
+  userTimezone=Intl.DateTimeFormat().resolvedOptions().timeZone,
 }: props) => {
   const dayPickerClassNames = getDefaultClassNames();
   const [isManual, setIsManual] = useState(false);
-  // const [bookingSlots,setBookingSlots]=useState<IBookedSlot[]>([])
+
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const endDate = new Date();
   endDate.setMonth(endDate.getMonth() + 2);
-  // const occupiedDates = filledSlots.map((slot) => new Date(slot.date));
-
+ 
   const modifiersStyles = {
    filled: {
       color: '#696969', // Slate-400
       backgroundColor: '#FF0000', // Slate-100
       textDecoration: 'line-through',
     },
+  };
+  const sessionTimezone = session?.timezone || 'UTC';
+  //---Formats HH:mm string according to timezone & session mode
+  const formatSlotTime = (timeStr: string, date?: Date): string => {
+    if (!timeStr) return '';
+    if (!isOnline || !date) {
+      return formatTo12Hour(timeStr);
+    }
+
+    try {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+
+      // Create raw timestamp representing session host time
+      const dateString = `${year}-${month}-${day}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+      
+      // Target time in user timezone
+      return formatInTimeZone(new Date(dateString), userTimezone, 'hh:mm a');
+    } catch {
+      return formatTo12Hour(timeStr);
+    }
   };
 
   useEffect(() => {
@@ -234,8 +259,24 @@ const TimeSlotPicker = ({
           />
         )}
         <div className="mt-4  w-full  text-zinc-300 ">
-          <div className="flexitems-center justify-between mb-3">
+          {/* <div className="flexitems-center justify-between mb-3">
             <p className="text-sm underline font-bold">Available slots</p>
+          </div> */}
+          <div className="flex items-center justify-between mb-3 pb-2 border-b border-zinc-800">
+            <p className="text-sm font-bold text-zinc-100">Available Slots</p>
+            <span className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-400 bg-zinc-800/80 px-2.5 py-1 rounded-full border border-zinc-700">
+              {isOnline ? (
+                <>
+                  <Globe className="w-3 h-3 text-emerald-400" />
+                  <span>{userTimezone}</span>
+                </>
+              ) : (
+                <>
+                  <MapPin className="w-3 h-3 text-emerald-400" />
+                  <span>{sessionTimezone} (Venue Time)</span>
+                </>
+              )}
+            </span>
           </div>
           <div className="grid grid-cols-2 gap-3 py-2">
             {(() => {
@@ -269,11 +310,11 @@ const TimeSlotPicker = ({
                       <div className="flex items-center gap-1 ">
                         <span className=" text-sm sm:text-xs  ">
                           {' '}
-                          {formatTo12Hour(t.startTime)}
+                          {formatSlotTime(t.startTime,currentDate)}
                         </span>
                         <span className="opacity-40">-</span>
                         <span className=" text-sm sm:text-xs">
-                          {formatTo12Hour(t.endTime)}
+                          {formatSlotTime(t.endTime,currentDate)}
                         </span>
                       </div>
                       {isBooked && (
@@ -383,8 +424,8 @@ const TimeSlotPicker = ({
                     <p className=" text-sm p-2 ">
                       Slot :{' '}
                       <span className=" text-sm p-2 text-emerald-600">
-                        {formatTo12Hour(bookingSlots[0].startTime)} -
-                        {formatTo12Hour(bookingSlots[0].endTime)}
+                        {formatSlotTime(bookingSlots[0].startTime, new Date(bookingSlots[0].date))} -
+                        {formatSlotTime(bookingSlots[0].endTime, new Date(bookingSlots[0].date))}
                       </span>
                     </p>
                   )}

@@ -1,6 +1,6 @@
 export interface SessionOccuranceRequestDTO {
   trainerId: string;
-  page: number;
+
   sessionModel: string;  
   attendanceMarked:boolean
 }

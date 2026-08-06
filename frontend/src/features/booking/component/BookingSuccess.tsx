@@ -2,17 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useBookingStore } from '../store/useBookingStore';
 import BookingService from '../service/bookingService';
-import {
-  Calendar,
-  Check,
-  CheckCheck,
-  CheckCircle,
-  CheckCircle2,
-  CheckIcon,
-  CheckSquare,
-  Clock,
-} from 'lucide-react';
-import { BOOKING_STATUS } from '@/constants/constants';
+import {  Calendar,  Clock,} from 'lucide-react';
+
 import { Button } from '@/components/ui/Button';
 import { formatDateReadable, formatTo12Hour } from '@/utils/formatDate';
 
@@ -75,8 +66,7 @@ const BookingSuccess = () => {
       <div className="  bg-card rounded-2xl shadow-xl overflow-hidden border">
         <div className="bg-primary py-6 text-center text-white">
           <h1 className="text-2xl font-black">BOOKING CONFIRMED!</h1>
-          <p className="opacity-90">Get ready for your session </p>
-          {/* <CheckIcon className="w-10 h-10 mx-auto mt-4 animate-pulse" /> */}
+          <p className="opacity-90">Get ready for your session </p>         
         </div>
 
         <div className="p-8 space-y-6">

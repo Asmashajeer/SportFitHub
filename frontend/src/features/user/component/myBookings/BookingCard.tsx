@@ -17,12 +17,7 @@ function BookingCard({
 }) {
   const navigate = useNavigate();
   const isMultiple = booking.pricePlan.totalSessions > 1;
-  const isActive = booking.status === BOOKING_STATUS.CONFIRMED;
-  const statusBadge: Record<string, string> = {
-    confirmed: 'bg-green-500/10 text-green-400 ring-1 ring-green-500/20',
-    cancelled: 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20',
-    completed: 'bg-teal-500/10 text-teal-400 ring-1 ring-teal-500/20',
-  };
+ 
   if(bookedSession===undefined){
     return (
       <div>No Sessions</div>
@@ -58,13 +53,13 @@ function BookingCard({
             ₹ {booking.pricePlan.pricePaid}
           </p>
         </div>
-
-        <div>
-          <p className="text-xs text-zinc-400 mb-1">Venue</p>
-          <p className="text-sm text-zinc-100">{booking.venue.name}</p>
-          <p className="text-xs text-zinc-400 mt-1">{booking.venue.address}</p>
-        </div>
-
+        {booking.venue? (
+          <div>
+            <p className="text-xs text-zinc-400 mb-1">Venue</p>          
+              <p className="text-sm text-zinc-100">{booking.venue.name}</p>
+              <p className="text-xs text-zinc-400 mt-1">{booking.venue.address}</p>         
+          </div>
+         ):(<p className="text-xs text-zinc-400 mb-1">Online</p>  )}
         <div>
           <p className="text-xs text-zinc-400 mb-1">Booked on</p>
           <p className="text-xs text-zinc-300">

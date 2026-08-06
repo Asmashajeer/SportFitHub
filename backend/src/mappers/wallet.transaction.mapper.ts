@@ -16,6 +16,7 @@ export const toWalletTransactionResponseDTO = (transaction: IWalletTransaction) 
     // OPTIONAL
     // when transaction is booking-related
     bookingId: transaction.bookingId?.toString(),
+    bookingUID: transaction.bookingUID?.toString(),
     bookingSessionId: transaction.bookingSessionId?.toString(),
     createdAt: formatInTimeZone(transaction.createdAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
     updatedAt: formatInTimeZone(transaction.updatedAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX'),

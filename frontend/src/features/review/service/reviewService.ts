@@ -24,5 +24,9 @@ export const reviewService={
     getReviews:async(sessionId:string,sessionModel:ReviewType)=>{
           const res= await api.get(REVIEW_ROUTE.GET_REVIEWS(sessionModel,sessionId));
         return res.data;
+    },
+    getReviewsByTrainer:async(trainerId:string)=>{
+        const res= await api.get(REVIEW_ROUTE.GET_ALL_REVIEWS,{params:{trainerId}});
+        return res.data;
     }
 }

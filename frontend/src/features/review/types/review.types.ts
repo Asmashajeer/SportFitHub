@@ -14,3 +14,7 @@ export interface ReviewResponseData {
   createdAt: string;
   updatedAt: string;
 }
+export interface AllSessionReviewData extends Omit<ReviewResponseData,'reviewableId'> {
+   sessionId:string,  //reviewableId
+    sessionName:string
+}

@@ -6,6 +6,7 @@ import {
   PAYLOAD_MODEL,
   PAYMENT_METHOD,
   PAYMENT_STATUS,
+  SESSION_MODE,
   TRANSACTION_REASON,
   TRANSACTION_STATUS,
   TRANSACTION_TYPE,
@@ -53,7 +54,7 @@ import { toUserPaymentResponseDTO } from '@/mappers/booking/payment.mappers';
 import { FilterQuery } from 'mongoose';
 import { getTimezone } from '@/context/timezone.context';
 import { format, formatInTimeZone, fromZonedTime } from 'date-fns-tz';
-import { formatDateTo, formatTo12Hour, toUTC_Date } from '@/utils/formatTo';
+import { createUtcDateTime, formatDateTo, formatTo12Hour, toUTC_Date } from '@/utils/formatTo';
 import { IBookedSlot } from '@/models/booking.model';
 
 import { IUserRepository } from '@/interfaces/repositories/IUser.repository';
@@ -61,6 +62,7 @@ import { IPenaltyService } from '@/interfaces/services/trainer/IPenalty.service'
 import { PushNotificationPayload, sendPushNotification } from '@/utils/push-notification.service';
 
 import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
+
 
 export class BookingService implements IBookingService {
   private _bookingRepo: IBookingRepository;
@@ -101,8 +103,8 @@ export class BookingService implements IBookingService {
   }
 
   //--------------lock booking Slots------------------------
-  async lockSessionSlots(lockSlotsData: LockSlotDTO[]): Promise<string[]> {
-    const lockResults = await Promise.allSettled(lockSlotsData.map((lockData) => this.lockSlot(lockData)));
+  async lockSessionSlots(lockSlotsData: LockSlotDTO[], timezone: string): Promise<string[]> {
+    const lockResults = await Promise.allSettled(lockSlotsData.map((lockData) => this.lockSlot(lockData, timezone)));
 
     const failedLocks = lockResults.map((result, index) => ({ result, slot: lockSlotsData[index] })).filter(({ result }) => result.status === 'rejected');
     if (failedLocks.length > 0) {
@@ -141,7 +143,7 @@ export class BookingService implements IBookingService {
       const planId = metadata.planId;
       const numberOfSessions = Number(metadata.numberOfSessions);
       const amount = Number(metadata.amount);
-      const timezone = metadata.userTimezone;
+      const userTimezone = metadata.userTimezone;
 
       // payment receipt and method
       const charge = paymentIntent.latest_charge as Stripe.Charge;
@@ -151,6 +153,7 @@ export class BookingService implements IBookingService {
       //   Fetch the Session data (Sport or Fitness)
       const sessionRepo = sessionModel === PAYLOAD_MODEL.SPORT_SESSION ? this._sportsSessionRepo : this._fitnessSessionRepo;
       const session = await sessionRepo.findBysessionId(sessionId);
+
       if (!session) throw new AppError(ERROR_MESSAGES.SESSION.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
 
       const sessionsToBook = JSON.parse(metadata.sessionsToBook);
@@ -158,6 +161,10 @@ export class BookingService implements IBookingService {
         console.log('Missing sessionToBook in metadata');
         throw new AppError('Missing sessions ToBook');
       }
+
+      // Determine target timezone for availability check
+      // (Offline = Venue Timezone | Online = Trainer/User Timezone)
+      const targetTimezone = !('mode' in session) || session.mode === SESSION_MODE.OFFLINE ? session.timezone : userTimezone || session.timezone;
 
       //check availability of slots
       const availabilityResults = await Promise.allSettled(
@@ -168,13 +175,13 @@ export class BookingService implements IBookingService {
               slotId: slot.slotId,
               date: slot.date,
               maxCapacity: session.maxCapacity,
-              timezone: timezone,
+              timezone: targetTimezone,
             },
             dbSession
           )
         )
       );
-      console.log('AvailabilityResults  ',availabilityResults);
+      
       const occupiedSlots = availabilityResults
         .map((result, index) => ({ result, slot: sessionsToBook[index] }))
         .filter(
@@ -184,10 +191,10 @@ export class BookingService implements IBookingService {
           ...slot,
           remainingCount: result.status === 'fulfilled' ? result.value.remainingCount : 0,
         }));
-        console.log('occupaiedSlots----------',occupiedSlots,occupiedSlots.length);
+      
       // 3. If any occupied — throw with summary
       if (occupiedSlots.length > 0) {
-        const summary = occupiedSlots.map((slot) => `${slot.date} [${formatTo12Hour(slot.startTim)}- ${formatTo12Hour(slot.endTime)}]`).join(', ');
+        const summary = occupiedSlots.map((slot) => `${slot.date} [${formatTo12Hour(slot.startTime)}- ${formatTo12Hour(slot.endTime)}]`).join(', ');
         console.log(`${occupiedSlots.length} slot(s) already booked or at max capacity: ${summary}`);
         throw new AppError(`${occupiedSlots.length} slot(s) already booked or at max capacity: ${summary}`);
       }
@@ -222,8 +229,7 @@ export class BookingService implements IBookingService {
             pricePaid: amount,
             unitPrice: amount / numberOfSessions,
           },
-
-          venue: session.venue,
+          venue: session.venue ?? null,
           paymentId: payment._id,
           status: BOOKING_STATUS.CONFIRMED,
         },
@@ -233,12 +239,13 @@ export class BookingService implements IBookingService {
       const AllSessionsToBoook = await Promise.all(
         sessionsToBook.map(async (S) => {
           //convert to utc date
-          const utcDate = toUTC_Date(S.date, S.startTime);
-          const endDateTime = toUTC_Date(utcDate.toString(), S.endTime);
-
+          const utcDate = toUTC_Date(S.date, S.startTime, targetTimezone);
+          const startDateTimeUTC = createUtcDateTime(S.date, S.startTime, targetTimezone);
+          const endDateTimeUTC = createUtcDateTime(S.date, S.endTime, targetTimezone);
           await this._bookingSessionRepo.createSessionBooking(
             {
               bookingId: booking._id,
+              bookingUID:booking.bookingUID,
               userId: new Types.ObjectId(userId),
               trainerId: new Types.ObjectId(trainerId),
               sessionId: new Types.ObjectId(sessionId),
@@ -247,7 +254,9 @@ export class BookingService implements IBookingService {
               date: utcDate,
               startTime: S.startTime,
               endTime: S.endTime,
-              endDateTime: endDateTime,
+              startDateTime: startDateTimeUTC,
+              endDateTime: endDateTimeUTC,
+              timezone: targetTimezone,
               status: BOOKING_SESSION_STATUS.SCHEDULED,
             },
             dbSession
@@ -256,10 +265,18 @@ export class BookingService implements IBookingService {
       );
 
       // 3. Link Booking back to Payment
-      payment = await this._paymentRepo.updatePayment(payment._id, { bookingId: booking._id, bookingUId: booking.bookingUId }, dbSession);
+      payment = await this._paymentRepo.updatePayment(payment._id, { bookingId: booking._id, bookingUID: booking.bookingUId }, dbSession);
 
       await dbSession.commitTransaction();
-      const bookingSummary = AllSessionsToBoook.map((slot) => `${slot.date} [${formatTo12Hour(slot.startTime)}- ${formatTo12Hour(slot.endTime)}]`).join(', ');
+      // const bookingSummary = AllSessionsToBoook.map((slot) => `${slot.date} [${formatTo12Hour(slot.startTime)}- ${formatTo12Hour(slot.endTime)}]`).join(', ');
+      const bookingSummary = AllSessionsToBoook.map((slot) => {
+        // Format UTC start & end dates into  in target timezone
+        const dateStr = formatInTimeZone(slot.startDateTime, targetTimezone, 'MMM d, yyyy');
+        const startStr = formatInTimeZone(slot.startDateTime, targetTimezone, 'hh:mm a');
+        const endStr = formatInTimeZone(slot.endDateTime, targetTimezone, 'hh:mm a');
+
+        return `${dateStr} [${startStr} - ${endStr}]`;
+      }).join(', ');
 
       // sending mail to user about confirmation
       await sendNotificationEmail({
@@ -316,7 +333,7 @@ export class BookingService implements IBookingService {
   // ------------------find by stripe sessionId-------------
   async findBySessionId(stripeSessionId: string): Promise<UserBookingResponseDTO> {
     const bookingData = await this._bookingRepo.findBySessionId(stripeSessionId);
-    if (!bookingData) {      
+    if (!bookingData) {
       throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     }
     const booking = toUserBookingResponseDTO(bookingData);
@@ -325,7 +342,7 @@ export class BookingService implements IBookingService {
   }
 
   // -----------check availability on a specific date and slot------------------
-  async checkAvailability(bookingData: CheckAvailabilityDTO, session?: ClientSession) {
+  async checkAvailability(bookingData: CheckAvailabilityDTO, _session?: ClientSession) {
     const date = new Date(bookingData.date);
 
     const dateInZone = formatInTimeZone(date, bookingData.timezone, 'yyyy-MM-dd');
@@ -337,7 +354,8 @@ export class BookingService implements IBookingService {
 
     const currentBookings = await this._bookingSessionRepo.enrolledCount({
       sessionId: bookingData.sessionId,
-      date: { $gte: startDay, $lte: endOfDay },
+      // date: { $gte: startDay, $lte: endOfDay },
+      startDateTime: { $gte: startDay, $lte: endOfDay },
       slotId: bookingData.slotId,
       status: BOOKING_SESSION_STATUS.SCHEDULED,
     });
@@ -350,16 +368,17 @@ export class BookingService implements IBookingService {
   }
 
   //--------------------check duplicate booking-------------
-  checkDuplicateBooking = async (userId: string | Types.ObjectId, sessionId: string | Types.ObjectId, bookingSlots: IBookedSlot[]): Promise<string | null> => {
-    const timezone = getTimezone();
-    console.log(timezone);
+  checkDuplicateBooking = async (userId: string | Types.ObjectId, sessionId: string | Types.ObjectId, bookingSlots: IBookedSlot[], timezone: string): Promise<string | null> => {
+   
     const duplicateChecks = bookingSlots.map(async (slot) => {
-      const utcDate = toUTC_Date(slot.date, slot.startTime);
+      const utcDate = toUTC_Date(slot.date, slot.startTime, timezone);
+      const startDateTimeUTC = createUtcDateTime(slot.date, slot.startTime, timezone);
 
       const res = await this._bookingSessionRepo.findOne({
         sessionId: new Types.ObjectId(sessionId),
         userId: new Types.ObjectId(userId),
         date: utcDate, // UTC converted date
+        startDateTime: startDateTimeUTC,
         slotId: slot.slotId,
         status: BOOKING_SESSION_STATUS.SCHEDULED,
       });
@@ -380,7 +399,7 @@ export class BookingService implements IBookingService {
 
   //-----------find user bookings------
   async getUserBookings(userId: string | Types.ObjectId): Promise<UserBookingResponseDTOwithStatusCount[]> {
-    const bookings = await this._bookingRepo.find({ userId: userId });
+    const bookings = await this._bookingRepo.findUserBookings({ userId: userId });
     if (!bookings) {
       throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     }
@@ -398,7 +417,7 @@ export class BookingService implements IBookingService {
     const sessions = await this._bookingSessionRepo.findUserSessions({ userId: userId });
 
     if (!sessions) throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
-
+    
     const userSessions = sessions.map((session) => toUserSessionsResponseDTOwithPopulatedSession(session as unknown as IBookedSessionPopulate));
 
     return userSessions;
@@ -407,29 +426,45 @@ export class BookingService implements IBookingService {
   //----------------reschedule booked session-------------------
 
   async rescheduleSession(sessionBookingId: string, newSlot: BookedSlot): Promise<UserBookedSessionsResponseDTO> {
+
+
     const bookedSession = await this._bookingSessionRepo.findByBookingSessionId(sessionBookingId);
     if (!bookedSession) throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
-    const { userId, trainerId, sessionId, sessionModel, bookingId } = bookedSession;
+    const { userId, trainerId, sessionId, sessionModel, bookingId ,bookingUID} = bookedSession; 
+  
     const dbSession = await mongoose.startSession();
+    const userTimezone = getTimezone();
     dbSession.startTransaction();
     try {
-      const utcDate = toUTC_Date(newSlot.date, newSlot.startTime);
+      // (Offline = Venue Timezone | Online = Trainer/User Timezone)
+      const targetTimezone = !('mode' in bookedSession) || bookedSession.mode === SESSION_MODE.OFFLINE ? bookedSession.timezone : userTimezone || bookedSession.timezone;
+   
+      const utcDate = toUTC_Date(newSlot.date, newSlot.startTime, targetTimezone);
+      const startDateTimeUTC = createUtcDateTime(newSlot.date, newSlot.startTime, targetTimezone);
+      const endDateTimeUTC = createUtcDateTime(newSlot.date, newSlot.endTime, targetTimezone);
+         
+        
       // Create new session booking
       const newBookingData = await this._bookingSessionRepo.createSessionBooking(
         {
-          bookingId: new Types.ObjectId(bookingId),
-          userId: new Types.ObjectId(userId),
-          trainerId: new Types.ObjectId(trainerId),
-          sessionId: new Types.ObjectId(sessionId),
+          bookingId: bookingId,
+          bookingUID,
+          userId: userId,
+          trainerId: trainerId,
+          sessionId: sessionId,
           sessionModel,
           slotId: newSlot.slotId,
           date: utcDate,
           startTime: newSlot.startTime,
           endTime: newSlot.endTime,
+          startDateTime: startDateTimeUTC,
+          endDateTime: endDateTimeUTC,
+          timezone: targetTimezone,
           status: BOOKING_SESSION_STATUS.SCHEDULED,
         },
         dbSession
       );
+     
       //  Mark old session as rescheduled
       await this._bookingSessionRepo.updateSessionBookingStatus(sessionBookingId, { status: BOOKING_SESSION_STATUS.RESCHEDULED, rescheduledTo: newBookingData._id }, dbSession);
 
@@ -479,9 +514,11 @@ export class BookingService implements IBookingService {
         },
       };
       this.notifyTrainer(bookedSession.sessionId.trainerId, trainerNotificationpayload);
+
       return newBooking;
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      throw new AppError("error while rescheduling") ;
     } finally {
       dbSession.endSession();
     }
@@ -494,10 +531,14 @@ export class BookingService implements IBookingService {
 
     // const refundBooking = await this._bookingRepo.findById( bookedSession.bookingId );
     const bookedSession = bookedSessions[0];
-    console.log('bookedSession ', bookedSession);
+   
 
     const refundAmount = bookedSession.bookingId.pricePlan?.unitPrice;
-    const within = this.isWithinCancellationWindow(bookedSession.date.toString(), bookedSession.startTime, bookedSession.sessionId.cancellationWindow);
+    // (Offline = Venue Timezone | Online = Trainer/User Timezone)
+    const userTimezone = getTimezone();
+    const targetTimezone = !('mode' in bookedSession) || bookedSession.mode === SESSION_MODE.OFFLINE ? bookedSession.timezone : userTimezone || bookedSession.timezone;
+
+    const within = this.isWithinCancellationWindow(bookedSession.date.toString(), bookedSession.startTime, bookedSession.sessionId.cancellationWindow, targetTimezone);
     if (within) throw new AppError(`Cannot delete session within ${bookedSession.sessionId.cancellationWindow} hours of start time`, STATUS_CODE.ERROR.BAD_REQUEST);
 
     const dbSession = await mongoose.startSession();
@@ -516,7 +557,7 @@ export class BookingService implements IBookingService {
       );
       //add  refund amount  to wallet
       const wallet = await this._walletService.addToWallet(bookedSession.userId._id.toString(), refundAmount, dbSession);
-      console.log(wallet);
+     
       // add corresponding wallet transaction
       await this._walletTransactionService.addTransaction(
         {
@@ -528,6 +569,7 @@ export class BookingService implements IBookingService {
           description: `Refund ${refundAmount} to wallet by cancelling session with bookingId ${bookedSession.bookingId} on ${bookedSession.date} (${bookedSession.startTime}-${bookedSession.endTime})`,
           balanceAfter: wallet.balance,
           bookingId: bookedSession.bookingId,
+          bookingUID:bookedSession.bookingUID,
           bookingSessionId: bookedSession._id,
         },
         dbSession
@@ -624,13 +666,7 @@ export class BookingService implements IBookingService {
     const { page, sessionModel, date, status, limit } = filter;
     const skip = (page - 1) * limit;
     const query: FilterQuery<IBookingSession> = {};
-    // get trainer's session IDs
-    // const [sportsSessions, fitnessSessions] = await Promise.all([
-    //   this._sportsSessionRepo.find({ trainerId }),
-    //   this._fitnessSessionRepo.find({ trainerId }),
-    // ]);
-
-    //   const sessionIds = [...sportsSessions,... fitnessSessions].map(s => s._id);
+  
     query.trainerId = trainerId;
 
     if (sessionModel) query.sessionModel = sessionModel;
@@ -640,7 +676,7 @@ export class BookingService implements IBookingService {
     }
 
     if (date) {
-      //  const start = new Date(date);
+     
       //convert to utc date
       const startDay = fromZonedTime(`${date}T00:00:00`, timezone);
       const endofDay = fromZonedTime(`${date}T23:59:59`, timezone);
@@ -663,20 +699,12 @@ export class BookingService implements IBookingService {
   }
 
   async createBookingWithWallet(userId: string, payload: PayloadDTO): Promise<BookingConfirmResponseDTO> {
-    const timezone = getTimezone();
+    const userTimezone = getTimezone();
     const dbSession = await mongoose.startSession();
     dbSession.startTransaction();
     try {
       const wallet = await this._walletService.findWallet(userId);
       if (wallet.balance < payload.amount) throw new AppError(' there is no enough balance');
-      const lockSlotsData = payload.sessionsToBook.map((slot) => ({
-        userId: userId,
-        sessionId: payload.sessionId,
-        date: slot.date,
-        slotId: slot.slotId,
-        startTime: slot.startTime,
-      }));
-      const lockKeys = await this.lockSessionSlots(lockSlotsData);
 
       //   Fetch the Session data (Sport or Fitness)
       const sessionRepo = payload.sessionModel === PAYLOAD_MODEL.SPORT_SESSION ? this._sportsSessionRepo : this._fitnessSessionRepo;
@@ -685,6 +713,16 @@ export class BookingService implements IBookingService {
       if (!payload.sessionsToBook) {
         throw new AppError('Missing sessions ToBook ');
       }
+      const lockSlotsData = payload.sessionsToBook.map((slot) => ({
+        userId: userId,
+        sessionId: payload.sessionId,
+        date: slot.date,
+        slotId: slot.slotId,
+        startTime: slot.startTime,
+      }));
+      const lockKeys = await this.lockSessionSlots(lockSlotsData, session.timeZone);
+      // (Offline = Venue Timezone | Online = Trainer/User Timezone)
+      const targetTimezone = !('mode' in session) || session.mode === SESSION_MODE.OFFLINE ? session.timezone : userTimezone || session.timezone;
 
       //check availability of slots
       const availabilityResults = await Promise.allSettled(
@@ -695,7 +733,7 @@ export class BookingService implements IBookingService {
               slotId: slot.slotId,
               date: slot.date,
               maxCapacity: session.maxCapacity,
-              timezone: timezone,
+              timezone: targetTimezone,
             },
             dbSession
           )
@@ -729,7 +767,7 @@ export class BookingService implements IBookingService {
           // transactionId: paymentIntent.id,
           // invoiceId:invoiceId,
           amount: payload.amount,
-          currency: 'inr',
+          currency: CURRENCY,
           paymentMethod: PAYMENT_METHOD.WALLET,
           receiptUrl: '',
           status: PAYMENT_STATUS.SUCCESS,
@@ -749,7 +787,7 @@ export class BookingService implements IBookingService {
             pricePaid: payload.amount,
             unitPrice: payload.amount / payload.numberOfSessions,
           },
-          venue: session.venue,
+          venue: session.venue ?? null,
           paymentId: payment._id,
           status: BOOKING_STATUS.CONFIRMED,
         },
@@ -767,6 +805,7 @@ export class BookingService implements IBookingService {
           description: `Booked session with  ${payload.amount}  with booking Id ${booking._id} and payment Id ${payment._id} )`,
           balanceAfter: newWallet.balance,
           bookingId: booking._id,
+          bookingUID:booking.bookingUID
         },
         dbSession
       );
@@ -774,11 +813,15 @@ export class BookingService implements IBookingService {
       const AllSessionsToBoook = await Promise.all(
         payload.sessionsToBook.map(async (S) => {
           //convert to utc date
-          const utcDate = toUTC_Date(S.date, S.startTime);
-          const endDateTime = toUTC_Date(S.date, S.endTime);
+
+          const utcDate = toUTC_Date(S.date, S.startTime, targetTimezone);
+          const startDateTimeUTC = createUtcDateTime(S.date, S.startTime, targetTimezone);
+          const endDateTimeUTC = createUtcDateTime(S.date, S.endTime, targetTimezone);
           return await this._bookingSessionRepo.createSessionBooking(
             {
               bookingId: booking._id,
+              bookingUID:booking.bookingUID,
+              trainerId:new Types.ObjectId(payload.trainerId),
               userId: new Types.ObjectId(userId),
               sessionId: new Types.ObjectId(payload.sessionId),
               sessionModel: payload.sessionModel,
@@ -786,7 +829,9 @@ export class BookingService implements IBookingService {
               date: utcDate,
               startTime: S.startTime,
               endTime: S.endTime,
-              endDateTime: endDateTime,
+              startDateTime: startDateTimeUTC,
+              endDateTime: endDateTimeUTC,
+              timezone: targetTimezone,
               status: BOOKING_SESSION_STATUS.SCHEDULED,
             },
             dbSession
@@ -803,7 +848,14 @@ export class BookingService implements IBookingService {
       for (const lock of locks) {
         await this._slotLockService.releaseLock(lock);
       }
-      const bookingSummary = AllSessionsToBoook.map((slot) => `${slot.date} [${formatTo12Hour(slot.startTime)}- ${formatTo12Hour(slot.endTime)}]`).join(', ');
+      const bookingSummary = AllSessionsToBoook.map((slot) => {
+        // Format UTC start & end dates into  in target timezone
+        const dateStr = formatInTimeZone(slot.startDateTime, targetTimezone, 'MMM d, yyyy');
+        const startStr = formatInTimeZone(slot.startDateTime, targetTimezone, 'hh:mm a');
+        const endStr = formatInTimeZone(slot.endDateTime, targetTimezone, 'hh:mm a');
+
+        return `${dateStr} [${startStr} - ${endStr}]`;
+      }).join(', ');
 
       // sending mail to user about confirmation
       await sendNotificationEmail({
@@ -820,6 +872,29 @@ export class BookingService implements IBookingService {
         },
         closingLine: `Please arrive 10 minutes early to warm up. If you need to cancel, please do so at least ${session.bookingDeadline} hr  in advance.`,
       });
+      // send push notification to user
+      const user = await this._userRepo.findById(userId);
+      if (user?.fcmToken) {
+        await sendPushNotification(user.fcmToken, {
+          title: 'Booking Confirmed',
+          body: `You have successfully booked ${payload.numberOfSessions} session(s) of ${session.sessionName}  : ${bookingSummary}`,
+          data: {
+            type: BOOKING_SESSION_STATUS.SCHEDULED,
+            bookingId: booking._id.toString(),
+          },
+        });
+      }
+      //notification to trainer
+      const trainerNotificationpayload = {
+        title: 'Booking Received',
+        body: `A client has booked  ${payload.numberOfSessions} session(s) of ${session.sessionName}  : ${bookingSummary}`,
+        data: {
+          type: BOOKING_SESSION_STATUS.SCHEDULED,
+          bookingId: booking._id.toString(),
+        },
+      };
+      this.notifyTrainer(session.trainerId, trainerNotificationpayload);
+
       const bookingData = toUserBookingResponseDTO(booking);
       const paymentData = toUserPaymentResponseDTO(payment);
       return { booking: bookingData, payment: paymentData };
@@ -847,11 +922,32 @@ export class BookingService implements IBookingService {
     return result;
   }
 
-  //  ----------- function to lock a slot--------------
-  lockSlot = async (lockSlotData: LockSlotDTO) => {
+
+  async checkSessionAccess(userId:string,sessionId:string,sessionStartUTC:string):Promise<boolean>{
+    if(!sessionStartUTC){
+     
+      return;
+    }
+    
+    const startDateTime=new Date(sessionStartUTC);
+    const sessions = await this._bookingSessionRepo.findUserSessions({ sessionId,startDateTime});
+
+   
+    if (!sessions.length) return false;   
+     console.log("check trainer:   ",sessions[0].trainerId?.userId.toString() === userId);
+    if (sessions[0].trainerId?.userId.toString() === userId) return true; // check user is a trainer?
+    
+    console.log("check user:   ",sessions.some(s => s.userId.toString() === userId));
+    return sessions.some(s => s.userId.toString() === userId);  // user is a participant of this session?
+    
+   
+  };
+
+  //  _________________ function to lock a slot  _____________
+  lockSlot = async (lockSlotData: LockSlotDTO, timezone) => {
     const { userId, sessionId, date, slotId, startTime } = lockSlotData;
-    console.log('userId :', userId);
-    const utcDate = toUTC_Date(date, startTime); // convert to UTC Date
+    
+    const utcDate = toUTC_Date(date, startTime, timezone); // convert to UTC Date
     const lockKey = `lock_slot_${sessionId}_${utcDate}_${slotId}`;
     const existingOwner = await this._slotLockService.getLockOwner(lockKey);
     if (existingOwner) {
@@ -862,16 +958,16 @@ export class BookingService implements IBookingService {
       }
     }
     const locked = await this._slotLockService.lockSlot(lockKey, userId, TTLSECONDS);
-    console.log('locked  :', locked);
+ 
     if (!locked) {
       throw new AppError(`Failed to lock slot`, STATUS_CODE.ERROR.CONFLICT);
     }
     return lockKey;
   };
 
-  //  ----------- function to check isWithinCancellationWindow--------------
-  isWithinCancellationWindow(date: string, time: string, cancellationWindow: number): boolean {
-    const sessionDateTime = toUTC_Date(date, time);
+  //  ________ function to check isWithinCancellationWindow ______________
+  isWithinCancellationWindow(date: string, time: string, cancellationWindow: number, timezone: string): boolean {
+    const sessionDateTime = toUTC_Date(date, time, timezone);
     const now = new Date();
     const diffMs = sessionDateTime.getTime() - now.getTime();
     const diffHours = diffMs / (1000 * 60 * 60);
@@ -880,7 +976,7 @@ export class BookingService implements IBookingService {
     return diffHours <= cancellationWindow;
   }
 
-  // ─── to notify trainer  ───
+  // __________ to notify trainer  ___________
   private async notifyTrainer(trainerId: string, payload: PushNotificationPayload): Promise<void> {
     const userId = await this._trainerRepo.findUserIdByTrainerId(trainerId);
     if (!userId) return;
@@ -890,4 +986,8 @@ export class BookingService implements IBookingService {
 
     await sendPushNotification(fcmToken, payload);
   }
+
+
+
+
 }

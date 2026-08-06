@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect,} from 'react';
 import { useUserDashboardStore } from '../../store/useUserDashboardStore';
 
 import EmptyState from '../EmptyState';
@@ -7,10 +7,11 @@ import NextSessionCard from './NextSessionCard';
 import { BOOKING_SESSION_STATUS } from '@/constants/constants';
 import { useNavigate } from 'react-router-dom';
 import { useFCMToken } from '@/hooks/useFCMToken';
-import { PendingReviewsBanner } from '@/features/review/components/PendingReviewsBanner';
+import { PendingReviewsBanner } from '@/features/review/components/user/PendingReviewsBanner';
+
 
 const Dashboard = () => {
-  const { userSessions, userBookings, fetchBookings } = useUserDashboardStore();
+  const { userSessions, fetchBookings } = useUserDashboardStore();
   const navigate = useNavigate();
   const { initFCM } = useFCMToken();
   useEffect(() => {
@@ -52,7 +53,7 @@ const Dashboard = () => {
 
           <div className="space-y-2">
             {upcoming
-              .slice(1, 5)
+              .slice(0, 5)
               .sort(
                 (a, b) =>
                   new Date(a.date).getTime() - new Date(b.date).getTime()

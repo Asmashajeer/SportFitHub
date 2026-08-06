@@ -4,7 +4,7 @@ import { PENALTY, TRAINER_STATUS } from '@/constants/enums';
 import { differenceInDays } from 'date-fns';
 import { IPenaltyService } from '@/interfaces/services/trainer/IPenalty.service';
 import { sendNotificationEmail } from '@/utils/sendNotfication.mail';
-import { ITrainerProfile } from '@/models/trainerProfile.model';
+
 import { IUser } from '@/models/user.model';
 
 export class PenaltyService implements IPenaltyService {

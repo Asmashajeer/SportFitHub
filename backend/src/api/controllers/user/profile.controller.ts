@@ -22,7 +22,7 @@ export class ProfileController {
       if (result.tokens) {
         setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
       }
-      const { tokens, ...profileData } = result;
+      const {tokens: _tokens, ...profileData } = result;
       res.status(STATUS_CODE.SUCCESS.CREATED).json({
         message: SUCCESS_MESSAGES.USER.PROFILE_CREATED,
         profileData,
@@ -46,9 +46,7 @@ export class ProfileController {
   };
   getProfilePic = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { user } = req as AuthRequest;
-
-      const id = req.params.id;
+      const { user } = req as AuthRequest;      
       const profile = await this._profileService.getPrimaryProfile(user.id);
       const profilePic = profile.profilePic;
       res.status(STATUS_CODE.SUCCESS.OK).json({
@@ -74,8 +72,6 @@ export class ProfileController {
 
   updateProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { user } = req as AuthRequest;
-
       const id = req.params.id;
       const data = req.body.profile;
       const profileData = await this._profileService.updateProfile(id, data);
@@ -89,8 +85,6 @@ export class ProfileController {
   };
   updateProfilePic = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { user } = req as AuthRequest;
-
       const id = req.params.id;
       const profilePic = req.body.profilePic;
       const profileData = await this._profileService.updateProfile(id, { profilePic: profilePic });

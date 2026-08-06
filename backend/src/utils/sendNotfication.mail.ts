@@ -1,15 +1,15 @@
 import { transporter } from '@/utils/mailer';
-
+type NotificationDetailValue = string | number | boolean | Date | undefined | null;
 interface NotificationEmailProps {
   to: string;
   title: string;
   description: string;
-  details: Record<string, any>;
+  details: Record<string,  NotificationDetailValue> & { userName: string };
   closingLine: string;
 }
 
 export const sendNotificationEmail = async ({ to, title, description, details, closingLine }: NotificationEmailProps): Promise<void> => {
-  const buildDetailsRows = (details: Record<string, any>): string => {
+  const buildDetailsRows = (details: Record<string, NotificationDetailValue> & { userName: string }): string => {
     return Object.entries(details)
       .filter(([key, value]) => key !== 'userName' && value !== undefined && value !== null)
       .map(([key, value]) => `<p style="margin: 4px 0;"><strong>${key}:</strong> ${value}</p>`)

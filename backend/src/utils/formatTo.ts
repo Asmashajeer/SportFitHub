@@ -1,4 +1,3 @@
-import { getTimezone } from '@/context/timezone.context';
 import { format, parse } from 'date-fns';
 import { fromZonedTime } from 'date-fns-tz';
 
@@ -15,9 +14,7 @@ export const formatDateTo = (date: string) => {
   return formattedDate;
 };
 
-export const toUTC_Date = (date: string, time: string): Date => {
-  const timezone = getTimezone();
-
+export const toUTC_Date = (date: string, time: string, timezone: string): Date => {
   const localDate = new Date(date);
   const [hours, minutes] = time.split(':').map(Number);
   localDate.setHours(hours, minutes, 0, 0);
@@ -27,4 +24,17 @@ export const toUTC_Date = (date: string, time: string): Date => {
 
   //  UTC  date only
   return new Date(Date.UTC(utcDateTime.getUTCFullYear(), utcDateTime.getUTCMonth(), utcDateTime.getUTCDate()));
+};
+
+
+
+//----------create UTC date Time
+export const createUtcDateTime = (date: string, time: string, timezone: string): Date => {
+  const localDate = new Date(date);
+  const [hours, minutes] = time.split(':').map(Number);
+  localDate.setHours(hours, minutes, 0, 0);
+
+  //convert from user's timezone to UTC
+  const utcDateTime = fromZonedTime(localDate, timezone);
+  return utcDateTime;
 };

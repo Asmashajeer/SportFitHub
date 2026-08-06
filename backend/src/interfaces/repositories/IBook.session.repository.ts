@@ -12,7 +12,8 @@ export interface IBookingSessionRepository extends IBaseRepository<IBookingSessi
   updateSessionBookingStatus(id: string | Types.ObjectId, updateQuery: UpdateQuery<IBookingSession>, session: ClientSession);
   findBookedSessionsPopulatedUser(filter: FilterQuery<IBookingSession>, options?: { skip?: number; limit?: number });
   findAllByBookingId(id: string | Types.ObjectId);
-  findOccuredSessions(filter: FilterQuery<IBookingSession>, options: { skip?: number; limit?: number });
+  findOccuredSessions(filter: FilterQuery<IBookingSession>);
   autoCompleteExpiredSessions();
-  findOneSession(userId:string | Types.ObjectId, sessionId:string | Types.ObjectId,attendance:boolean)
+  findOneSession(filter:FilterQuery<IBookingSession>)
+  
 }

@@ -61,11 +61,16 @@ export interface UserBookedSessionsResponseData {
   id: string;
   bookingId: string;
   userId: string;
+  trainerId:string,
+  sessionId:string,
   sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
   slotId: string;
   date: string;
   startTime: string;
   endTime: string;
+  startDateTime:string,
+  endDateTime:string,
+  timezone:string,
   status: (typeof BOOKING_SESSION_STATUS)[keyof typeof BOOKING_SESSION_STATUS];
   rescheduledTo: string;
   attendance: boolean;

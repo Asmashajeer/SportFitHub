@@ -1,6 +1,6 @@
 import type { SportsSessionPublicResponseData } from '../../store/session.types';
-import { Clock, MapPin, Star, Users, Zap } from 'lucide-react';
-import { CURRENCY, Review_Type, SESSION_MODE } from '@/constants/constants';
+import { Clock, MapPin, Star, Users,  } from 'lucide-react';
+import { CURRENCY, Review_Type, } from '@/constants/constants';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { reviewService } from '@/features/review/service/reviewService';

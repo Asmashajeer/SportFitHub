@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react';
-import { sportSessionService } from '../service/sportSessionService';
 import { PAGINATION_DEFAULT_LIMIT } from '@/constants/constants';
 import { TrainerSportSessionService } from '@/features/trainer/service/sessionService/trainer.sports.session.service';
 

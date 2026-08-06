@@ -1,5 +1,4 @@
 import { PAGINATION_LIMIT, UserRole } from '@/constants/enums';
-
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 import {
   GetSessionsResponseDTO,
@@ -14,13 +13,13 @@ import { ISportsSessionService } from '@/interfaces/services/session/ISports.ses
 import { toSportSessionDetailedPublicDTO, toSportSessionPublicDTO, toSportsSessionResponseDTO, toSportsSessionUpdateResponseDTO } from '@/mappers/sports.session.mapper';
 
 import { ISportsSession } from '@/models/sportsSession.model';
-
 import AppError from '@/utils/AppError';
 import { FilterQuery } from 'mongoose';
 import { Types } from 'mongoose';
 import { formatTo12Hour } from '@/utils/formatTo';
-
 import { IBookingService } from '@/interfaces/services/booking/IBooking.service';
+import { getTimezone } from '@/context/timezone.context';
+import tz_lookup from 'tz-lookup';
 
 export class SportsSessionService implements ISportsSessionService {
   private _sportsSessionRepo: ISportsSessionRepository;
@@ -32,6 +31,7 @@ export class SportsSessionService implements ISportsSessionService {
     this._trainerRepo = trainerRepo;
     this._bookingService = bookingService;
   }
+
   //----------create Session------------------
   async createSportSession(sessionData: Partial<ISportsSession>): Promise<SportsSessionResponseDTO> {
     //-----------check timeslots are within trainer working hours
@@ -42,7 +42,23 @@ export class SportsSessionService implements ISportsSessionService {
     const conflict = await this.checkConflicts(sessionData.trainerId, newSlots);
     if (conflict?.hasConflict) throw new AppError(conflict.message, STATUS_CODE.ERROR.CONFLICT);
 
-    const data = await this._sportsSessionRepo.create(sessionData);
+    const requestTimezone = getTimezone(); //(Trainer's current timezone)
+    let sessionTimezone = requestTimezone;
+
+    if (sessionData.venue?.location?.coordinates) {
+      const [longitude, latitude] = sessionData.venue.location.coordinates;
+      try {
+        // Resolve timezone directly from lat/long coordinates (e.g., [55.2708, 25.2048] -> 'Asia/Dubai')
+        sessionTimezone = tz_lookup(latitude, longitude);
+      } catch (err) {
+        console.warn('Failed to resolve venue timezone from coordinates, falling back to request timezone', err);
+        sessionTimezone = requestTimezone;
+      }
+    }
+    const data = await this._sportsSessionRepo.create({
+      ...sessionData,
+      timezone: sessionTimezone, // Stored as 'Asia/Dubai'
+    });
     if (!data) {
       throw new AppError(ERROR_MESSAGES.SESSION.CREATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
     }
@@ -50,13 +66,13 @@ export class SportsSessionService implements ISportsSessionService {
     return session;
   }
 
+  //--------------------get session to update
   async getSessionsToUpdate(id: string): Promise<SportSessionUpdateResponseDTO> {
     const sessionData = await this._sportsSessionRepo.findBysessionId(id);
-
     const session = toSportsSessionUpdateResponseDTO(sessionData);
-
     return session;
   }
+
   //--------update session-----------
   async updateSportSession(id: string, sessionData: Partial<ISportsSession>): Promise<SportSessionUpdateResponseDTO> {
     //check timeslots are within trainer working hours
@@ -67,7 +83,25 @@ export class SportsSessionService implements ISportsSessionService {
     const conflict = await this.checkConflicts(sessionData.trainerId, newSlots, id);
     if (conflict?.hasConflict) throw new AppError(conflict.message, STATUS_CODE.ERROR.CONFLICT);
 
-    const data = await this._sportsSessionRepo.updateSession(id, sessionData);
+    const requestTimezone = getTimezone(); //(Trainer's current timezone)
+
+    let sessionTimezone = requestTimezone;
+
+    if (sessionData.venue?.location?.coordinates) {
+      const [longitude, latitude] = sessionData.venue.location.coordinates;
+
+      try {
+        // Resolve timezone directly from lat/long coordinates
+        sessionTimezone = tz_lookup(latitude, longitude);
+      } catch (err) {
+        console.warn('Failed to resolve venue timezone from coordinates, falling back to request timezone', err);
+        sessionTimezone = requestTimezone;
+      }
+    }
+    const data = await this._sportsSessionRepo.updateSession(id, {
+      ...sessionData,
+      timezone: sessionTimezone,
+    });
     if (!data) {
       throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
     }
@@ -91,7 +125,7 @@ export class SportsSessionService implements ISportsSessionService {
     // ----with bookings
     const cancellationWindow = bookingSessions[0].session.cancellationWindow;
     const withinWindow = bookingSessions.some((bookingSession) =>
-      this._bookingService.isWithinCancellationWindow(bookingSession.date.toString(), bookingSession.startTime, bookingSession.session.cancellationWindow)
+      this._bookingService.isWithinCancellationWindow(bookingSession.date.toString(), bookingSession.startTime, bookingSession.session.cancellationWindow,bookingSession.timezone)
     );
 
     if (withinWindow) {
@@ -101,7 +135,7 @@ export class SportsSessionService implements ISportsSessionService {
     await Promise.all(
       bookingSessions.map(async (bookingSession) => {
         const sessionBookingId = bookingSession.id;
-        const userId = bookingSession.userId.toString();
+       
         const reason = 'Cancelled by trainer';
 
         await this._bookingService.cancelSession(sessionBookingId, reason, cancelledBy);
@@ -148,7 +182,7 @@ export class SportsSessionService implements ISportsSessionService {
 
   //--------------- get all sessions-----Public Listing---------
   async getAllSessions(filters: FilterQuery<ISportsSession>): Promise<GetSessionsResponseDTO> {
-    const { page, limit, search, sport, sessionType, ageGroup, lat, lng, radius } = filters;
+    const { page, limit, search, sport, sessionType, ageGroup, rating,lat, lng, radius } = filters;
 
     const query: FilterQuery<ISportsSession> = { isDeleted: false, isApproved: true, isActive: true };
 
@@ -158,6 +192,8 @@ export class SportsSessionService implements ISportsSessionService {
     if (sport && sport !== 'all') query.sportCategory = sport;
     if (sessionType && sessionType !== 'all') query.sessionType = sessionType;
     if (ageGroup && ageGroup !== 'all') query.ageGroup = ageGroup;
+     if (rating && rating !== 'all') query.rating = { $gte: Number(rating) };
+
 
     if (lat && lng && radius) {
       query['venue.location'] = {
@@ -180,7 +216,7 @@ export class SportsSessionService implements ISportsSessionService {
     const sessionData = await this._sportsSessionRepo.findBysessionId(id);
 
     const session = toSportSessionDetailedPublicDTO(sessionData);
-   
+
     return session;
   }
 
@@ -189,7 +225,7 @@ export class SportsSessionService implements ISportsSessionService {
     for (const dayEntry of newTimeSlots) {
       const { day, slots } = dayEntry;
       for (const slot of slots) {
-        const query: any = {
+        const query: FilterQuery<ISportsSession> = {
           trainerId,
           timeSlots: {
             $elemMatch: {

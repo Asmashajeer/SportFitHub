@@ -1,4 +1,4 @@
-import { AGE_GROUP, DAY, SESSION_MODE, SESSION_TYPE } from '@/constants/enums';
+import { AGE_GROUP, DAY, SESSION_TYPE } from '@/constants/enums';
 import mongoose, { Document, Types } from 'mongoose';
 
 interface IVenue {
@@ -26,6 +26,7 @@ interface IPricing {
 export interface ISportsSession extends Document {
   _id: Types.ObjectId;
   trainerId: Types.ObjectId;
+  timezone: string;
   sportCategory: Types.ObjectId;
   sessionName: string;
   slug: string;
@@ -35,7 +36,7 @@ export interface ISportsSession extends Document {
   sessionType: SESSION_TYPE;
   enrolledCount: number;
   maxCapacity: number;
-  venue?: IVenue;
+  venue: IVenue;
   amenities?: string[];
   timeSlots: ITimeSlot[];
   pricing: IPricing[];
@@ -57,6 +58,11 @@ const SportsSessionSchema = new mongoose.Schema<ISportsSession>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'TrainerProfile',
       required: true,
+    },
+    timezone: {
+      type: String,
+      required: true,
+      default: 'UTC', 
     },
     sportCategory: {
       type: mongoose.Schema.Types.ObjectId,

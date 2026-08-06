@@ -1,7 +1,7 @@
 import { sendMessageRequestDTO } from '@/dtos/request/chat/chat.request.dto';
 import { ConversationPopulatedResponseDTO, ConversationResponseDTO, MessageResponseDTO } from '@/dtos/response/chat/chat.response.dto';
 import { IConversation } from '@/models/conversation.model';
-import { IMessage } from '@/models/message.model';
+
 
 export interface IChatService {
   createConversation(conversationData: Partial<IConversation>): Promise<ConversationResponseDTO>;

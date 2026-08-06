@@ -10,13 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Filter, MapPin, Search, X, SlidersHorizontal } from 'lucide-react';
+import {  MapPin, Search, X, SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import {
   AGE_GROUP,
   LOCATION_RADIUS,
   PAGINATION_DEFAULT_LIMIT,
-  Review_Type,
+ 
   SESSION_TYPE,
 } from '@/constants/constants';
 import SportSessionCard from './SportSessionCard';
@@ -30,7 +30,7 @@ import { Button } from '@/components/ui/Button';
 import { userService } from '@/features/user/service/userService';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import Pagination from '@/components/reusable/Pagination';
-import { reviewService } from '@/features/review/service/reviewService';
+
 
 interface PaginationProps {
   totalPages: number;
@@ -65,11 +65,12 @@ const PublicSportsSessions = () => {
     lng: 0,
     radius:0,
   });
+  const [ratingFilter, setRatingFilter] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 500);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, sportFilter, sessionTypeFilter, ageGroupFilter, location]);
+  }, [debouncedSearch, sportFilter, sessionTypeFilter, ageGroupFilter,ratingFilter, location]);
 
   useEffect(() => {
     try {
@@ -79,12 +80,12 @@ const PublicSportsSessions = () => {
       };
       getSportCategory();
     } catch (error) {
-      console.error('Failed to fetch sport categories');
+      console.error('Failed to fetch sport categories',error);
     }
   }, []);
 
   useEffect(() => {
-    const loadUsers = async () => {
+    const loadSessions = async () => {
       setIsLoading(true);
       try {
         const data = await sportSessionService.getAllSessions({
@@ -93,6 +94,7 @@ const PublicSportsSessions = () => {
           sport: sportFilter,
           sessionType: sessionTypeFilter,
           ageGroup: ageGroupFilter,
+          minRating: Number(ratingFilter) ,
           ...location,
         });
         setSessionsData(data);
@@ -105,40 +107,41 @@ const PublicSportsSessions = () => {
         setIsLoading(false);
       }
     };
-    loadUsers();
-  }, [currentPage, debouncedSearch, sportFilter, sessionTypeFilter, ageGroupFilter, location]);
+    loadSessions();
+  }, [currentPage, debouncedSearch, sportFilter, sessionTypeFilter, ageGroupFilter,ratingFilter, location]);
 
    useEffect(()=>{
      const getCurrentLocation = async (radius:number) => {
-    if (user && isAuthenticated) {
-      const data = await userService.getProfile();
-      if (data.profile) {
-        setLocation({
-          lat: data.profile.location.coordinates[0],
-          lng: data.profile.location.coordinates[1],
-          radius: radius,
-        });
-        return;
-      }
-    }
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            radius:radius,
-          });
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          toast.error('Unable to get current location');
+        if (user && isAuthenticated) {
+          console.log("here");
+          const data = await userService.getProfile();
+          if (data.profile) {
+            setLocation({
+              lat: data.profile.location.coordinates[0],
+              lng: data.profile.location.coordinates[1],
+              radius: radius,
+            });
+            return;
+          }
         }
-      );
-    } else {
-      toast.error('Geolocation is not supported by this browser');
-    }
-  };
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              setLocation({
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                radius:radius,
+              });
+            },
+            (error) => {
+              console.error('Error getting location:', error);
+              toast.error('Unable to get current location');
+            }
+          );
+        } else {
+          toast.error('Geolocation is not supported by this browser');
+        }
+    };
   if(radius!==0)
       getCurrentLocation(radius);
 },[radius]);
@@ -149,10 +152,11 @@ const PublicSportsSessions = () => {
     setSportFilter('');
     setSessionTypeFilter('');
     setAgeGroupFilter('');
+     setRatingFilter('');
     setLocation({ lat: 0, lng: 0, radius: 0 });
   };
 
-  const activeFilterCount = [sportFilter, sessionTypeFilter, ageGroupFilter].filter(
+  const activeFilterCount = [sportFilter, sessionTypeFilter, ageGroupFilter,ratingFilter].filter(
     (f) => f && f !== 'all'
   ).length + (location.lat !== 0 ? 1 : 0);
 
@@ -224,6 +228,32 @@ const PublicSportsSessions = () => {
         </Select>
       </div>
 
+          {/* Rating */}
+       <div className="flex flex-col gap-2">
+        <Label className="text-xs text-muted-foreground uppercase tracking-wide">
+          Rating
+        </Label>
+        <div className="flex gap-1.5">
+          {[4, 3, 2].map((r) => {
+            const isActive = ratingFilter === String(r);
+            return (
+              <Button
+                key={r}
+                type="button"
+                variant="outline"
+                onClick={() => setRatingFilter(isActive ? '' : String(r))}
+                className={`flex items-center gap-1 text-xs h-8 rounded-lg border transition-all duration-150
+                  ${isActive
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                    : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
+                  }`}
+              >
+                {r}★+
+              </Button>
+            );
+          })}
+        </div>
+      </div>     
       {/* Location */}
       <div className="flex flex-col gap-2">
         <Label className="text-xs text-muted-foreground uppercase tracking-wide">
