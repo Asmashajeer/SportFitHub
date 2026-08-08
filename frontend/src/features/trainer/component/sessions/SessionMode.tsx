@@ -75,7 +75,7 @@ const SessionMode = <T extends FieldValues>({offlineOnly=false}:{offlineOnly?:bo
         </>
       )}
 
-      {currentMode === SESSION_MODE.OFFLINE ? (
+      {currentMode === SESSION_MODE.OFFLINE ?(
         /* venue Details */
         <section className="space-y-4 p-5 rounded-xl  bg-card">
           <h3 className="flex items-center gap-2 font-bold text-primary">
@@ -156,16 +156,10 @@ const SessionMode = <T extends FieldValues>({offlineOnly=false}:{offlineOnly?:bo
         </section>
       ) : (
         <div className="space-y-2 animate-in fade-in duration-500">
-          <Label>Meeting Link </Label>
-          <Input
-            {...register('meetingLink' as Path<T>)}
-            placeholder="https://zoom.us/j/..."
-          />
-          {(errors as any)?.meetingLink && (
-            <p className="text-xs text-red-500">
-              {(errors as any).meetingLink.message}
-            </p>
-          )}
+        <Label>Meeting Link</Label>
+          <p className="text-sm text-muted-foreground">
+            You will get the link to join on the day of the session.
+          </p>
         </div>
       )}
     </div>

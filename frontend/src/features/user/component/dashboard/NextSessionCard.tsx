@@ -21,12 +21,13 @@ const NextSessionCard = ({ nextSession }: Props) => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            Next Session
+           Up next
           </div>
 
           <h2 className="text-2xl md:text-xl font-black text-white leading-tight">
             {nextSession.session.sessionName}
           </h2>
+          <p>{nextSession.sessionModel}</p>
         </div>
       )}
     </div>

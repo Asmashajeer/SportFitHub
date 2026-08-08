@@ -40,7 +40,7 @@ export interface SessionResponseDTO {
   maxCapacity: number;
   enrolledCount: number;
   mode: SESSION_MODE;
-  meetingLink?: string;
+ 
   venue: IVenue;
   amenities: string[];
   timeSlots: ITimeSlot[];

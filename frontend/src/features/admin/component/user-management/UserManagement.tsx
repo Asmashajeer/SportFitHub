@@ -82,12 +82,13 @@ const UserManagement = () => {
       }
     };
     loadUsers();
-  }, [currentPage, debouncedSearch, statusFilter, roleFilter]);
+  }, [currentPage, debouncedSearch, statusFilter, roleFilter]); 
 
   const handleToggleBlock = async (id: string) => {
     try {
       const { userData } = await userManagementService.toggleBlock(id);
-      updateUser(userData);
+      updateUser(userData);      
+     
       await fetchStats();
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -272,7 +273,7 @@ const UserManagement = () => {
                             }`}
                           >
                             {user.isBlocked && user.isActive
-                              ? 'Blocked'
+                              ? `Blocked`
                               : user.isActive
                                 ? 'Active'
                                 : 'Deleted'}

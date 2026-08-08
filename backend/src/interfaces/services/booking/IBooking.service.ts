@@ -8,6 +8,7 @@ import {
   UserBookedSessionsResponseDTO,
   UserBookingResponseDTO,
   UserSessionsResponseDTOwithPopulatedSession,
+  UserSessionsResponseDTOwithPrice,
 } from '@/dtos/response/booking/booking.response.dto';
 
 import { IBookedSlot } from '@/models/booking.model';
@@ -27,7 +28,7 @@ export interface IBookingService {
   getPublicBookedSlots(sessionId: string): Promise<BookedSlotPublicResponseData[]>;
   getBookedSessionByTrainerId(trainerId: string, timezone: string, filter: BookingSessionRequestfilterDTO): Promise<BookedSessionTrainerResponseDTO>;
   createBookingWithWallet(userId: string, payload: PayloadDTO): Promise<BookingConfirmResponseDTO>;
-  getBookedSessionsBySessionId(sessionId: string): Promise<UserSessionsResponseDTOwithPopulatedSession[]>;
+  getBookedSessionsBySessionId(sessionId: string): Promise<UserSessionsResponseDTOwithPrice[]> 
   isWithinCancellationWindow(date: string, time: string, cancellationWindow: number,timezone): boolean;
   autoCompleteSessions();
   checkSessionAccess(userId:string,sessionId:string,sessionStartUTC:string):Promise<boolean>

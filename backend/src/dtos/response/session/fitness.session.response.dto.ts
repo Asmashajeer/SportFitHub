@@ -50,7 +50,7 @@ export interface IFitnessSessionPopulated {
   maxCapacity: number;
   intensityLevel: INTENSITY_LEVEL;
   mode: SESSION_MODE;
-  meetingLink?: string; // Required if mode === ONLINE
+ 
   venue?: IVenue; // Required if mode === OFFLINE
   amenities?: string[]; // Required if mode === OFFLINE
   requirements: string[];
@@ -99,7 +99,7 @@ export interface FitnessSessionResponseDTO {
   enrolledCount: number;
   intensityLevel: INTENSITY_LEVEL;
   mode: SESSION_MODE;
-  meetingLink?: string;
+ 
   venue: IVenue;
   amenities: string[];
   requirements: string[];

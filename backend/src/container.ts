@@ -89,6 +89,8 @@ import { ReviewController } from './api/controllers/review/review.controller';
 import { createVideoCallHandler } from './socket/handlers/video.call.handler';
 import { PaymentsManagementController } from './api/controllers/admin/paymentManagement.controller';
 import { PaymentsManagementService } from './services/admin/paymentManagement.service';
+import { PenaltyLedgerModel } from './models/penaltyLedger.model';
+import { PenaltyLedgerRepository } from './repositories/penaltyLedger.repository';
 
 const userRepository = new UserRepository(User);
 const profileRepository = new ProfileRepository(Profile);
@@ -149,8 +151,8 @@ export const slotLockService = new SlotLockService(redisClientService);
 const walletService = new WalletService(walletRepository);
 const walletTransactionService = new WalletTransactionService(walletRepository, walletTransactionRepository);
 export const walletController = new WalletController(walletService, walletTransactionService);
-
-const penaltyService = new PenaltyService(penaltyRepository, walletService);
+const penaltyLedgerRepository=new PenaltyLedgerRepository(PenaltyLedgerModel)
+const penaltyService = new PenaltyService(penaltyRepository,penaltyLedgerRepository);
 
 export const bookingService = new BookingService(
   bookingRepository,
@@ -169,7 +171,7 @@ export const paymentController = new PaymentController(paymentService, bookingSe
 export const bookingController = new BookingController(bookingService);
 
 export const webhookController = new WebhookController(bookingService, slotLockService);
-const sportsSessionService = new SportsSessionService(sportsSessionRepository, trainerRepository, bookingService);
+const sportsSessionService = new SportsSessionService(sportsSessionRepository, trainerRepository, bookingService,penaltyService);
 export const sportsSessionController = new SportsSessionController(sportsSessionService);
 const fitnessSessionService = new FitnessSessionService(fitnessSessionRepository, trainerRepository, bookingService);
 export const fitnessSessionController = new FitnessSessionController(fitnessSessionService);

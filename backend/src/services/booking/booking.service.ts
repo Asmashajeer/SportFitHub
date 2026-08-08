@@ -33,7 +33,9 @@ import {
   UserBookedSessionsResponseDTO,
   UserBookingResponseDTO,
   UserBookingResponseDTOwithStatusCount,
+  
   UserSessionsResponseDTOwithPopulatedSession,
+  UserSessionsResponseDTOwithPrice,
 } from '@/dtos/response/booking/booking.response.dto';
 import {
   toBookedSessionResponseDTOWithPopulatedUser,
@@ -43,6 +45,7 @@ import {
   toUserBookingResponseDTO,
   toUserSessionsResponseDTO,
   toUserSessionsResponseDTOwithPopulatedSession,
+  toUserSessionsResponseDTOwithPrice,
 } from '@/mappers/booking/booking.mapper';
 import { ISlotLockService } from '@/interfaces/services/booking/ISlotLock.service';
 import { IBookingSessionRepository } from '@/interfaces/repositories/IBook.session.repository';
@@ -577,9 +580,11 @@ export class BookingService implements IBookingService {
 
       await dbSession.commitTransaction();
 
-      if (cancelledBy === UserRole.TRAINER) {
-        await this._penaltyService.applyPenalty(bookedSession.sessionId.trainerId.toString(), refundAmount);
-      }
+      // if (cancelledBy === UserRole.TRAINER) {
+      //   // await this._penaltyService.applyPenalty(bookedSession.sessionId.trainerId.toString(), refundAmount);
+      //           await this._penaltyService.applyPenalty(bookedSession.sessionId.trainerId.toString(),bookedSession.sessionId, refundAmount,  reason,  status);
+
+      // }
 
       const bookingSummary = ` Your Booking Summary was ${bookedSession.sessionId.sessionname} was scheduled on ${bookedSession.date} (${bookedSession.startTime}-${bookedSession.endTime}) at ${bookedSession.bookingId.venue.address}. `;
 
@@ -907,11 +912,11 @@ export class BookingService implements IBookingService {
     }
   }
 
-  async getBookedSessionsBySessionId(sessionId: string): Promise<UserSessionsResponseDTOwithPopulatedSession[]> {
+  async getBookedSessionsBySessionId(sessionId: string): Promise<UserSessionsResponseDTOwithPrice[]> {
     const sessions = await this._bookingSessionRepo.findUserSessions({ sessionId: sessionId, status: BOOKING_SESSION_STATUS.SCHEDULED });
     if (!sessions) throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
 
-    const bookedSessions = sessions.map((session) => toUserSessionsResponseDTOwithPopulatedSession(session as unknown as IBookedSessionPopulate));
+    const bookedSessions = sessions.map((session) => toUserSessionsResponseDTOwithPrice(session as unknown as IBookedSessionPopulate));
 
     return bookedSessions;
   }

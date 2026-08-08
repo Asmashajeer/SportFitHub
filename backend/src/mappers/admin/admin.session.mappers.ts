@@ -119,7 +119,7 @@ export const toAdminSessionDetailedViewDTO = (session: SportsSessionDetails | Fi
     // only include for fitness sessions
     ...(isFitness && {
       mode: (session as FitnessSessionDetails).mode,
-      meetingLink: (session as FitnessSessionDetails).meetingLink ?? null,
+      
       venue: (session as FitnessSessionDetails).venue ?? null,
     }),
   };

@@ -1,6 +1,7 @@
 export const AppName = 'SportFitHub';
 export const AppEmail = 'sportfit.hub@gmail.com';
 
+//------AUTH----------
 export enum UserRole {
   ADMIN = 'admin',
   TRAINER = 'trainer',
@@ -12,8 +13,10 @@ export enum OtpType {
   VERIFICATION = 'VERIFICATION',
   PASSWORD_RESET = 'PASSWORD_RESET',
 }
-
 export const PAGINATION_LIMIT = 10;
+
+
+//-------USER------------
 export enum GENDER {
   MALE = 'Male',
   FEMALE = 'Female',
@@ -28,7 +31,7 @@ export enum RELATIONSHIP {
   OTHER = 'Other',
 }
 
-//Trainer
+//-------------------TRAINER--------
 export enum TRAINER_CATEGORY {
   SPORT = 'Sports',
   FITNESS = 'Fitness',
@@ -58,7 +61,7 @@ export enum TRAINER_STATUS {
   SUSPENDED = 'suspended',
   VARIFICATION_REQUIRED = 'Need Verification',
 }
-
+//---------------SESSION------------
 export const CURRENCIES = {
   US: '$',
   EURO: '€',
@@ -68,7 +71,7 @@ export const CURRENCIES = {
 };
 export const CURRENCY = '₹';
 
-// session
+
 export enum AGE_GROUP {
   KIDS = 'Kids',
   TEENS = 'Teens',
@@ -90,7 +93,7 @@ export enum DAY {
   Saturday = 'Saturday',
   Sunday = 'Sunday',
 }
-
+//fitness session
 export enum SESSION_MODE {
   ONLINE = 'Online',
   OFFLINE = 'Offline',
@@ -102,6 +105,8 @@ export enum INTENSITY_LEVEL {
   ADVANCED = 'Advanced',
 }
 
+
+//--------------BOOKING----------
 export enum PAYLOAD_MODEL {
   SPORT_SESSION = 'SportsSession',
   FITNESS_SESSION = 'FitnessSession',
@@ -140,7 +145,7 @@ export enum BOOKING_SESSION_STATUS {
   CANCELLED = 'cancelled',
 }
 export const TTLSECONDS = 900;
-
+//---------------TRANSACTION--------
 export enum TRANSACTION_TYPE {
   DEBIT = 'Debit',
   CREDIT = 'Credit',
@@ -158,6 +163,18 @@ export enum TRANSACTION_STATUS {
   FAILED = 'failed',
 }
 
+//-----------PENALTY-------------
+export enum PENALTY_REASONS {
+  LATE_CANCELLATION = 'late_cancellation',
+  NO_SHOW = 'no_show',
+  REPEATED_CANCELLATION = 'repeated_cancellation',
+}
+
+export enum PENALTY_STATUS {
+  PENDING = 'pending',
+  DEDUCTED = 'deducted',
+  REVERSED = 'reversed',
+}
 export const PENALTY = {
   CANCELLATION_PENALTY_PERCENT: 15, // 15% of session revenue deducted from trainer wallet
 
@@ -170,18 +187,23 @@ export const PENALTY = {
   STRIKE_RESET_DAYS: 90, // strikes reset after 90 days
 } as const;
 
+
+
+//----------------ATTENDANCE-------------
 export enum AttendanceStatus {
   PRESENT = 'true',
   ABSENT = 'false', 
 }
 
-
+//------------------REVIEW----
 export enum Review_Type{
   SPORT_SESSION='SportsSession',
   FITNESS_SESSION='FitnessSession',
   TRAINER='TrainerProfile'  
 }
 
+
+// -----------VIDEO CALL--------------
 export enum VIDEO_CALL_STATUS{
   IDLE='idle' ,
   RINGING= 'ringing' ,

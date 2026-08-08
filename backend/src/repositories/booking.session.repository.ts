@@ -35,7 +35,7 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
   async findUserSessions(filter: FilterQuery<IBookingSession>) {
     const sessions = await this.model
       .find(filter)
-      .populate('bookingId', ' _id venue')
+      .populate('bookingId', ' _id bookingUID pricePlan.unitPrice ')
       .populate('trainerId', '_id userId displayName')
       .populate('sessionId', '_id trainerId sessionName sessionType maxCapacity bookingDeadline cancellationWindow')
       .sort({ date: -1 }) 

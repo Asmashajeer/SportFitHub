@@ -38,8 +38,7 @@ export interface IFitnessSession extends Document {
   maxCapacity: number;
   enrolledCount: number;
   intensityLevel: INTENSITY_LEVEL;
-  mode: SESSION_MODE;
-  meetingLink?: string;
+  mode: SESSION_MODE;  
   venue?: IVenue;
   amenities: string[];
   requirements: string[];
@@ -122,12 +121,7 @@ const FitnessSessionSchema = new mongoose.Schema<IFitnessSession>(
       enum: Object.values(SESSION_MODE),
       default: SESSION_MODE.OFFLINE,
     },
-    meetingLink: {
-      type: String,
-      required: function () {
-        return this.mode === SESSION_MODE.ONLINE;
-      },
-    },
+   
     venue: {
       name: {
         type: String,

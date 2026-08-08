@@ -20,16 +20,21 @@ import { formatTo12Hour } from '@/utils/formatTo';
 import { IBookingService } from '@/interfaces/services/booking/IBooking.service';
 import { getTimezone } from '@/context/timezone.context';
 import tz_lookup from 'tz-lookup';
+import { IBookedSessionPopulate } from '@/models/booking.session.model';
+import { UserSessionsResponseDTOwithPopulatedSession, UserSessionsResponseDTOwithPrice } from '@/dtos/response/booking/booking.response.dto';
+import { IPenaltyService } from '@/interfaces/services/trainer/IPenalty.service';
 
 export class SportsSessionService implements ISportsSessionService {
   private _sportsSessionRepo: ISportsSessionRepository;
   private _trainerRepo: ITrainerRepository;
   private _bookingService: IBookingService;
+  private _penaltyService:IPenaltyService;
 
-  constructor(sportsSessionRepo: ISportsSessionRepository, trainerRepo: ITrainerRepository, bookingService: IBookingService) {
+  constructor(sportsSessionRepo: ISportsSessionRepository, trainerRepo: ITrainerRepository, bookingService: IBookingService,penaltyService:IPenaltyService) {
     this._sportsSessionRepo = sportsSessionRepo;
     this._trainerRepo = trainerRepo;
     this._bookingService = bookingService;
+    this._penaltyService=penaltyService;
   }
 
   //----------create Session------------------
@@ -141,6 +146,23 @@ export class SportsSessionService implements ISportsSessionService {
         await this._bookingService.cancelSession(sessionBookingId, reason, cancelledBy);
       })
     );
+    //  apply penalty once PER OCCURRENCE,
+    if (cancelledBy === UserRole.TRAINER) {
+    const occurrenceGroups = groupByOccurrence(bookingSessions); // group by slotId + startDateTime
+      await Promise.all(
+        occurrenceGroups.map((group) => {
+          const sessionRevenue = group.bookings.reduce((sum, b) => sum + b.unitPrice, 0);
+          return this._penaltyService.applyPenalty(
+            group.trainerId,
+            id,               // sessionId (template)
+            group.slotId,
+            group.startDateTime,
+            sessionRevenue
+          );
+        })
+      );
+    }
+
     const data = await this._sportsSessionRepo.deleteASession(id);
     if (!data) {
       throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.BAD_REQUEST);
@@ -280,4 +302,17 @@ export class SportsSessionService implements ISportsSessionService {
       });
     });
   };
+}
+function groupByOccurrence(bookingSessions: UserSessionsResponseDTOwithPrice[]) {
+  const map = new Map<string, { trainerId: string; slotId: string; startDateTime: Date; bookings: typeof bookingSessions }>();
+
+  for (const b of bookingSessions) {
+    const key = `${b.slotId}_${b.startDateTime}`;
+    if (!map.has(key)) {
+      map.set(key, { trainerId: b.trainer.id, slotId: b.slotId, startDateTime:new Date (b.startDateTime), bookings: [] });
+    }
+    map.get(key)!.bookings.push(b);
+  }
+
+  return Array.from(map.values());
 }

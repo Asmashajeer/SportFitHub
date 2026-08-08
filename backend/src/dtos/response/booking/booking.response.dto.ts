@@ -83,6 +83,11 @@ export interface UserSessionsResponseDTOwithPopulatedSession extends Omit<UserBo
       trainerName:string,
     },
 }
+
+export interface UserSessionsResponseDTOwithPrice extends UserSessionsResponseDTOwithPopulatedSession {
+  unitPrice :number , 
+}
+
 export interface userInfo {
   userId: string;
   userName: string;

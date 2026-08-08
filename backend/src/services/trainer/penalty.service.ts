@@ -1,62 +1,78 @@
 import { PenaltyRepository } from '@/repositories/penalty.repository';
-import { WalletService } from '../wallet/wallet.service';
 import { PENALTY, TRAINER_STATUS } from '@/constants/enums';
 import { differenceInDays } from 'date-fns';
 import { IPenaltyService } from '@/interfaces/services/trainer/IPenalty.service';
 import { sendNotificationEmail } from '@/utils/sendNotfication.mail';
 
 import { IUser } from '@/models/user.model';
+import { IPenaltyLedgerRepository } from '@/interfaces/repositories/IPenaltyLedger.repository';
 
 export class PenaltyService implements IPenaltyService {
   private _penaltyRepo: PenaltyRepository;
-  private _walletService: WalletService;
-  constructor(penaltyRepo: PenaltyRepository, walletService: WalletService) {
+  private _penaltyLedgerRepo: IPenaltyLedgerRepository;
+
+  constructor(penaltyRepo: PenaltyRepository, penaltyLedgerRepo: IPenaltyLedgerRepository) {
     this._penaltyRepo = penaltyRepo;
-    this._walletService = walletService;
+    this._penaltyLedgerRepo = penaltyLedgerRepo;
+   
   }
 
-  async applyPenalty(trainerId: string, sessionRevenue: number): Promise<void> {
+  async applyPenalty(trainerId: string, sessionId: string, slotId: string, startDateTime: Date, sessionRevenue: number): Promise<void> {
+    const alreadyPenalized = await this._penaltyLedgerRepo.findByOccurrence(sessionId, slotId, startDateTime);
+    if (alreadyPenalized) return;
     const trainer = await this._penaltyRepo.findTrainerById(trainerId);
-
     const user = trainer.userId as unknown as IUser;
+
+    // don't keep striking/penalizing a trainer who's already suspended
+    if (trainer.status === TRAINER_STATUS.SUSPENDED) return;
 
     // reset strikes if last strike was > 90 days ago
     const shouldReset = trainer.lastStrikeDate && differenceInDays(new Date(), new Date(trainer.lastStrikeDate)) > PENALTY.STRIKE_RESET_DAYS;
 
-    let { strikePoints, penalty, cancellationCount } = trainer;
-    if (shouldReset) {
-      strikePoints = 0;
-      penalty = 0;
-      cancellationCount = 0;
+     if (shouldReset) {
+      await this._penaltyRepo.updatePenalty(trainerId, { strikePoints: 0, cancellationCount: 0 });
     }
+    // increment strike
+    const updatedTrainer = await this._penaltyRepo.incrementStrike(trainerId, {
+      strikePoints: 1,
+      cancellationCount: 1,
+      lastStrikeDate: new Date(),
+    });
 
-    cancellationCount += 1;
-    strikePoints += 1;
-    const lastStrikeDate = new Date();
-
+    const { strikePoints } = updatedTrainer;
     const penaltyAmount = (sessionRevenue * PENALTY.CANCELLATION_PENALTY_PERCENT) / 100;
 
     if (strikePoints === PENALTY.STRIKE_THRESHOLDS.WARNING) {
       await this._handleFirstStrike(user, strikePoints);
-    } else if (strikePoints === PENALTY.STRIKE_THRESHOLDS.PENALTY) {
-      penalty += penaltyAmount;
+    } 
+    else if (strikePoints === PENALTY.STRIKE_THRESHOLDS.PENALTY) {
+      await this._recordPenalty(trainerId, sessionId, slotId, startDateTime, penaltyAmount);
       await this._handleSecondStrike(user, strikePoints, penaltyAmount);
-    } else if (strikePoints >= PENALTY.STRIKE_THRESHOLDS.SUSPENSION) {
-      penalty += penaltyAmount;
+    } 
+    else if (strikePoints >= PENALTY.STRIKE_THRESHOLDS.SUSPENSION) {
+      await this._recordPenalty(trainerId, sessionId, slotId, startDateTime, penaltyAmount);
       await this._handleThirdStrike(user, strikePoints, penaltyAmount);
-    }
-
-    await this._penaltyRepo.updatePenalty(trainerId, {
-      penalty,
-      strikePoints,
-      cancellationCount,
-      lastStrikeDate,
-      ...(strikePoints >= PENALTY.STRIKE_THRESHOLDS.SUSPENSION && {
+      //update trainer status
+      await this._penaltyRepo.updatePenalty(trainerId, {
         status: TRAINER_STATUS.SUSPENDED,
         suspensionReason: 'Suspended due to repeated session cancellations.',
         suspendedAt: new Date(),
-      }),
+      });
+    }
+  }
+
+  private async _recordPenalty(trainerId: string, sessionId: string, slotId: string, startDateTime: Date, amount: number): Promise<void> {
+    await this._penaltyLedgerRepo.createPenalty({
+      trainerId,
+      sessionId,
+      slotId,
+      startDateTime,
+      amount,
+      reason: 'late_cancellation',
+      status: 'pending',
     });
+
+    
   }
 
   // ─── Strike Handlers ────────────────────────────────────────
@@ -77,12 +93,10 @@ export class PenaltyService implements IPenaltyService {
   }
 
   private async _handleSecondStrike(user: IUser, strikePoints: number, penaltyAmount: number): Promise<void> {
-    await this._walletService.deductFromWallet(user._id.toString(), penaltyAmount);
-
     await sendNotificationEmail({
       to: user.email,
       title: '🚩 Second Strike — Financial Penalty Applied',
-      description: 'A financial penalty has been deducted from your wallet due to session cancellation.',
+      description: 'A financial penalty will be deducted from your upcoming payout due to session cancellation.',
       details: {
         userName: user.name,
         strikes: `${strikePoints} / ${PENALTY.STRIKE_THRESHOLDS.SUSPENSION}`,
@@ -94,8 +108,6 @@ export class PenaltyService implements IPenaltyService {
   }
 
   private async _handleThirdStrike(user: IUser, strikePoints: number, penaltyAmount: number): Promise<void> {
-    await this._walletService.deductFromWallet(user._id.toString(), penaltyAmount);
-
     await sendNotificationEmail({
       to: user.email,
       title: '🚫Account Suspended',

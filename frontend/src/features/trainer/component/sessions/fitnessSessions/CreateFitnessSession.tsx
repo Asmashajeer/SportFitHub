@@ -519,24 +519,28 @@ const CreateFitnessSessionModal = ({
                     {/* session type-grup/one to one */}
                     <div className="flex items-center gap-2 ">
                       <Label className=" text-slate-400">Type</Label>
-                      <Select
-                        key={watch('sessionType') || ''}
-                        value={watch('sessionType') || ''}
-                        onValueChange={(val) =>
-                          handleSelectChange('sessionType', val)
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.values(SESSION_TYPE).map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {type}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {watch('mode')===SESSION_MODE.ONLINE ? (
+                        <p className='mx-1 p-2 border'>{SESSION_TYPE.ONE_ONE}</p>
+                      ):(
+                        <Select
+                          key={watch('sessionType') || ''}
+                          value={watch('sessionType') || ''}
+                          onValueChange={(val) =>
+                            handleSelectChange('sessionType', val)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.values(SESSION_TYPE).map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                       {watch('sessionType') === SESSION_TYPE.GROUP && (
                         <div className="flex items-center gap-1 bg-card">
                           <Label className="text-xs text-slate-400">Max </Label>

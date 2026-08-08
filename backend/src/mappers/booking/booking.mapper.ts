@@ -3,7 +3,7 @@ import { IBooking } from '@/models/booking.model';
 import { IBookedSessionPopulate, IBookingSession } from '@/models/booking.session.model';
 import { formatInTimeZone } from 'date-fns-tz';
 import { getTimezone } from '@/context/timezone.context';
-import { UserSessionsResponseDTOwithPopulatedSession } from '@/dtos/response/booking/booking.response.dto';
+import { UserSessionsResponseDTOwithPopulatedSession, UserSessionsResponseDTOwithPrice } from '@/dtos/response/booking/booking.response.dto';
 import { Types } from 'mongoose';
 
 interface Counts {
@@ -115,7 +115,14 @@ export const toUserSessionsResponseDTOwithPopulatedSession = (bookedSession: IBo
     venue: bookedSession.bookingId.venue ?? null,
   };
 };
+export const toUserSessionsResponseDTOwithPrice = (bookedSession):UserSessionsResponseDTOwithPrice => {
+   return {
+    ...toUserSessionsResponseDTOwithPopulatedSession(bookedSession),
+    unitPrice:bookedSession.bookingId.pricePlan.unitPrice,      
+    
+  };
 
+} 
 export const toCancelBookedSessionResponseDTO = (data) => {
   const timezone = getTimezone();
   return {
