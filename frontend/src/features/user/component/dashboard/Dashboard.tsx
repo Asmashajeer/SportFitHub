@@ -108,20 +108,20 @@ const Dashboard = () => {
   const upcoming = userSessions
     .filter(
       (s) =>
-        new Date(s.date) >= new Date() &&
+        new Date(s.startDateTime) >= new Date() &&
         s.status !== BOOKING_SESSION_STATUS.RESCHEDULED &&
         s.status !== BOOKING_SESSION_STATUS.CANCELLED
     )
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .sort((a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
 
-  const rest = upcoming.slice(1, 4);
-
-  // Sessions landing within the next 7 days — used for the quiet weekly stat.
-  const weekFromNow = new Date();
-  weekFromNow.setDate(weekFromNow.getDate() + 7);
-  const thisWeekCount = upcoming.filter(
-    (s) => new Date(s.date) <= weekFromNow
-  ).length;
+      // Sessions landing within the next 7 days — used for the quiet weekly stat.
+    const weekFromNow = new Date();
+    weekFromNow.setDate(weekFromNow.getDate() + 7);
+    const thisWeekCount = upcoming.filter(
+      (s) => new Date(s.startDateTime) <= weekFromNow
+    ).length;
+  const thisWeekSessions = upcoming.slice(0, thisWeekCount);    
+ 
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
@@ -134,23 +134,13 @@ const Dashboard = () => {
       <PendingReviewsBanner />
 
       {upcoming[0] ? (
-        <>
-          {/* Hero: closest booking gets the spotlight */}
-          {/* <div className="rounded-3xl bg-[#1a1a1a] border border-white/5 p-6"> */}
-            {/* <div className="flex items-start justify-between mb-5">
-              <p className="text-sm text-emerald-500 font-medium">Up next</p>
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                <Calendar size={18} className="text-emerald-500" />
-              </div>
-            </div> */}
-
-            <NextSessionCard nextSession={upcoming[0]} />
-            
-          {/* </div> */}
+        <>   
+            <NextSessionCard nextSession={upcoming[0]} />         
+         
 
           {/* Quiet weekly stat — swap in real streak data once tracked */}
           <div className="rounded-3xl bg-[#1a1a1a] border border-white/5 p-5 flex items-center justify-between">
-            <p className="text-sm text-gray-400">This week</p>
+            <p className="flex items-center gap-2 text-sm text-gray-400"><Calendar className=' w-3 h-3 text-green-600'/>This week</p>
             <p className="text-lg font-bold text-white">{thisWeekCount} session{thisWeekCount === 1 ? '' : 's'}</p>
           </div>
         </>
@@ -159,7 +149,7 @@ const Dashboard = () => {
       )}
 
       {/* Coming up — short, scannable, not a full schedule dump */}
-      {rest.length > 0 && (
+      {thisWeekSessions.length > 0 && (
         <div className="rounded-3xl bg-[#1a1a1a] border border-white/5 p-6">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-500">Coming up</p>
@@ -173,7 +163,7 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-2">
-            {rest.map((s) => (
+            {thisWeekSessions.map((s) => (
               <MiniBookingCard key={`${s.id}-${s.date}`} session={s} />
             ))}
           </div>

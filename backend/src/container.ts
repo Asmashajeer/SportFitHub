@@ -91,7 +91,24 @@ import { PaymentsManagementController } from './api/controllers/admin/paymentMan
 import { PaymentsManagementService } from './services/admin/paymentManagement.service';
 import { PenaltyLedgerModel } from './models/penaltyLedger.model';
 import { PenaltyLedgerRepository } from './repositories/penaltyLedger.repository';
-
+import { SettingsRepository } from './repositories/settings.repository';
+import { SettingsService } from './services/admin/settings.service';
+import PlatformSettingsModel from './models/PlatformSettings.model';
+import { PayoutLedgerRepository } from './repositories/payoutLedger.repository';
+import payoutLedgerModel from './models/payoutLedger.model';
+import { SettingsController } from './api/controllers/admin/settings.controller';
+import { PayoutLedgerService } from './services/trainer/payoutLedger.service';
+import { TrainerEarningsService } from './services/trainer/trainerEarnings.service';
+import { TrainerEarningsController } from './api/controllers/trainer/trainerEarnings.controller';
+import { PayoutBatchRepository } from './repositories/payoutBatch.repository';
+import PayoutBatchModel from './models/payoutBatch.model';
+import { PayoutService } from './services/trainer/payout.service';
+import Stripe from 'stripe';
+import { StripeConnectService } from './services/trainer/stripeConnect.service';
+import { StripeConnectController } from './api/controllers/trainer/stripeConnect.controller';
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2026-03-25.dahlia',
+});
 const userRepository = new UserRepository(User);
 const profileRepository = new ProfileRepository(Profile);
 const otpRepository = new OtpRepository(otpModel);
@@ -109,7 +126,10 @@ const penaltyRepository = new PenaltyRepository(TrainerProfile);
 const reviewRepository=new ReviewRepository(reviewModel);
 const reviewService=new ReviewService(reviewRepository,bookingSessionRepository,sportsSessionRepository,fitnessSessionRepository);
 export const reviewController=new ReviewController(reviewService);
-
+const settingsRepo = new SettingsRepository(PlatformSettingsModel);
+const settingsService = new SettingsService(settingsRepo);
+const payoutLedgerRepository=new PayoutLedgerRepository(payoutLedgerModel);
+const payoutBatchRepository=new PayoutBatchRepository(PayoutBatchModel)
 const userManagementService = new UserManagementService(userRepository, bookingSessionRepository, walletRepository, trainerRepository, sportsSessionRepository, fitnessSessionRepository);
 export const userManagementController = new UserManagementController(userManagementService);
 export const isBlocked = checkBlocked(userRepository);
@@ -143,7 +163,7 @@ export const fitnessManagementController = new FitnessManagementController(fitne
 const sessionManagementService = new SessionManagementService(sportsSessionRepository, fitnessSessionRepository);
 export const sessionManagementController = new SessionManagementController(sessionManagementService);
 
-const paymentService = new PaymentService(paymentRepository, userRepository, sportsSessionRepository, fitnessSessionRepository);
+const paymentService = new PaymentService(paymentRepository, userRepository, sportsSessionRepository, fitnessSessionRepository,stripe);
 
 export const redisClientService = new RedisClientService();
 export const slotLockService = new SlotLockService(redisClientService);
@@ -165,12 +185,15 @@ export const bookingService = new BookingService(
   walletTransactionService,
   penaltyService,
   userRepository,
-  trainerRepository
+  trainerRepository,
+  payoutLedgerRepository,
+  settingsService,
+  
 );
 export const paymentController = new PaymentController(paymentService, bookingService);
 export const bookingController = new BookingController(bookingService);
 
-export const webhookController = new WebhookController(bookingService, slotLockService);
+export const webhookController = new WebhookController(bookingService, slotLockService,stripe);
 const sportsSessionService = new SportsSessionService(sportsSessionRepository, trainerRepository, bookingService,penaltyService);
 export const sportsSessionController = new SportsSessionController(sportsSessionService);
 const fitnessSessionService = new FitnessSessionService(fitnessSessionRepository, trainerRepository, bookingService);
@@ -178,7 +201,7 @@ export const fitnessSessionController = new FitnessSessionController(fitnessSess
 export const sessionController = new SessionController(sportsSessionService, fitnessSessionService);
 const bookingsManagementService = new BookingsManagementService(bookingRepository, bookingSessionRepository);
 export const bookingsManagementController = new BookingsManagementController(bookingsManagementService);
-const paymentsManagementService=new PaymentsManagementService(paymentRepository);
+const paymentsManagementService=new PaymentsManagementService(paymentRepository,walletTransactionRepository,payoutBatchRepository,payoutLedgerRepository);
 export const paymentsManagementController=new PaymentsManagementController(paymentsManagementService)
 const attendanceService = new AttendanceService(bookingSessionRepository,reviewService);
 export const attendanceController = new AttendanceController(attendanceService);
@@ -187,9 +210,14 @@ const conversationRepository = new ConversationRepository(conversationModel);
 const messageRepository = new MessageRepository(messageModel);
 
 export const chatService = new ChatService(conversationRepository, messageRepository);
-
 export const chatHandler = createChatHandler(chatService);
 export const chatController = new ChatController(chatService);
 
 export const videoCallHandler=createVideoCallHandler(bookingService);
-
+export const settingsController=new SettingsController(settingsService);
+export const payoutLedgerService=new PayoutLedgerService(payoutLedgerRepository);
+const trainerEarningsService = new TrainerEarningsService(payoutLedgerRepository, penaltyLedgerRepository,payoutBatchRepository);
+export const trainerEarningsController=new TrainerEarningsController(trainerEarningsService);
+export const payoutService=new PayoutService(payoutLedgerRepository,penaltyLedgerRepository,payoutBatchRepository, trainerRepository,stripe )
+const stripeConnectService=new StripeConnectService(trainerRepository,stripe)
+export const stripeConnectController= new StripeConnectController(stripeConnectService)

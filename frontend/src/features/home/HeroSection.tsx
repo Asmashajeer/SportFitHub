@@ -32,12 +32,7 @@ const HeroSection = () => {
           </p>
 
           {/* CTA Buttons - Utilizing your .btn-primary and .btn-secondary */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* <Link to={isAuthenticated ? "/dashboard" : "/register"} className="w-full sm:w-auto">
-              <Button variant="primary" className="text-lg py-4">
-                {isAuthenticated ? "Go to Dashboard" : "Explore Now"}
-              </Button>
-            </Link> */}
+          <div className="flex flex-col sm:flex-row gap-4">        
 
             
               <Button variant="ghost" size="lg" className="border-2"  

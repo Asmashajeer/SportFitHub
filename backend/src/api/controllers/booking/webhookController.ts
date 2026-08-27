@@ -5,15 +5,17 @@ import { ISlotLockService } from '@/interfaces/services/booking/ISlotLock.servic
 
 import { NextFunction, Request, Response } from 'express';
 import Stripe from 'stripe';
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export class WebhookController {
   private _bookingService: IBookingService;
   private _slotLockService: ISlotLockService;
-  constructor(bookingService: IBookingService, slotLockService: ISlotLockService) {
+  private _stripe: Stripe 
+  constructor(bookingService: IBookingService, slotLockService: ISlotLockService,stripe:Stripe,) {
     this._bookingService = bookingService;
     this._slotLockService = slotLockService;
+    this._stripe=stripe
   }
   public handleWebhook = async (req: Request, res: Response, next: NextFunction) => {
     const sig = req.headers['stripe-signature'];
@@ -24,7 +26,7 @@ export class WebhookController {
     let event: Stripe.Event;
 
     try {
-      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+      event = this._stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
     } catch (err) {
       console.error(` Webhook Error: ${err.message}`);
       return next(err);
@@ -44,7 +46,7 @@ export class WebhookController {
           return res.status(STATUS_CODE.ERROR.BAD_REQUEST).json({ message: 'No PaymentIntent found' });
         }
         try {
-          const paymentIntent = await stripe.paymentIntents.retrieve(
+          const paymentIntent = await  this._stripe.paymentIntents.retrieve(
             paymentIntentId as string,
             { expand: ['latest_charge'] } // This allows you to get the receipt_url
           );

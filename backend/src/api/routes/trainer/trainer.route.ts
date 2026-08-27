@@ -7,6 +7,7 @@ import { uploadMiddleware } from '@/middleware/upload.middleware';
 import sessionRoute from '../trainer/session.route';
 import bookingsRoute from './bookings.route';
 import attendanceRoute from './attendance.route';
+import earningsRoute from './earnings.route';
 
 const upload = uploadMiddleware();
 import { Router } from 'express';
@@ -31,6 +32,7 @@ router.use(restrictTo([UserRole.TRAINER]));
 router.use('/sessions', sessionRoute);
 router.use('/bookings', bookingsRoute);
 router.use('/attendance', attendanceRoute);
+router.use('/earnings', earningsRoute);
 
 router.get('/profile_pic', trainerController.getProfilePic);
 router.patch('/profile/profile_pic/:id', trainerController.updateProfilePic);

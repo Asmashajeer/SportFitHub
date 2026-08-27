@@ -9,21 +9,16 @@ export const TRAINER_ROUTES = {
   },
   UPDATE_PROFILE_PIC: {
       BY_ID: (profileId: string) => `trainer/profile/profile_pic/${profileId}`,
-
-
-
     },
-  //------------Booking------------
+
+
+      //------------Booking------------
   GET_BOOKINGS: '/trainer/bookings',
   GET_BOOKED_SESSIONS:'/trainer/bookings/booked-sessions',
  
 }
 
-export const TRAINER_ATTENDACE_ROUTE={
-   GET_BOOKED_SESSIONS_OCCURANCES:'/trainer/attendance/booked-sessions-occurances',
-   MARK_ATTENDANCE:(sessionId:string)=>`/trainer/attendance/${sessionId}/mark-attendance`
-}
-  
+//-------SPRORTS SESSION--------------
 export const SPORTS_SESSION_ROUTE = {
   ADD_SPORT_SESSION: '/trainer/sessions/sports/sport',
   SPORT_SESSION: {
@@ -35,6 +30,8 @@ export const SPORTS_SESSION_ROUTE = {
   GET_SESSIONS: '/trainer/sessions/sports',
 };
 
+
+//----------FITNESS SESSION------------
 export const FITNESS_SESSION_ROUTE = {
   ADD_FITNESS_SESSION: '/trainer/sessions/fitness/fitnessSession',
   FITNESS_SESSION: {
@@ -46,4 +43,26 @@ export const FITNESS_SESSION_ROUTE = {
 export const DOCUMENTS_ROUTE={
   GET_CERTIFICATE:`/documents/download?type=certificate`,
   GET_ID_ATTACHMENT:`/documents/download?type=id-attachment`,
+}
+
+
+
+
+
+
+//--------------ATTENDANCE---
+export const TRAINER_ATTENDACE_ROUTE={
+   GET_BOOKED_SESSIONS_OCCURANCES:'/trainer/attendance/booked-sessions-occurances',
+   MARK_ATTENDANCE:(sessionId:string)=>`/trainer/attendance/${sessionId}/mark-attendance`
+}
+
+//-----EARNINGS------------
+export const TRAINER_EARNINGS_ROUTE={
+   GET_SUMMARY:'/trainer/earnings/summary',
+   GET_HISTORY:'/trainer/earnings/history',
+   GET_SESSIONS:'/trainer/earnings/sessions',  
+   GET_STRIPE_STATUS:'/trainer/earnings/stripe_status', 
+   STRIPE_CONNECT: '/trainer/earnings/stripe_connect', 
+   GENERATE_LINK: '/trainer/earnings/stripe_refresh-link', 
+  
 }

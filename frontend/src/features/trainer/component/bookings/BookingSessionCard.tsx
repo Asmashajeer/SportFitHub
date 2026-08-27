@@ -107,9 +107,9 @@ function BookingSessionCard({
       {/* Actions */}
      
       <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-zinc-700/40">
-      {/* {canJoinSession(first) && */}
+      {canJoinSession(first) &&
        <Button onClick={handleJoinSession}> {callStatus===VIDEO_CALL_STATUS.WAITING ? 'waiting To Join...': 'Join Session'}</Button>
-      {/* }  */}
+      }  
         <button
           onClick={() => setShowParticipant((prev) => !prev)}
           className="text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors"

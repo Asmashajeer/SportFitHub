@@ -3,5 +3,6 @@ export interface AdminPaymentsFilterDTO {
   limit: number;
   search: string;
   status: string;
+  date:string;
  
 }

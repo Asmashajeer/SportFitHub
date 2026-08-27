@@ -55,6 +55,10 @@ export const ADMIN_ROUTES = {
  
 
 
-
+   GET_PAYMENT_STATS:'/admin/payments/stats',
    GET_PAYMENTS:'/admin/payments',
+
+   SETTINGS:'/admin/settings/'
+
 } as const;
+

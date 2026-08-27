@@ -9,6 +9,7 @@ import categoryRoute from './categoryManagement.route';
 import sessionRoute from './sessionManagement.route';
 import bookingRoute from './bookingManagement.route';
 import paymentsRoute from './paymentManagement.route';
+import settingsRoute from './settings.route'
 
 const adminRouter = Router();
 adminRouter.use(protect);
@@ -20,4 +21,5 @@ adminRouter.use('/category', categoryRoute);
 adminRouter.use('/sessions', sessionRoute);
 adminRouter.use('/bookings', bookingRoute);
 adminRouter.use('/payments', paymentsRoute);
+adminRouter.use('/settings',settingsRoute);
 export default adminRouter;

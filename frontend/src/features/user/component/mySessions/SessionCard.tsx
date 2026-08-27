@@ -165,9 +165,9 @@ function SessionCard({
       )}
       {cfg.actions.length > 0 && (
         <div className="flex justify-end  gap-2">
-          {/* {canJoinSession() && */}
+          {canJoinSession() &&
               <Button onClick={handleJoinSession}> {callStatus===VIDEO_CALL_STATUS.WAITING ? 'waiting To Join...': 'Join Session'}</Button>
-           {/* }   */}
+         }   
           {cfg.actions.map((a) =>
             a === 'cancel' ? (
               <div className=" px-3 py-1 rounded-lg border border-red-400/30 hover:bg-red-500/10">

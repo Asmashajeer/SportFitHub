@@ -20,8 +20,8 @@ import { formatTo12Hour } from '@/utils/formatTo';
 import { IBookingService } from '@/interfaces/services/booking/IBooking.service';
 import { getTimezone } from '@/context/timezone.context';
 import tz_lookup from 'tz-lookup';
-import { IBookedSessionPopulate } from '@/models/booking.session.model';
-import { UserSessionsResponseDTOwithPopulatedSession, UserSessionsResponseDTOwithPrice } from '@/dtos/response/booking/booking.response.dto';
+
+import { UserSessionsResponseDTOwithPrice } from '@/dtos/response/booking/booking.response.dto';
 import { IPenaltyService } from '@/interfaces/services/trainer/IPenalty.service';
 
 export class SportsSessionService implements ISportsSessionService {

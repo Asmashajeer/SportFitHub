@@ -112,6 +112,8 @@ export interface ITrainerProfile extends Document {
   rejectionReason?: string;
   rejectedAt?: Date;
   applicationCount: number;
+  stripeAccountId?:string;
+  stripeOnboardingComplete:boolean,
   penalty: number;
   strikePoints: number;
   cancellationCount: number;
@@ -260,11 +262,13 @@ const TrainerProfileSchema = new mongoose.Schema(
       type: verificationRemarksSchema,
       default: { fields: [], changedAt: null },
     },
-    suspensionReason: String,
-    suspendedAt: Date,
-    rejectionReason: String,
-    rejectedAt: Date,
+    suspensionReason: {type:String,default:""},
+    suspendedAt:{ type: Date, default: null },
+    rejectionReason:{type:String,default:""},
+    rejectedAt: { type: Date, default: null },
     applicationCount: { type: Number, default: 1 },
+    stripeAccountId:{type:String,default:""},
+    stripeOnboardingComplete:{type:Boolean,default:false},
     penalty: { type: Number, default: 0 },
     strikePoints: { type: Number, default: 0 },
     cancellationCount: { type: Number, default: 0 },

@@ -26,6 +26,8 @@ interface SessionsDataProps {
   page: number;
 }
 
+
+
 const Upcoming = () => {
   const { profile } = useTrainerStore();
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,7 +53,7 @@ const Upcoming = () => {
           limit: PAGINATION_DEFAULT_LIMIT,
           ...filters,
         });
-        console.log('-----------', sessionsData);
+        
         setSessionsData(data);
         setCurrentPage(sessionsData.page);
       }

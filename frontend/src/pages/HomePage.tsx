@@ -3,7 +3,7 @@ import HeroSection from '../features/home/HeroSection';
 import {
   SportsSection,
   FitnessSection,
-  CampSection,
+  
 } from '../features/home/ContentSection';
 import Footer from '../components/layout/Footer';
 const HomePage = () => {
@@ -14,7 +14,7 @@ const HomePage = () => {
         <HeroSection />
         <SportsSection />
         <FitnessSection />
-        <CampSection />
+        {/* <CampSection /> */}
       </main>
       <Footer />
     </div>

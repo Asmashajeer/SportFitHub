@@ -17,18 +17,20 @@ import AppError from '@/utils/AppError';
 import { Types } from 'mongoose';
 
 import Stripe from 'stripe';
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default class PaymentService implements IPaymentService {
   private _paymentRepo: IPaymentRepository;
   private _userRepo: IUserRepository;
   private _sportsSessionRepo: ISportsSessionRepository;
   private _fitnessSessionRepo: IFitnessSessionRepository;
-  constructor(paymentRepo: IPaymentRepository, userRepo: IUserRepository, sportsSessionRepo: ISportsSessionRepository, fitnessSessionRepo: IFitnessSessionRepository) {
+  private _stripe: Stripe 
+  constructor(paymentRepo: IPaymentRepository, userRepo: IUserRepository, sportsSessionRepo: ISportsSessionRepository, fitnessSessionRepo: IFitnessSessionRepository,stripe:Stripe,) {
     this._paymentRepo = paymentRepo;
     this._userRepo = userRepo;
     this._sportsSessionRepo = sportsSessionRepo;
     this._fitnessSessionRepo = fitnessSessionRepo;
+     this._stripe=stripe
   }
 
   createCheckoutSession = async ({ userId, lockKeys, ...payload }: CreateCheckoutSessionDTO): Promise<Stripe.Checkout.Session> => {
@@ -78,7 +80,7 @@ export default class PaymentService implements IPaymentService {
       success_url: `${process.env.FRONTEND_URL}/checkout/booking-success?stripeSession_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/checkout`,
     };
-    const stripeSession = await stripe.checkout.sessions.create(sessionCreateParams);
+    const stripeSession = await this._stripe.checkout.sessions.create(sessionCreateParams);
     return stripeSession;
   };
 
@@ -94,7 +96,7 @@ export default class PaymentService implements IPaymentService {
   //   -----------find booking invoice------
   async getInvoice(invoiceId: string): Promise<GetInvoiceResponseDTO> {
     if (invoiceId) {
-      const invoice = await stripe.invoices.retrieve(invoiceId);
+      const invoice = await this._stripe.invoices.retrieve(invoiceId);
       return {
         pdfUrl: invoice.invoice_pdf, // send this to frontend for download
         invoiceUrl: invoice.hosted_invoice_url, // send this to frontend to view

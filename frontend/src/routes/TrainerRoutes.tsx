@@ -8,6 +8,8 @@ import Bookings from '@/features/trainer/page/Bookings';
 import Attendance from '@/features/trainer/page/Attandance';
 import { ChatInboxPage } from '@/features/chat/page/ChatInboxPage';
 import TrainerReviewsPage from '@/features/review/page/TrainerReviewsPage';
+import TrainerEarningsPage from '@/features/trainer/page/Earning';
+import OnboardingRefresh from '@/features/trainer/component/earnings/OnboardingRefreshPage';
 const TrainerRoutes = () => {
   return (
     <Routes>
@@ -19,6 +21,9 @@ const TrainerRoutes = () => {
       <Route path="/attendance" element={<Attendance />} />
       <Route path="/messages" element={<ChatInboxPage />} />
       <Route path="/review-rating" element={<TrainerReviewsPage />} />
+      <Route path="/earnings" element={<TrainerEarningsPage />} />
+       <Route path="/onboarding/refresh" element={<OnboardingRefresh />} />
+     
       {/* <Route path='/sessions/create-Sport-session' element={<CreateSportSession />}/> */}
     </Routes>
   );

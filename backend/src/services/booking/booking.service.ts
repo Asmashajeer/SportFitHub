@@ -40,6 +40,7 @@ import {
 import {
   toBookedSessionResponseDTOWithPopulatedUser,
   toBookedSlotPublicResponseData,
+  toBookingSession_Price,
   toCancelBookedSessionResponseDTO,
   totoUserBookingResponseDTOwithStatusCount,
   toUserBookingResponseDTO,
@@ -65,6 +66,9 @@ import { IPenaltyService } from '@/interfaces/services/trainer/IPenalty.service'
 import { PushNotificationPayload, sendPushNotification } from '@/utils/push-notification.service';
 
 import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
+import { IPayoutLedgerRepository } from '@/interfaces/repositories/IPayoutLedger.repository';
+
+import { ISettingsService } from '@/interfaces/services/admin/ISettings.service';
 
 
 export class BookingService implements IBookingService {
@@ -79,6 +83,9 @@ export class BookingService implements IBookingService {
   private _penaltyService: IPenaltyService;
   private _userRepo: IUserRepository;
   private _trainerRepo: ITrainerRepository;
+  private _payoutLedgerRepo:IPayoutLedgerRepository;
+  private _settingsService:ISettingsService;
+
   constructor(
     bookingRepo: IBookingRepository,
     bookingSessionRepo: IBookingSessionRepository,
@@ -90,7 +97,10 @@ export class BookingService implements IBookingService {
     walletTransactionService: IWalletTransactionService,
     penaltyService: IPenaltyService,
     userRepo: IUserRepository,
-    trainerRepo: ITrainerRepository
+    trainerRepo: ITrainerRepository,
+    payoutLedgerRepo:IPayoutLedgerRepository,
+    settingsService:ISettingsService,
+    
   ) {
     this._bookingRepo = bookingRepo;
     this._bookingSessionRepo = bookingSessionRepo;
@@ -103,6 +113,9 @@ export class BookingService implements IBookingService {
     this._penaltyService = penaltyService;
     this._userRepo = userRepo;
     this._trainerRepo = trainerRepo;
+    this._payoutLedgerRepo=payoutLedgerRepo;
+     this._settingsService=settingsService;
+    
   }
 
   //--------------lock booking Slots------------------------
@@ -922,21 +935,32 @@ export class BookingService implements IBookingService {
   }
 
   async autoCompleteSessions() {
-    const result = await this._bookingSessionRepo.autoCompleteExpiredSessions();
-    if (result.modifiedCount > 0) console.log(`Auto-completed ${result.modifiedCount} sessions`);
-    return result;
+   const results = await this._bookingSessionRepo.autoCompleteExpiredSessions();   
+   if (results .length === 0) return { modifiedCount: 0 };
+      console.log("from bookingServiceRepo");
+    console.log(results[0].bookingId.pricePlan.unitPrice);
+   const completedSessions= results.map((session)=>toBookingSession_Price(session));
+  
+    console.log(completedSessions);
+    const commissionPercent = await this._settingsService.getCommissionPercent(); // admin config
+    const holdHours = await this._settingsService.getHoldHours();  
+    await Promise.all(completedSessions.map(async (session) => {
+      const existing = await this._payoutLedgerRepo.findByBookingSessionId(session.id.toString());
+      if (existing) return; 
+          
+      await this._payoutLedgerRepo.createFromBookingSession(session, commissionPercent, holdHours);     
+    })    
+  );     
+  console.log(`Auto-completed ${completedSessions.length} sessions, created payout ledger entries`);
+  return { modifiedCount: completedSessions.length }; 
   }
 
 
   async checkSessionAccess(userId:string,sessionId:string,sessionStartUTC:string):Promise<boolean>{
-    if(!sessionStartUTC){
-     
-      return;
-    }
+    if(!sessionStartUTC) return;   
     
     const startDateTime=new Date(sessionStartUTC);
     const sessions = await this._bookingSessionRepo.findUserSessions({ sessionId,startDateTime});
-
    
     if (!sessions.length) return false;   
      console.log("check trainer:   ",sessions[0].trainerId?.userId.toString() === userId);
@@ -944,8 +968,7 @@ export class BookingService implements IBookingService {
     
     console.log("check user:   ",sessions.some(s => s.userId.toString() === userId));
     return sessions.some(s => s.userId.toString() === userId);  // user is a participant of this session?
-    
-   
+       
   };
 
   //  _________________ function to lock a slot  _____________

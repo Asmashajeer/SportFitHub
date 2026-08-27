@@ -24,3 +24,17 @@ export interface PaymentAdminResponseDTO {
 export interface AdminPaymentsResponseDTOwithPagination extends PaginationResponseDTO {
   payments: PaymentAdminResponseDTO[];
 }
+
+
+export interface AdminPaymentOverviewResponseDTO{
+   range: {
+    startDate:Date,
+    endDate:Date
+   }| null,
+  grossRevenue:number,
+  totalRefunds:number,
+  netRevenue:number,
+  totalPayouts:number,
+  commissionEarned:number,
+  pendingPayoutLiability:number,
+}

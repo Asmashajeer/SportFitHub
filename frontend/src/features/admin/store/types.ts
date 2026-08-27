@@ -1,8 +1,4 @@
-import {
-  BOOKING_SESSION_STATUS,
-  SESSION_MODE,
-  SESSION_TYPE,
-} from '@/constants/constants';
+
 
 export interface DashboardStats {
   totalusers: number;

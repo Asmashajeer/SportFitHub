@@ -230,3 +230,8 @@ export const PersonalInfoSchema = z.object({
 });
 
 export type PersonalInfoReqDTO = z.infer<typeof PersonalInfoSchema>;
+
+export interface stripeData{
+    stripeAccountId?: string
+    stripeOnboardingComplete?: boolean,
+}

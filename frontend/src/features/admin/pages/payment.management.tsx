@@ -1,4 +1,5 @@
 
+import PaymentStats from "../component/payment-management/PaymentStats";
 import PaymentsTable from "../component/payment-management/paymentTable";
 
 
@@ -18,7 +19,7 @@ const AdminPayments = () => {
         </div>
 
         {/* Stats */}
-        {/* <PaymentStats /> */}
+        <PaymentStats />
 
         <PaymentsTable/>
       </div>

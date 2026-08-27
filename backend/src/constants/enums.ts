@@ -211,3 +211,24 @@ export enum VIDEO_CALL_STATUS{
   WAITING='waiting',
   ACTIVE= 'active'
 }
+
+
+//------------TRAINER PAYOUT----
+
+export const PAYOUT_LEDGER_STATUS = {
+  PENDING_HOLD: 'pending_hold',
+  PAYABLE: 'payable',
+  PAID: 'paid',
+  REFUNDED: 'refunded',
+  VOID: 'void',
+} as const;
+
+export type PayoutLedgerStatus = (typeof PAYOUT_LEDGER_STATUS)[keyof typeof PAYOUT_LEDGER_STATUS];
+
+export const PAYOUT_BATCH_STATUS = {
+  TRANSFERRED: 'transferred',
+  SKIPPED: 'skipped',
+  FAILED: 'failed',
+} as const;
+
+export type PayoutBatchStatus = (typeof PAYOUT_BATCH_STATUS)[keyof typeof PAYOUT_BATCH_STATUS];

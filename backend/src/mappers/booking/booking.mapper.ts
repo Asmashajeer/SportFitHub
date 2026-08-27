@@ -1,4 +1,4 @@
-import {  IBookedSessionPopulateUserAndSession } from '@/dtos/request/booking/booking.request.dto';
+import {  BookingSession_Price, IBookedSessionPopulateUserAndSession } from '@/dtos/request/booking/booking.request.dto';
 import { IBooking } from '@/models/booking.model';
 import { IBookedSessionPopulate, IBookingSession } from '@/models/booking.session.model';
 import { formatInTimeZone } from 'date-fns-tz';
@@ -168,3 +168,12 @@ export const toBookedSessionResponseDTOWithPopulatedUser = (bookedSession: IBook
     refundAmount: bookedSession.refundAmount,
   };
 };
+
+
+
+export const toBookingSession_Price=(bookingSession):BookingSession_Price=>{
+    return{
+      ...toUserSessionsResponseDTO(bookingSession),
+      unitPrice:bookingSession.bookingId.pricePlan.unitPrice,
+    }
+}

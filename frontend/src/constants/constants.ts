@@ -153,7 +153,7 @@ export const trainerNavLinks = [
   { label: 'Sessions', icon: CalendarDays, path: '/trainer/sessions' },
   { label: 'Bookings ', icon: UserCheck, path: '/trainer/bookings' },
   { label: 'Attandance', icon: CheckCircle, path: '/trainer/attendance' },
-  { label: 'Earnings', icon: Wallet2, path: '/camps' },
+  { label: 'Earnings', icon: Wallet2, path: '/trainer/earnings' },
   { label: 'Messages',    icon: MessageCircle,    path: '/trainer/messages',  },
   { label: 'Review & Rating', icon: MessageSquareDiff,    path: '/trainer/review-rating',  },
   { label: 'Profile', icon: CircleUser, path: 'trainer/profile' },
@@ -213,6 +213,8 @@ export const BOOKING_STATUS = {
   COMPLETED: 'completed',
   CANCELLED: 'cancelled',
 };
+export type BookingStatus = (typeof BOOKING_STATUS)[keyof typeof BOOKING_STATUS];
+
 
 export const BOOKING_SESSION_STATUS = {
   SCHEDULED: 'scheduled',
@@ -231,6 +233,9 @@ export const PAYMENT_STATUS = {
   FAILED: 'failed',
   ACTION_REQUIRED: 'requires_action',
 };
+export type PaymentStatus = (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS];
+
+
 export const TRANSACTION_TYPE = {
   DEBIT: 'Debit',
   CREDIT: 'Credit',
@@ -290,3 +295,14 @@ export type Video_Call_Status_Type=typeof VIDEO_CALL_STATUS[keyof typeof VIDEO_C
 
 export const SESSION_GRACE_MINUTES=5*60*1000;   // 5 min
 export const oneDay=1000*60*60*24;
+
+
+//------------earnings-
+export const PAYOUT_BATCH_STATUS = {
+  TRANSFERRED: 'transferred',
+  SKIPPED: 'skipped',
+  FAILED: 'failed',
+} as const;
+
+export type PayoutBatchStatus = (typeof PAYOUT_BATCH_STATUS)[keyof typeof PAYOUT_BATCH_STATUS];
+

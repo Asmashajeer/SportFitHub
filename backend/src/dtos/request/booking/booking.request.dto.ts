@@ -1,4 +1,5 @@
 import { PAYLOAD_MODEL, SESSION_TYPE } from '@/constants/enums';
+import { UserBookedSessionsResponseDTO } from '@/dtos/response/booking/booking.response.dto';
 import { IBookedSlot } from '@/models/booking.model';
 import { IBookedSessionPopulate, IBookingSession } from '@/models/booking.session.model';
 import { IUser } from '@/models/user.model';
@@ -75,4 +76,8 @@ export interface IBookedSessionPopulateUser extends Omit<IBookingSession, 'userI
     sessionName: string;
     sessionType: string;
   };
+  
+}
+export interface BookingSession_Price extends UserBookedSessionsResponseDTO {
+  unitPrice :number , 
 }

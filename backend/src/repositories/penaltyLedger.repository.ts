@@ -1,8 +1,9 @@
 
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { BaseRepository } from './base.repository';
 import { IPenaltyLedger } from '@/models/penaltyLedger.model';
 import { IPenaltyLedgerRepository } from '@/interfaces/repositories/IPenaltyLedger.repository';
+import { PENALTY_STATUS } from '@/constants/enums';
 
 export class PenaltyLedgerRepository extends BaseRepository<IPenaltyLedger> implements IPenaltyLedgerRepository {
   constructor(model: Model<IPenaltyLedger>) {
@@ -16,11 +17,17 @@ export class PenaltyLedgerRepository extends BaseRepository<IPenaltyLedger> impl
     return this.model.create(data);
   }
 
-  async markDeducted(sessionId: string, slotId: string, startDateTime: Date): Promise<void> {
-    await this.model.updateOne({ sessionId, slotId, startDateTime }, { status: 'deducted' });
-  }
-
   async findPendingByTrainer(trainerId: string): Promise<IPenaltyLedger[]> {
     return this.model.find({ trainerId, status: 'pending' });
   }
+
+
+   async markDeductedBulk(ids: Types.ObjectId[]): Promise<void> {
+      await this.model.updateMany({ _id: { $in: ids } }, { status: PENALTY_STATUS.DEDUCTED});
+    }
+// async markDeducted(): Promise<void> {
+  //   await this.model.updateOne({ sessionId, slotId, startDateTime }, { status: 'deducted' });
+  // }
+
+
 }

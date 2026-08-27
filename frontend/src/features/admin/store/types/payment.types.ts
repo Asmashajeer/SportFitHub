@@ -21,3 +21,16 @@ export interface AdminPaymentResponseData{
 }
 
 
+
+export interface AdminPaymentOverviewResponseData{
+   range: {
+    startDate:Date,
+    endDate:Date
+   }| null,
+  grossRevenue:number,
+  totalRefunds:number,
+  netRevenue:number,
+  totalPayouts:number,
+  commissionEarned:number,
+  pendingPayoutLiability:number,
+}

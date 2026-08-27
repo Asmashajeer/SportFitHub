@@ -3,6 +3,7 @@ import {
 
   PAGINATION_DEFAULT_LIMIT,
   PAYLOAD_MODEL,
+  type BookingStatus,
 } from '@/constants/constants';
 import {
   Eye,
@@ -52,7 +53,7 @@ const BookingsTable = () => {
   const [selectedBooking, setSelectedBooking] = useState<AdminBookingDetailData| null>(null);
   const [loading, setLoading] = useState(false);
 
-  type BookingStatusKey = 'confirmed' | 'cancelled' | 'completed' | 'pending';
+  type BookingStatusKey =  BookingStatus
 
   const STATUS_BADGE: Record<BookingStatusKey, string> = {
     pending:   'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20',

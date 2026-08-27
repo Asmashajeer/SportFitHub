@@ -2,6 +2,7 @@ import { ITrainerProfile } from '@/models/trainerProfile.model';
 import { BaseRepository } from './base.repository';
 import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
 import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
+import { stripeData } from '@/dtos/request/trainer/trainer.profile.request.dto';
 
 
 export class TrainerRepository extends BaseRepository<ITrainerProfile> implements ITrainerRepository {
@@ -23,10 +24,6 @@ export class TrainerRepository extends BaseRepository<ITrainerProfile> implement
     return await this.model.findById(trainerId).populate('userId');
   }
 
-  //  async findByCertId(certId: Types.ObjectId | string){
-  //       return await this.model    .findOne({certificateInfo.documents})
-  //     .populate('userId')
-  //  }
 
   async updateSection(id: string | Types.ObjectId, updateData: UpdateQuery<ITrainerProfile>, changedField: string): Promise<ITrainerProfile | null> {
     const updateQuery = {
@@ -56,4 +53,8 @@ export class TrainerRepository extends BaseRepository<ITrainerProfile> implement
     };
     return await this.model.findByIdAndUpdate(id, updateQuery, { new: true });
   }
+
+   async updateTrainerStripeAC(trainerId: string, updateData: stripeData): Promise<ITrainerProfile> {
+      return await this.model.findByIdAndUpdate(trainerId, updateData);
+    }
 }

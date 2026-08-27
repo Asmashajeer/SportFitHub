@@ -14,7 +14,6 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from '../ui/sheet';
 import { Button } from '../ui/Button';
@@ -83,7 +82,7 @@ const Sidebar = () => {
   const navLinks = role === ROLES.USER ? userNavLinks : trainerNavLinks;
   const trainerProfile = useTrainerStore((state) => state.profile);
   const fetchTrainer = useTrainerStore((state) => state.fetchProfile);
-  const userProfile = useUserStore((state) => state.profile);
+
   const fetchUser = useUserStore((state) => state.fetchProfile);
 
   useEffect(() => {
