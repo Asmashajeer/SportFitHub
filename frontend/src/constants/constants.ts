@@ -134,8 +134,7 @@ export const  adminNavLinks= [
     {path:"/admin/session-management", icon: Ticket ,         label:"Sessions"   },
     {path:"/admin/bookings-management"   , icon: CalendarDays ,   label:"Bookings"       },
     {path:"/admin/payment-management"   , icon: CalendarDays ,   label:"Payments"       },      
-    // {path:"/admin/camp-management"   , icon:CalendarDays ,   label:"Camps"       },
-    // {path:"/admin/coupons"           , icon:Ticket ,         label:"Coupons"     },
+  
     {path:"/admin/settings"          , icon: Settings ,       label:"Settings"   },
 ]  
 export const userNavLinks = [

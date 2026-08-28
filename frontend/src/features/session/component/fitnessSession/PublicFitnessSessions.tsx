@@ -13,6 +13,7 @@ import {
   AGE_GROUP,
   LOCATION_RADIUS,
   PAGINATION_DEFAULT_LIMIT,
+  Review_Type,
   SESSION_TYPE,
 } from '@/constants/constants';
 
@@ -29,6 +30,7 @@ import { Button } from '@/components/ui/Button';
 import Pagination from '@/components/reusable/Pagination';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { userService } from '@/features/user/service/userService';
+import { reviewService } from '@/features/review/service/reviewService';
 
 interface PaginationProps {
   totalPages: number;
@@ -61,6 +63,7 @@ const PublicFitnessSessions = () => {
   const [location, setLocation] = useState({ lat: 0, lng: 0, radius: 0 });
   const [ratingFilter, setRatingFilter] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 500);
+  const [ratingsMap, setRatingsMap] = useState<Record<string, { avgRating: number; reviewCount: number }>>({});
 
   useEffect(() => {
     setCurrentPage(1);
@@ -142,6 +145,32 @@ const PublicFitnessSessions = () => {
     if(radius!==0) getCurrentLocation();
   }, [radius]);
 
+
+  //  batch rating
+  useEffect(() => {
+    if (sessionsData.sessions.length === 0) return;
+    const sessionIds =sessionsData.sessions.map(s => s.id);
+    
+   const getRating=async()=>{
+    const data= await reviewService.getBatchRatings(sessionIds, Review_Type.FITNESS_SESSION)
+     // Transform array into a lookup dictionary
+      const map = data.reduce(
+        (
+          acc: Record<string, { avgRating: number; reviewCount: number }>,
+          item: { _id: string; avgRating: number; reviewCount: number }
+        ) => {
+        acc[item._id] = {
+          avgRating: item.avgRating,
+          reviewCount: item.reviewCount,
+        };
+        return acc;
+      }, {} as Record<string, { avgRating: number; reviewCount: number }>);
+
+      setRatingsMap(map);
+  }
+   getRating();
+  }, [sessionsData]);
+
   const resetAllFilters = () => {
     setSearchQuery('');
     setProgramFilter('');
@@ -157,6 +186,7 @@ const PublicFitnessSessions = () => {
       (f) => f && f !== 'all'
     ).length + (location.lat !== 0 ? 1 : 0);
 
+    
   const FilterPanel = () => (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
@@ -354,7 +384,7 @@ const PublicFitnessSessions = () => {
             <>
               <div id='sessions' className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {sessionsData.sessions.map((session) => (
-                  <FitnessSessionCard key={session.id} session={session} />
+                  <FitnessSessionCard key={session.id} session={session}  rating={ratingsMap[session.id]} />
                 ))}
               </div>
               <Pagination

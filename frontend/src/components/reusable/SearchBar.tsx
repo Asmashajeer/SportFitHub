@@ -1,9 +1,11 @@
 import { Search, X } from 'lucide-react';
+import { Input } from '../ui/Input';
 
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
   onClear: () => void;
+  onSearch?: () => void;
   placeholder?: string;
 }
 
@@ -11,6 +13,7 @@ const SearchBar = ({
   value,
   onChange,
   onClear,
+  onSearch,
   placeholder = 'Search...',
 }: SearchBarProps) => {
   return (
@@ -21,10 +24,11 @@ const SearchBar = ({
       </div>
 
       {/* Input Field */}
-      <input
+      <Input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && onSearch?.()}
         className="block w-full p-2 pl-8 pr-10 text-sm border border-gray-700 rounded-lg bg-transparent  focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-gray-400"
         placeholder={placeholder}
       />

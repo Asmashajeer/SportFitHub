@@ -106,9 +106,14 @@ import { PayoutService } from './services/trainer/payout.service';
 import Stripe from 'stripe';
 import { StripeConnectService } from './services/trainer/stripeConnect.service';
 import { StripeConnectController } from './api/controllers/trainer/stripeConnect.controller';
+import { EmbeddingService } from './services/embeddingService';
+import { SessionsSearchService } from './services/session/sessions.search.service';
+
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-03-25.dahlia',
 });
+
+export const gemini_apiKey = process.env.GEMINI_API_KEY;
 const userRepository = new UserRepository(User);
 const profileRepository = new ProfileRepository(Profile);
 const otpRepository = new OtpRepository(otpModel);
@@ -159,8 +164,8 @@ export const fitnessController = new FitnessController(fitnessService);
 
 const fitnessManagementService = new FitnessManagementService(fitnessRepository);
 export const fitnessManagementController = new FitnessManagementController(fitnessManagementService);
-
-const sessionManagementService = new SessionManagementService(sportsSessionRepository, fitnessSessionRepository);
+const embeddingService=new EmbeddingService(gemini_apiKey);
+const sessionManagementService = new SessionManagementService(sportsSessionRepository, fitnessSessionRepository,embeddingService);
 export const sessionManagementController = new SessionManagementController(sessionManagementService);
 
 const paymentService = new PaymentService(paymentRepository, userRepository, sportsSessionRepository, fitnessSessionRepository,stripe);
@@ -198,7 +203,8 @@ const sportsSessionService = new SportsSessionService(sportsSessionRepository, t
 export const sportsSessionController = new SportsSessionController(sportsSessionService);
 const fitnessSessionService = new FitnessSessionService(fitnessSessionRepository, trainerRepository, bookingService);
 export const fitnessSessionController = new FitnessSessionController(fitnessSessionService);
-export const sessionController = new SessionController(sportsSessionService, fitnessSessionService);
+const sessionsSearchService=new SessionsSearchService(sportsSessionRepository,fitnessSessionRepository,embeddingService);
+export const sessionController = new SessionController(sportsSessionService, fitnessSessionService,sessionsSearchService);
 const bookingsManagementService = new BookingsManagementService(bookingRepository, bookingSessionRepository);
 export const bookingsManagementController = new BookingsManagementController(bookingsManagementService);
 const paymentsManagementService=new PaymentsManagementService(paymentRepository,walletTransactionRepository,payoutBatchRepository,payoutLedgerRepository);

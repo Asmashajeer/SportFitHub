@@ -72,6 +72,20 @@ export class ReviewController {
             next(error);
         }
     }
+    //------------------------get Batch Rating & Review Count
+    getBatchRatingAndReviewCount=async (req: AuthRequest, res: Response, next: NextFunction):Promise<void>=>{
+       
+        const sessionModel =req.params.sessionModel as Review_Type
+        const sessionIds = req.query.sessionIds as string[];    
+       
+         try {
+            const result= await this._reviewService.getBatchRatingAndCount( sessionModel ,sessionIds);           
+            
+            res.status(STATUS_CODE.SUCCESS.OK).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
 
 
     //----------------------All Reviews of a sessoin

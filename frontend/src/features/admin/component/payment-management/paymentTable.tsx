@@ -145,7 +145,7 @@ const PaymentsTable = () => {
                 <th className={thCls}>Transaction ID</th>
                 <th className={thCls}>Amount</th>
                 <th className={thCls}>Payment Method</th>
-                <th className={thCls}>Discount</th>
+                {/* <th className={thCls}>Discount</th> */}
                 <th className={thCls}>Status</th>
                 <th className={thCls}>Paid On</th>
               </tr>
@@ -183,13 +183,13 @@ const PaymentsTable = () => {
                       <span className="text-zinc-400">{payment.paymentMethod}</span>
                     </td>
 
-                    <td className={tdCls}>
+                    {/* <td className={tdCls}>
                       <span className="text-zinc-400">
                         {payment.discount?.amountOff
                           ? `-${ payment.discount.amountOff} {CURRENCY}`
                           : '—'}
                       </span>
-                    </td>
+                    </td> */}
 
                     <td className={tdCls}>
                       <span

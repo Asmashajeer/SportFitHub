@@ -1,7 +1,12 @@
 
+import SearchBar from '@/components/reusable/SearchBar';
 import { Button } from '@/components/ui/Button';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const [query, setQuery] = useState('');
+  const navigate = useNavigate();
   return (
     <section
       id="home"
@@ -43,6 +48,7 @@ const HeroSection = () => {
               </Button>
            
           </div>
+         
         </div>
       </div>
 

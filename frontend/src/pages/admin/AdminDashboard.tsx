@@ -1,4 +1,4 @@
-import Dashboard from '../../features/admin/component/dashboard';
+import Dashboard from '../../features/admin/pages/dashboard';
 
 function AdminDashboard() {
   return (

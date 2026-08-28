@@ -104,7 +104,8 @@ export enum INTENSITY_LEVEL {
   INTERMEDIATE = 'Intermediate',
   ADVANCED = 'Advanced',
 }
-
+//----------------SEMANTIC SEARCH- QUERY EMBEDDING
+export const SIMILARITY_THRESHOLD = 0.75;
 
 //--------------BOOKING----------
 export enum PAYLOAD_MODEL {
@@ -145,6 +146,8 @@ export enum BOOKING_SESSION_STATUS {
   CANCELLED = 'cancelled',
 }
 export const TTLSECONDS = 900;
+
+
 //---------------TRANSACTION--------
 export enum TRANSACTION_TYPE {
   DEBIT = 'Debit',

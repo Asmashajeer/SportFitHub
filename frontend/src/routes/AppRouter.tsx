@@ -27,6 +27,8 @@ import FitnessSessionDetailPage from '@/pages/FitnessSessionDetailPage';
 
 import BookingRoutes from './BookingRoutes';
 import LiveSessionRoutes from './LiveSessionRoutes';
+import SessionsListingPage from '@/pages/SessionsListingPage';
+
 function AppRouter() {
   return (
     <div className="min-w-[320px]">
@@ -44,7 +46,7 @@ function AppRouter() {
             path="/fitness/sessions/:sessionId"
             element={<FitnessSessionDetailPage />}
           />
-
+          <Route path="/sessions" element={<SessionsListingPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
 

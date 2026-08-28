@@ -48,6 +48,7 @@ export interface ISportsSession extends Document {
   isApproved: boolean;
   images: string[];
   rating: number;
+  embedding?: number[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -191,6 +192,12 @@ const SportsSessionSchema = new mongoose.Schema<ISportsSession>(
     images: [String],
     // URLs  images
     rating: { type: Number, default: 0 },
+    
+    embedding: {
+      type: [Number],
+      select: false, // excluded from normal queries/responses (keeps payloads light)
+    },
+
   },
 
   {

@@ -153,14 +153,17 @@ getPendingReviewsForUser=  async (userId: string):Promise<PendingReviewResponseD
 
      getAvgRatingAndCount=async(reviewableType: Review_Type ,reviewableId:string):Promise<{ averageRating: number; totalReviews: number }>=>{
         const [result]=await this._reviewRepo.getAverageRatingAndCount(reviewableType,reviewableId);
-        console.log(result);
+       
         return result;
     };
-
+    getBatchRatingAndCount=async(reviewableType: Review_Type ,reviewableIds:string[]):Promise<{ averageRating: number; totalReviews: number }[]>=>{
+            const result=await this._reviewRepo.getBatchRatingAndCount(reviewableType,reviewableIds);        
+            return result;
+        };
 
      getReviews=async(reviewableType: Review_Type ,reviewableId:string):Promise<ReviewResponsePopulatedUserDTO[]>=>{
         const all=await this._reviewRepo.getReviews(reviewableType,reviewableId);
-        console.log(all);
+       
         const reviews=all.map((r)=>toReviewResponsePopulatedUserDTO(r));
         return  reviews;
     };

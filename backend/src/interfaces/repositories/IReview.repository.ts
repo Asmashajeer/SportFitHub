@@ -8,6 +8,7 @@ export interface IReviewRepository extends IBaseRepository<IReview> {
     TopReviews(reviewableType:Review_Type):Promise<IRatingAggregateResult[]>
     findReviewedSessionIds(query:FilterQuery<IReview>)
     getAverageRatingAndCount(reviewableType: Review_Type ,reviewableId:string)
+    getBatchRatingAndCount(reviewableType: Review_Type ,ids:string[]|Types.ObjectId[])
     getReviews(reviewableType: Review_Type ,reviewableId:string|Types.ObjectId)
     getAllReviews(sessionIds:string[])
 }

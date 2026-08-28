@@ -10,6 +10,7 @@ export interface IReviewService {
   getReviewableSession(userId: string, sessionId: string);
   createReview(data: ReviewRequestDTO): Promise<ReviewResponseDTO>;
   getAvgRatingAndCount(reviewableType: Review_Type, reviewableId: string): Promise<{ averageRating: number; totalReviews: number }>;
+  getBatchRatingAndCount(reviewableType: Review_Type ,reviewableIds:string[]):Promise<{ averageRating: number; totalReviews: number }[]>;
   getReviews(reviewableType: Review_Type, reviewableId: string): Promise<ReviewResponsePopulatedUserDTO[]>;
   getAllSessionReviews(trainerId: string): Promise<ReviewResponsePopulatedRevewableIdDTO[]>;
 }

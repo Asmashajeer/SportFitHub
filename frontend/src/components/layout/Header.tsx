@@ -6,9 +6,11 @@ import Avatar from '../reusable/Avatar';
 import { authService } from '@/features/auth/service/authService';
 import { Button } from '../ui/Button';
 import { ROLES, USER_ROLES } from '@/constants/constants';
+import SearchBar from '../reusable/SearchBar';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [query, setQuery] = React.useState('');
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading} = useAuthStore();
   if (isLoading) return <div className="w-10 h-10" />;
@@ -57,7 +59,17 @@ const Header = () => {
             ))}
           </nav>
         )}
-
+        {user?.activeRole !== ROLES.TRAINER && (
+          <div className="hidden md:block">
+            <SearchBar
+              value={query}
+              onChange={setQuery}
+              onClear={() => setQuery('')}
+              onSearch={() => navigate(`/sessions?q=${encodeURIComponent(query)}`)}
+              placeholder="Search ..."
+            />
+          </div>
+        )}
         <div className="hidden md:flex place-items-left me-20 ">
           {!isAuthenticated ? (
             <Button
@@ -129,6 +141,16 @@ const Header = () => {
       {/* Mobile Navigation - Styled with your 'card' background color */}
       {isMenuOpen && (
         <nav className="md:hidden border-t border-border bg-card p-4 flex flex-col space-y-4 animate-in slide-in-from-top duration-300">
+           <SearchBar
+              value={query}
+              onChange={setQuery}
+              onClear={() => setQuery('')}
+              onSearch={() => {
+                setIsMenuOpen(false);
+                navigate(`/sessions?q=${encodeURIComponent(query)}`);
+              }}
+              placeholder="Search ..."
+            />
           {['Sports', 'Fitness', 'Trainer'].map((item) => (
             <a
               key={item}

@@ -5,20 +5,23 @@ import { AdminSessionActionResponseDTO, AdminSessionDetailedViewDTO, AdminSessio
 import { IFitnessSessionRepository } from '@/interfaces/repositories/IFitness.session.repository';
 import { ISportsSessionRepository } from '@/interfaces/repositories/ISports.session.repository';
 import { ISessionManagementService } from '@/interfaces/services/admin/ISessionMnagement.service';
+import { IEmbeddingService } from '@/interfaces/services/IEmbeddingService';
 import { toAdminSessionActionResponseDTO, toAdminSessionDetailedViewDTO, toAdminSessionResponseDTO } from '@/mappers/admin/admin.session.mappers';
 import { IFitnessSession } from '@/models/fitnessSession.model';
 import { ISportsSession } from '@/models/sportsSession.model';
 import AppError from '@/utils/AppError';
+import { buildFitnessSearchText, buildSportsSearchText } from '@/utils/buildSearchableText';
 
 import { FilterQuery, Types } from 'mongoose';
 
 export class SessionManagementService implements ISessionManagementService {
   private _sportsSessionRepo: ISportsSessionRepository;
   private _fitnessSessionRepo: IFitnessSessionRepository;
-
-  constructor(sportsSessionRepo: ISportsSessionRepository, fitnessSessionRepo: IFitnessSessionRepository) {
+  private _embeddingService:IEmbeddingService;
+  constructor(sportsSessionRepo: ISportsSessionRepository, fitnessSessionRepo: IFitnessSessionRepository,embeddingService:IEmbeddingService) {
     this._sportsSessionRepo = sportsSessionRepo;
     this._fitnessSessionRepo = fitnessSessionRepo;
+    this._embeddingService=embeddingService
   }
 
   //-------------------get session Stats-----------
@@ -65,7 +68,7 @@ export class SessionManagementService implements ISessionManagementService {
       repo.findAllWithTrainer(query, { skip, limit }), // populate trainerId
       repo.count(query),
     ]);
-    console.log(Sessions);
+  
     const sessionsData = Sessions.map((s) => toAdminSessionResponseDTO(s));
     return {
       sessions: sessionsData,
@@ -92,6 +95,17 @@ export class SessionManagementService implements ISessionManagementService {
     }
     const data = await repo.findOneAndUpdate(id, { isApproved, isActive: Active });
     if (!data) throw new AppError(ERROR_MESSAGES.SESSION.UPDATE_FAILED, STATUS_CODE.ERROR.NOT_FOUND);
+
+      // Generate and store embedding for semantic search(only when approving )
+    if (isApproved === true) {
+      const searchText =
+        sessionModel === PAYLOAD_MODEL.SPORT_SESSION
+          ? buildSportsSearchText(data)
+          : buildFitnessSearchText(data);
+
+      const embedding = await this._embeddingService.embedText(searchText);
+      await repo.findOneAndUpdate(id, { embedding });
+    }
     const session = toAdminSessionActionResponseDTO(data);
     return session;
   }

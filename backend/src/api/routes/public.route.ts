@@ -1,7 +1,10 @@
-import { bookingController, fitnessController, fitnessSessionController, sportsController, sportsSessionController } from '@/container';
+import { bookingController, fitnessController, fitnessSessionController, sessionController, sportsController, sportsSessionController } from '@/container';
 import { Router } from 'express';
 const router = Router();
 
+
+
+router.get('/sessions/search',sessionController.searchSessions);
 //-----------------sports -----------------
 router.get('/sportsCategory', sportsController.getAvailableSports);
 router.get('/sportsCategory', sportsController.getAvailableSports);

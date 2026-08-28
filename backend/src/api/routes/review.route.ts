@@ -10,6 +10,7 @@ router.get('/pending',reviewController.getPendingReviews);
 router.get('/session/:sessionId',reviewController.getSessionForReview);
 router.post('/:sessionModel/:sessionId',reviewController.submitReview)
 router.get('/rating/:sessionModel/:sessionId',reviewController.getAvgRatingAndReviewCount)
+router.get('/batch_rating/:sessionModel',reviewController.getBatchRatingAndReviewCount)
 router.get('/:sessionModel/:sessionId',reviewController.getReviews)
 router.get('/topReviews',reviewController.TopReviews);
 router.get('/allReviews',reviewController.getAllSessionReviewsByTrainer);

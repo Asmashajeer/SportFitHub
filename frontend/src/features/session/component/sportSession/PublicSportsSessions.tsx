@@ -17,6 +17,8 @@ import {
   LOCATION_RADIUS,
   PAGINATION_DEFAULT_LIMIT,
  
+  Review_Type,
+ 
   SESSION_TYPE,
 } from '@/constants/constants';
 import SportSessionCard from './SportSessionCard';
@@ -30,6 +32,7 @@ import { Button } from '@/components/ui/Button';
 import { userService } from '@/features/user/service/userService';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import Pagination from '@/components/reusable/Pagination';
+import { reviewService } from '@/features/review/service/reviewService';
 
 
 interface PaginationProps {
@@ -67,6 +70,8 @@ const PublicSportsSessions = () => {
   });
   const [ratingFilter, setRatingFilter] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 500);
+  const [ratingsMap, setRatingsMap] = useState<Record<string, { avgRating: number; reviewCount: number }>>({});
+
 
   useEffect(() => {
     setCurrentPage(1);
@@ -146,6 +151,30 @@ const PublicSportsSessions = () => {
       getCurrentLocation(radius);
 },[radius]);
  
+//  batch rating
+  useEffect(() => {
+    if (sessionsData.sessions.length === 0) return;
+    const sessionIds =sessionsData.sessions.map(s => s.id);
+    
+   const getRating=async()=>{
+    const data= await reviewService.getBatchRatings(sessionIds, Review_Type.SPORTS_SESSION)
+     // Transform array into a lookup dictionary
+      const map = data.reduce(
+        (
+          acc: Record<string, { avgRating: number; reviewCount: number }>,
+          item: { _id: string; avgRating: number; reviewCount: number }
+        ) => {
+        acc[item._id] = {
+          avgRating: item.avgRating,
+          reviewCount: item.reviewCount,
+        };
+        return acc;
+      }, {} as Record<string, { avgRating: number; reviewCount: number }>);
+
+      setRatingsMap(map);
+  }
+   getRating();
+  }, [sessionsData]);
 
   const resetAllFilters = () => {
     setSearchQuery('');
@@ -351,7 +380,7 @@ const PublicSportsSessions = () => {
             <>
               <div id='sessions' className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {sessionsData.sessions.map((session) => (
-                  <SportSessionCard key={session.id} session={session}  />
+                  <SportSessionCard key={session.id} session={session} rating={ratingsMap[session.id]}  />
                 ))}
               </div>
               <Pagination

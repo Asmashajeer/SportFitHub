@@ -140,4 +140,29 @@ export class SportsSessionRepository extends BaseRepository<ISportsSession> impl
       isActive: false,
     });
   }
+
+
+
+
+  //   vector Search 
+    async vectorSearch(queryEmbedding: number[], limit = 20) {
+      return this.model.aggregate([
+        {
+          $vectorSearch: {
+            index: 'sports_vector_index',
+            path: 'embedding',
+            queryVector: queryEmbedding,
+            numCandidates: 100,
+            limit,
+          },
+        },
+        { $match: { isApproved: true, isActive: true, isDeleted: false } },
+        {
+          $project: {
+            embedding: 0,
+            score: { $meta: 'vectorSearchScore' },
+          },
+        },
+      ]);
+    }
 }

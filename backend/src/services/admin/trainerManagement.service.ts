@@ -44,7 +44,7 @@ export class TrainerManagementService implements ITrainerManagementService {
     }
 
     const [trainers, totalCount] = await Promise.all([await this._trainerRepo.findAll(query, { skip, limit }), await this._trainerRepo.count(query)]);
-    console.log(trainers,"-------------------");
+    
     const result = trainers.map((trainer) => serializeTrainerProfile(trainer, { id: user?.id, role: user?.role }));
     const trainersData = result.map((t) => toAdminTrainersResponseDTO(t));
     return {

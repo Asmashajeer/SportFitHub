@@ -43,7 +43,14 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
         },
       ]);
   }
-
+async getBatchRatingAndCount(reviewableType: Review_Type ,reviewableIds:string[]|Types.ObjectId[]){
+    const ids=reviewableIds.map(id=>new Types.ObjectId(id));     
+     return await this.model.aggregate( [      
+        { $match: { reviewableId: { $in: ids },reviewableType: reviewableType} },
+        { $group: { _id: '$reviewableId', avgRating: { $avg: '$rating' }, reviewCount: { $sum: 1 } } },
+      ]);      
+   
+  }
 
 
    async getReviews(reviewableType: Review_Type ,reviewableId:string|Types.ObjectId){

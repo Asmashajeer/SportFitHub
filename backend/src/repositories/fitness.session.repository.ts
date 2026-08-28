@@ -110,6 +110,7 @@ export class FitnessSessionRepository extends BaseRepository<IFitnessSession> im
     return session;
   }
 
+  //--------update
   async updateSession(id: string | Types.ObjectId, sessionData: UpdateQuery<IFitnessSession>) {
     const { images, ...restData } = sessionData;
     const updateQuery: UpdateQuery<IFitnessSession> = {
@@ -123,10 +124,38 @@ export class FitnessSessionRepository extends BaseRepository<IFitnessSession> im
     }
     return await this.model.findByIdAndUpdate(id, updateQuery, { new: true });
   }
+
+
+
+  //----------delete
   async deleteASession(id: string | Types.ObjectId) {
     return await this.model.findByIdAndUpdate(id, {
       isDeleted: true,
       isActive: false,
     });
   }
+
+// -------vector Search
+    async vectorSearch(queryEmbedding: number[], limit = 20) {
+      return this.model.aggregate([
+        {
+          $vectorSearch: {
+            index: 'fitness_vector_index',
+            path: 'embedding',
+            queryVector: queryEmbedding,
+            numCandidates: 100,
+            limit,
+          },
+        },
+        { $match: { isApproved: true, isActive: true, isDeleted: false } },
+        {
+          $project: {
+            embedding: 0,
+            score: { $meta: 'vectorSearchScore' },
+          },
+        },
+      ]);
+    }
+
+
 }

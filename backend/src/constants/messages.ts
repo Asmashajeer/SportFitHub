@@ -91,6 +91,7 @@ export const ERROR_MESSAGES = {
     CREATE_FAILED: "We couldn't schedule your  session. Please  try again.",
     UPDATE_FAILED: "We couldn't update your  session. Please  try again.",
     NOT_FOUND: 'Session not found',
+    QUERY_REQUIRED:'Session query not found'
   },
   BOOKING: {
     NOT_FOUND: 'Booking not found',

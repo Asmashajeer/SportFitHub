@@ -21,6 +21,13 @@ export const reviewService={
           const res= await api.get(REVIEW_ROUTE.GET_AVG_RATING_REVIEW_COUNT(sessionModel,sessionId));
         return res.data;
     },
+     getBatchRatings:async(sessionIds:string[],sessionModel:ReviewType)=>{
+        
+        const res= await api.get(REVIEW_ROUTE.GET_BATCH_RATING_REVIEW_COUNT(sessionModel),{params:{sessionIds},
+          paramsSerializer: { indexes: null }
+        })
+        return res.data;
+    },
     getReviews:async(sessionId:string,sessionModel:ReviewType)=>{
           const res= await api.get(REVIEW_ROUTE.GET_REVIEWS(sessionModel,sessionId));
         return res.data;

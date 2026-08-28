@@ -1,14 +1,16 @@
 import { Clock, MapPin, Star, Users, User, Zap } from 'lucide-react';
-import { CURRENCY, Review_Type, SESSION_MODE } from '@/constants/constants';
+import { CURRENCY,PAYLOAD_MODEL,SESSION_MODE } from '@/constants/constants';
 import { useNavigate } from 'react-router-dom';
 import type { FitnessSessionPublicResponseData } from '../../store/fitness.session.types';
-import { useEffect, useState } from 'react';
-import { reviewService } from '@/features/review/service/reviewService';
+
+
 
 const FitnessSessionCard = ({
   session,
+  rating
 }: {
   session: FitnessSessionPublicResponseData;
+  rating?: { avgRating: number; reviewCount: number };
 }) => {
   const navigate = useNavigate();
   const handleCardClick = () => navigate(`/fitness/sessions/${session.id}`);
@@ -21,21 +23,7 @@ const FitnessSessionCard = ({
     Medium: 'text-amber-500 bg-amber-50 border-amber-200',
     High: 'text-red-500 bg-red-50 border-red-200',
   };
-   const [ratingReview,setRatingReview]=useState({
-      avgRating:0,
-      reviewCount:0
-    })
-    useEffect(()=>{
-      const getRating=async()=>{
-        try {
-          const ratingData = await reviewService.getAvgRatingAndCount(session.id, Review_Type.FITNESS_SESSION);
-          setRatingReview({ avgRating: ratingData.averageRating, reviewCount: ratingData.totalReviews });
-        } catch (err) {
-          console.error('Failed to fetch rating:', err);
-        }
-      }    
-        getRating();
-    },[session.id]);
+ 
 
   return (
     <div
@@ -85,7 +73,7 @@ const FitnessSessionCard = ({
         {/* Bottom-right: program badge */}
         <div className="absolute bottom-3 right-3">
           <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-primary text-primary-foreground shadow-sm">
-            {session.fitnessCategory.programName}
+            {session.fitnessCategory?.programName?? PAYLOAD_MODEL.FITNESS_SESSION}
           </span>
         </div>
 
@@ -93,7 +81,8 @@ const FitnessSessionCard = ({
         <div className="absolute bottom-3 left-3">
           <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-amber-400/90 text-amber-900">
             <Star size={10} fill="currentColor" />
-            {ratingReview.avgRating ?? 0}
+          
+              {rating?.avgRating ?? 0}
           </span>
         </div>
       </div>

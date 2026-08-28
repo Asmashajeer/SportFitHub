@@ -53,6 +53,7 @@ export interface IFitnessSession extends Document {
   images: string[];
 
   rating: number;
+  embedding?: number[]; 
   createdAt: Date;
   updatedAt: Date;
 }
@@ -219,6 +220,10 @@ const FitnessSessionSchema = new mongoose.Schema<IFitnessSession>(
     images: [String],
     // URLs  images
     rating: { type: Number, default: 0 },
+    embedding: {
+      type: [Number],
+      select: false,
+    },
   },
 
   {
