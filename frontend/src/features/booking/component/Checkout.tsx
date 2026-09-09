@@ -167,7 +167,7 @@ const CheckoutPage = () => {
       }
       setIsRedirecting(true);
       try {
-        // stripe Checlkout session
+        // stripe Checlkout session       
         const data = await BookingService.createCheckoutSession(payload);
         //  The backend  return { url: "https://checkout.stripe.com/..." }
         if (data?.url) {

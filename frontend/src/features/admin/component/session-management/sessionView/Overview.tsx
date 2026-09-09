@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button"
-import type { AdminFitnessSessionDetails, AdminSportSessionDetails, FitnessSessionDetailsData, SportsSessionDetailsData } from "@/features/admin/store/types/session.types"
+import { Button } from "@/components/ui/Button"
+import type { AdminFitnessSessionDetails, AdminSportSessionDetails } from "@/features/admin/store/types/session.types"
 import { Clock, MapPin, User, Users } from "lucide-react"
 
 const Overview=({session}:{session:AdminSportSessionDetails | AdminFitnessSessionDetails})=>{

@@ -19,7 +19,7 @@ export const useInitSocketListeners =()=>{
             updateConversationsPreview(message);           
         }
        
-        const handleNewMessage = ({message,conversationId}:{message:Message,conversationId:string}) => {
+        const handleNewMessage = ({message}:{message:Message,conversationId:string}) => {
             addMessage(message);           
             updateConversationsPreview(message);
         };

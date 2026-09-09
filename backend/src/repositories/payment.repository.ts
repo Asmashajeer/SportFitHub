@@ -4,6 +4,7 @@ import { BaseRepository } from './base.repository';
 import { Model } from 'mongoose';
 import { IPaymentRepository } from '@/interfaces/repositories/IPayment.repository';
 import { PAYMENT_STATUS } from '@/constants/enums';
+import { RevenuePoint } from '@/dtos/response/admin/dashboard.dto';
 
 
 export class PaymentRepository extends BaseRepository<IPayment> implements IPaymentRepository {
@@ -44,6 +45,55 @@ export class PaymentRepository extends BaseRepository<IPayment> implements IPaym
     ]);
     return result[0]?.total ?? 0;
   }
+
+
+  //-----total revenue--
+  async sumRevenue(): Promise<number> {
+    const result =  await this.model.aggregate([
+      { $match: { status: PAYMENT_STATUS.SUCCESS } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    return result[0]?.total || 0;
+  }
+
+
+//-----------revenue by week
+  async getWeeklyRevenue(): Promise<RevenuePoint[]> {
+    const days = 7;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - (days - 1));
+    startDate.setHours(0, 0, 0, 0);
+
+    const results = await this.model.aggregate([
+      {
+        $match: {
+          status: "success",
+          createdAt: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          total: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const totalsByDate = new Map(results.map((r) => [r._id, r.total]));
+
+    const points: RevenuePoint[] = [];
+    for (let i = 0; i < days; i++) {
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + i);
+      const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+      const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      points.push({ name: label, value: totalsByDate.get(key) || 0 });
+    }
+
+    return points;
+  }
 }
+
+
 
 

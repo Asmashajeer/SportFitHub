@@ -16,5 +16,6 @@ export interface IBookingSessionRepository extends IBaseRepository<IBookingSessi
   findOccuredSessions(filter: FilterQuery<IBookingSession>);
  autoCompleteExpiredSessions();
   findOneSession(filter:FilterQuery<IBookingSession>)
-  
+  getRecentBookings(limit: number );
+  getBookingCategoryMetrics(startDate?: Date, endDate?: Date)
 }

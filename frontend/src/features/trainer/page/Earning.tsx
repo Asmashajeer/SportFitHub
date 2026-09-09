@@ -83,7 +83,7 @@ export default function TrainerEarningsPage() {
         ]);       
         setSummary(s);
         setHistory(h);
-        setSessions(sess.sessions);
+        setSessions(sess.sessionsData.sessions);
         setSessionsPagination({
           page: sess.page,
           total: sess.total,

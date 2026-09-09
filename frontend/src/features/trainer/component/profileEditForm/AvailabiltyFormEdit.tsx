@@ -1,4 +1,4 @@
-import { CURRENCY, DAYS_OF_WEEK } from '@/constants/constants';
+import { DAYS_OF_WEEK } from '@/constants/constants';
 import { trainerService } from '../../service/trainerService';
 import type {
   AvailabiltyPricing,
@@ -11,19 +11,9 @@ import { Input } from '@/components/ui/Input';
 import { useTrainerStore } from '../../store/useTrainerStore';
 import {
   Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 
 interface AvailabilityFormValues {
   pricing: { sessionCharge: number; currency: string };
@@ -63,7 +53,7 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
   const profile = useTrainerStore((state) => state.profile);
   const setProfile = useTrainerStore((state) => state.setProfile);
   const form = useForm<AvailabilityFormValues>({ defaultValues: initialData });
-  const { register, watch, handleSubmit, control } = form;
+  const { register, watch, handleSubmit} = form;
   // const { control } = useForm<AvailabilityFormValues>({...});
 
   const onSubmit = async (data: AvailabiltyPricing) => {

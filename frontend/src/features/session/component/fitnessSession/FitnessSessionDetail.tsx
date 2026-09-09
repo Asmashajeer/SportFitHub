@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 
 import { LoadingScreen } from '@/components/reusable/LoadingScreen';
 
@@ -49,10 +49,12 @@ import { getDay, parse } from 'date-fns';
 import BookingService from '@/features/booking/service/bookingService';
 import { useCheckAvailability } from '@/hooks/useCheckAvailability';
 import TimeSlotPicker from '../TimeSlotPicker';
-import { MapView } from '@/components/reusable/MapView';
-import { ChatDrawer } from '@/features/chat/component/ChatDrawer';
-import { SessionReviews } from '@/features/review/components/session/SessionReviews';
+const MapView = lazy(() =>  import('@/components/reusable/MapView'));
+const ChatDrawer = lazy(() =>  import('@/features/chat/component/ChatDrawer'));
+const SessionReviews = lazy(() =>  import('@/features/review/components/session/SessionReviews'));
 import { reviewService } from '@/features/review/service/reviewService';
+import MapSkeleton from '@/components/reusable/MapSkeleton';
+import ReviewsSkeleton from '@/components/reusable/ReviewsSkeleton';
 
 const FitnessSessionDetail = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -399,11 +401,13 @@ const FitnessSessionDetail = () => {
                   <p className="font-black italic uppercase text-xl text-white">{session.venue?.name}</p>
                   <p className="text-zinc-500 text-sm mt-1">{session.venue?.address}</p>
                 </div>
-                <MapView
-                  lat={session.venue.location.coordinates[1]}
-                  lng={session.venue.location.coordinates[0]}
-                  label={`${session.venue.name}  ${session.venue.address}`}
-                />
+                 <Suspense fallback={<MapSkeleton/>}>
+                  <MapView
+                    lat={session.venue.location.coordinates[1]}
+                    lng={session.venue.location.coordinates[0]}
+                    label={`${session.venue.name}  ${session.venue.address}`}
+                  />
+                </Suspense>
                 {session.venue?.location?.coordinates && (
                   <GetMapsLink coords={session.venue.location.coordinates} />
                 )}
@@ -518,12 +522,15 @@ const FitnessSessionDetail = () => {
                         #{item.replace(/\s+/g, '')}
                       </span>
                     ))}
-                    <ChatDrawer
-                      userId={session.trainer.userId}
-                      trainerName={session.trainer.displayName}
-                      contextSessionId={session.id}
-                      contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION}
-                    />
+
+                     <Suspense fallback={null}>
+                      <ChatDrawer
+                        userId={session.trainer.userId}
+                        trainerName={session.trainer.displayName}
+                        contextSessionId={session.id}
+                        contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION}
+                      />
+                    </Suspense>
                   </div>
                 </div>
               </div>
@@ -548,9 +555,11 @@ const FitnessSessionDetail = () => {
           </div>
         </div>
            {/* Reviews summary */}
-                     <div className="mt-3 pt-3 border-t border-zinc-800">
-                      <SessionReviews reviewableId={sessionId!} reviewableType={Review_Type.FITNESS_SESSION} />
-                     </div>         
+          <div className="mt-3 pt-3 border-t border-zinc-800">
+            <Suspense fallback={<ReviewsSkeleton />}>
+              <SessionReviews reviewableId={sessionId!} reviewableType={Review_Type.FITNESS_SESSION} />
+            </Suspense>  
+          </div>         
           <StickyBookingBar
             sessionId={session.id}
             selectedDate={

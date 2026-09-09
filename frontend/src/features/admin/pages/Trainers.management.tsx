@@ -1,5 +1,4 @@
-import BookingsStats from "../component/booking-management/BookingStats";
-import BookingsTable from "../component/booking-management/BookingsTable";
+
 import Approvals from "../component/trainer-management/Approvals";
 import TrainersTable from "../component/trainer-management/TrainersTable";
 

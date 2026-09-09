@@ -108,6 +108,8 @@ import { StripeConnectService } from './services/trainer/stripeConnect.service';
 import { StripeConnectController } from './api/controllers/trainer/stripeConnect.controller';
 import { EmbeddingService } from './services/embeddingService';
 import { SessionsSearchService } from './services/session/sessions.search.service';
+import { DashboardService } from './services/admin/dashboard.service';
+import { AdminDashboardController } from './api/controllers/admin/admin.dashboard.controller';
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-03-25.dahlia',
@@ -226,4 +228,6 @@ const trainerEarningsService = new TrainerEarningsService(payoutLedgerRepository
 export const trainerEarningsController=new TrainerEarningsController(trainerEarningsService);
 export const payoutService=new PayoutService(payoutLedgerRepository,penaltyLedgerRepository,payoutBatchRepository, trainerRepository,stripe )
 const stripeConnectService=new StripeConnectService(trainerRepository,stripe)
-export const stripeConnectController= new StripeConnectController(stripeConnectService)
+export const stripeConnectController= new StripeConnectController(stripeConnectService);
+const dashboardService=new DashboardService(userRepository,trainerRepository,sportsSessionRepository,fitnessSessionRepository,paymentRepository,bookingSessionRepository);
+export const adminDashboardController=new AdminDashboardController(dashboardService);

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { MoveLeft, Home, Search } from 'lucide-react';
 
 const NotFound = () => {

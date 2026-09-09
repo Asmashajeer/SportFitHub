@@ -1,5 +1,6 @@
 import { PAGINATION_LIMIT, PAYLOAD_MODEL, UserRole } from '@/constants/enums';
 import { STATUS_CODE } from '@/constants/messages';
+
 import { getTimezone } from '@/context/timezone.context';
 import { CheckAvailabilityDTO } from '@/dtos/request/booking/booking.request.dto';
 import { IBookingService } from '@/interfaces/services/booking/IBooking.service';
@@ -166,4 +167,5 @@ export class BookingController {
       next(error);
     }
   };
+
 }

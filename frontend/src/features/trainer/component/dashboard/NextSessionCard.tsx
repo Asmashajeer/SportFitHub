@@ -6,7 +6,7 @@ import type { BookedSessionResponseDataWithUserInfo } from "../../types/trainer.
 import BookingSessionCard from "../bookings/BookingSessionCard";
 
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, ArrowRightCircle } from "lucide-react";
+import { ArrowRightCircle } from "lucide-react";
 
 
 interface SessionsDataProps {

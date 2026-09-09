@@ -165,4 +165,9 @@ export class SportsSessionRepository extends BaseRepository<ISportsSession> impl
         },
       ]);
     }
+
+
+  async countActiveSessions(): Promise<number> {   
+    return await this.model.countDocuments({isActive:true,isApproved:true});
+  }
 }

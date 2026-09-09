@@ -7,13 +7,10 @@ const router = Router();
 
 import { bookingController, isBlocked, paymentController } from '@/container';
 import { UserRole } from '@/constants/enums';
-
 router.use(protect);
 router.use(isBlocked);
 router.use(timezoneMiddleware);
-
 router.use(restrictTo([UserRole.USER]));
-
 router.get('/checkSlotAvailability', bookingController.checkAvailability);
 router.post('/check-duplicate-booking', bookingController.checkDuplicateBooking);
 
@@ -26,5 +23,7 @@ router.get('/my-payments', paymentController.getUserPayments);
 router.get('/payment/invoice/:invoiceId', paymentController.getInvoice);
 router.put('/sessions/:sessionBookingId/reschedule', bookingController.rescheduleBookedSession);
 router.patch('/sessions/:sessionBookingId', bookingController.cancelBookedSession);
+
+
 
 export default router;

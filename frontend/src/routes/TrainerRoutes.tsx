@@ -1,30 +1,37 @@
+import { LoadingScreen } from '@/components/reusable/LoadingScreen';
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 
-import TrainerDashboard from '@/features/trainer/page/TrainerDashboard';
-import ProfileView from '@/features/trainer/component/ProfileView';
 
-import Sessions from '@/features/trainer/page/Sessions';
-import Bookings from '@/features/trainer/page/Bookings';
-import Attendance from '@/features/trainer/page/Attandance';
-import { ChatInboxPage } from '@/features/chat/page/ChatInboxPage';
-import TrainerReviewsPage from '@/features/review/page/TrainerReviewsPage';
-import TrainerEarningsPage from '@/features/trainer/page/Earning';
-import OnboardingRefresh from '@/features/trainer/component/earnings/OnboardingRefreshPage';
+const TrainerDashboard = lazy(() => import('@/features/trainer/page/TrainerDashboard'));
+const ProfileView = lazy(() => import('@/features/trainer/component/ProfileView'));
+const Sessions = lazy(() => import('@/features/trainer/page/Sessions'));
+const Bookings = lazy(() => import('@/features/trainer/page/Bookings'));
+const Attendance = lazy(() => import('@/features/trainer/page/Attandance'));
+const TrainerReviewsPage = lazy(() => import('@/features/review/page/TrainerReviewsPage'));
+const TrainerEarningsPage = lazy(() => import('@/features/trainer/page/Earning'));
+const OnboardingRefresh = lazy(() => import('@/features/trainer/component/earnings/OnboardingRefreshPage'));
+const ChatInboxPage = lazy(() =>  import('@/features/chat/page/ChatInboxPage'));
+
+
+
 const TrainerRoutes = () => {
   return (
     <Routes>
-      <Route path="/dashboard" element={<TrainerDashboard />} />    
-      {/* <Route path="/add-Profile"  element={<TrainerProfileForm /> }  />  */}
-      <Route path="/profile" element={<ProfileView />} />
-      <Route path="/sessions" element={<Sessions />} />
-      <Route path="/bookings" element={<Bookings />} />
-      <Route path="/attendance" element={<Attendance />} />
-      <Route path="/messages" element={<ChatInboxPage />} />
-      <Route path="/review-rating" element={<TrainerReviewsPage />} />
-      <Route path="/earnings" element={<TrainerEarningsPage />} />
-       <Route path="/onboarding/refresh" element={<OnboardingRefresh />} />
-     
-      {/* <Route path='/sessions/create-Sport-session' element={<CreateSportSession />}/> */}
+      <Suspense fallback={<LoadingScreen />}>
+        <Route path="/dashboard" element={<TrainerDashboard />} />    
+        {/* <Route path="/add-Profile"  element={<TrainerProfileForm /> }  />  */}
+        <Route path="/profile" element={<ProfileView />} />
+        <Route path="/sessions" element={<Sessions />} />
+        <Route path="/bookings" element={<Bookings />} />
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/messages" element={<ChatInboxPage />} />
+        <Route path="/review-rating" element={<TrainerReviewsPage />} />
+        <Route path="/earnings" element={<TrainerEarningsPage />} />
+        <Route path="/onboarding/refresh" element={<OnboardingRefresh />} />
+      
+        {/* <Route path='/sessions/create-Sport-session' element={<CreateSportSession />}/> */}
+      </Suspense>  
     </Routes>
   );
 };

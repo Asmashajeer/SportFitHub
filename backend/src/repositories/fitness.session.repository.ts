@@ -158,4 +158,8 @@ export class FitnessSessionRepository extends BaseRepository<IFitnessSession> im
     }
 
 
+
+  async countActiveSessions(): Promise<number> {   
+    return await this.model.countDocuments({isActive:true,isApproved:true});
+  }
 }

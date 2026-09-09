@@ -38,7 +38,7 @@ const PaymentsTable = () => {
    refunded:   'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20',
     succeeded: 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20',
     requires_action: 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20',
-    failed: 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20',
+    failed: 'bg-red-500/10 t.ext-red-400 ring-1 ring-red-500/20',
   };
  
   useEffect(() => {
@@ -60,6 +60,7 @@ const PaymentsTable = () => {
     };
     getPayments();
   }, [currentPage,search,filters]);
+
 
   const thCls =
     'px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider whitespace-nowrap';
@@ -211,15 +212,14 @@ const PaymentsTable = () => {
           </table>
         </div>
           {/* Pagination */}
-                <Pagination
-                  totalPages={paymentData.totalPages}
-                  ITEMS_PER_PAGE={PAGINATION_DEFAULT_LIMIT}
-                  currentPage={paymentData.page}
-                  totalCount={paymentData.total}
-                  setCurrentPage={setCurrentPage}
-                  label="Payments"
-                />
-       
+          <Pagination
+            totalPages={paymentData.totalPages}
+            ITEMS_PER_PAGE={PAGINATION_DEFAULT_LIMIT}
+            currentPage={paymentData.page}
+            totalCount={paymentData.total}
+            setCurrentPage={setCurrentPage}
+            label="Payments"
+          />    
 
      
       </div>

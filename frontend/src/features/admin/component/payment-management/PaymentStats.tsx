@@ -57,7 +57,7 @@ export default function PaymentStats() {
         </div>
 
         <div className="flex gap-1 rounded-lg p-1">
-          {PRESETS.map((preset, i) => (
+          {PRESETS.map((preset) => (
             <button
               key={preset.label}
               onClick={() => setActivePreset(preset.days)}
@@ -112,7 +112,7 @@ export default function PaymentStats() {
           </div>
 
           {/* Pending liability — separate, since it's a snapshot, not date-scoped */}
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-center justify-between">
+          <div className="rounded-xl border border-red-400 bg-[#f5aec2] p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-amber-900">Pending payout liability</p>
               <p className="text-xs text-amber-700 mt-0.5">

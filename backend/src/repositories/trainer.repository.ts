@@ -56,5 +56,10 @@ export class TrainerRepository extends BaseRepository<ITrainerProfile> implement
 
    async updateTrainerStripeAC(trainerId: string, updateData: stripeData): Promise<ITrainerProfile> {
       return await this.model.findByIdAndUpdate(trainerId, updateData);
-    }
+    } 
+
+    //----active trainers
+ async countActiveTrainers(): Promise<number> {
+    return await this.model.countDocuments({ status: "approved" });
+  }
 }

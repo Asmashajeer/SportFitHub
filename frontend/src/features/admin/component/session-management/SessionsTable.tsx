@@ -24,9 +24,9 @@ import {
 } from '@/components/ui/select';
 
 import Pagination from '@/components/reusable/Pagination';
-import { useNavigate } from 'react-router-dom';
+
 import SessionDetailModal from './sessionView/SessionDetailModal';
-import type { AdminFitnessSessionDetails, AdminSportSessionDetails, FitnessSessionDetailsData, SportsSessionDetailsData } from '../../store/types/session.types';
+import type { AdminFitnessSessionDetails, AdminSportSessionDetails, } from '../../store/types/session.types';
 
 export interface AdminSessionRow {
   id: string;
@@ -70,7 +70,6 @@ const SessionsTable = ({
   const [refreshKey, setRefreshKey] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedSession, setSelectedSession] = useState< AdminSportSessionDetails | AdminFitnessSessionDetails | null>(null);
-  const [loading, setLoading] = useState(false);
 
   type SessionStatus = 'pending' | 'active' | 'inactive' | 'rejected';
   const STATUS_BADGE: Record<SessionStatus, string> = {
@@ -110,13 +109,8 @@ const SessionsTable = ({
 
 
   const handleView = async (sessionId: string, sessionModel:(typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL]) => {
-      setLoading(true);
-      try {
-        const data = await SessionManagementService.getSessionById(sessionId, sessionModel);
-        setSelectedSession(data);
-      } finally {
-        setLoading(false);
-      }
+      const data = await SessionManagementService.getSessionById(sessionId, sessionModel);
+      setSelectedSession(data);
   };
 
 

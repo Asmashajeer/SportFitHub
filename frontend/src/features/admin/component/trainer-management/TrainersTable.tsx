@@ -43,7 +43,6 @@ const TrainersTable = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [category, setCategory] = useState('all');
-  const [refreshKey, setRefreshKey] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const  [selectedTrainer,setSelectedTrainer]= useState< string|null>(null);
  
@@ -76,7 +75,7 @@ const TrainersTable = () => {
       }
     };
     getTrainers();
-  }, [currentPage, search, statusFilter,  refreshKey, category]);
+  }, [currentPage, search, statusFilter, category]);
 
 
 

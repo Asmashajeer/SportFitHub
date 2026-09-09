@@ -13,3 +13,6 @@ export const PUBLIC_ROUTE = {
     BY_SESSIONID: (sessionId: string) => `/availability/${sessionId}`,
   },
 };
+
+
+

@@ -1,5 +1,5 @@
 import { oneDay } from "@/constants/constants";
-import { ChevronDown, Star } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Stars } from "../../page/TrainerReviewsPage";
 import type { AllSessionReviewData } from "../../types/review.types";

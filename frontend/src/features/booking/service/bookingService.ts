@@ -25,6 +25,7 @@ const BookingService = {
     );
     return data;
   },
+
   // ----------------create checkout session
   createBookingWithWallet: async (payload: Payload) => {
     const { data } = await api.post(

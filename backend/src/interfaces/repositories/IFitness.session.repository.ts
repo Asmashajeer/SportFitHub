@@ -15,4 +15,5 @@ export interface IFitnessSessionRepository extends IBaseRepository<IFitnessSessi
   updateSession(id: string | Types.ObjectId, sessionData: UpdateQuery<IFitnessSession>);
   deleteASession(id: string | Types.ObjectId);
   vectorSearch(queryEmbedding: number[], limit?:number);
+  countActiveSessions(): Promise<number> ;
 }

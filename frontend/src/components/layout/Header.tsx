@@ -29,7 +29,7 @@ const Header = () => {
     <header className="fixed top-0 left-0 z-50 w-full shrink-0 p-0 border-border bg-background/80 backdrop-blur-md transition-all">
       <div className="section-container px-4  flex h-16 md:h-20 items-center  justify-between">
        <div   
-          className="flex items-center justify-around   cursor-pointer group"
+          className="flex items-center justify-around   bg-black cursor-pointer group"
           onClick={() => navigate('/')}
         >
           <img 

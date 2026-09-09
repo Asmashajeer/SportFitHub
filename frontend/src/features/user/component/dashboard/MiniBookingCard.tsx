@@ -1,9 +1,7 @@
 import type { SportsSessionResponseData } from '@/features/session/store/session.types';
 import { useUserDashboardStore } from '../../store/useUserDashboardStore';
 import type {
-  UserBookedSessionsResponseData,
-  UserBookingResponseData,
-} from '../../types/user.booking.types';
+  UserBookedSessionsResponseData} from '../../types/user.booking.types';
 import type { FitnessSessionResponseData } from '@/features/session/store/fitness.session.types';
 import { useEffect, useState } from 'react';
 import { sessionService } from '@/features/session/service/sessionService';

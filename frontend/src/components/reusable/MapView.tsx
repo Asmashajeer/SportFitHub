@@ -20,7 +20,7 @@ interface MapViewProps {
   zoom?: number; // default 15
 }
 
-export function MapView({ lat, lng, label, zoom = 15 }: MapViewProps) {
+function MapView({ lat, lng, label, zoom = 15 }: MapViewProps) {
   return (
     <MapContainer
       center={[lat, lng]}
@@ -39,3 +39,4 @@ export function MapView({ lat, lng, label, zoom = 15 }: MapViewProps) {
     </MapContainer>
   );
 }
+export default MapView;

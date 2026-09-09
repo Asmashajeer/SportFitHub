@@ -48,7 +48,6 @@ const BookingsTable = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sessionModel, setsessionModel] = useState('all');
 
-  const [refreshKey, setRefreshKey] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBooking, setSelectedBooking] = useState<AdminBookingDetailData| null>(null);
   const [loading, setLoading] = useState(false);
@@ -81,7 +80,7 @@ const BookingsTable = () => {
       }
     };
     getBookings();
-  }, [currentPage, search, statusFilter,  refreshKey, sessionModel]);
+  }, [currentPage, search, statusFilter, sessionModel]);
 
   const handleView = async (    bookingId: string     ) => {
     setLoading(true);

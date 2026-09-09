@@ -1,5 +1,5 @@
 import { PAYLOAD_MODEL, SIMILARITY_THRESHOLD } from "@/constants/enums";
-import { SessionPublicResponseDTO } from "@/dtos/response/session/session.response.dto";
+import { FitnessSessionRawResult, SessionPublicResponseDTO, SportSessionRawResult } from "@/dtos/response/session/session.response.dto";
 import { IFitnessSessionRepository } from "@/interfaces/repositories/IFitness.session.repository";
 import { ISportsSessionRepository } from "@/interfaces/repositories/ISports.session.repository";
 import { IEmbeddingService } from "@/interfaces/services/IEmbeddingService";
@@ -28,15 +28,15 @@ export class SessionsSearchService implements ISessionsSearchService {
       this._sportSessionRepo.vectorSearch(queryEmbedding),
       this._fitnessSessionRepo.vectorSearch(queryEmbedding),
     ]);
-   
+
     const taggedSports = sportsResults
-      .filter((s: any) => s.score >= SIMILARITY_THRESHOLD)
-      .map((s: any) => toSessionPublicResponseDTO(s, PAYLOAD_MODEL.SPORT_SESSION));
+      .filter((s: SportSessionRawResult) => s.score >= SIMILARITY_THRESHOLD)
+      .map((s) => toSessionPublicResponseDTO(s, PAYLOAD_MODEL.SPORT_SESSION));
 
     const taggedFitness = fitnessResults
-      .filter((s: any) => s.score >= SIMILARITY_THRESHOLD)
-      .map((s: any) => toSessionPublicResponseDTO(s, PAYLOAD_MODEL.FITNESS_SESSION));
+      .filter((s: FitnessSessionRawResult) => s.score >= SIMILARITY_THRESHOLD)
+      .map((s) => toSessionPublicResponseDTO(s, PAYLOAD_MODEL.FITNESS_SESSION));
 
-    return [...taggedSports, ...taggedFitness].sort((a: any, b: any) => b.score - a.score);
+    return [...taggedSports, ...taggedFitness].sort((a, b) => b.score - a.score);
   }
 }

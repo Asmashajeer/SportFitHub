@@ -1,5 +1,5 @@
 import { formatDateDDMMYY } from '@/utils/formatDate';
-import { BOOKING_STATUS } from '@/constants/constants';
+
 import type {
   UserBookedSessionsResponseData,
 

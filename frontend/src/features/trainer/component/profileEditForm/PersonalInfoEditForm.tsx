@@ -15,9 +15,9 @@ import { Button } from '@/components/ui/Button';
 import { useTrainerStore } from '../../store/useTrainerStore';
 import { trainerService } from '../../service/trainerService';
 import { PersonalInfoSchema } from '../../types/trainer.profile.schema';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { formatDateDDMMYY } from '@/utils/formatDate';
+
 
 
 
@@ -44,7 +44,7 @@ const PersonalInfoEditForm = ({
 }) => {
   const profile = useTrainerStore((state) => state.profile);
   const setProfile = useTrainerStore((state) => state.setProfile);
-  const fetchProfile = useTrainerStore((state) => state.fetchProfile);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<PersonalInfoFormValues>({
     defaultValues: initialData,

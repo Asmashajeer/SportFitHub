@@ -42,7 +42,7 @@ import toast from 'react-hot-toast';
 import { CreateProfileSchema } from '../types/user.schema';
 import { useNavigate } from 'react-router-dom';
 
-export const UserProfile = () => {
+const UserProfile = () => {
   const navigate=useNavigate();
   const { user, setUser } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
@@ -418,3 +418,6 @@ return (
   </div>
 );
 };
+
+
+export default UserProfile;

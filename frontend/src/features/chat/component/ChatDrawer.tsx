@@ -17,7 +17,7 @@ interface ChatDrawerProps {
   contextSessionModel?:typeof PAYLOAD_MODEL[keyof typeof PAYLOAD_MODEL];
 }
 
-export const ChatDrawer = ({ userId, trainerName, contextSessionId, contextSessionModel }: ChatDrawerProps) => {
+const ChatDrawer = ({ userId, trainerName, contextSessionId, contextSessionModel }: ChatDrawerProps) => {
   const lastCreatedConversationId = useChatStore((s) => s.lastCreatedConversationId);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -64,3 +64,5 @@ export const ChatDrawer = ({ userId, trainerName, contextSessionId, contextSessi
     </Sheet>
   );
 };
+
+export default ChatDrawer;

@@ -46,3 +46,11 @@ backend/src/config/serviceAccountKey.json
 
 *.pem
 *.key
+
+# --- PWA generated files (
+frontend/dev-dist/
+**/dev-dist/
+**/sw.js
+**/workbox-*.js
+**/registerSW.js
+**/manifest.webmanifest

@@ -15,7 +15,7 @@ import {
 
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 
 import { LoadingScreen } from '@/components/reusable/LoadingScreen';
 import { sportSessionService } from '../../service/sportSessionService';
@@ -47,13 +47,16 @@ import TimeSlotPicker from '../TimeSlotPicker';
 import BookingService from '@/features/booking/service/bookingService';
 import type { IBookedSlot } from '@/features/user/types/user.booking.types';
 import type { BookingSlot, Payload } from '@/features/booking/store/payment.types';
-import { MapView } from '@/components/reusable/MapView';
-
 import { useCheckAvailability } from '@/hooks/useCheckAvailability';
-import { ChatDrawer } from '@/features/chat/component/ChatDrawer';
 import { reviewService } from '@/features/review/service/reviewService';
+import MapSkeleton from '@/components/reusable/MapSkeleton';
+import ReviewsSkeleton from '@/components/reusable/ReviewsSkeleton';
+const MapView = lazy(() =>  import('@/components/reusable/MapView'));
+const ChatDrawer = lazy(() =>  import('@/features/chat/component/ChatDrawer'));
+const SessionReviews = lazy(() =>  import('@/features/review/components/session/SessionReviews'));
 
-import { SessionReviews } from '@/features/review/components/session/SessionReviews';
+
+
 
 const SessionDetail = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -389,11 +392,13 @@ const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 
                     {session.venue.address}
                   </p>
                 </div>
-                <MapView
-                  lat={session.venue.location.coordinates[1]}
-                  lng={session.venue.location.coordinates[0]}
-                  label={`${session.venue.name}  ${session.venue.address}`}
-                />
+                <Suspense fallback={<MapSkeleton/>}>
+                  <MapView
+                    lat={session.venue.location.coordinates[1]}
+                    lng={session.venue.location.coordinates[0]}
+                    label={`${session.venue.name}  ${session.venue.address}`}
+                  />
+                </Suspense>
                 {session.venue.location?.coordinates && (
                   <GetMapsLink coords={session.venue.location.coordinates} />
                 )}
@@ -499,12 +504,14 @@ const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 
                       </span>
                     ))}
                     {isAuthenticated &&
-                      <ChatDrawer
-                        userId={session.trainer.userId}
-                        trainerName={session.trainer.displayName}
-                        contextSessionId={session.id}
-                        contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION}
-                      />
+                      <Suspense fallback={null}>
+                        <ChatDrawer
+                          userId={session.trainer.userId}
+                          trainerName={session.trainer.displayName}
+                          contextSessionId={session.id}
+                          contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION}
+                        />
+                      </Suspense>
                     }
                   </div>
                 </div>
@@ -532,7 +539,9 @@ const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 
         
          {/* Reviews summary */}
           <div className="mt-3 pt-3 border-t border-zinc-800">
-           <SessionReviews reviewableId={sessionId!} reviewableType={Review_Type.SPORTS_SESSION} />
+            <Suspense fallback={<ReviewsSkeleton />}>
+              <SessionReviews reviewableId={sessionId!} reviewableType={Review_Type.SPORTS_SESSION} />
+            </Suspense>        
           </div>
         <StickyBookingBar
           sessionId={session.id}

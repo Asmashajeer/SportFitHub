@@ -14,7 +14,7 @@ interface MessageThreadProps {
 }
 
 export const AllMessages = ({ conversationId }: MessageThreadProps) => {
-  const { messages, setMessages } = useChatStore();
+  const { messages, setMessages,markAsRead } = useChatStore();
   const {user}= useAuthStore();
   const currentUserId=user?.id;
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -26,9 +26,9 @@ export const AllMessages = ({ conversationId }: MessageThreadProps) => {
     const msgs=await chatService.getMessages(conversationId);
         setMessages(conversationId, msgs);
     }  
- 
+  
     fetchMessages();
-   
+    markAsRead(conversationId);
   }, [conversationId, setMessages]);
 
   useEffect(() => {

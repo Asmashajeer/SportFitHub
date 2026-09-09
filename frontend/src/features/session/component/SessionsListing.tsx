@@ -76,13 +76,14 @@ const SessionsListing = () => {
           </button>
         </div>
       )} 
-      {/* {loading ? (
-        <LoadingGrid /> */}
-      {/* ) :  */}
-      {sessions.length > 0 ? (
+      {loading ? (
+        <div className="flex justify-center py-12 text-sm text-muted-foreground">
+          Loading sessions...
+        </div>
+      ) : sessions.length > 0 ? (
         <SessionGrid sessions={sessions} ratingsMap={ratingsMap} />
       ) : (
-        <EmptyState  />
+        <EmptyState />
       )}
     </div>
   );

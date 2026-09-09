@@ -19,12 +19,13 @@ api.interceptors.response.use(
     const isLoginPath = originalRequest.url.includes('/auth/login');
     const PUBLIC_PATHS = ['/', '/sports', '/fitness', '/login', '/register', /* ... */];
     const isPublicPath = () => PUBLIC_PATHS.some(p => window.location.pathname===p);
+   
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
       !isLoginPath &&
       !originalRequest.url.includes('/auth/refresh') 
-      //&& !isPublicPath
+      && !isPublicPath
     ) {
       originalRequest._retry = true;
       try {
@@ -40,6 +41,7 @@ api.interceptors.response.use(
         return Promise.reject('Session expired. Please log in again.');
       }
     }
+   
     return Promise.reject(error);
   }
 );

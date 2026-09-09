@@ -91,15 +91,17 @@ export default function MySessions() {
     getStats();
   }, [userSessions]);
 
+  const bookingId = location.state?.bookingId;
+  const bookingSessionId = location.state?.bookingSessionId;
   const filtered = useMemo(() => {
-    if (location.state?.bookingId) {
+    if (bookingId) {
       return userSessions.filter(
-        (s) => s.bookingId === location.state.bookingId
+        (s) => s.bookingId === bookingId
       );
     }
-    if (location.state?.bookingSessionId) {
+    if (bookingSessionId) {
       return userSessions.filter(
-        (s) => s.id === location.state.bookingSessionId
+        (s) => s.id === bookingSessionId
       );
     }
     return activeFilter === 'all'
@@ -111,10 +113,13 @@ export default function MySessions() {
   }, [activeFilter, userSessions,location.state?.bookingId,location.state?.bookingSessionId]);
 
   //for pagination
-  useEffect(() => {
-    setCurrentPage(1);
-   },[activeFilter]);
-
+  // useEffect(() => {
+  //   setCurrentPage(1);
+  //  },[activeFilter]);
+  const handleFilterChange = (newFilter: string) => {
+    setActiveFilter(newFilter);
+    setCurrentPage(1); // Both states update together in ONE render cycle
+  };
   const totalPages = Math.ceil(filtered.length / PAGINATION_DEFAULT_LIMIT);
 
   const paginated = useMemo(() => {
@@ -312,7 +317,7 @@ export default function MySessions() {
           {filters.map((f) => (
             <button
               key={f}
-              onClick={() => setActiveFilter(f)}
+              onClick={() => handleFilterChange(f)}
               className={`text-xs px-4 py-2 rounded-full border transition-all duration-150 font-medium ${
                 activeFilter === f
                   ? 'bg-zinc-100 text-zinc-900 border-zinc-100'

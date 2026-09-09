@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/Button";
 
  interface AttendanceModalProps {
   session:SessionOccuranceResponseData
-  slotId: string;
+  
   onClose: () => void;
   onSaved?: () => void;
 }
-export function AttendanceModal({ session, slotId, onClose, onSaved }: AttendanceModalProps) {
+export function AttendanceModal({ session, onClose, onSaved }: AttendanceModalProps) {
     const [data, setData] = useState<SessionOccuranceResponseData>(session);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

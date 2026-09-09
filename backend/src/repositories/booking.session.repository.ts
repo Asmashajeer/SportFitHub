@@ -5,7 +5,7 @@ import { ClientSession, Model, Types, UpdateQuery } from 'mongoose';
 import { IBookingSessionRepository } from '@/interfaces/repositories/IBook.session.repository';
 import { FilterQuery } from 'mongoose';
 import { BOOKING_SESSION_STATUS } from '@/constants/enums';
-
+import { BookingDataMetricDTO } from '@/dtos/response/admin/dashboard.dto';
 
 export class BookingSessionRepository extends BaseRepository<IBookingSession> implements IBookingSessionRepository {
   constructor(model: Model<IBookingSession>) {
@@ -91,15 +91,14 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
 
     const ids = expiredSessions.map((s) => s._id);
     //update
-    await this.model.updateMany(
-      { _id: { $in: ids } },
-      { $set: { status: 'completed' } }
-    );
+    await this.model.updateMany({ _id: { $in: ids } }, { $set: { status: 'completed' } });
 
     // Fetch and return the updated documents
-    const docs = await this.model.find({ _id: { $in: ids } })
-    .populate<{ bookingId: { pricePlan: { unitPrice: number } } }>('bookingId',' pricePlan.unitPrice').lean();    
-      return docs ;
+    const docs = await this.model
+      .find({ _id: { $in: ids } })
+      .populate<{ bookingId: { pricePlan: { unitPrice: number } } }>('bookingId', ' pricePlan.unitPrice')
+      .lean();
+    return docs;
   }
 
   //--------------------find completed Sessions  by trainerId
@@ -139,4 +138,151 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
   async findOneSession(filter: FilterQuery<IBookingSession>) {
     return await this.model.findOne(filter).populate('sessionId', '_id sessionName').populate('trainerId', '_id  displayName').exec();
   }
+
+  async getRecentBookings(limit: number = 5) {
+    const bookings = await this.model
+      .find()
+      .populate('userId', 'name')
+      .populate('sessionId', 'sessionName')
+      .populate('trainerId', 'displayName')
+      .populate('bookingId', 'pricePlan paymentId') // if Booking stores a paymentId ref
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+    return bookings;
+  }
+
+
+
+async getBookingCategoryMetrics(startDate?: Date, endDate?: Date): Promise<BookingDataMetricDTO[]> {
+  const dateFilter: FilterQuery<IBookingSession> = {};
+  if (startDate || endDate) {
+    dateFilter.createdAt = {};
+    if (startDate) dateFilter.createdAt.$gte = startDate;
+    if (endDate) dateFilter.createdAt.$lte = endDate;
+  }
+
+  return this.model.aggregate([
+    // ...(Object.keys(dateFilter).length ? [{ $match: dateFilter }] : []),
+
+    // 1. Lookup from SportsSessions
+    {
+      $lookup: {
+        from: "sportssessions",
+        localField: "sessionId",
+        foreignField: "_id",
+        as: "sportSession"
+      }
+    },
+
+    // 2. Lookup from FitnessSessions
+    {
+      $lookup: {
+        from: "fitnesssessions",
+        localField: "sessionId",
+        foreignField: "_id",
+        as: "fitnessSession"
+      }
+    },
+
+    // 3. Merge dynamic session collections into one object
+    {
+      $addFields: {
+        sessionObj: {
+          $arrayElemAt: [
+            { $concatArrays: ["$sportSession", "$fitnessSession"] },
+            0
+          ]
+        }
+      }
+    },
+
+    // 4. Get the raw categoryId (whichever field is populated)
+    {
+      $addFields: {
+        categoryId: {
+          $ifNull: [
+            "$sessionObj.sportCategory",
+            "$sessionObj.fitnessCategory",
+            null
+          ]
+        }
+      }
+    },
+
+    // 5a. Resolve against "sportsmodels" collection
+    {
+      $lookup: {
+        from: "sportsmodels",
+        localField: "categoryId",
+        foreignField: "_id",
+        as: "sportCategoryDoc",
+        pipeline: [{ $project: { sportName: 1 } }]
+      }
+    },
+
+    // 5b. Resolve against "fitnessprogrammodals" collection
+    {
+      $lookup: {
+        from: "fitnessprogrammodals",
+        localField: "categoryId",
+        foreignField: "_id",
+        as: "fitnessCategoryDoc",
+        pipeline: [{ $project: { programName: 1 } }]
+      }
+    },
+
+    // 6. Merge both category lookups into one resolved name
+    {
+      $addFields: {
+        category: {
+          $ifNull: [
+            { $arrayElemAt: ["$sportCategoryDoc.sportName", 0] },
+            { $arrayElemAt: ["$fitnessCategoryDoc.programName", 0] },
+            "Uncategorized"
+          ]
+        }
+      }
+    },
+
+    // 7. Lookup bookingId with pricePlan projection
+    {
+      $lookup: {
+        from: "bookings",
+        localField: "bookingId",
+        foreignField: "_id",
+        as: "booking",
+        pipeline: [
+          { $project: { "pricePlan.unitPrice": 1 } }
+        ]
+      }
+    },
+    {
+      $unwind: { path: "$booking", preserveNullAndEmptyArrays: true }
+    },
+
+    // 8. Group by category
+    {
+      $group: {
+        _id: "$category",
+        totalRevenue: { $sum: { $ifNull: ["$booking.pricePlan.unitPrice", 0] } },
+        totalSessions: { $sum: 1 }
+      }
+    },
+
+    // 9. Rename to match chart consumer shape { name, value }
+    {
+      $project: {
+        _id: 0,
+        name: "$_id",
+        value: "$totalRevenue"
+      }
+    },
+
+    { $sort: { value: -1 } }
+  ]);
 }
+}
+  
+
+

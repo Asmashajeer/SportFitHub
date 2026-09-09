@@ -58,7 +58,13 @@ export const ADMIN_ROUTES = {
    GET_PAYMENT_STATS:'/admin/payments/stats',
    GET_PAYMENTS:'/admin/payments',
 
-   SETTINGS:'/admin/settings/'
+   SETTINGS:'/admin/settings/',
 
+   DASHBOARD:{
+    STATS:'/admin/dashboard/stats',
+    WEEKLY_REVENUE:"/admin/dashboard/revenue",
+    BOOKING_METRICS:"/admin/dashboard/bookingMetrics",
+    RECENT_BOOKINGS:"/admin/dashboard/recent_bookings"
+   }
 } as const;
 

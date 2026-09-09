@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import type { AdminFitnessSessionDetails, AdminSportSessionDetails} from "@/features/admin/store/types/session.types"
 import { formatDateDDMMYY } from "@/utils/formatDate"
 import { Check } from "lucide-react"

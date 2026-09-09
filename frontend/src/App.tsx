@@ -6,6 +6,7 @@ import { LoadingScreen } from './components/reusable/LoadingScreen';
 import { useSocketConnection } from './hooks/socket.hook/useSocketConnection';
 import { useInitSocketListeners } from './features/chat/socket.hooks/useInitSocketListeners ';
 import { useVideoCallSocketListeners } from './features/videoCall/hooks/useVideoCallSocketListeners';
+import PwaUpdatePrompt from './PwaUpdatePrompt';
 
 function App() {
   const { isLoading } = useAuth(); // Initialize here
@@ -63,6 +64,7 @@ function App() {
           
         }}
       />
+       <PwaUpdatePrompt />
       {isLoading ? <LoadingScreen /> : <AppRouter />}
     </>
   );

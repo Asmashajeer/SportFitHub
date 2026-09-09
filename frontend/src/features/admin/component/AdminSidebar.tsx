@@ -44,7 +44,7 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-const AdminSidebar: React.FC<SidebarProps> = ({ activePage, onClose }) => {
+const AdminSidebar: React.FC<SidebarProps> = ({  onClose }) => {
   const navLinks = adminNavLinks;
   const { pathname } = useLocation();
   const navigate = useNavigate();

@@ -29,7 +29,7 @@ export class TrainerEarningsService implements ITrainerEarningsService {
  
 
   async getSessionEarnings(trainerId: string, page: number) {
-    const [total,sessions]=await Promise.all([
+    const [sessions,total]=await Promise.all([
       this._payoutLedgerRepo.findByTrainerPaginated(trainerId, page),
       this._payoutLedgerRepo.count({trainerId})
     ]);

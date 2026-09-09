@@ -1,33 +1,35 @@
 import { Routes, Route } from 'react-router-dom';
-
-import CompleteProfilePage from '@/features/user/page/CompleteProfilePage';
-import UserDashboard from '@/features/user/page/UserDashboard';
-import { UserProfile } from '@/features/user/component/UserProfile';
-import MySessions from '@/features/user/page/MySessions';
-import ReschedulePage from '@/features/user/page/ReschedulePage';
-import MyBookings from '@/features/user/component/myBookings/MyBookings';
-import MyPayments from '@/features/user/component/myPayments/MyPayments';
-import MyWallet from '@/features/user/page/MyWallet';
-import { ChatInboxPage } from '@/features/chat/page/ChatInboxPage';
-import SubmitSessionReview from '@/features/review/components/user/SubmitSessionReview';
-
+import { lazy, Suspense } from 'react';
+import { LoadingScreen } from '@/components/reusable/LoadingScreen';
+const CompleteProfilePage = lazy(() => import('@/features/user/page/CompleteProfilePage'));
+const UserDashboard = lazy(() => import('@/features/user/page/UserDashboard'));
+const MySessions = lazy(() => import('@/features/user/page/MySessions'));
+const ReschedulePage = lazy(() => import('@/features/user/page/ReschedulePage'));
+const MyBookings = lazy(() => import('@/features/user/component/myBookings/MyBookings'));
+const MyPayments = lazy(() => import('@/features/user/component/myPayments/MyPayments'));
+const MyWallet = lazy(() => import('@/features/user/page/MyWallet'));
+const SubmitSessionReview = lazy(() => import('@/features/review/components/user/SubmitSessionReview'));
+const UserProfile = lazy(() =>  import('@/features/user/component/UserProfile'));
+const ChatInboxPage = lazy(() =>  import('@/features/chat/page/ChatInboxPage'));
 
 function UserRoutes() {
   return (
     <Routes>
-      <Route path="/dashboard" element={<UserDashboard />} />
-      <Route path="/add-profile" element={<CompleteProfilePage />} />
-      <Route path="/profile" element={<UserProfile />} />
-      <Route path="/my-sessions" element={<MySessions />} />
-      <Route
-        path="/sessions/reschedule/:sessionBookingId"
-        element={<ReschedulePage />}
-      />
-      <Route path="/my-bookings" element={<MyBookings />} />
-      <Route path="/my-payments" element={<MyPayments />} />
-      <Route path="/my-wallet" element={<MyWallet />} />
-      <Route path="/messages" element={<ChatInboxPage />} />
-      <Route path='/review/:sessionModel/:sessionId' element={<SubmitSessionReview/>}/>
+      <Suspense fallback={<LoadingScreen />}>
+        <Route path="/dashboard" element={<UserDashboard />} />
+        <Route path="/add-profile" element={<CompleteProfilePage />} />
+        <Route path="/profile" element={<UserProfile />} />
+        <Route path="/my-sessions" element={<MySessions />} />
+        <Route
+          path="/sessions/reschedule/:sessionBookingId"
+          element={<ReschedulePage />}
+        />
+        <Route path="/my-bookings" element={<MyBookings />} />
+        <Route path="/my-payments" element={<MyPayments />} />
+        <Route path="/my-wallet" element={<MyWallet />} />
+        <Route path="/messages" element={<ChatInboxPage />} />
+        <Route path='/review/:sessionModel/:sessionId' element={<SubmitSessionReview/>}/>
+     </Suspense>
     </Routes>
   );
 }

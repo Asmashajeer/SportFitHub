@@ -8,8 +8,8 @@ import {
   DialogClose,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Edit, Plus } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';

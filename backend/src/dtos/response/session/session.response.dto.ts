@@ -1,6 +1,30 @@
 // dtos/session.dto.ts (or types file, wherever your DTOs live)
 
 import { INTENSITY_LEVEL, PAYLOAD_MODEL, SESSION_MODE, SESSION_TYPE } from "@/constants/enums";
+import { IFitnessSession } from "@/models/fitnessSession.model";
+import { ISportsSession } from "@/models/sportsSession.model";
+
+
+export interface SportSessionRawResult  extends ISportsSession{
+  score?:number
+}
+export interface FitnessSessionRawResult extends IFitnessSession {
+  score?:number
+}
+export type SessionRawResult = SportSessionRawResult | FitnessSessionRawResult
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 interface BaseSessionPublicResponseDTO {
@@ -19,8 +43,8 @@ interface BaseSessionPublicResponseDTO {
 
 interface SportsSessionPublicResponseDTO extends BaseSessionPublicResponseDTO {
   sessionModel: typeof PAYLOAD_MODEL.SPORT_SESSION;
-  sportCategory: { _id: string; sportName: string } | string; // populated or raw ID
-  
+  // sportCategory: { _id: string; sportName: string } | string; // populated or raw ID
+  sportCategory:string,
   venue: {
     name: string;
     address: string;

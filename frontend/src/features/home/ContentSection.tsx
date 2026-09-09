@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { TRAINER_CATEGORY } from '@/constants/constants';
 import { useNavigate } from 'react-router-dom';
 interface ContentSectionProps {

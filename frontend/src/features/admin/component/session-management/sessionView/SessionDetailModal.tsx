@@ -8,8 +8,8 @@ import Overview from "./Overview";
 import Schedule from "./Schedule";
 import Pricing from "./Pricing";
 import Trainer from "./Trainer";
-import { formatDateDDMMYY, formatDateReadable } from "@/utils/formatDate";
-import { Button } from "@/components/ui/button";
+import { formatDateDDMMYY } from "@/utils/formatDate";
+import { Button } from "@/components/ui/Button";
 
 
 interface SessionDetailModalProps {

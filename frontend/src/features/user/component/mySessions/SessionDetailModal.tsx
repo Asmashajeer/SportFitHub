@@ -16,7 +16,7 @@ import type { FitnessSessionDetailedPublicResponseData } from '@/features/sessio
 import { Button } from '@/components/ui/Button';
 import { formatDateReadable, formatTo12Hour } from '@/utils/formatDate';
 
-import { MapView } from '@/components/reusable/MapView';
+import  MapView  from '@/components/reusable/MapView';
 import GetMapsLink from '@/components/reusable/GetMapsLink';
 import { useUserDashboardStore } from '../../store/useUserDashboardStore';
 import { BOOKING_SESSION_STATUS } from '@/constants/constants';

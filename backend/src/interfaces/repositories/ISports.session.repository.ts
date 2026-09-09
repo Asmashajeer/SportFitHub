@@ -15,5 +15,6 @@ export interface ISportsSessionRepository extends IBaseRepository<ISportsSession
   findBysessionIdwithTrainerDetails(sessionId: string | Types.ObjectId);
   updateSession(id: string | Types.ObjectId, sessionData: UpdateQuery<ISportsSession>);
   deleteASession(id: string | Types.ObjectId);
-  vectorSearch(queryEmbedding: number[], limit?:number)
+  vectorSearch(queryEmbedding: number[], limit?:number);
+  countActiveSessions(): Promise<number> 
 }

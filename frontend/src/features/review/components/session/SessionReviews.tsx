@@ -10,7 +10,7 @@ interface SessionReviewsProps {
   reviewableType: ReviewType;
 }
 
-export const SessionReviews = ({ reviewableId, reviewableType }: SessionReviewsProps) => {
+const SessionReviews = ({ reviewableId, reviewableType }: SessionReviewsProps) => {
   const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 });
   const [reviews, setReviews] = useState<ReviewResponseData[]>([]);
 
@@ -109,3 +109,5 @@ export const SessionReviews = ({ reviewableId, reviewableType }: SessionReviewsP
     </div>
   );
 };
+
+export default SessionReviews;

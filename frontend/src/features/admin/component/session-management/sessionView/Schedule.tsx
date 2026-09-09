@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button"
-import type { AdminFitnessSessionDetails, AdminSportSessionDetails, FitnessSessionDetailsData, SportsSessionDetailsData } from "@/features/admin/store/types/session.types"
+
+import type { AdminFitnessSessionDetails, AdminSportSessionDetails } from "@/features/admin/store/types/session.types"
 import { formatTo12Hour } from "@/utils/formatDate"
 import { ClockPlus } from "lucide-react"
 

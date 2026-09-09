@@ -140,7 +140,7 @@ const Attendance = () => {
       <Pagination totalPages={totalPages} ITEMS_PER_PAGE={PAGINATION_DEFAULT_LIMIT} currentPage={currentPage} totalCount={sessions.length} setCurrentPage={setCurrentPage} label="Sessions" />
 
       {activeSession && activeSessionNeedsMarking ? (
-        <AttendanceModal session={activeSession} slotId={activeSession.slotId} onClose={() => setActiveSession(null)} />
+        <AttendanceModal session={activeSession} onClose={() => setActiveSession(null)} />
       ) : (
         activeSession && <AttendanceDisplayModal session={activeSession} onClose={() => setActiveSession(null)} />
       )}

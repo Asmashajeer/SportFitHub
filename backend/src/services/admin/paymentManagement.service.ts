@@ -38,7 +38,7 @@ export class PaymentsManagementService implements IPaymentsManagementService {
 
   const totalPayouts = await this._payoutBatchRepo.sumNetAmount(dateRange);
   const pendingPayoutLiability =await this._payoutLedgerRepo.sumPayableAcrossAllTrainers();
-  console.log(netRevenue - totalPayouts-pendingPayoutLiability);
+
   return {
     range: dateRange ?? null,
     grossRevenue,
@@ -68,14 +68,16 @@ export class PaymentsManagementService implements IPaymentsManagementService {
       const endofDay = fromZonedTime(`${date}T23:59:59`, timezone);
       query.date = { $gte: startDay, $lte: endofDay };
     }
-     const [paymentsData, totalCount] = await Promise.all([this._paymentRepo.findAllPayments(query, { skip, limit }), this._paymentRepo.count(query)]);
+     const [paymentsData, totalCount] = await Promise.all(
+      [this._paymentRepo.findAllPayments(query, { skip, limit }),
+       this._paymentRepo.count(query)]);
      if (!paymentsData) throw new AppError(ERROR_MESSAGES.GENERAL.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
-
+        console.log('payment pagination  ->',page, Math.floor(totalCount / limit));
     const payments = paymentsData.map((payment) => toPaymentAdminResponseDTO(payment));
     return {
       payments,
       total: totalCount,
-      totalPages: Math.ceil(totalCount / limit),
+      totalPages: Math.floor(totalCount / limit),
       page,
     };
     

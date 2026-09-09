@@ -1,13 +1,13 @@
 // components/TrainerWelcome.tsx
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+
 import { TRAINER_STATUS } from "@/constants/constants";
 import { useTrainerStore } from "../../store/useTrainerStore";
 import NextSessionCard from "./NextSessionCard";
-import TrainerNotificationBanner from "./TrainerNotificationBanner";
+
 
 
 const TrainerWelcome = () => {
-  const { user } = useAuthStore();
+
   const { profile } = useTrainerStore();  
   const status = profile?.status;
   const firstName = profile?.personalInfo?.fullName?.split(" ")[0]

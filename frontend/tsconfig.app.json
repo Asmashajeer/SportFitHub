@@ -26,5 +26,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "../server/src/utils/constants/messages.ts", "src/components/reusable", "src/features/admin/component/trainer-management/trainerDetailView/ScheduleInfo.tsx"]
+  "include": ["src", "../server/src/utils/constants/messages.ts", "src/components/reusable",  "src/components/ui","src/features/admin/component/trainer-management/trainerDetailView/ScheduleInfo.tsx"]
 }

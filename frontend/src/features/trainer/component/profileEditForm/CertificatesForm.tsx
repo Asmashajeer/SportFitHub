@@ -16,6 +16,7 @@ interface CertificatesFormValues {
   documents: ICertificate[];
 }
 interface ICertificate {
+  id?: string;
   name: string;
   issuedAt: string | Date;
   validUpto: string | Date;
@@ -69,6 +70,7 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
               UPLOAD_TYPE.CERTIFICATES
             );
             return {
+              id: doc.id ?? crypto.randomUUID(),
               name: doc.name,
               url: url,
               validUpto: doc.validUpto,
@@ -78,6 +80,7 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
           if (doc.url) {
           // if(url){
             return {
+              id: doc.id ?? crypto.randomUUID(),
               name: doc.name,
               url: doc.url,
               validUpto: doc.validUpto,
@@ -93,6 +96,7 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
         return;
       } else {
         const cleanCerts: ICertification[] = uploadedCerts.map((cert) => ({
+          id: cert!.id,
           name: cert!.name,
           url: cert!.url,
           validUpto: cert!.validUpto,

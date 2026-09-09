@@ -13,4 +13,5 @@ export interface ITrainerRepository extends IBaseRepository<ITrainerProfile> {
   updateSection(id: string | Types.ObjectId, updateData: UpdateQuery<ITrainerProfile>, changedField: string): Promise<ITrainerProfile | null>;
   reSubmitApplication(id: string | Types.ObjectId, updateData: UpdateQuery<ITrainerProfile>);
   updateTrainerStripeAC(trainerId: string, updateData: stripeData): Promise<Partial<ITrainerProfile>>;
+  countActiveTrainers(): Promise<number>
 }
