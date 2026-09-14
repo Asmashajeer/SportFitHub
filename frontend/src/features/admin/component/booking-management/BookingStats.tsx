@@ -5,7 +5,7 @@ import { BookingsManagementService } from '../../service/bookingsManagementServi
 
 const BookingsStats = () => {
   const [stats, setStats] = useState({
-    total:0, confirmed:0, cancelled:0, revenue:0
+    total:0, confirmed:0, cancelled:0, 
   });
 
   useEffect(() => {
@@ -33,11 +33,7 @@ const BookingsStats = () => {
         value={stats.cancelled}
         cls={'text-emerald-400'}
       />
-      <StatCard
-        label={'Revenue'}
-        value={stats.revenue}
-        cls={'text-zinc-500'}
-      />
+     
     </div>
   );
 };

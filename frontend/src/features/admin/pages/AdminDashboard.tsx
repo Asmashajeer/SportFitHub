@@ -1,10 +1,12 @@
 import  { useEffect, useState } from 'react';
-import { Users, ShieldCheck, Ticket,  Wallet, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Users, ShieldCheck, Ticket,  Wallet, TrendingUp, } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, } from 'recharts';
 import { DashboardService } from '../service/dashboardService';
-import { CURRENCY } from '@/constants/constants';
+
 
 import type { BookingDataMetric, DashboardStats, RecentBookingData, RevenuePoint } from '../store/types/dashboard.types';
+
+import StatCard from '@/components/reusable/StatsCard';
 
 
 
@@ -51,31 +53,31 @@ export default function AdminDashboard() {
   const stats = [
     {
       label: 'Total Users',
-      value: statsData ? statsData.totalUsers.toLocaleString() : '—',
+      value: statsData ? statsData.totalUsers: 0,
       up: true,
       icon: Users,
-      accent: 'bg-indigo-50 text-indigo-600',
+      accent: '0 text-indigo-600',
     },
     {
       label: 'Active Trainers',
-      value: statsData ? statsData.activeTrainers.toLocaleString() : '—',
+      value: statsData ? statsData.activeTrainers : 0,
       up: true,
       icon: ShieldCheck,
-      accent: 'bg-emerald-50 text-emerald-600',
+      accent: ' text-emerald-600',
     },
     {
       label: 'Sessions',
-      value: statsData ? statsData.totalSessions.toLocaleString() : '—',
+      value: statsData ? statsData.totalSessions : 0,
       up: false,
       icon: Ticket,
-      accent: 'bg-amber-50 text-amber-600',
+      accent: ' text-amber-600',
     },
     {
       label: 'Revenue',
-      value: statsData ? `${CURRENCY} ${statsData.revenue.toLocaleString()}` : '—',
+      value: statsData ? statsData.revenue : 0,
       up: true,
       icon: Wallet,
-      accent: 'bg-rose-50 text-rose-600',
+      accent: ' text-rose-600',
     },
   ];
 
@@ -91,19 +93,13 @@ export default function AdminDashboard() {
 
         {/* Stat cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map(({ label, value, up, icon: Icon, accent }) => (
-            <div key={label} className="rounded-2xl border border-slate-500 bg-zinc-800 p-5 shadow-sm transition hover:shadow-md">
-              <div className="flex items-center justify-between">
-                <span className={`bg-zinc-600 rounded-xl p-2.5 ${accent}`}>
-                  <Icon className="h-5 w-5 bg-zinc-600" strokeWidth={2} />
-                </span>
-                <span className={`flex items-center gap-1 text-xs font-medium ${up ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {up ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
-                </span>
-              </div>
-              <p className="mt-4 text-2xl text-slate-300 font-semibold">{value}</p>
-              <p className="text-sm text-slate-300">{label}</p>
-            </div>
+          {stats.map(({ label, value,  icon: Icon, accent }) => (          
+              <StatCard
+                label={label}                
+                value={value}
+                icon={Icon}
+                cls={accent}
+              />           
           ))}
         </div>
 

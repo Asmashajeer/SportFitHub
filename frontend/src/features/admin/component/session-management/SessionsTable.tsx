@@ -52,8 +52,10 @@ interface SessionsDataProps {
 }
 
 const SessionsTable = ({
+  setRefresh,
   sessionModel,
 }: {
+  setRefresh: (value: boolean) => void;
   sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
 }) => {
   const [sessionsData, setSessionsData] = useState<SessionsDataProps>({
@@ -105,6 +107,7 @@ const SessionsTable = ({
       }
     };
     getSessions();
+    setRefresh(true);
   }, [currentPage, search, statusFilter, typeFilter, modeFilter, refreshKey]);
 
 

@@ -7,12 +7,12 @@ const CheckoutPage=lazy (()=>import ( '@/features/booking/component/Checkout'));
 
 const BookingRoutes = () => {
   return (
-    <Routes>
-       <Suspense fallback={<LoadingScreen />}>
+    <Suspense fallback={<LoadingScreen />}>
+      <Routes>       
         <Route path="/" element={<CheckoutPage />} />
-        <Route path="/booking-success" element={<BookingSuccess />} />
-      </Suspense>
-    </Routes>
+        <Route path="/booking-success" element={<BookingSuccess />} />    
+      </Routes>
+    </Suspense>
   );
 };
 export default BookingRoutes;

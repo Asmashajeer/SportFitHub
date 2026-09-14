@@ -146,8 +146,7 @@ const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 
         if(!sessionId)return;
         const ratingData = await reviewService.getAvgRatingAndCount(sessionId, Review_Type.SPORTS_SESSION);
          setRatingReview({ avgRating: ratingData.averageRating, reviewCount: ratingData.totalReviews });
-         
-         
+                
       } catch (err) {
         console.error('Failed to fetch rating:', err);
       }

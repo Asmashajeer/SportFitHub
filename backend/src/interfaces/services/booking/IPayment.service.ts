@@ -1,6 +1,5 @@
 import { CreateCheckoutSessionDTO } from '@/dtos/request/booking/booking.request.dto';
-import { UserPaymentResponseDTO } from '@/dtos/response/booking/booking.response.dto';
-import { GetInvoiceResponseDTO } from '@/dtos/response/booking/payment.response.dto';
+import { GetInvoiceResponseDTO, UserPaymentResponseDTO } from '@/dtos/response/booking/payment.response.dto';
 import { Types } from 'mongoose';
 import Stripe from 'stripe';
 

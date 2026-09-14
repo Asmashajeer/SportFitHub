@@ -181,7 +181,7 @@ export class FitnessSessionService implements IFitnessSessionService {
       query['venue.location'] = {
         $geoWithin: {
           $centerSphere: [
-            [Number(lng), Number(lat)], // [longitude, latitude]
+             [Number(lng),Number(lat) ], // [longitude, latitude]
             radius / 6371,
           ],
         },

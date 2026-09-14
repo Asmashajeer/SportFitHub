@@ -87,34 +87,36 @@ const Header = () => {
               {user?.roles && user.roles.length > 1? 
                 (user?.activeRole === ROLES.TRAINER?               
                   <Button 
+                  variant="secondary"
                     onClick={switchUserMode}
                     className="w-full p-2 flex justify-center  rounded-xl gap-2 bg-green-700 items-center   text-xs text-foreground  hover:bg-transparent hover:border-2 hover:border-green-700 transition-colors "
                   >
-                    <LogOut className="w-5 h-5 " />
+                    <LogOut className="w-7 h-7 font-bold text-green-500" />
                     switch to  User Mode
                   </Button>
-                : <button
+                : <Button
+                     variant="secondary"
                     onClick={switchUserMode}
-                    className="w-full p-2 flex justify-center  rounded-xl gap-2:bg-transparent border-2 border-green-700   items-center   text-xs text-foreground  hover:bg-green-800 hover:border-black hover: transition-colors "
+                    className="w-full p-2 flex justify-center  rounded-xl gap-1 bg-transparent   items-center   text-xs text-foreground  hover:bg-green-800 hover:border-black hover: transition-colors "
                   >
-                    <LogOut className="w-5 h-5 px-1" />
+                    <LogOut className="w-7 h-7 font-bold text-green-500" />
                     switch to Trainer Mode
-                  </button>
+                  </Button>
                 ):(
                   user?.activeRole===USER_ROLES.TRAINER?
                     <button
                      onClick={()=>navigate('/user/add-Profile')}
-                      className="w-full p-2 flex justify-center  rounded-xl gap-2:bg-transparent border-2 border-green-700   items-center   text-xs text-foreground  hover:bg-green-800 hover:border-black hover: transition-colors "
+                      className="w-full p-2 flex justify-center  rounded-xl gap-2:bg-transparent   items-center   text-xs text-foreground  hover:bg-green-800 hover:border-black hover: transition-colors "
                     >
-                      <User2 className="w-5 h-5 px-1" />
+                      <User2 className="w-5 h-5 px-1 font-bold text-green-50" />
                       Become a Member
                     </button>
                   :
                   <button
                       onClick={()=>navigate('/trainer/add-Profile')}
-                      className="w-full p-2 flex justify-center  rounded-xl gap-2:bg-transparent border-2 border-green-700   items-center   text-xs text-foreground  hover:bg-green-800 hover:border-black hover: transition-colors "
+                      className="w-full p-2 flex justify-center  rounded-xl gap-2:bg-transparent  items-center   text-xs text-foreground  hover:bg-green-800 hover:border-black hover: transition-colors "
                     >
-                      <UserCog2 className="w-5 h-5 px-1" />
+                      <UserCog2 className="w-5 h-5 px-1 font-bold text-green-50" />
                       Become a Trainer
                     </button>
                 )
@@ -176,21 +178,21 @@ const Header = () => {
           ) : (
             <div>
               {user?.roles && user.roles.length > 1 && user?.activeRole === ROLES.TRAINER? 
-              <button
-              onClick={switchUserMode}
-              className="w-full py-3 flex justify-center  rounded-xl gap-2 bg-transparent items-center  text-foreground  hover:bg-primary transition-colors "
-            >
-              <LogOut className="w-5 h-5 " />
-               switch to userMode
-            </button>
-            : <button
-              onClick={switchUserMode}
-              className="w-full py-3 flex justify-center  rounded-xl gap-2 bg-transparent items-center  text-foreground  hover:bg-primary transition-colors "
-            >
-              <LogOut className="w-5 h-5 " />
-               switch to Trainer Mode
-            </button>
-          }
+                  <button
+                  onClick={switchUserMode}
+                  className="w-full py-3 flex justify-center  rounded-xl gap-2 bg-transparent items-center  text-foreground  hover:bg-primary transition-colors "
+                >
+                  <LogOut className="w-5 h-5 " />
+                  switch to userMode
+                </button>
+                : <button
+                  onClick={switchUserMode}
+                  className="w-full py-3 flex justify-center  rounded-xl gap-2 bg-transparent items-center  text-foreground  hover:bg-primary transition-colors "
+                >
+                  <LogOut className="w-5 h-5 " />
+                  switch to Trainer Mode
+                </button>
+              }
             </div>
             
           )}

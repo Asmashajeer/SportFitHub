@@ -1,4 +1,5 @@
 import {
+  BOOKING_SESSION_STATUS,
     BOOKING_STATUS,
 
   PAGINATION_DEFAULT_LIMIT,
@@ -60,6 +61,7 @@ const BookingsTable = () => {
     completed: 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20',
     cancelled: 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20',
   };
+
 
   useEffect(() => {
     const getBookings = async () => {

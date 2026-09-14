@@ -11,10 +11,9 @@ function MainLayout() {
       <div className="flex flex-1 left-0 p-0 m-0 ">
         {user?.hasProfile && <Sidebar />}
         <main className=" flex flex-1  flex-col overflow-y-auto p-8 ">
-          {/* <div className="flex-1 py-8 bg-zinc-800/70 "> */}
+        
             <Outlet />
-          {/* </div> */}
-          {/* <Footer /> */}
+        
         </main>
       </div>
     </div>

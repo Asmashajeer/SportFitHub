@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { SessionManagementService } from '../../service/sessionManagementService';
 import StatCard from '@/components/reusable/StatsCard';
 
-const SessionStats = () => {
+const SessionStats = ({refresh,setRefresh}:{refresh:boolean, setRefresh: (value: boolean) => void;}) => {
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -24,7 +24,10 @@ const SessionStats = () => {
       });
     };
     getSessions();
-  }, []);
+   if (refresh) {
+      setRefresh(false); 
+    }
+  }, [refresh]);
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

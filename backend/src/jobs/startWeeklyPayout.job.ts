@@ -1,3 +1,6 @@
+import { payoutService } from "@/container";
+import cron from 'node-cron';
+
 export function startWeeklyPayoutJob() {
   cron.schedule('0 9 * * 1', async () => { // every Monday, 9 AM
     try {

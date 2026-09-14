@@ -112,10 +112,7 @@ export default function MySessions() {
       
   }, [activeFilter, userSessions,location.state?.bookingId,location.state?.bookingSessionId]);
 
-  //for pagination
-  // useEffect(() => {
-  //   setCurrentPage(1);
-  //  },[activeFilter]);
+
   const handleFilterChange = (newFilter: string) => {
     setActiveFilter(newFilter);
     setCurrentPage(1); // Both states update together in ONE render cycle

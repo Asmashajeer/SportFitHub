@@ -4,7 +4,7 @@ import { authService } from '@/features/auth/service/authService';
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const api = axios.create({
-  baseURL: API_URL || ' http://localhost:5000/api/v1',
+  baseURL: API_URL || 'http://localhost:5000/api/v1',
   withCredentials: true,
   // headers: {
   //   'Content-Type': 'application/json'
@@ -25,7 +25,7 @@ api.interceptors.response.use(
       !originalRequest._retry &&
       !isLoginPath &&
       !originalRequest.url.includes('/auth/refresh') 
-      && !isPublicPath
+      && !isPublicPath()
     ) {
       originalRequest._retry = true;
       try {

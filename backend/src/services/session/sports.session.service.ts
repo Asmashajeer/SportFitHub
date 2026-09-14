@@ -221,12 +221,12 @@ export class SportsSessionService implements ISportsSessionService {
       query['venue.location'] = {
         $geoWithin: {
           $centerSphere: [
-            [Number(lat), Number(lng)], // [longitude, latitude]
+            [Number(lng),Number(lat) ], // [longitude, latitude]
             radius / 6371,
           ],
         },
       };
-    }
+    }    
     const result = await this._sportsSessionRepo.findAll(query, { page: Number(page) || 1, limit: Number(limit) || PAGINATION_LIMIT });
     const sessionData = result?.sessions || [];
     const sessions = sessionData.map((session) => toSportSessionPublicDTO(session));
@@ -236,7 +236,7 @@ export class SportsSessionService implements ISportsSessionService {
   // ---------------------get  a session by ID-public-------------
   async getASession(id: string | Types.ObjectId): Promise<SportSessionDetailedPublicDTO> {
     const sessionData = await this._sportsSessionRepo.findBysessionId(id);
-
+    console.log(sessionData);
     const session = toSportSessionDetailedPublicDTO(sessionData);
 
     return session;

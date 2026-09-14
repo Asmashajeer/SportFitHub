@@ -1,11 +1,11 @@
-import { ROLES } from '@/constants/constants';
+import { ROLES, USER_ROLES } from '@/constants/constants';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 
 function ProfilePic() {
   const user = useAuthStore((state) => state.user);
 
   const alias = user?.name?.[0].toUpperCase();
-
+  const role=user?.activeRole==USER_ROLES.TRAINER? USER_ROLES.TRAINER:'Member';
   return (
     <div className="flex items-center text-center gap-2  pb-2">
       <div
@@ -16,7 +16,7 @@ function ProfilePic() {
       <div className=' text-start'>
           <p className="py-0 ">{user?.name}</p>
           {user &&
-            <span className="text-xs py-0 text-green-500">{user?.activeRole[0].toUpperCase()+user?.activeRole.slice(1)}</span>
+            <span className="text-xs py-0 text-green-500">{role[0].toUpperCase()+role.slice(1)}</span>
           }
       </div>     
     </div>

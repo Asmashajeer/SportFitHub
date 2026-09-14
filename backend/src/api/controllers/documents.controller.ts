@@ -12,13 +12,7 @@ export default class DocumentsController {
   constructor(documentsService: IDocumentsService) {
     this._documentsService = documentsService;
   }
-  // getdocumentsViewUrl = async (req: AuthRequest, res: Response,next:NextFunction):Promise<void> => {
-  //     const {trainerId}=req.query;
-  //     console.log('trainerId:',trainerId);
-  //     const certId=req.params.certId;
-  //     const url = await this._documentsService.getViewUrl(certId, trainerId as string, req.user);
-  //      res.status(STATUS_CODE.SUCCESS.OK).json(url);
-  // };
+  
 
   getDocumentFile = async (req: AuthRequest, res: Response) => {
 

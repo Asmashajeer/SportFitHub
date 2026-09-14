@@ -56,11 +56,11 @@ const SessionReviews = ({ reviewableId, reviewableType }: SessionReviewsProps) =
       <div className="flex items-center gap-3 mb-6">
         <h2 className="text-lg font-semibold text-zinc-100">Reviews</h2>
         {ratingReview.reviewCount > 0 && (
-          <div className="flex items-center gap-1.5 text-sm text-zinc-400">
+          <div className="flex items-center gap-1 text-sm text-zinc-400">
             <span className="text-amber-400">★</span>
             <span className="font-medium text-zinc-200">{ratingReview.avgRating.toFixed(1)}</span>
-            <span>
-              ({ratingReview.reviewCount} review{ratingReview.reviewCount !== 1 ? 's' : ''})
+            <span className='w-sm'>
+              ( {ratingReview.reviewCount} review{ratingReview.reviewCount !== 1 ? 's' : ''} )
             </span>
           </div>
         )}
@@ -82,7 +82,7 @@ const SessionReviews = ({ reviewableId, reviewableType }: SessionReviewsProps) =
                       key={star}
                       className={star <= r.rating ? 'text-amber-400' : 'text-zinc-700'}
                     >
-                      ★
+                      ★ 
                     </span>
                   ))}
                 </div>

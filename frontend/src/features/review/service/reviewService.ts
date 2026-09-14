@@ -3,6 +3,7 @@ import { REVIEW_ROUTE } from "./review.api";
 
 import type {  SessionReviewData } from "../types/review.schema";
 import type { ReviewType } from "@/constants/constants";
+import { PUBLIC_ROUTE } from "@/service/public.api";
 
 export const reviewService={
     getPendingReviews:async()=>{
@@ -18,18 +19,18 @@ export const reviewService={
         return res.data;
     },
     getAvgRatingAndCount:async(sessionId:string,sessionModel:ReviewType)=>{
-          const res= await api.get(REVIEW_ROUTE.GET_AVG_RATING_REVIEW_COUNT(sessionModel,sessionId));
+          const res= await api.get(PUBLIC_ROUTE.GET_AVG_RATING_REVIEW_COUNT(sessionModel,sessionId));
         return res.data;
     },
      getBatchRatings:async(sessionIds:string[],sessionModel:ReviewType)=>{
         
-        const res= await api.get(REVIEW_ROUTE.GET_BATCH_RATING_REVIEW_COUNT(sessionModel),{params:{sessionIds},
+        const res= await api.get(PUBLIC_ROUTE.GET_BATCH_RATING_REVIEW_COUNT(sessionModel),{params:{sessionIds},
           paramsSerializer: { indexes: null }
         })
         return res.data;
     },
     getReviews:async(sessionId:string,sessionModel:ReviewType)=>{
-          const res= await api.get(REVIEW_ROUTE.GET_REVIEWS(sessionModel,sessionId));
+          const res= await api.get(PUBLIC_ROUTE.GET_REVIEWS(sessionModel,sessionId));
         return res.data;
     },
     getReviewsByTrainer:async(trainerId:string)=>{

@@ -135,8 +135,7 @@ export enum DISCOUNT_TYPE {
 
 export enum BOOKING_STATUS {
   PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  COMPLETED = 'completed',
+  CONFIRMED = 'confirmed', 
   CANCELLED = 'cancelled',
 }
 export enum BOOKING_SESSION_STATUS {

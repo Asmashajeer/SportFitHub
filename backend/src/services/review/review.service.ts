@@ -30,7 +30,6 @@ export class ReviewService implements IReviewService {
 
 
 
-
 //-----------------email and push notification review prompt for session-----------
   sendReviewPromptforSession=async(prompt:SessionReviewPromptRequestDTO):Promise<void>=>{   
       const existingReview=await this._reviewRepo.findOne({userId:prompt.userId,reviewableType:prompt.sessionModel,reviewableId:prompt.sessionId});
@@ -94,7 +93,7 @@ getPendingReviewsForUser=  async (userId: string):Promise<PendingReviewResponseD
       // 1. Confirm this user actually attended this session
       const attendance=true;
       const attendantedSession = await this._bookingSessionRepo.findOneSession({userId, sessionId,attendance} );
-      console.log(attendantedSession);
+     
       if (!attendantedSession) {
         throw new AppError(  'You can only review sessions you attended',STATUS_CODE.ERROR.FORBIDDEN       );
       }
@@ -138,7 +137,7 @@ getPendingReviewsForUser=  async (userId: string):Promise<PendingReviewResponseD
       const review=toReviewResponseDTO(userReview);
       // update sessionDetails rating
       const [result]=await this._reviewRepo.getAverageRatingAndCount(review.reviewableType,review.reviewableId);
-      console.log(result.averageRating);
+     
       switch(review.reviewableType){
         case Review_Type.SPORT_SESSION:await this._sportsSessionRepo.findOneAndUpdate(review.reviewableId,{rating:result.averageRating});
         break;
@@ -183,7 +182,7 @@ getPendingReviewsForUser=  async (userId: string):Promise<PendingReviewResponseD
     const sessionIds=[...new Set(sessions.map((s)=>(s.sessionId.toString())))];
     const allReviews=await this._reviewRepo.getAllReviews(sessionIds);
     if(!allReviews) throw new Error("no reviews for this trainer.s sessions ")
-    console.log(allReviews);
+
     return await allReviews.map((r)=> toReviewResponsePopulatedRevewableIdDTO(r));
    
   }

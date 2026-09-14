@@ -39,29 +39,17 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           _id: null,
           total: { $sum: 1 },
           pending: { $sum: { $cond: [{ $eq: ['$status', BOOKING_STATUS.PENDING] }, 1, 0] } },
-          completed: { $sum: { $cond: [{ $eq: ['$status', BOOKING_STATUS.COMPLETED] }, 1, 0] } },
+        
           cancelled: { $sum: { $cond: [{ $eq: ['$status', BOOKING_STATUS.CANCELLED] }, 1, 0] } },
           confirmed: { $sum: { $cond: [{ $eq: ['$status', BOOKING_STATUS.CONFIRMED] }, 1, 0] } },
         },
       },
     ]);
 
-    return result[0] ?? { total: 0, pending: 0, completed: 0, cancelled: 0, confirmed: 0 };
+    return result[0] ?? { total: 0, pending: 0,  cancelled: 0, confirmed: 0 };
   }
 
-  // ------------------find All Bookings by admin------
-  // async findAllBookings(filter: FilterQuery<IBooking>, options: { skip: number; limit: number }    ) {
-  // const bookings = await this.model.find(filter)
-  //   .populate("userId","name email")
-  //   .populate('sessionId','_id trainerId sessionName sessionType')
-  //   .sort({ createdAt: -1 })
-  //   .skip(options.skip)
-  //   .limit(options.limit)
-  //   .lean()
-  //   .exec();
-
-  //   return bookings;
-  // }
+  
 
   async findAllBookings(filter: FilterQuery<IBooking>, options: { skip: number; limit: number; search: string }) {
     const { skip, limit, search } = options;

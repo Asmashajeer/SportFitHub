@@ -65,7 +65,7 @@ const initialData = {
   enrolledCount: 0,
   intensityLevel: INTENSITY_LEVEL.BEGINNER,
   mode: SESSION_MODE.OFFLINE,
-  meetingLink: '',
+ 
 
   venue: {
     name: '',
@@ -283,9 +283,7 @@ const CreateFitnessSessionModal = ({
         toast.error("select location from map");
         return;
       }
-      else if(formData.mode===SESSION_MODE.ONLINE &&! formData.meetingLink){
-         toast.error("Add online meetlink");return;
-      }
+      
     if (user) {
       //grouping timeslotsby day
       const groupedSlots = formData.timeSlots.reduce<TimeSlot[]>(

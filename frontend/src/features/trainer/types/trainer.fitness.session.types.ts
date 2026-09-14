@@ -49,8 +49,7 @@ export interface FitnessSessionFormValues {
   maxCapacity: number;
   enrolledCount: number;
   intensityLevel: Intensity_level_type;
-  mode: Session_Mode_type;
-  meetingLink?: string;
+  mode: Session_Mode_type; 
   venue?: Venue;
   requirements: string;
   images: FileList | null;

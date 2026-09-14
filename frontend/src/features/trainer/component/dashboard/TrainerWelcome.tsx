@@ -3,6 +3,7 @@
 import { TRAINER_STATUS } from "@/constants/constants";
 import { useTrainerStore } from "../../store/useTrainerStore";
 import NextSessionCard from "./NextSessionCard";
+import { BadgeCheck } from "lucide-react";
 
 
 
@@ -12,6 +13,7 @@ const TrainerWelcome = () => {
   const status = profile?.status;
   const firstName = profile?.personalInfo?.fullName?.split(" ")[0]
     || "there";
+ 
   const hour = new Date().getHours();
   const greeting =
       hour < 12 ? "Good morning" :
@@ -25,7 +27,7 @@ const TrainerWelcome = () => {
          
           <div>
             <h2 className="text-xl font-semibold text-amber-700">
-              Welcome, {firstName}! Your profile is  under review.
+              Welcome, {}! Your profile is  under review.
             </h2>
             <p className="text-zinc-300 mt-1 text-sm">
               Our team is reviewing your submitted documents and profile.
@@ -43,7 +45,10 @@ const TrainerWelcome = () => {
    
     return (
       <div className=" rounded-xl p-6">
-        <div className=" flex flex-start left-0 ">        
+        <div className=" flex flex-start left-0 gap-2 "> 
+          <BadgeCheck 
+              className="w-6 h-6 text-emerald-600 fill-emerald-500 stroke-gray-950" 
+            />       
             <h2 className="text-2xl font-semibold text-gray-500">
               {greeting}, {firstName}! 
             </h2>

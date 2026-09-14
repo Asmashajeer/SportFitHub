@@ -54,7 +54,7 @@ export const fitnessSessionSchema = z
     intensityLevel: z.enum(INTENSITY_LEVEL),
     images: z.array(z.string('image required')).optional().default([]),
     mode: z.enum(SESSION_MODE),
-    meetingLink: z.string().url('Invalid meeting URL').optional().or(z.literal('')),
+  
     venue: VenueSchema.optional(),
     requirements: z.array(z.string()).optional().default([]),
     pricing: z.array(PricingSchema).min(1, 'At least one pricing plan is required'),
@@ -78,12 +78,12 @@ export const fitnessSessionSchema = z
       }
     }
 
-    // online → meetingLink required
-    if (data.mode === SESSION_MODE.ONLINE) {
-      if (!data.meetingLink) {
-        ctx.addIssue({ code: 'custom', message: 'Meeting link is required for online sessions', path: ['meetingLink'] });
-      }
-    }
+    // // online → meetingLink required
+    // if (data.mode === SESSION_MODE.ONLINE) {
+    //   if (!data.meetingLink) {
+    //     ctx.addIssue({ code: 'custom', message: 'Meeting link is required for online sessions', path: ['meetingLink'] });
+    //   }
+    // }
 
     // cancellation window check
     if (data.cancellationWindow >= data.bookingDeadline) {

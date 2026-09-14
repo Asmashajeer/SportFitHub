@@ -17,8 +17,8 @@ const ChatInboxPage = lazy(() =>  import('@/features/chat/page/ChatInboxPage'));
 
 const TrainerRoutes = () => {
   return (
-    <Routes>
-      <Suspense fallback={<LoadingScreen />}>
+    <Suspense fallback={<LoadingScreen />}>
+      <Routes>      
         <Route path="/dashboard" element={<TrainerDashboard />} />    
         {/* <Route path="/add-Profile"  element={<TrainerProfileForm /> }  />  */}
         <Route path="/profile" element={<ProfileView />} />
@@ -30,9 +30,9 @@ const TrainerRoutes = () => {
         <Route path="/earnings" element={<TrainerEarningsPage />} />
         <Route path="/onboarding/refresh" element={<OnboardingRefresh />} />
       
-        {/* <Route path='/sessions/create-Sport-session' element={<CreateSportSession />}/> */}
-      </Suspense>  
-    </Routes>
+        {/* <Route path='/sessions/create-Sport-session' element={<CreateSportSession />}/> */}       
+      </Routes>
+    </Suspense> 
   );
 };
 

@@ -3,8 +3,10 @@ import SessionsTable from '../component/session-management/SessionsTable';
 
 import SessionStats from '../component/session-management/SessionStats';
 import { PAYLOAD_MODEL } from '@/constants/constants';
+import { useState } from 'react';
 
 const AdminSessions = () => {
+  const [refresh,setRefresh]=useState(false);
   return (
     <div className="min-h-screen bg-zinc-900 text-zinc-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
@@ -19,7 +21,7 @@ const AdminSessions = () => {
         </div>
 
         {/* Stats */}
-        <SessionStats />
+        <SessionStats refresh={refresh} setRefresh={setRefresh} />
 
         {/* Tabs */}
         <Tabs defaultValue="sports" className="w-full">
@@ -41,11 +43,11 @@ const AdminSessions = () => {
           </TabsList>
 
           <TabsContent value="sports">
-            <SessionsTable sessionModel={PAYLOAD_MODEL.SPORT_SESSION} />
+            <SessionsTable  setRefresh={setRefresh} sessionModel={PAYLOAD_MODEL.SPORT_SESSION} />
           </TabsContent>
 
           <TabsContent value="fitness">
-            <SessionsTable sessionModel={PAYLOAD_MODEL.FITNESS_SESSION} />
+            <SessionsTable setRefresh={setRefresh} sessionModel={PAYLOAD_MODEL.FITNESS_SESSION} />
           </TabsContent>
         </Tabs>
       </div>
