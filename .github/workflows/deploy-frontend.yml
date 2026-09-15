@@ -27,6 +27,7 @@ jobs:
         env:
           VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
           VITE_MAPTILER_CLOUD_API: ${{ secrets.VITE_MAPTILER_CLOUD_API }}
+          VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
         run: npm run build
 
       - name: Configure AWS credentials
