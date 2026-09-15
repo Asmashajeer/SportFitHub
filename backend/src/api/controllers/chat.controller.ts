@@ -23,7 +23,7 @@ export class ChatController {
 
   getConversations = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.id;
-    console.log(userId, req.user.role);
+   
 
     try {
       const conversations = await this._chatService.getConversations(userId);

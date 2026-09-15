@@ -60,7 +60,7 @@ export class DashboardService implements IDashboardService {
   //booking category  metrics
   async getBookingCategoryMetrics(startDate?: Date, endDate?: Date): Promise<BookingDataMetricDTO[]> {
     const bookingMetrics = await this._bookingSessionRepo.getBookingCategoryMetrics(startDate, endDate);
-    console.log(bookingMetrics);
+  
     return bookingMetrics;
   }
 }

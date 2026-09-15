@@ -72,7 +72,7 @@ export class PaymentsManagementService implements IPaymentsManagementService {
       [this._paymentRepo.findAllPayments(query, { skip, limit }),
        this._paymentRepo.count(query)]);
      if (!paymentsData) throw new AppError(ERROR_MESSAGES.GENERAL.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
-        console.log('payment pagination  ->',page, Math.floor(totalCount / limit));
+       
     const payments = paymentsData.map((payment) => toPaymentAdminResponseDTO(payment));
     return {
       payments,
