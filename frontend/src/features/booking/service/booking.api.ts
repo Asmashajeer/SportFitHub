@@ -1,5 +1,5 @@
 export const BOOKING_ROUTE = {
-  CHECK_SLOT_AVAIL: '/booking/checkSlotAvailability',
+
   LOCK_SLOT: '/booking/lock-slot',
   IS_DUPLICATE_BOOKING:'/booking/check-duplicate-booking',
   CREATE_CHECKOUT_SESSION: '/booking/payment/create-checkout-session',

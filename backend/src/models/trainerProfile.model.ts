@@ -79,6 +79,10 @@ export interface ITrainerProfile extends Document {
   };
 
   // availability
+  // availablePeriod:{
+  //   startDate:Date;
+  //   endDate:Date:
+  // }
   availability: {
     isAvailable: boolean;
     Monday: IDayAvailability;

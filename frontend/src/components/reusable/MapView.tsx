@@ -27,13 +27,10 @@ function MapView({ lat, lng, label, zoom = 15 }: MapViewProps) {
       zoom={zoom}
       style={{ height: '250px', width: '100%', borderRadius: '10px' }}
     >
-      {/* <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://https://www.osmap.us//">OpenStreetMap</a>'
-      /> */}
-      <TileLayer
-        url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>'
+      
+       <TileLayer
+        url={`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${import.meta.env.VITE_MAPTILER_CLOUD_API}`}
+        attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
       />
       <Marker position={[lat, lng]}>{label && <Popup>{label}</Popup>}</Marker>
     </MapContainer>

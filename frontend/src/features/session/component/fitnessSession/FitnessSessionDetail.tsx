@@ -280,174 +280,167 @@ const FitnessSessionDetail = () => {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
 
-        {/* LEFT COLUMN */}
-        <div className="lg:col-span-8 space-y-8 sm:space-y-12">
+        {/* ================= TITLE (above banner, sets context first) ================= */}
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black italic uppercase tracking-tighter leading-none text-white">
+          {session.sessionName}
+        </h1>
 
-          {/* Main Image */}
-          <section className="relative h-56 sm:h-72 md:h-80 rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl border border-zinc-900">
-            <ImageCarousel images={session.images} />
-            <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
+        {/* ================= ROW 1: BANNER + TRAINER DETAILS ================= */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
 
-            <div className="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 flex gap-2 sm:gap-3 flex-wrap">
-              <Badge className="bg-emerald-500 text-black font-black uppercase italic px-3 sm:px-4 py-1 border-none text-[10px] sm:text-xs">
-                {session.fitnessCategory?.programName}
-              </Badge>
-              <Badge className="bg-zinc-950/60 backdrop-blur-md text-emerald-400 border-zinc-800 uppercase font-bold text-[10px]">
-                {session.sessionType}
-              </Badge>
-            </div>
+          {/* Main Image / Banner */}
+          <div className="lg:col-span-8">
+            <div className="relative h-64 sm:h-80 lg:h-96 rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl border border-zinc-900">
+              <ImageCarousel images={session.images} />
+              <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
 
-            {session.mode === SESSION_MODE.ONLINE && (
-              <div className="absolute bottom-4 sm:bottom-8 right-4 sm:right-8 gap-3 bg-emerald-500/10 border border-emerald-500/20 px-3 sm:px-4 py-2 rounded-2xl">
-                <div className="relative flex h-3 w-3">
-                  <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              <div className="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 flex gap-2 sm:gap-3 flex-wrap">
+                <Badge className="bg-emerald-500 text-black font-black uppercase italic px-3 sm:px-4 py-1 border-none text-[10px] sm:text-xs">
+                  {session.fitnessCategory?.programName}
+                </Badge>
+                <Badge className="bg-zinc-950/60 backdrop-blur-md text-emerald-400 border-zinc-800 uppercase font-bold text-[10px]">
+                  {session.sessionType}
+                </Badge>
+              </div>
+
+              {session.mode === SESSION_MODE.ONLINE && (
+                <div className="absolute bottom-4 sm:bottom-8 right-4 sm:right-8 flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 px-3 sm:px-4 py-2 rounded-2xl">
+                  <div className="relative flex h-3 w-3">
+                    <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">Live Session</span>
+                    <span className="text-xs sm:text-sm font-bold text-zinc-200">Digital Access via Zoom/Meet</span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">Live Session</span>
-                  <span className="text-xs sm:text-sm font-bold text-zinc-200">Digital Access via Zoom/Meet</span>
+              )}
+            </div>
+          </div>
+
+          {/* Coach / Trainer Profile Card */}
+          <div className="lg:col-span-4">
+            <div className="bg-zinc-900/50 p-5 sm:p-6 rounded-[2rem] border border-zinc-800 flex flex-col gap-5 group cursor-pointer hover:bg-zinc-900 transition-all">
+
+              {/* Header: avatar + name */}
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-full bg-zinc-800 overflow-hidden border-2 border-zinc-700 group-hover:border-emerald-500/50 transition-colors">
+                  <img
+                    src={`${session.trainer?.profilePic}?v={${new Date()}}` || '/coach-placeholder.jpg'}
+                    className="w-full h-full object-cover"
+                    alt="Coach"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">
+                    Lead Coach
+                  </p>
+                  <p className="font-black text-white text-lg sm:text-xl italic uppercase leading-tight truncate group-hover:text-emerald-400 transition-colors">
+                    {session.trainer?.displayName}
+                  </p>
                 </div>
               </div>
-            )}
-          </section>
 
-          {/* Header Info */}
-          <section className="space-y-4 sm:space-y-6">
-            <h1 className="text-3xl sm:text-4xl md:text-3xl font-black italic uppercase tracking-tighter leading-none text-white">
-              {session.sessionName}
-            </h1>
-            <p className="text-zinc-400 text-sm sm:text-md leading-relaxed font-medium max-w-3xl">
-              {session.description}
-            </p>
-            <div className="flex flex-wrap gap-x-5 sm:gap-x-8 gap-y-4 sm:gap-y-6 text-zinc-400 border-y border-zinc-900 py-5 sm:py-8">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Clock size={20} className="text-emerald-500" />
-                <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.duration} MINS</span>
+              {/* Quick stats */}
+              <div className="grid grid-cols-2 gap-4 text-sm border-y border-zinc-900 py-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-zinc-500">Discipline</p>
+                  <p className="font-bold text-white truncate">{session.trainer?.coreDiscipline}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-zinc-500">Experience</p>
+                  <p className="font-bold text-white">{session.trainer?.experience} Years</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-[10px] uppercase tracking-widest text-zinc-500">Languages</p>
+                  <p className="font-bold text-white truncate">{session.trainer?.languages?.join(', ')}</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <UserCircle size={20} className="text-emerald-500" />
-                <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.ageGroup}</span>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Flame size={20} className="text-emerald-500" />
-                <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.intensityLevel}</span>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Users size={20} className="text-emerald-500" />
-                <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.sessionType}</span>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Maximize size={20} className="text-emerald-500" />
-                <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">LIMIT: {session.maxCapacity}</span>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Star size={20} className="text-yellow-500" fill="currentColor" />
-                <span className="font-bold text-zinc-400 tracking-tight text-sm">
-                  {ratingReview.avgRating || 'NEW'}
-                </span>
-              </div>
-            </div>
-          </section>
 
-          {/* Time Slots */}
-          <section id="timeSlot"  className="space-y-4">
-            <h3 className="text-sm font-black uppercase tracking-[0.3em] text-emerald-500">Time slots</h3>
-            <p className="text-xs text-gray-500">Select Date and Time</p>
-            <TimeSlotPicker
-              selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
-              selectedDates={selectedDates}
-              setSelectedDates={setSelectedDates}
-              selectedSlot={selectedSlot}
-              setSelectedSlot={setSelectedSlot}
-              pricePlan={pricePlan}
-              offDays={offDays}
-              session={session}
-               occupiedSlots={occupiedSlots}
-              filledDates={filledDates}
-              bookingSlots={bookingSlots}
-              setBookingSlots={setBookingSlots}
-              isOnline={isOnline}
-              userTimezone={userTimezone}
-            />
-          </section>
-
-          {/* Amenities & Venue */}
-          {session.mode === SESSION_MODE.OFFLINE && (
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_3fr] gap-6 sm:gap-8">
-              <div className="bg-zinc-900 p-5 sm:p-8 rounded-[2rem] border border-zinc-800/50 space-y-6">
-                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-                  <Shield size={16} className="text-emerald-500" /> Amenities
-                </h3>
-                <div className="flex flex-wrap gap-3">
-                  {session.amenities?.map((item: string, i: number) => (
+              {/* Specialties */}
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-2">Specialties</p>
+                <div className="flex flex-wrap gap-2">
+                  {session.trainer?.specialties?.map((item: string, i: number) => (
                     <span
                       key={i}
-                      className="flex items-center gap-2 bg-zinc-950 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold text-zinc-200 border border-zinc-800"
+                      className="text-[11px] font-medium text-emerald-400 bg-emerald-500/5 border border-emerald-500/20 px-2 py-1 rounded-lg"
                     >
-                      <CheckCircle2 size={14} className="text-emerald-500" /> {item}
+                      #{item.replace(/\s+/g, '')}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-zinc-900 p-5 sm:p-8 rounded-[2rem] border border-zinc-800/50 space-y-6">
-                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-                  <MapPin size={16} className="text-emerald-500" /> Location
-                </h3>
-                <div>
-                  <p className="font-black italic uppercase text-xl text-white">{session.venue?.name}</p>
-                  <p className="text-zinc-500 text-sm mt-1">{session.venue?.address}</p>
-                </div>
-                 <Suspense fallback={<MapSkeleton/>}>
-                  <MapView
-                    lat={session.venue.location.coordinates[1]}
-                    lng={session.venue.location.coordinates[0]}
-                    label={`${session.venue.name}  ${session.venue.address}`}
+              {/* Chat action — pinned below specialties, separate from tags */}
+              <div className="pt-1">
+                <Suspense fallback={null}>
+                  <ChatDrawer
+                    userId={session.trainer.userId}
+                    trainerName={session.trainer.displayName}
+                    contextSessionId={session.id}
+                    contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION}
                   />
                 </Suspense>
-                {session.venue?.location?.coordinates && (
-                  <GetMapsLink coords={session.venue.location.coordinates} />
-                )}
               </div>
             </div>
-          )}
+          </div>
+        </section>
 
-          {/* Requirements */}
-          <div className="bg-zinc-900 p-5 sm:p-8 rounded-[2rem] border border-zinc-800/50 space-y-6">
-            <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-              <Shield size={16} className="text-emerald-500" /> Requirements
-            </h3>
-            <div className="flex flex-wrap gap-3">
-              {session.requirements?.map((item: string, i: number) => (
-                <span
-                  key={i}
-                  className="flex items-center gap-2 bg-zinc-950 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold text-zinc-200 border border-zinc-800"
-                >
-                  <CheckCircle2 size={14} className="text-emerald-500" /> {item}
-                </span>
-              ))}
+        {/* ================= DESCRIPTION + QUICK STATS ================= */}
+        <section className="space-y-4 sm:space-y-6">
+          <p className="text-zinc-400 text-sm sm:text-md leading-relaxed font-medium max-w-3xl">
+            {session.description}
+          </p>
+          <div className="flex flex-wrap bg-zinc-900 rounded-2xl gap-x-6 sm:gap-x-10 gap-y-4 sm:gap-y-6 text-zinc-400 border-y border-zinc-900 p-4 sm:p-8">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Clock size={20} className="text-emerald-500" />
+              <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.duration} MINS</span>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <UserCircle size={20} className="text-emerald-500" />
+              <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.ageGroup}</span>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Flame size={20} className="text-emerald-500" />
+              <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.intensityLevel}</span>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Users size={20} className="text-emerald-500" />
+              <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.sessionType}</span>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Maximize size={20} className="text-emerald-500" />
+              <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">LIMIT: {session.maxCapacity}</span>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Star size={20} className="text-yellow-500" fill="currentColor" />
+              <span className="font-bold text-zinc-400 tracking-tight text-sm">
+                {ratingReview.avgRating || 'NEW'}
+              </span>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* RIGHT COLUMN — above content on mobile, sticky on desktop */}
-        <div className="lg:col-span-4 order-first lg:order-0">
-          <div className="lg:sticky lg:top-28 space-y-6">
+        {/* ================= ROW 2: PRICE DETAILS + CALENDAR / TIME SLOTS ================= */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
 
-            {/* Pricing Card */}
-            <div className="bg-zinc-900 p-6 sm:p-8 rounded-[2.5rem] border border-zinc-800 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[50px] rounded-full -mr-16 -mt-16" />
-              <p className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em] mb-6">
+          {/* Pricing Card */}
+          <div className="lg:col-span-4">
+            <div className="lg:sticky lg:top-28 h-full flex flex-col bg-zinc-900 p-5 sm:p-6 rounded-[1.75rem] border border-zinc-800 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[50px] rounded-full -mr-16 -mt-16 pointer-events-none" />
+
+              <p className="text-[11px] font-black uppercase text-zinc-500 tracking-[0.2em] mb-4 relative">
                 Select Pricing Plan
               </p>
-              <div className="space-y-4 mb-10">
+
+              <div className="space-y-3 flex-1 relative">
                 {session.pricing?.map((plan: PricePlan) => (
                   <ol
                     key={plan._id}
-                    className={`p-4 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer flex justify-between items-center bg-zinc-950/50 
+                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 bg-zinc-950/50
                     ${plan._id === pricePlan?._id
                         ? 'border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500'
                         : 'border-zinc-800 hover:border-zinc-700'
@@ -459,87 +452,115 @@ const FitnessSessionDetail = () => {
                       }
                     }}
                   >
-                    <div>
-                      <p className="font-black text-md italic uppercase text-zinc-300">
+                    <div className="min-w-0">
+                      <p className="font-black text-sm italic uppercase text-zinc-200 truncate">
                         {plan.sessionCount} Session{plan.sessionCount > 1 ? 's' : ''}
                       </p>
-                      <p className="text-[10px] font-bold text-zinc-500 tracking-tighter">CONFIRMED ACCESS</p>
+                      <p className="text-[10px] font-bold text-zinc-500 tracking-tighter mt-0.5">CONFIRMED ACCESS</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-black tracking-tighter italic text-white">₹{plan.price}</p>
+                    <div className="text-right shrink-0">
+                      <p className="text-xl sm:text-2xl font-black tracking-tighter italic text-white leading-none">₹{plan.price}</p>
                     </div>
                   </ol>
                 ))}
               </div>
-              <p className="text-[9px] text-center text-zinc-600 font-bold uppercase tracking-[0.2em] mt-6">
+
+              <p className="text-[9px] text-center text-zinc-600 font-bold uppercase tracking-[0.2em] mt-6 pt-4 border-t border-zinc-800/70 relative">
                 Instant Confirmation • Secure Payment
               </p>
             </div>
+          </div>
 
-            {/* Coach Profile Card */}
-            <div className="bg-zinc-900/50 p-5 sm:p-6 rounded-[2rem] border border-zinc-800 flex-col items-center gap-4 group cursor-pointer hover:bg-zinc-900 transition-all">
-              <div className="flex-col m-1">
-                <div className="h-16 w-24 justify-center mx-auto rounded-2xl bg-zinc-800 overflow-hidden border border-zinc-700 group-hover:border-emerald-500/50 transition-colors">
-                  <img
-                    src={`${session.trainer?.profilePic}?v={${new Date()}}` || '/coach-placeholder.jpg'}
-                    className="w-full h-full object-cover"
-                    alt="Coach"
-                  />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Lead Coach</p>
-                  <p className="font-black text-white text-xl italic uppercase group-hover:text-emerald-400 transition-colors">
-                    {session.trainer?.displayName}
-                  </p>
-                </div>
+          {/* Time Slots / Calendar Availability */}
+          <div id="timeSlot" className="lg:col-span-8">
+            <div className="h-full bg-zinc-900 p-5 sm:p-6 rounded-[1.75rem] border border-zinc-800/50 flex flex-col gap-4">
+              <div>
+                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-500">Time Slots</h3>
+                <p className="text-xs text-zinc-500 mt-1">Select a date and time to continue</p>
               </div>
-              <div className="space-y-6 text-sm">
-                <div className="flex justify-between border-b border-zinc-900 pb-4">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-500">Discipline</p>
-                    <p className="font-bold text-white">{session.trainer?.coreDiscipline}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-500">Experience</p>
-                    <p className="font-bold text-white">{session.trainer?.experience} Years</p>
-                  </div>
-                </div>
-                <div className="flex justify-between border-b border-zinc-900 pb-4">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-500">Rating</p>
-                    <p className="font-bold text-emerald-500">★ {session.trainer?.averageRating || 'New'}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-500">Languages</p>
-                    <p className="font-bold text-white">{session.trainer?.languages?.join(', ')}</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-2">Specialties</p>
-                  <div className="flex flex-wrap gap-2">
-                    {session.trainer?.specialties?.map((item: string, i: number) => (
-                      <span key={i} className="text-[11px] font-medium text-emerald-400">
-                        #{item.replace(/\s+/g, '')}
-                      </span>
-                    ))}
-
-                     <Suspense fallback={null}>
-                      <ChatDrawer
-                        userId={session.trainer.userId}
-                        trainerName={session.trainer.displayName}
-                        contextSessionId={session.id}
-                        contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION}
-                      />
-                    </Suspense>
-                  </div>
-                </div>
+              <div className="flex-1">
+                <TimeSlotPicker
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  selectedDates={selectedDates}
+                  setSelectedDates={setSelectedDates}
+                  selectedSlot={selectedSlot}
+                  setSelectedSlot={setSelectedSlot}
+                  pricePlan={pricePlan}
+                  offDays={offDays}
+                  session={session}
+                  occupiedSlots={occupiedSlots}
+                  filledDates={filledDates}
+                  bookingSlots={bookingSlots}
+                  setBookingSlots={setBookingSlots}
+                  isOnline={isOnline}
+                  userTimezone={userTimezone}
+                />
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* ================= ROW 3: LOCATION + AMENITIES (offline sessions only) ================= */}
+        {session.mode === SESSION_MODE.OFFLINE && (
+          <section className="grid grid-cols-1 md:grid-cols-[1fr_3fr] gap-6 sm:gap-8">
+            <div className="bg-zinc-900 p-5 sm:p-8 rounded-[2rem] border border-zinc-800/50 space-y-6">
+              <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+                <Shield size={16} className="text-emerald-500" /> Amenities
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {session.amenities?.map((item: string, i: number) => (
+                  <span
+                    key={i}
+                    className="flex items-center gap-2 bg-zinc-950 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold text-zinc-200 border border-zinc-800"
+                  >
+                    <CheckCircle2 size={14} className="text-emerald-500" /> {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-zinc-900 p-5 sm:p-8 rounded-[2rem] border border-zinc-800/50 space-y-6">
+              <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+                <MapPin size={16} className="text-emerald-500" /> Location
+              </h3>
+              <div>
+                <p className="font-black italic uppercase text-xl text-white">{session.venue?.name}</p>
+                <p className="text-zinc-500 text-sm mt-1">{session.venue?.address}</p>
+              </div>
+              <Suspense fallback={<MapSkeleton/>}>
+                <MapView
+                  lat={session.venue.location.coordinates[1]}
+                  lng={session.venue.location.coordinates[0]}
+                  label={`${session.venue.name}  ${session.venue.address}`}
+                />
+              </Suspense>
+              {session.venue?.location?.coordinates && (
+                <GetMapsLink coords={session.venue.location.coordinates} />
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Requirements */}
+        <div className="bg-zinc-900 p-5 sm:p-8 rounded-[2rem] border border-zinc-800/50 space-y-6">
+          <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+            <Shield size={16} className="text-emerald-500" /> Requirements
+          </h3>
+          <div className="flex flex-wrap gap-3">
+            {session.requirements?.map((item: string, i: number) => (
+              <span
+                key={i}
+                className="flex items-center gap-2 bg-zinc-950 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold text-zinc-200 border border-zinc-800"
+              >
+                <CheckCircle2 size={14} className="text-emerald-500" /> {item}
+              </span>
+            ))}
           </div>
         </div>
 
         {/* Policies — full width */}
-        <div className="col-span-1 lg:col-span-12 text-xs text-zinc-400 bg-zinc-800 rounded-lg text-left p-3 space-y-2">
+        <div className="text-xs text-zinc-400 bg-zinc-800 rounded-lg text-left p-3 space-y-2">
           <p className="text-zinc-300 text-sm font-medium mb-2">Policies</p>
           <div className="flex items-center justify-between">
             <span className="text-zinc-400">▫️ Booking Deadline</span>
@@ -554,25 +575,26 @@ const FitnessSessionDetail = () => {
             <span className="text-zinc-300">{session.cancellationWindow} hrs before</span>
           </div>
         </div>
-           {/* Reviews summary */}
-          <div className="mt-3 pt-3 border-t border-zinc-800">
-            <Suspense fallback={<ReviewsSkeleton />}>
-              <SessionReviews reviewableId={sessionId!} reviewableType={Review_Type.FITNESS_SESSION} />
-            </Suspense>  
-          </div>         
-          <StickyBookingBar
-            sessionId={session.id}
-            selectedDate={
-              selectedDate?.toString() ??
-              selectedDates?.[0].toString() ??
-              undefined
-            }
-            selectedSlot={selectedSlot}
-            pricePlan={pricePlan}
-            bookingSlots={bookingSlots}
-            onBooking={handleBooking}
-          />
-        
+
+        {/* Reviews summary */}
+        <div className="pt-3 border-t border-zinc-800">
+          <Suspense fallback={<ReviewsSkeleton />}>
+            <SessionReviews reviewableId={sessionId!} reviewableType={Review_Type.FITNESS_SESSION} />
+          </Suspense>
+        </div>
+
+        <StickyBookingBar
+          sessionId={session.id}
+          selectedDate={
+            selectedDate?.toString() ??
+            selectedDates?.[0].toString() ??
+            undefined
+          }
+          selectedSlot={selectedSlot}
+          pricePlan={pricePlan}
+          bookingSlots={bookingSlots}
+          onBooking={handleBooking}
+        />
       </main>
     </div>
   );

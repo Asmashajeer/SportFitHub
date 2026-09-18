@@ -11,7 +11,7 @@ const BookingService = {
   checkSlotAvailabilty: async (
     bookingSlot: Omit<BookingSlot, 'startTime' | 'endTime'>
   ) => {
-    const res = await api.get(BOOKING_ROUTE.CHECK_SLOT_AVAIL, {
+    const res = await api.get(PUBLIC_ROUTE.CHECK_SLOT_AVAIL, {
       params: bookingSlot,
     });
     return res.data;

@@ -15,6 +15,7 @@ export const PUBLIC_ROUTE = {
     BY_SESSIONID: (sessionId: string) => `/availability/${sessionId}`,
   },
 
+ CHECK_SLOT_AVAIL: '/checkSlotAvailability',
   GET_BATCH_RATING_REVIEW_COUNT:(sessionModel:ReviewType)=>`/batch_rating_review/${sessionModel}`,
   GET_AVG_RATING_REVIEW_COUNT:(sessionModel:ReviewType,sessionId:string)=>`/rating/${sessionModel}/${sessionId}`,
   GET_REVIEWS:(sessionModel:ReviewType,sessionId:string)=>`/session_review/${sessionModel}/${sessionId}`,  

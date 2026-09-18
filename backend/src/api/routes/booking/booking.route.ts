@@ -11,7 +11,8 @@ router.use(protect);
 router.use(isBlocked);
 router.use(timezoneMiddleware);
 router.use(restrictTo([UserRole.USER]));
-router.get('/checkSlotAvailability', bookingController.checkAvailability);
+
+
 router.post('/check-duplicate-booking', bookingController.checkDuplicateBooking);
 
 router.post('/payment/create-checkout-session', paymentController.createCheckoutSession);
