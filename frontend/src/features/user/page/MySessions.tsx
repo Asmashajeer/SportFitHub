@@ -192,20 +192,21 @@ export default function MySessions() {
         break;
 
       case 'directions':  
-        const coords = session?.venue?.location?.coordinates;
-        if(coords[0]===0){
-          toast.success('online Session');
-          return;
-        }
-        if (!coords || coords.length !== 2) {
-          toast.error('Location not available for this session');
-          return;
-        }   
-        const [lng, lat] = session.venue.location.coordinates;
-        window.open(
-            `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
-            '_blank'
-        );
+       const coords = session?.venue?.location?.coordinates;
+
+          if (!coords || coords.length !== 2) {
+            toast.error('Location not available for this session');
+            return;
+          }
+
+          const [lng, lat] = coords;
+
+          if (lng === 0 && lat === 0) {
+            toast.success('Online session');
+            return;
+          }
+
+          window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
     return;      
       
 
