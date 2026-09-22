@@ -78,11 +78,7 @@ const disabledDays = range
       { after: lastSelectableDate! },
       ...filledDates,
     ]
-  : [];
-  // const tomorrow = new Date();
-  // tomorrow.setDate(tomorrow.getDate() + 1);
-  // const endDate = new Date();
-  // endDate.setMonth(endDate.getMonth() + MAX_ADVANCE_BOOKING_MONTHS);
+  : []; 
 
   const modifiersStyles = {
     filled: {

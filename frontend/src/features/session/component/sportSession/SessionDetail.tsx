@@ -213,17 +213,7 @@ const SessionDetail = () => {
           <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
           <span className="text-xs font-black uppercase tracking-tighter">Back</span>
         </button>
-        <div className="flex gap-4">
-          <button
-            onClick={() => setIsFavorite(!isFavorite)}
-            className={`p-2 rounded-full border border-zinc-800 transition-all ${isFavorite ? 'text-red-500 bg-red-500/10 border-red-500/20' : 'text-zinc-400 hover:text-white'}`}
-          >
-            <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
-          </button>
-          <button className="p-2 rounded-full border border-zinc-800 text-zinc-400 hover:text-white transition-colors">
-            <Share2 size={20} />
-          </button>
-        </div>
+      
       </nav>
 
       <main className="max-w-7xl  px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
@@ -337,7 +327,7 @@ const SessionDetail = () => {
                     ${plan._id === pricePlan?._id ? 'border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500' : 'border-zinc-800 hover:border-zinc-700'}`}
                     onClick={() => {
                       if (plan._id) {
-                        setPricePlan(plan);                       
+                        setPricePlan(plan);
                       }
                     }}
                   >

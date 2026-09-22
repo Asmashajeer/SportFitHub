@@ -78,11 +78,7 @@ export interface ITrainerProfile extends Document {
     coordinates: [number, number]; // [longitude, latitude]
   };
 
-  // availability
-  // availablePeriod:{
-  //   startDate:Date;
-  //   endDate:Date:
-  // }
+ 
   availability: {
     isAvailable: boolean;
     Monday: IDayAvailability;
