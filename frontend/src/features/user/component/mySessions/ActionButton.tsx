@@ -22,10 +22,10 @@ function ActionButton({
       label: 'Rebook',
       cls: 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10 cursor-pointer',
     },
-    bookagain: {
-      label: 'Book again',
-      cls: 'border-zinc-600 text-zinc-400 hover:bg-zinc-700/50 cursor-pointer',
-    },
+    // bookagain: {
+    //   label: 'Book again',
+    //   cls: 'border-zinc-600 text-zinc-400 hover:bg-zinc-700/50 cursor-pointer',
+    // },
 
     viewDetails: {
       label: 'View',

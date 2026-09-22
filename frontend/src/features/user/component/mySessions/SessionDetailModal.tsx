@@ -115,7 +115,7 @@ const SessionDetailModal = ({
                   {venue?.name}{' '}
                   <span className="text-xs text-gray-500">{venue?.address}</span>
                 </p>
-                {venue?.location?.coordinates && (
+                {venue?.location?.coordinates && venue?.location?.coordinates[0]!== 0 ? (
                   <div>
                   <MapView
                     lat={venue?.location.coordinates[1] }
@@ -125,6 +125,9 @@ const SessionDetailModal = ({
                   
                     <GetMapsLink coords={venue.location.coordinates} />
                   </div>
+                  ):(
+                    <div>online Session</div>
+
                   )}
               </div>
             )}

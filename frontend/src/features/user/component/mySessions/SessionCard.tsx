@@ -31,7 +31,7 @@ const STATUS_CONFIG: Record<
     label: 'Completed',
     badge: 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20',
     dot: 'bg-emerald-400',
-    actions: ['viewDetails', 'bookagain', 'directions'],
+    actions: ['viewDetails',  'directions'],
   },
   cancelled: {
     label: 'Cancelled',
@@ -107,7 +107,7 @@ function SessionCard({
   ) {
     cfg.actions = [...cfg.actions.filter((action) => action !== 'reschedule')];
   }
-  
+  console.log()
   return (
     <div className="group  bg-zinc-800/40 hover:bg-zinc-800/70 border border-zinc-700/40 hover:border-zinc-600/60 rounded-xl p-4  transition-all duration-200">
       <div className="flex flex-col gap-2">

@@ -191,7 +191,16 @@ export default function MySessions() {
         setSelectedSession(session);
         break;
 
-      case 'directions':       
+      case 'directions':  
+        const coords = session?.venue?.location?.coordinates;
+        if(coords[0]===0){
+          toast.success('online Session');
+          return;
+        }
+        if (!coords || coords.length !== 2) {
+          toast.error('Location not available for this session');
+          return;
+        }   
         const [lng, lat] = session.venue.location.coordinates;
         window.open(
             `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
