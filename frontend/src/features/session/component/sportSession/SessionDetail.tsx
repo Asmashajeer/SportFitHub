@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { getDay, parse } from 'date-fns';
-import { Clock, MapPin, Users, Shield, ArrowLeft, Share2, Heart, CheckCircle2, Trophy, Star } from 'lucide-react';
+import { Clock, MapPin, Users, Shield, ArrowLeft, CheckCircle2, Trophy, Star } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
@@ -34,12 +34,9 @@ const SessionReviews = lazy(() => import('@/features/review/components/session/S
 
 const SessionDetail = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
-
   const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 });
-
   const { user, isAuthenticated, isLoading } = useAuthStore();
   const navigate = useNavigate();
-  const [isFavorite, setIsFavorite] = useState(false);
   const [session, setSession] = useState<SportsSessionDetailedPublicResponseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [offDays, setOffDays] = useState<number[]>([]);
@@ -213,7 +210,6 @@ const SessionDetail = () => {
           <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
           <span className="text-xs font-black uppercase tracking-tighter">Back</span>
         </button>
-      
       </nav>
 
       <main className="max-w-7xl  px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
