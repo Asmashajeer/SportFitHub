@@ -142,7 +142,7 @@ const BookingsTable = () => {
                 <th className={thCls}>Booking ID</th>
                 <th className={thCls}>user</th>
                 <th className={thCls}>Session</th>
-                {/* <th className={thCls}>Type</th> */}
+              
                 <th className={thCls}>Model</th>
                 <th className={thCls}>Sessions</th>
                 <th className={thCls}>Amount Paid</th>
@@ -178,10 +178,7 @@ const BookingsTable = () => {
                       <p className="text-zinc-400">({booking.sessionType})</p>
                     </td>
 
-                    {/* Trainer
-                    <td className={tdCls}>
-                      <span className="text-zinc-400">{booking.trainerId}</span>
-                    </td>
+                   
 
                  
 

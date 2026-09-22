@@ -26,8 +26,7 @@ const BookingSessions=({sessions}:Props)=> {
                         )}
                     </div>
                     
-                    {/* <AttendanceBadge attendance={s.attendance} />
-                    <StatusBadge status={s.status} /> */}                    
+                                     
                 </div>
             </div>
          ))}

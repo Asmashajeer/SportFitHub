@@ -24,9 +24,7 @@ const BookingOverview=({booking}:{booking:Props})=> {
             <p className="text-xs text-zinc-400">{booking.sessionModel} </p>
              <p className="flex items-center  gap-1 text-xs text-zinc400"><span><User className="w-3 h-3"/></span>{booking.sessionType}</p>
           </div>
-          {/* <div className="bg-zinc-800 p-2 rounded-xl ">
-            <p className="flex items-center  gap-1 text-xs text-zinc-500"><span><UserCog className="w-3 h-3"/></span> {booking.trainerId}</p>        
-         </div> */}          
+                 
         </div>
 
       <div className="m-2 p-2">
