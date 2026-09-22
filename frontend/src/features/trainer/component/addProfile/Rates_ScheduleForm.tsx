@@ -12,8 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import type { TrainerOnboardingFormValues } from '../../types/trainerprofile.types';
 import { Button } from '@/components/ui/Button';
-import { MapPin, Target } from 'lucide-react';
-import {  DAYS_OF_WEEK, type DayName } from '@/constants/constants';
+import { Calendar, MapPin, Target } from 'lucide-react';
+import {  DAYS_OF_WEEK, END_OF_TODAY, type DayName } from '@/constants/constants';
 
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -166,7 +166,70 @@ const Rates_ScheduleForm: React.FC<Rates_ScheduleFormProps> = ({
             />
             <Label htmlFor="isAvailable"> Availabile on</Label>
           </div>
-
+           {availability?.isAvailable &&(
+            <>
+            <h3 className="text-start mb-0">Effective</h3>
+            <div className=" flex items-center py-1 px-2 gap-2 space-y-2 mb-4 bg-zinc-700/60">
+              <div className=" flex items-center  gap-1 space-y-2">
+                <label className="block text-sm  text-slate-300 mb-2">
+                  From
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  <Input
+                    type="date"
+                    required
+                    value={watch('availability.effectiveFrom')}
+                    {...register('availability.effectiveFrom', {
+                      required: 'Date is required',
+                      validate: (v) =>
+                        new Date(v) > new Date() || 'Date cannot be in the past',
+                    })}
+                    className="w-full pl-12 pr-4 py-3 rounded-xl [&::-webkit-calendar-picker-indicator]:invert bg-secondary/60 border border-[#454c59] text-white"
+                  />
+                </div>
+                {errors?.availability?.effectiveFrom && (
+                  <p className=" block text-[10px] text-red-500">
+                    {errors.availability?.effectiveFrom.message}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center  gap-2  space-y-2">
+                <label className="block text-sm  text-slate-300 mb-2">
+                  To
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  <Input
+                    type="date"
+                    required
+                    value={watch('availability.effectiveTo')}
+                    {...register('availability.effectiveTo', {
+                      required: 'Date is required',
+                      validate: {
+                          notInPast: (v) => new Date(v) >= END_OF_TODAY || 'Date cannot be in the past',
+                          afterEffectiveFrom: (v, formValues) => {
+                            const effectiveFrom = formValues?.availability?.effectiveFrom;
+                            if (!effectiveFrom) return true;
+                            return (
+                              new Date(v) > new Date(effectiveFrom) || 
+                              'Effective To date must be after Effective From date'
+                            );
+                          },
+                        }, 
+                    })}
+                    className="w-full pl-12 pr-4 py-3 rounded-xl [&::-webkit-calendar-picker-indicator]:invert bg-secondary/60 border border-[#454c59] text-white"
+                  />
+                </div>
+                {errors?.availability?.effectiveTo && (
+                  <p className="text-[10px] text-red-500">
+                    {errors.availability?.effectiveTo.message}
+                  </p>
+                )}
+              </div>
+            </div>
+            </>
+           )}
           {availability?.isAvailable &&
             DAYS_OF_WEEK.map((day) => {
               const dayKey = day as DayName;

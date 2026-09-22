@@ -81,6 +81,9 @@ export interface TrainerProfileDTO {
     Friday: IDayAvailability;
     Saturday: IDayAvailability;
     Sunday: IDayAvailability;
+    timezone:string;
+    effectiveFrom: string // start dateof trainer availabitity
+    effectiveTo: string,  
   };
 
   // payment Data

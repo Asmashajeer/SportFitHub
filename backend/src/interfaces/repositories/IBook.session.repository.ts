@@ -4,6 +4,7 @@ import { ClientSession, FilterQuery, Types } from 'mongoose';
 import { UpdateQuery } from 'mongoose';
 
 
+
 export interface IBookingSessionRepository extends IBaseRepository<IBookingSession> {
   enrolledCount(filter: FilterQuery<IBookingSession>): Promise<number>;
   createSessionBooking(data: Partial<IBookingSession>, session: ClientSession);
@@ -18,4 +19,5 @@ export interface IBookingSessionRepository extends IBaseRepository<IBookingSessi
   findOneSession(filter:FilterQuery<IBookingSession>)
   getRecentBookings(limit: number );
   getBookingCategoryMetrics(startDate?: Date, endDate?: Date)
+  countScheduledBetween(trainerId: string | Types.ObjectId, from: Date, to?: Date): Promise<number>
 }

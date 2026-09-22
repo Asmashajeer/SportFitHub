@@ -99,6 +99,8 @@ export const toFitnessSessionDetailedPublicDTO = (session: IFitnessSessionDetail
           experience: session.trainerId.experience,
           languages: session.trainerId.languages,
           averageRating: session.trainerId.averageRating,
+          effectiveFrom: formatInTimeZone(session.trainerId.availability.effectiveFrom, session.timezone, 'yyyy-MM-dd'),
+          effectiveTo: formatInTimeZone(session.trainerId.availability.effectiveTo, session.timezone, 'yyyy-MM-dd'),
         }
       : null,
       timezone:session.timezone,

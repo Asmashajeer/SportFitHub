@@ -1,6 +1,6 @@
 import { CURRENCY, GENDER, GOVT_ID_TYPE } from '@/constants/constants';
 import z from 'zod';
-
+const endOfToday = new Date(new Date().setHours(23, 59, 59, 999));
 const dayAvailabilitySchema = z
   .object({
     available: z.boolean().default(false),
@@ -112,6 +112,20 @@ export const AddTrainerProfileSchema = z.object({
     Friday: dayAvailabilitySchema,
     Saturday: dayAvailabilitySchema,
     Sunday: dayAvailabilitySchema,
+    effectiveFrom: z.coerce.date({
+      message: 'Effective start date is required',  
+    }),
+    effectiveTo: z.coerce.date({
+      message: 'Effective end date is required', 
+    }),
+  })
+  .refine((data) => data.effectiveFrom > endOfToday, {
+    message: 'Start date cannot be in the past',
+    path: ['effectiveFrom'],
+  })
+  .refine((data) => data.effectiveTo > data.effectiveFrom, {
+    message: 'Availabilty End date must be greater than availability start date',
+    path: ['effectiveTo'],
   }),
 
   // Payment Info (Optional during initial creation depending on your flow)

@@ -1,6 +1,15 @@
 export const AppName = 'SportFitHub';
 export const AppEmail = 'sportfit.hub@gmail.com';
-
+export const DAYS_OF_WEEK = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+] as const;
+export type DayName = (typeof DAYS_OF_WEEK)[number];
 //------AUTH----------
 export enum UserRole {
   ADMIN = 'admin',

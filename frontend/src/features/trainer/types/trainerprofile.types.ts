@@ -56,6 +56,8 @@ export interface TrainerOnboardingFormValues {
     Friday: dayAvailability;
     Saturday: dayAvailability;
     Sunday: dayAvailability;
+    effectiveFrom:  string, 
+    effectiveTo: string,   
   };
   paymentInfo?: {
     bankAccount?: {
@@ -70,18 +72,7 @@ export interface TrainerOnboardingFormValues {
 
 
 
-// export interface personalInfoData {
-//     fullName: string;
-//     DOB: string;
-//     gender: string;
-//     phone: string;
-//      address: {
-//       street?: string;
-//       city?: string;
-//       state?: string;
-//       zip?: string;
-//     };
-// }
+
 
 export interface documents {
   name: string;
@@ -115,6 +106,8 @@ export interface AvailabiltyPricing {
     Friday: dayAvailability;
     Saturday: dayAvailability;
     Sunday: dayAvailability;
+    effectiveFrom?:  string, 
+    effectiveTo?: string,  
   };
 }
 

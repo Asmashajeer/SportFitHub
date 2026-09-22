@@ -131,6 +131,8 @@ export interface Trainer {
     Friday: IDayAvailability;
     Saturday: IDayAvailability;
     Sunday: IDayAvailability;
+    effectiveFrom:string;
+    effectiveTo:string;
   };
   paymentInfo: {
     // payment Data

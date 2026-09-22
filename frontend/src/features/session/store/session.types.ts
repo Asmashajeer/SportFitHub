@@ -1,9 +1,4 @@
-import type {
-  AGE_GROUP,
-  DayName,
-  PAYLOAD_MODEL,
-  SESSION_TYPE,
-} from '@/constants/constants';
+import type { AGE_GROUP, DayName, PAYLOAD_MODEL, SESSION_TYPE } from '@/constants/constants';
 interface SportsCategory {
   id: string;
   sportName: string;
@@ -35,12 +30,10 @@ export interface Pricing {
   price: number;
 }
 
-
-
 export interface SportsSessionResponseData {
   id: string;
   trainerId: string;
-  timezone:string;
+  timezone: string;
   sportCategory: string;
   sessionName: string;
   slug: string;
@@ -49,7 +42,7 @@ export interface SportsSessionResponseData {
   ageGroup: (typeof AGE_GROUP)[keyof typeof AGE_GROUP];
   sessionType: (typeof SESSION_TYPE)[keyof typeof SESSION_TYPE];
   maxCapacity: number;
-  enrolledCount: number; 
+  enrolledCount: number;
   venue: Venue;
   amenities: string[];
   timeSlots: TimeSlot[];
@@ -72,16 +65,13 @@ export interface SportsSessionImage {
 export interface SportSessionFormResponseDTO extends Omit<SportsSessionResponseData, 'images'> {
   images: SportsSessionImage[];
 }
-export interface SportsSessionPublicResponseData extends Omit<
-  SportsSessionResponseData,
-  'sportCategory'
-> {
+export interface SportsSessionPublicResponseData extends Omit<SportsSessionResponseData, 'sportCategory'> {
   sportCategory: SportsCategory;
 }
 
 interface PopulatedTrainer {
   id: string;
-  userId:string;
+  userId: string;
   displayName: string;
   profilePic: string;
   coreDiscipline: string;
@@ -89,11 +79,10 @@ interface PopulatedTrainer {
   experience: number;
   languages: string[];
   averageRating: number;
+  effectiveFrom: string;
+  effectiveTo: string;
 }
-export interface SportsSessionDetailedPublicResponseData extends Omit<
-  SportsSessionResponseData,
-  'sportCategory' | 'trainerId'
-> {
+export interface SportsSessionDetailedPublicResponseData extends Omit<SportsSessionResponseData, 'sportCategory' | 'trainerId'> {
   sportCategory: SportsCategory;
   trainer: PopulatedTrainer;
 }
@@ -130,6 +119,3 @@ export interface session_filter {
   id: string;
   sessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
 }
-
-
-

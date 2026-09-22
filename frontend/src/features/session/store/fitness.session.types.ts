@@ -90,6 +90,8 @@ interface PopulatedTrainer {
   experience: number;
   languages: string[];
   averageRating: number;
+  effectiveFrom: string;
+  effectiveTo: string;
 }
 export interface FitnessSessionDetailedPublicResponseData extends Omit<
   FitnessSessionResponseData,

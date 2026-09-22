@@ -152,7 +152,7 @@ const trainerManagementService = new TrainerManagementService(trainerRepository,
 export const trainerManagementController = new TrainerManagementController(trainerManagementService);
 
 export const authController = new AuthController(authService);
-const trainerService = new TrainerService(trainerRepository, userRepository, authService);
+const trainerService = new TrainerService(trainerRepository, userRepository, authService,bookingSessionRepository);
 
 export const trainerController = new TrainerController(trainerService);
 const sportsService = new SportsService(sportsRepository);

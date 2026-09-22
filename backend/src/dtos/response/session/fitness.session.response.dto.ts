@@ -78,6 +78,10 @@ interface IPopulatedTrainer {
   experience: number;
   languages: string[];
   averageRating: number;
+   availability:{
+    effectiveFrom:Date;    
+    effectiveTo:Date;
+  }
 }
 export interface IFitnessSessionDetailsPopulated extends Omit<IFitnessSessionPopulated, 'trainerId'> {
   trainerId: IPopulatedTrainer;
@@ -121,9 +125,11 @@ interface FitnessCategory extends Omit<IPopulatedFitnessPgm, '_id'> {
   id: string;
 }
 
-interface PopulatedTrainer extends Omit<IPopulatedTrainer, '_id' | 'userId'> {
+interface PopulatedTrainer extends Omit<IPopulatedTrainer, '_id' | 'userId'|'availability'> {
   id: string;
   userId: string;
+   effectiveFrom:string,
+  effectiveTo:string
 }
 export interface FitnessSessionPublicDTO extends Omit<FitnessSessionResponseDTO, 'fitnessCategory'> {
   fitnessCategory: FitnessCategory;

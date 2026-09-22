@@ -1,6 +1,7 @@
 import { BOOKING_SESSION_STATUS, BOOKING_STATUS, BOOKING_TYPE, PAYLOAD_MODEL, SESSION_TYPE } from '@/constants/enums';
 import { IPricePlan, IVenue } from '@/models/booking.model';
 import { UserPaymentResponseDTO } from './payment.response.dto';
+import { IBookingSession } from '@/models/booking.session.model';
 
 
 export interface UserBookingResponseDTO {
@@ -113,3 +114,4 @@ export interface CancelBookedSessionResponseDTO {
   cancelledAt: string;
 }
 
+ export type ConflictBooking = Pick<IBookingSession, '_id' | 'bookingUID' | 'userId' | 'sessionId' | 'startDateTime' | 'endDateTime'>;

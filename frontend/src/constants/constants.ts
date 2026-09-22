@@ -19,6 +19,13 @@ import {
 
 export const AppName="SportFitHub"
 export const AppEmail="sportfit.hub@gmail.com"
+export const OTP_EXPIRATION_MINUTES = 1;
+export const PAGINATION_DEFAULT_LIMIT = 10;
+export const LOCATION_RADIUS=[2,5.8,10,20,50,100]
+export const CURRENCY='₹';
+export const MAX_ADVANCE_BOOKING_MONTHS = 1;
+
+
 
 export const ROLES = {
   ADMIN: 'admin',
@@ -33,16 +40,14 @@ export const USER_ROLES = {
  
 export type UserRole = (typeof ROLES)[keyof typeof ROLES];
 
-export const OTP_EXPIRATION_MINUTES = 1;
 
 export const OTP_TYPE = {
   VERIFICATION: 'VERIFICATION',
   PASSWORD_RESET: 'PASSWORD_RESET',
 };
 
-export const PAGINATION_DEFAULT_LIMIT = 10;
-export const LOCATION_RADIUS=[2,5.8,10,20,50,100]
 
+export const END_OF_TODAY = new Date(new Date().setHours(23, 59, 59, 999));
 
 export const GENDER = {
   MALE: 'Male',
@@ -52,7 +57,7 @@ export const GENDER = {
 };
 export type GenderType = (typeof GENDER)[keyof typeof GENDER];
 
-export const CURRENCY='₹';
+
 
 export const RELATIONSHIP = {
   SELF: 'Self',
@@ -126,6 +131,7 @@ export const DAYS_OF_WEEK = [
   'Sunday',
 ] as const;
 export type DayName = (typeof DAYS_OF_WEEK)[number];
+
 export const  adminNavLinks= [
     {path:"/admin/dashboard"         , icon:LayoutDashboard ,label:"Dashboard"  },
     {path:"/admin/category-management", icon: Layers ,         label:"Categories"  },

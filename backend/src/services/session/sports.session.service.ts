@@ -227,6 +227,7 @@ export class SportsSessionService implements ISportsSessionService {
         },
       };
     }    
+    
     const result = await this._sportsSessionRepo.findAll(query, { page: Number(page) || 1, limit: Number(limit) || PAGINATION_LIMIT });
     const sessionData = result?.sessions || [];
     const sessions = sessionData.map((session) => toSportSessionPublicDTO(session));

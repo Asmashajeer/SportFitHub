@@ -77,7 +77,12 @@ export const toTrainerProfileDTOPopulatedUser = (trainer: ITrainerPopulated) => 
     },
 
     currentLocation: trainer.currentLocation ? { ...trainer.currentLocation } : undefined,
-    availability: trainer.availability ? { ...trainer.availability } : undefined,
+    availability: trainer.availability ? {
+       ...trainer.availability ,
+        effectiveFrom:trainer.availability.effectiveFrom?trainer.availability.effectiveFrom.toString():"",
+        effectiveTo:trainer.availability.effectiveTo? trainer.availability.effectiveTo.toString():"",
+      } 
+       : undefined,
 
     paymentInfo: {
       bankAccount: trainer.paymentInfo?.bankAccount ? { ...trainer.paymentInfo.bankAccount } : {},

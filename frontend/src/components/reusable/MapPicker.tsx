@@ -31,7 +31,7 @@ const LocationMarker = ({ onLocationSelect }: MapPickerProps) => {
     },
   });
   useEffect(() => {
-    const handleSearch = (result: any) => {
+    const handleSearch = (result:any) => {
       const { x, y } = result.location; // x: lng, y: lat
       const newPos = L.latLng(y, x);
       setPosition(newPos);

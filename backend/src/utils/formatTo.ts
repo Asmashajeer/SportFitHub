@@ -38,3 +38,7 @@ export const createUtcDateTime = (date: string, time: string, timezone: string):
   const utcDateTime = fromZonedTime(localDate, timezone);
   return utcDateTime;
 };
+
+
+export const toDateStr = (d: Date | string): string =>
+  typeof d === 'string' ? d.slice(0, 10) : d.toISOString().slice(0, 10);

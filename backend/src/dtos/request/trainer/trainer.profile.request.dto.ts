@@ -1,43 +1,7 @@
 import { GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY, TRAINER_STATUS } from '@/constants/enums';
 import z from 'zod';
 
-// 1.
-// export const step1Schema = z.object({
-//   category: z.enum(['sport', 'fitness', 'both']),
-//   displayName: z.string().min(3, 'Name must be at least 3 characters'),
-//   coreDiscipline: z.string().min(1, 'Main discipline is required'),
-//   bio: z.string().min(10, 'Bio should be at least 10 characters').max(1000),
-//   // Note: profilePic is validated as a File object on frontend
-
-//   profilePic: z
-//     .instanceof(File, { message: 'Please upload an image' })
-//     .refine(file => file.size <= MAX_FILE_SIZE, 'File too large'),
-// });
-// export const step2Schema = z.object({
-//   specialties: z.array(z.string()).nonempty('Select at least one specialty'),
-//   experience: z.coerce.number().min(0, 'Experience cannot be negative'),
-//   languages: z.array(z.string()).nonempty('Select at least one language'),
-//   // Note: certifications (Files) are handled by the form state
-// });
-
-// export const step3Schema = z.object({
-//   personalInfo: z.object({
-//     fullName: z.string().min(3, 'Full name is required'),
-//     DOB: z.coerce.date().refine(data => data < new Date(), 'Date of birth must be in the past'),
-//     gender: z.nativeEnum(GENDER),
-//     phone: z.string().min(10, 'Valid phone number is required'),
-//     address: z.object({
-//       street: z.string().optional(),
-//       city: z.string().min(1, 'City is required'),
-//       state: z.string().min(1, 'State is required'),
-//       zip: z.string().min(1, 'Zip code is required'),
-//     }),
-//   }),
-//   idVerification: z.object({
-//     idType: z.nativeEnum(GOVT_ID_TYPE),
-//     idNumber: z.string().min(1, 'ID Number is required'),
-//   }),
-// });
+const endOfToday = new Date(new Date().setHours(23, 59, 59, 999));
 
 const daySchema = z.object({
   available: z.boolean(),
@@ -50,19 +14,35 @@ export const AvailabilityPricingSchema = z.object({
     sessionCharge: z.number(),
   }),
 
-  availability: z.object({
-    isAvailable: z.boolean().default(true),
-    Monday: daySchema,
-    Tuesday: daySchema,
-    Wednesday: daySchema,
-    Thursday: daySchema,
-    Friday: daySchema,
-    Saturday: daySchema,
-    Sunday: daySchema,
-  }),
-});
+  availability: z
+    .object({
+      isAvailable: z.boolean().default(true),
 
+      Monday: daySchema,
+      Tuesday: daySchema,
+      Wednesday: daySchema,
+      Thursday: daySchema,
+      Friday: daySchema,
+      Saturday: daySchema,
+      Sunday: daySchema,
+      timezone:z.string(),
+      effectiveFrom: z.coerce.date().optional(),
+      effectiveTo: z.coerce.date().optional(),
+    })
+  
+    .refine(
+      (data) =>
+        !data.effectiveTo ||
+        !data.effectiveFrom ||
+        data.effectiveTo > data.effectiveFrom,
+      {
+        message: 'End date must be greater than start date',
+        path: ['effectiveTo'],
+      }
+    ),
+});
 export type AvailabiltyPricingReqDTO = z.infer<typeof AvailabilityPricingSchema>;
+export type AvailabilityShape= z.infer<typeof AvailabilityPricingSchema>['availability'];
 
 export const PaymentInfoSchema = z.object({
   paymentInfo: z.object({
@@ -83,11 +63,7 @@ export const IdVerificationSchema = z.object({
   idAttachment: z.string(),
 });
 export type idVerificationReqDTO = z.infer<typeof IdVerificationSchema>;
-// export interface idVerificationReqDTO {
-//   idType: GOVT_ID_TYPE;
-//   idNumber: string;
-//   idAttachment: string;
-// }
+
 
 const dayAvailabilitySchema = z.object({
   available: z.boolean().default(false),
@@ -172,7 +148,23 @@ export const AddTrainerProfileSchema = z.object({
     Friday: dayAvailabilitySchema,
     Saturday: dayAvailabilitySchema,
     Sunday: dayAvailabilitySchema,
+    timezone:z.string(),
+    effectiveFrom: z.coerce.date({
+      message: 'Effective start date is required',  
+    }),
+    effectiveTo: z.coerce.date({
+      message: 'Effective end date is required', 
+    }),
+  })
+  .refine((data) => data.effectiveFrom > endOfToday, {
+    message: 'Start date cannot be in the past',
+    path: ['effectiveFrom'],
+  })
+  .refine((data) => data.effectiveTo > data.effectiveFrom, {
+    message: 'End date must be greater than start date',
+    path: ['effectiveTo'],
   }),
+  
   pricing: z.object({
     sessionCharge: z.coerce.number().min(1, 'Price must be at least 1').max(10000, 'Price seems too high'),
   }),

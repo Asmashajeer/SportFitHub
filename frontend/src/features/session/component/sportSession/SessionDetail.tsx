@@ -380,6 +380,8 @@ const SessionDetail = () => {
                   filledDates={filledDates}
                   bookingSlots={bookingSlots}
                   setBookingSlots={setBookingSlots}
+                  effectiveFrom={session.trainer.effectiveFrom}
+                  effectiveTo={session.trainer.effectiveTo}
                 />
               </div>
             </div>

@@ -17,7 +17,7 @@ import {
   SESSION_MODE,
   SESSION_TYPE,
   TIME_PERIOD,
-  type DayName,
+  
 } from '@/constants/constants';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
@@ -51,6 +51,7 @@ import { fitnessSessionService } from '../../../../session/service/fitnessSessio
 import { formatTo12Hour } from '@/utils/formatDate';
 import type { FitnessSessionFormValues } from '@/features/trainer/types/trainer.fitness.session.types';
 import { TrainerFitnessSessionService } from '@/features/trainer/service/sessionService/trainer.fitness.session.service';
+import { useTrainerAvailability } from '@/features/trainer/hook/useTrainerAvailability';
 
 const initialData = {
   fitnessCategory: '',
@@ -114,7 +115,9 @@ const CreateFitnessSessionModal = ({
   const { profile, fetchProfile } = useTrainerStore();
   const { user } = useAuthStore();
   const { fitness, setFitness } = useSessionStore();
-  const [availableDays, setAvailableDays] = useState<string[]>([]);
+    const { availableDays, checkInWorkingHours}=useTrainerAvailability(profile);
+  
+  // const [availableDays, setAvailableDays] = useState<string[]>([]);
   const [fitnessId,setFitnessId]=useState('');   //fitness category id to add to slug
   const form = useForm<FitnessSessionFormValues>({
     defaultValues: initialData,
@@ -150,16 +153,7 @@ const CreateFitnessSessionModal = ({
     getFitnessCategory();
   }, []);
 
-  //to get trainer working day
-  useEffect(() => {
-    if (profile) {
-      const workingDays = DAYS_OF_WEEK.filter((day) => {
-        return profile?.availability?.[day]?.available === true;
-      });
-      console.log('AvailableDays:    ', workingDays);
-      setAvailableDays(workingDays);
-    }
-  }, [profile]);
+ 
 
   useEffect(() => {
     console.log(sessionToEdit);
@@ -209,29 +203,7 @@ const CreateFitnessSessionModal = ({
     setValue('slug', session_slug, { shouldValidate: true });
   };
 
-  const timeToMinutes = (time: string) => {
-    if (!time) return 0;
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
-  const checkInWorkingHours = (
-    day: DayName,
-    startTime: string,
-    endTime: string
-  ) => {
-    const workingDay = profile?.availability?.[day];
-
-    if (!workingDay || !workingDay.available) return false;
-
-    if (workingDay.startTime && workingDay.endTime) {
-      const sessionStart = timeToMinutes(startTime);
-      const sessionEnd = timeToMinutes(endTime);
-      const trainerStart = timeToMinutes(workingDay.startTime);
-      const trainerEnd = timeToMinutes(workingDay.endTime);
-      // Check if session start is >= trainer start AND session end is <= trainer end
-      return sessionStart >= trainerStart && sessionEnd <= trainerEnd;
-    }
-  };
+ 
 
   //  check sessions are overlaped each other
   const checkInternalOverlap = (timeSlots: any[]) => {

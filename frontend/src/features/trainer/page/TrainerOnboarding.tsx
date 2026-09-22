@@ -93,6 +93,8 @@ const TrainerOnboarding = () => {
         Friday: { available: false, startTime: '09:00', endTime: '17:00' },
         Saturday: { available: false, startTime: '09:00', endTime: '17:00' },
         Sunday: { available: false, startTime: '09:00', endTime: '17:00' },
+        effectiveFrom: '' ,
+        effectiveTo: '' ,  
       },
       // Step 5: Financial
       paymentInfo: {

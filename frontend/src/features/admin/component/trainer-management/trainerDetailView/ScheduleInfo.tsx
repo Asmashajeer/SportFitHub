@@ -1,6 +1,7 @@
 
 import type { Trainer } from "@/features/admin/store/trainerSlice"
 import { DAYS_OF_WEEK } from "@/constants/constants";
+import { formatDateReadable } from "@/utils/formatDate";
 
 
 
@@ -19,7 +20,16 @@ const ScheduleInfo=({trainer}:{trainer:Trainer})=> {
           {trainer.availability.isAvailable ? "Accepting Sessions" : "Not Available"}
         </span>
       </div>
+         <div className="py-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase ">Availabilty Period </p>
+            <p className="text-emerald-600 px-2">
+                From : <span  className="text-white">{formatDateReadable(trainer?.availability.effectiveFrom)}</span>{' '}
+            </p>
+            <p className="text-emerald-600 px-2">
+              To : <span  className="text-white">{formatDateReadable(trainer?.availability.effectiveTo)}</span>{' '}
+            </p>
 
+          </div>  
       <div className="grid grid-cols-2 gap-2.5">
         {DAYS_OF_WEEK.map((day) => {
           const d = trainer.availability[day];

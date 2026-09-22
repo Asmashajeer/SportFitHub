@@ -57,7 +57,7 @@ export class SportsSessionRepository extends BaseRepository<ISportsSession> impl
     const session = await this.model
       .findOne({ _id: objectId })
       .populate('sportCategory', '_id sportName icon slug')
-      .populate('trainerId', 'userId displayName profilePic coreDiscipline specialties experience languages averageRating ')
+      .populate('trainerId', 'userId displayName profilePic coreDiscipline specialties experience languages averageRating availability.effectiveFrom availability.effectiveTo')
       .lean()
       .exec();
 
@@ -113,7 +113,7 @@ export class SportsSessionRepository extends BaseRepository<ISportsSession> impl
     const session = await this.model
       .findOne({ _id: objectId })
       .populate('sportCategory', '_id sportName icon slug')
-      .populate('trainerId', 'displayName profilePic coreDiscipline specialties experience languages averageRating idVerification.verified certificationInfo.verified createdAt')
+      .populate('trainerId', 'userId displayName profilePic coreDiscipline specialties experience languages averageRating idVerification.verified certificationInfo.verified createdAt availability.effectiveFrom availability.effectiveTo')
       .lean()
       .exec();
 

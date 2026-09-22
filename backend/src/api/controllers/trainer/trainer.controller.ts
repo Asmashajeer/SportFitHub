@@ -152,8 +152,8 @@ export class TrainerController {
     try {
       const { id } = req.params;
       const data = req.body;
-      const { user } = req as AuthRequest;
-
+      const { user } = req as AuthRequest;     
+       
       const profile = await this._trainerService.updateAvailabilityPricing(id, data, user);
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,

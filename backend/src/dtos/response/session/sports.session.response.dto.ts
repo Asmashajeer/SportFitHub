@@ -74,6 +74,10 @@ export interface IPopulatedTrainer {
   experience: number;
   languages: string[];
   averageRating: number;
+  availability:{
+    effectiveFrom:Date;    
+    effectiveTo:Date;
+  }
 }
 export interface ISportsSessionDetailsPopulated extends Omit<ISportsSessionPopulated, 'trainerId'> {
   trainerId: IPopulatedTrainer;
@@ -120,9 +124,11 @@ export interface SportsCategory extends Omit<IPopulatedSport, '_id'> {
   id: string;
 }
 
-export interface PopulatedTrainer extends Omit<IPopulatedTrainer, '_id' | 'userId'> {
+export interface PopulatedTrainer extends Omit<IPopulatedTrainer, '_id' | 'userId'|'availability'> {
   id: string;
   userId: string;
+  effectiveFrom:string,
+  effectiveTo:string
 }
 export interface SportSessionPublicDTO extends Omit<SportsSessionResponseDTO, 'sportCategory'> {
   sportCategory: SportsCategory;

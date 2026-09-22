@@ -92,6 +92,9 @@ export interface ITrainerProfile extends Document {
     Friday: IDayAvailability;
     Saturday: IDayAvailability;
     Sunday: IDayAvailability;
+    timezone:string;
+    effectiveFrom?: Date | null;
+    effectiveTo?: Date | null;
   };
 
   // payment Data
@@ -143,6 +146,7 @@ const verificationRemarksSchema = new mongoose.Schema(
   },
   { _id: false }
 );
+
 
 const TrainerProfileSchema = new mongoose.Schema(
   {
@@ -243,6 +247,10 @@ const TrainerProfileSchema = new mongoose.Schema(
         endTime: String,
       },
       Sunday: { available: { type: Boolean, default: false }, startTime: String, endTime: String },
+      timezone: { type: String, default: 'UTC' },
+      effectiveFrom: { type: Date, default: null }, //  trainer availability from
+      effectiveTo: { type: Date, default: null },   // trainer availabitity To
+      
     },
 
     // --- Payment Data ---

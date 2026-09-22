@@ -33,7 +33,7 @@ import toast from 'react-hot-toast';
 import IdVerificationFormEdit from './profileEditForm/IdVerificationFormEdit';
 import AvailabilityFormEdit from './profileEditForm/AvailabiltyFormEdit';
 import PaymentInfoFormEdit from './profileEditForm/PaymentInfoEdit';
-import { formatTo12Hour } from '@/utils/formatDate';
+import { formatDateReadable, formatTo12Hour } from '@/utils/formatDate';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import BasicInfoEditForm from './profileEditForm/BasicInfoEditForm';
 import PersonalInfoEditForm from './profileEditForm/PersonalInfoEditForm';
@@ -643,28 +643,39 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                       </p>
                     </div>  
                     <div className=" space-y-2 border rounded-xl p-2">
-                          {profile?.availability &&
-                            Object.entries(profile.availability)
-                              .filter(
-                                ([key, value]) =>
-                                  key !== 'isAvailable' &&
-                                  typeof value === 'object' &&
-                                  value.available
-                              )
-                              .map(([day, info]: [string, any]) => (
-                                <div
-                                  key={day}
-                                  className="grid grid-cols-2 gap-y-2"
-                                  // className="w-full flex justify-between items-center  text-sm border-b pb-1 border-muted/50"
-                                >
-                                  <span className="font-medium capitalize">
-                                    {day}:
-                                  </span>
-                                  <span className="px-6 text-muted-foreground">
-                                    {formatTo12Hour(info.startTime)} - {formatTo12Hour(info.endTime)}
-                                  </span>
-                                </div>
-                            ))}
+                        {profile?.availability &&
+                          <div className="py-2">
+                              <p className="text-xs font-semibold text-muted-foreground uppercase ">Availabilty Period </p>
+                              <p className="text-emerald-600 px-2">
+                                  From : <span  className="text-white">{formatDateReadable(profile?.availability.effectiveFrom)}</span>{' '}
+                              </p>
+                              <p className="text-emerald-600 px-2">
+                                To : <span  className="text-white">{formatDateReadable(profile?.availability.effectiveTo)}</span>{' '}
+                              </p>
+                  
+                          </div>  
+                        }
+                        {profile?.availability && Object.entries(profile.availability)
+                          .filter(
+                            ([key, value]) =>
+                              key !== 'isAvailable' &&
+                              typeof value === 'object' &&
+                              value.available
+                          )
+                          .map(([day, info]: [string, any]) => (
+                            <div
+                              key={day}
+                              className="grid grid-cols-2 gap-y-2"
+                              // className="w-full flex justify-between items-center  text-sm border-b pb-1 border-muted/50"
+                            >
+                              <span className="font-medium capitalize">
+                                {day}:
+                              </span>
+                              <span className="px-6 text-muted-foreground">
+                                {formatTo12Hour(info.startTime)} - {formatTo12Hour(info.endTime)}
+                              </span>
+                            </div>
+                        ))}
                     </div>
                   </div>    
                   {editingSection === 'availability' && (

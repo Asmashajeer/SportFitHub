@@ -493,6 +493,8 @@ const FitnessSessionDetail = () => {
                   filledDates={filledDates}
                   bookingSlots={bookingSlots}
                   setBookingSlots={setBookingSlots}
+                  effectiveFrom={session.trainer.effectiveFrom}
+                  effectiveTo={session.trainer.effectiveTo}
                   isOnline={isOnline}
                   userTimezone={userTimezone}
                 />
