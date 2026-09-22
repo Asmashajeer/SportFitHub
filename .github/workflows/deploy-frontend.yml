@@ -22,13 +22,13 @@ jobs:
         working-directory: ./frontend
         run: npm install
 
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v3
+
       - name: Build frontend
         working-directory: ./frontend
-        env:
-          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
-          VITE_MAPTILER_CLOUD_API: ${{ secrets.VITE_MAPTILER_CLOUD_API }}
-          VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
-        run: npm run build
+        run: doppler run --token=${{ secrets.DOPPLER_TOKEN }} -- npm run build
+       
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
