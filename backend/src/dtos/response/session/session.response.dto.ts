@@ -54,7 +54,7 @@ interface SportsSessionPublicResponseDTO extends BaseSessionPublicResponseDTO {
 
 interface FitnessSessionPublicResponseDTO extends BaseSessionPublicResponseDTO {
   sessionModel: typeof PAYLOAD_MODEL.FITNESS_SESSION;
-  category: string;
+  fitnessCategory: string;
   mode: SESSION_MODE;
   level:INTENSITY_LEVEL;
   venue?: {

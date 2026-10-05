@@ -57,7 +57,7 @@ export const toSessionPublicResponseDTO = (
     return {
       ...base,
       sessionModel: PAYLOAD_MODEL.FITNESS_SESSION,
-      category: fitnessData.fitnessCategory.toString(),
+      fitnessCategory: fitnessData.fitnessCategory.toString(),
       mode: fitnessData.mode,
       level: fitnessData.intensityLevel,
       venue: formatVenue(fitnessData.venue),
