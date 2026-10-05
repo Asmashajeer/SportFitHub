@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
 import { trainerManagementService } from '../../service/trainerManagementService';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ExternalLink, CreditCard, Building2, ShieldCheck, Award, User2Icon, Loader2 } from 'lucide-react';
+import { ExternalLink, CreditCard,  ShieldCheck, Award, User2Icon, Loader2 } from 'lucide-react';
 import { UseAdminStore } from '../../store/useAdminStore';
 import { useEffect, useState } from 'react';
 import type { ICertification, TrainerOverView } from '../../store/trainerSlice';
