@@ -54,8 +54,10 @@ export const ERROR_MESSAGES = {
     USER_DELETED: 'This account no longer exists',
     BLOCKED_USER: 'Your account has been suspended',
     INVALID_CREDENTIALS: 'Invalid credentials ',
+
     OTP_INVALID: 'Invalid or expired code.Please request new one',
     ROLE_INVALID: 'Invalid Role selected',
+    INVALID_PASSWORD:"Invalid  current password verification failed",
     SEND_VERIFICATION_CODE_FAILED: 'Failed to send verification code. Please try again later',
     REFRESH_TOKEN_MISSING: 'Refresh token not found',
     REFRESH_TOKEN_INVALID: 'Invalid token',

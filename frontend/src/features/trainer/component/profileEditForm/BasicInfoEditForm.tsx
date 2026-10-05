@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 
 import { Badge } from '@/components/ui/badge';
-import { CornerDownLeftIcon,  X } from 'lucide-react';
+import { CornerDownLeftIcon,  Loader2,  X } from 'lucide-react';
 import { useState } from 'react';
 import { BasicInfoSchema } from '../../types/trainer.profile.schema';
 import toast from 'react-hot-toast';
@@ -49,7 +49,7 @@ const BasicInfoEditForm = ({
   const {getValues,setValue,setError,clearErrors,}=form
   const [newSpecialty, setNewSpecialty] = useState('');
   const [newLang, setNewLang] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const addToArray = (
     field: 'specialties' | 'languages',
@@ -83,7 +83,7 @@ const BasicInfoEditForm = ({
   };
   const onSubmit = async (data: BasicInfoFormValues) => {
     if (!profile?.id) return;
-     setIsSubmitting(true);
+     setIsUpdating(true);
     try {
       const payload={
         ...data,
@@ -95,7 +95,7 @@ const BasicInfoEditForm = ({
               const errorMessage = newData.error.issues[0].message;
               toast.error(errorMessage);
               console.log(errorMessage);
-              setIsSubmitting(false);
+              setIsUpdating(false);
               return;
             }
       const updatedData = await trainerService.updateBasicInfo(
@@ -109,6 +109,9 @@ const BasicInfoEditForm = ({
     } catch (error) {
        toast.error('Failed to update. Please try again.');
       console.error('Failed to update Basic info', error);
+    }
+    finally{
+      setIsUpdating(false);
     }
   };
 
@@ -311,7 +314,11 @@ const BasicInfoEditForm = ({
             Cancel
           </Button>
           
-          <Button disabled={isSubmitting} type="submit">Update Basic Info</Button>
+          <Button disabled={isUpdating} type="submit">
+             {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isUpdating  ? "updating..." : "Update Basic Info"}
+            Update Basic Info
+            </Button>
         </div>
       </form>
     </Form>

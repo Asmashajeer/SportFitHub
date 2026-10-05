@@ -59,15 +59,7 @@ export interface TrainerOnboardingFormValues {
     effectiveFrom:  string, 
     effectiveTo: string,   
   };
-  paymentInfo?: {
-    bankAccount?: {
-      accountName?: string;
-      accountNumber?: string;
-      bankName?: string;
-      ifscCode?: string;
-    };
-    upiId?: string;
-  };
+ 
 }
 
 

@@ -12,37 +12,49 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import type { TrainerOnboardingFormValues } from '../../types/trainerprofile.types';
 import { Button } from '@/components/ui/Button';
-import { Calendar, MapPin, Target } from 'lucide-react';
+import { Calendar, Loader2, MapPin, Target } from 'lucide-react';
 import {  DAYS_OF_WEEK, END_OF_TODAY, type DayName } from '@/constants/constants';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-interface Rates_ScheduleFormProps {
-  onNext: (fields: any[]) => void;
+interface Rates_ScheduleFormProps { 
   onBack: () => void;
+   isSubmitting: boolean;
 }
 
 const Rates_ScheduleForm: React.FC<Rates_ScheduleFormProps> = ({
-  onNext,
-  onBack,
+   onBack,
+   isSubmitting,
 }) => {
   const form = useFormContext<TrainerOnboardingFormValues>();
   const {
     register,
     watch,
     setValue,
-    formState: { errors },
-    setError,
+    formState: { errors },   
     clearErrors,
   } = form;
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [trainerLocation,setTrainerLocation]=useState("");
   const location = watch('currentLocation.coordinates');
   const availability = watch('availability');
 
-  const currentFields = ['pricePerHour', 'availability', 'currentLocation'];
+  // const currentFields = ['pricePerHour', 'availability', 'currentLocation'];
 
+  useEffect(() => {
+  register('currentLocation.coordinates', {
+    validate: (coords) => {
+      if (!coords || !Array.isArray(coords) || coords.length !== 2) {
+         'Location is required';
+      }
+      if (coords[0] === 0 && coords[1] === 0) {
+        return 'Please click "Get Location" to capture coordinates';
+      }
+      return true;
+    },
+  });
+}, [register]);
   const showPickedAddress = async (lat: number, lng: number) => {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
@@ -52,7 +64,7 @@ const Rates_ScheduleForm: React.FC<Rates_ScheduleFormProps> = ({
   };
 
   const handleGetLocation = () => {
-    setLoading(true);
+    setIsLoading(true);
     clearErrors('currentLocation.coordinates');
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -68,10 +80,11 @@ const Rates_ScheduleForm: React.FC<Rates_ScheduleFormProps> = ({
         (error) => {
           toast.custom('Location access denied');
           console.error('Location access denied', error);
+          setIsLoading(false);
         }
       );
     }
-    setLoading(false);
+    setIsLoading(false);
   };
   return (
     <div className="space-y-6">
@@ -138,8 +151,12 @@ const Rates_ScheduleForm: React.FC<Rates_ScheduleFormProps> = ({
                 variant="secondary"
                 size="sm"
                 onClick={handleGetLocation}
+                disabled={isLoading}
               >
-                <Target className="h-4 w-4 mr-2" /> Get Location
+                <Target className="h-4 w-4 mr-2" /> 
+                {isLoading &&  <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading? 'getting Location':'Get Location'}
+                
               </Button>
             </div>
           </div>
@@ -285,7 +302,7 @@ const Rates_ScheduleForm: React.FC<Rates_ScheduleFormProps> = ({
           <Button variant="outline" onClick={onBack}>
             Back
           </Button>
-          <Button
+          {/* <Button
             disabled={loading}
             className="flex-1"
             onClick={() => {
@@ -299,7 +316,16 @@ const Rates_ScheduleForm: React.FC<Rates_ScheduleFormProps> = ({
             }}
           >
             Continue
-          </Button>
+          </Button> */}
+           <Button
+
+          type="submit" // This triggers the root form's onSubmit
+          className="flex-1 bg-green-600 hover:bg-green-700"
+          disabled={isSubmitting}
+        >
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isSubmitting ? 'Submitting Application...' : 'Complete Onboarding'}
+        </Button>
         </CardFooter>
       </Card>
     </div>

@@ -1,5 +1,5 @@
 import { TRAINER_STATUS } from '@/constants/enums';
-import { AvailabiltyPricingReqDTO, BasicInfoReqDTO, CertificationReqDTO, idVerificationReqDTO, PaymentInfoReqDTO, PersonalInfoReqDTO } from '@/dtos/request/trainer/trainer.profile.request.dto';
+import { AvailabiltyPricingReqDTO, BasicInfoReqDTO, CertificationReqDTO, idVerificationReqDTO,  PersonalInfoReqDTO } from '@/dtos/request/trainer/trainer.profile.request.dto';
 import { TrainerProfileResponseDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { AuthUser } from '@/middleware/auth.middleware';
@@ -22,7 +22,7 @@ export interface ITrainerService {
 
   updateAvailabilityPricing(id: string | Types.ObjectId, data: AvailabiltyPricingReqDTO, user: AuthUser): Promise<TrainerProfileDTO>;
 
-  updatePaymentInfo(id: string | Types.ObjectId, data: PaymentInfoReqDTO, user: AuthUser): Promise<TrainerProfileDTO>;
+  // updatePaymentInfo(id: string | Types.ObjectId, data: PaymentInfoReqDTO, user: AuthUser): Promise<TrainerProfileDTO>;
 
   resubmitApplicaion(id: string | Types.ObjectId, status: TRAINER_STATUS, user: AuthUser): Promise<TrainerProfileDTO>;
 }

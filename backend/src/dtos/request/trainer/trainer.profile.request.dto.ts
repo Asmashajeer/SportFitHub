@@ -44,18 +44,18 @@ export const AvailabilityPricingSchema = z.object({
 export type AvailabiltyPricingReqDTO = z.infer<typeof AvailabilityPricingSchema>;
 export type AvailabilityShape= z.infer<typeof AvailabilityPricingSchema>['availability'];
 
-export const PaymentInfoSchema = z.object({
-  paymentInfo: z.object({
-    bankAccount: z.object({
-      accountName: z.string().min(1, 'Account holder name is required'),
-      accountNumber: z.string().min(1, 'Account number is required'),
-      bankName: z.string().min(1, 'Bank name is required'),
-      ifscCode: z.string().min(1, 'IFSC code is required'),
-    }),
-    upiId: z.string().optional(),
-  }),
-});
-export type PaymentInfoReqDTO = z.infer<typeof PaymentInfoSchema>;
+// export const PaymentInfoSchema = z.object({
+//   paymentInfo: z.object({
+//     bankAccount: z.object({
+//       accountName: z.string().min(1, 'Account holder name is required'),
+//       accountNumber: z.string().min(1, 'Account number is required'),
+//       bankName: z.string().min(1, 'Bank name is required'),
+//       ifscCode: z.string().min(1, 'IFSC code is required'),
+//     }),
+//     upiId: z.string().optional(),
+//   }),
+// });
+// export type PaymentInfoReqDTO = z.infer<typeof PaymentInfoSchema>;
 
 export const IdVerificationSchema = z.object({
   idType: z.enum(GOVT_ID_TYPE),
@@ -169,19 +169,19 @@ export const AddTrainerProfileSchema = z.object({
     sessionCharge: z.coerce.number().min(1, 'Price must be at least 1').max(10000, 'Price seems too high'),
   }),
 
-  paymentInfo: z
-    .object({
-      bankAccount: z
-        .object({
-          accountName: z.string().optional(),
-          accountNumber: z.string().optional(),
-          bankName: z.string().optional(),
-          ifscCode: z.string().optional(),
-        })
-        .optional(),
-      upiId: z.string().optional(),
-    })
-    .optional(),
+  // paymentInfo: z
+  //   .object({
+  //     bankAccount: z
+  //       .object({
+  //         accountName: z.string().optional(),
+  //         accountNumber: z.string().optional(),
+  //         bankName: z.string().optional(),
+  //         ifscCode: z.string().optional(),
+  //       })
+  //       .optional(),
+  //     upiId: z.string().optional(),
+  //   })
+  //   .optional(),
   status: z.enum(TRAINER_STATUS),
   verificationRemarks: z.object({
     fields: z.array(z.string()), // which fields changed

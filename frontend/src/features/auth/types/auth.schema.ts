@@ -81,47 +81,23 @@ export const ResetPasswordSchema = z.object({
 });
 export type ResetPasswordData = z.infer<typeof ResetPasswordSchema>;
 
-// // ------------Validation function----------
-// export type ValidationResult<T> =
-//   | { success: true; data: T }
-//   | { success: false; errors: Record<string, string> };
-
-// export const validateRegisterForm=(data:any):ValidationResult<any>=>{
-
-//       const formData={
-//         email: data.email||"",
-//         password: data.password||"",
-//         confirmPassword: data?.confirmPassword||"",
-//         role: data.role||"",
-//       }
-//       const result=RegisterSchema.safeParse(formData);
-//      if (!result.success) {
-//         const errors: Record<string, string> = {};
-//         result.error.issues.forEach((issue) => {
-//           const path = issue.path[0] as string;
-//           errors[path] = issue.message;
-//         });
-//         return { success: false, errors };
-//       }
-//       return { success: true, data: result.data };
-//     }
-
-// export const validateLoginForm=(data:any):ValidationResult<any>=>{
-
-//       const formData={
-//         email: data.email||"",
-//         password: data.password||"",
-//         role: data.role||"",
-//       }
-//       const result=LoginSchema.safeParse(formData);
-//       if (!result.success) {
-//         const errors: Record<string, string> = {};
-//         result.error.issues.forEach((issue) => {
-//           const path = issue.path[0] as string;
-//           errors[path] = issue.message;
-//         });
-//         return { success: false, errors };
-//       }
-//       return { success: true, data: result.data };
-
-// }
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z
+      .string()
+      .min(8, 'New password must be at least 8 characters')
+      .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
+      .regex(/[a-z]/, 'Must contain at least one lowercase letter')
+      .regex(/[0-9]/, 'Must contain at least one number'),
+    confirmPassword: z.string().min(1, 'Please confirm your new password'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: 'New password must be different from current password',
+    path: ['newPassword'],
+  });
+export type ChangePasswordValues = z.infer<typeof changePasswordSchema>;

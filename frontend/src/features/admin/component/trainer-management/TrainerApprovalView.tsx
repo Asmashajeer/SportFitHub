@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
 import { trainerManagementService } from '../../service/trainerManagementService';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ExternalLink, CreditCard, Building2, ShieldCheck, Award, User2Icon } from 'lucide-react';
+import { ExternalLink, CreditCard, Building2, ShieldCheck, Award, User2Icon, Loader2 } from 'lucide-react';
 import { UseAdminStore } from '../../store/useAdminStore';
 import { useEffect, useState } from 'react';
 import type { ICertification, TrainerOverView } from '../../store/trainerSlice';
@@ -19,14 +19,13 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
   const setSelectedTrainer = UseAdminStore((state) => state.setSelectedTrainer);
   const [rejectionTarget, setRejectionTarget] = useState<string | null>(null); // e.g., 'certificationInfo'
   const [rejectionReason, setRejectionReason] = useState('');
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
       const { trainerData } = await trainerManagementService.getTrainer(trainer.id);
-
       setSelectedTrainer(trainerData);
     };
-
     fetchCurrentUser();
   }, [trainer]);
 
@@ -73,6 +72,8 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
   };
   //update cerificates/id status
   const updateStatus = async (id: string, targetField: 'certificationInfo' | 'idVerification', status: Doc_status_type, reason?: string) => {
+    const actionKey = `${status.toLowerCase()}-${targetField}`;
+    setLoadingAction(actionKey);
     try {
       const data = await trainerManagementService.updateFileStatus(id, targetField, status, reason);
 
@@ -82,19 +83,23 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
       }
     } catch (error) {
       toast.error(error?.toString() || 'Something went wrong');
+    } finally {
+      setLoadingAction(null);
     }
   };
 
   //update Trainer application Status
 
   const trainerApplicationStatus = async (trainer: Trainer, status: Doc_status_type, reason?: string) => {
+    const actionKey = `application-${status.toLowerCase()}`;
+    setLoadingAction(actionKey);
     try {
-      if(trainer.idVerification.status===DOC_VERIFY_STATUS.PENDING ||trainer.certificationInfo.status===DOC_VERIFY_STATUS.PENDING){
-        toast.error("please verify Id Document and Certification to continue.");
+      if (trainer.idVerification.status === DOC_VERIFY_STATUS.PENDING || trainer.certificationInfo.status === DOC_VERIFY_STATUS.PENDING) {
+        toast.error('please verify Id Document and Certification to continue.');
         return;
       }
-      if(status==TRAINER_STATUS.APPROVED &&trainer.idVerification.status!==DOC_VERIFY_STATUS.VERIFIED && trainer.certificationInfo.status!==DOC_VERIFY_STATUS.VERIFIED){
-        toast.error("The application can only be approved once all certificates and ID documents are verified.");
+      if (status == TRAINER_STATUS.APPROVED && trainer.idVerification.status !== DOC_VERIFY_STATUS.VERIFIED && trainer.certificationInfo.status !== DOC_VERIFY_STATUS.VERIFIED) {
+        toast.error('The application can only be approved once all certificates and ID documents are verified.');
         return;
       }
       const data = await trainerManagementService.updateTrainerStatus(trainer.id, status, reason);
@@ -106,6 +111,8 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
       }
     } catch (error) {
       toast.error(error?.toString() || 'Something went wrong');
+    } finally {
+      setLoadingAction(null);
     }
   };
 
@@ -241,8 +248,11 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
                   <p>Certificates verificaton status: {selectedTrainer?.certificationInfo?.status.toUpperCase()}</p>
                   {selectedTrainer?.certificationInfo?.status === DOC_VERIFY_STATUS.PENDING && rejectionTarget !== 'certificationInfo' && (
                     <div className="flex items-center gap-2 ">
-                      <Button onClick={() => updateStatus(selectedTrainer?.id, 'certificationInfo', DOC_VERIFY_STATUS.VERIFIED)}>Verify</Button>
-                      <Button variant={'destructive'} onClick={() => setRejectionTarget('certificationInfo')}>
+                      <Button disabled={!!loadingAction} onClick={() => updateStatus(selectedTrainer?.id, 'certificationInfo', DOC_VERIFY_STATUS.VERIFIED)}>
+                        {loadingAction === 'verified-certificationInfo' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Verify
+                      </Button>
+                      <Button variant={'destructive'} disabled={!!loadingAction} onClick={() => setRejectionTarget('certificationInfo')}>
                         Reject
                       </Button>
                     </div>
@@ -263,6 +273,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
                       <div className="flex justify-end gap-2">
                         <Button
                           variant="ghost"
+                          disabled={!!loadingAction}
                           size="sm"
                           onClick={() => {
                             setRejectionTarget(null);
@@ -274,7 +285,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
                         <Button
                           variant="destructive"
                           size="sm"
-                          disabled={!rejectionReason.trim()}
+                          disabled={!rejectionReason.trim() || !!loadingAction}
                           onClick={() => {
                             updateStatus(selectedTrainer?.id, 'certificationInfo', DOC_VERIFY_STATUS.REJECTED, rejectionReason);
                             setRejectionTarget(null);
@@ -344,8 +355,11 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
                 </div>
                 {selectedTrainer?.idVerification.status === DOC_VERIFY_STATUS.PENDING && rejectionTarget !== 'idVerification' && (
                   <div className="flex items-center gap-2 ">
-                    <Button onClick={() => updateStatus(selectedTrainer?.id, 'idVerification', DOC_VERIFY_STATUS.VERIFIED)}>Verify</Button>
-                    <Button variant={'destructive'} onClick={() => setRejectionTarget('idVerification')}>
+                    <Button disabled={!!loadingAction} onClick={() => updateStatus(selectedTrainer?.id, 'idVerification', DOC_VERIFY_STATUS.VERIFIED)}>
+                      {loadingAction === 'verified-idVerification' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Verify
+                    </Button>
+                    <Button variant={'destructive'} disabled={!!loadingAction} onClick={() => setRejectionTarget('idVerification')}>
                       Reject
                     </Button>
                   </div>
@@ -364,6 +378,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
                     <div className="flex justify-end gap-2">
                       <Button
                         variant="ghost"
+                        disabled={!!loadingAction}
                         size="sm"
                         onClick={() => {
                           setRejectionTarget(null);
@@ -375,7 +390,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
                       <Button
                         variant="destructive"
                         size="sm"
-                        disabled={!rejectionReason.trim()}
+                        disabled={!rejectionReason.trim()|| !!loadingAction}
                         onClick={() => {
                           if (!selectedTrainer?.id) return;
                           updateStatus(selectedTrainer?.id, 'idVerification', DOC_VERIFY_STATUS.REJECTED, rejectionReason);
@@ -383,6 +398,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
                           setRejectionReason('');
                         }}
                       >
+                        {loadingAction === 'rejected-idVerification' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Confirm & Send Rejection
                       </Button>
                     </div>
@@ -408,7 +424,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
             </AccordionTrigger>
             <AccordionContent className="pb-4 border-t pt-4  bg-zinc-800/70 p-4">
               <div className="grid grid-cols-2 gap-y-4">
-                <div className=''>
+                <div className="">
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
                     SessionCharge
                     <span className="px-2 text-sm font-medium text-white">₹ {selectedTrainer?.pricing.sessionCharge} </span>
@@ -416,12 +432,11 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
                   <div className="py-2">
                     <p className="text-xs font-semibold text-muted-foreground uppercase ">Availabilty Period </p>
                     <p className="text-emerald-600 px-2">
-                       From : <span  className="text-white">{formatDateReadable(selectedTrainer?.availability.effectiveFrom)}</span>{' '}
+                      From : <span className="text-white">{formatDateReadable(selectedTrainer?.availability.effectiveFrom)}</span>{' '}
                     </p>
                     <p className="text-emerald-600 px-2">
-                      To : <span  className="text-white">{formatDateReadable(selectedTrainer?.availability.effectiveTo)}</span>{' '}
+                      To : <span className="text-white">{formatDateReadable(selectedTrainer?.availability.effectiveTo)}</span>{' '}
                     </p>
-
                   </div>
                 </div>
                 <div>
@@ -445,45 +460,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
               </div>
             </AccordionContent>
           </AccordionItem>
-          {/* Payment & Bank Info */}
-          <AccordionItem value="payment" className="border rounded-lg px-4">
-            <AccordionTrigger
-              className="text-[13px] hover:no-underline
-             data-[state=open]:text-gray-400
-                    data-[state=open]:bg-green-900/50
-                   data-[state=open]:border-b-2
-                  data-[state=open]:px-2
-                  data-[state=open]:rounded-t-lg"
-            >
-              <div className="flex items-center gap-3">
-                <Building2 className="text-green-600 h-5 w-5" />
-                <span className="font-bold">Banking & Payment Data</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 border-t pt-4  bg-zinc-800/70 p-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="">
-                  <p className="text-xs text-muted-foreground uppercase font-bold">Bank Account</p>
-                  <div className="p-2 bg-zinc-950 rounded">
-                    <p className="text-[13px] text-slate-400">
-                      Account Name: <span className="text-slate-200 px-2">{selectedTrainer?.paymentInfo.bankAccount?.accountName}</span>
-                    </p>
-                    <p className="flex text-[13px] text-slate-400 ">
-                      A/C:
-                      <span className="px-2 text-slate-200">{selectedTrainer?.paymentInfo.bankAccount?.accountNumber}</span>
-                    </p>
-                    <p className="text-[13px] text-slate-400">
-                      IFSC: <span className="text-slate-200 px-2">{selectedTrainer?.paymentInfo.bankAccount?.ifscCode}</span>
-                    </p>
-                  </div>
-                </div>
-                <div className="p-3 bg-secondary/20 rounded">
-                  <p className="text-xs text-muted-foreground uppercase font-bold">UPI ID</p>
-                  <p className="text-sm font-mono mt-2">{selectedTrainer?.paymentInfo.upiId || 'Not Provided'}</p>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+        
         </Accordion>
       </div>
 
@@ -493,11 +470,12 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
           <h4 className="font-bold text-sm mb-4">Verification Actions</h4>
           {selectedTrainer && (
             <div className="space-y-2 flex  justify-end gap-2">
-              <Button className="text-[13px] bg-green-600 hover:bg-green-700 " onClick={() => trainerApplicationStatus(selectedTrainer, TRAINER_STATUS.APPROVED)}>
-                Approve Application
+              <Button disabled={!!loadingAction} className="text-[13px] bg-green-600 hover:bg-green-700 " onClick={() => trainerApplicationStatus(selectedTrainer, TRAINER_STATUS.APPROVED)}>
+                {loadingAction === 'application-approved' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {loadingAction === 'application-approved' ? 'Approving...' : 'Approve Application'}
               </Button>
               <div>
-                <Button variant="outline" className="text-[13px]  border-destructive text-destructive hover:bg-destructive/5" onClick={() => setRejectionTarget('trainerStatus')}>
+                <Button variant="outline" disabled={!!loadingAction} className="text-[13px]  border-destructive text-destructive hover:bg-destructive/5" onClick={() => setRejectionTarget('trainerStatus')}>
                   Reject Application
                 </Button>
                 {rejectionTarget === 'trainerStatus' && (
@@ -533,6 +511,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
                           setRejectionReason('');
                         }}
                       >
+                        {loadingAction === 'application-rejected' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Confirm & Send Rejection
                       </Button>
                     </div>
@@ -544,6 +523,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
                 className=" text-[13px] border-amber-200 text-amber-200 hover:bg-amber-600/5"
                 onClick={() => trainerApplicationStatus(selectedTrainer, TRAINER_STATUS.UNDER_REVIEW)}
               >
+                {loadingAction === 'application-under_review' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Under Review
               </Button>
             </div>

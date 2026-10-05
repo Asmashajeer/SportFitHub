@@ -29,6 +29,8 @@ import { trainerService } from '../../service/trainerService';
 import { useTrainerStore } from '../../store/useTrainerStore';
 import { uploadService } from '@/service/upload.service';
 import toast from 'react-hot-toast';
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface props {
   initialData: { idType: Govt_Id_type; idNumber: string };
@@ -39,6 +41,7 @@ const IdVerificationFormEdit = ({ initialData, onCancel }: props) => {
   const profile = useTrainerStore((state) => state.profile);
   const setProfile = useTrainerStore((state) => state.setProfile);
   const form = useForm<idVerification>({ defaultValues: initialData });
+  const [isUpdating, setIsUpdating] = useState(false);
   const {
     register,
     formState: { errors },
@@ -49,23 +52,25 @@ const IdVerificationFormEdit = ({ initialData, onCancel }: props) => {
 
   const selectedIDType = watch('idType');
   const onSubmit = async (data: idVerification) => {
+     setIsUpdating(true);
     if (profile) {
       const userId = profile?.userId;
-      const folderPath = `trainers/${userId}/${profile?.category}`;
+      const folderPath = `trainers/${userId}/${profile?.category}/idAttachment`;
 
       try {
         if (data.idAttachment?.[0]) {
-          const [url] = await uploadService.upload(
+          const [urls] = await uploadService.upload(
             data.idAttachment?.[0],
             folderPath,
             userId,
             UPLOAD_TYPE.ID_ATTACHMENT
           );
-          if (url) {
+          console.log(urls);
+          if (urls) {
             const idverifcationInfo = {
               idType: data.idType,
               idNumber: data.idNumber,
-              idAttachment: url,
+              idAttachment: urls,
             };
             const updatedData = await trainerService.updateIdverification(
             profile?.id,
@@ -74,10 +79,15 @@ const IdVerificationFormEdit = ({ initialData, onCancel }: props) => {
             setProfile(updatedData.profile);
             onCancel();
           }
-          toast.error('fileupload failed');
+          else{
+            toast.error('fileupload failed');
+          }
         }
       } catch (error) {
         toast.error(error?.toString() || 'Something went wrong');
+      }
+      finally{
+         setIsUpdating(false);
       }
     }
   };
@@ -174,7 +184,12 @@ const IdVerificationFormEdit = ({ initialData, onCancel }: props) => {
           )}
         </div>
         <div className="flex  justify-end gap-3">
-          <Button type="submit">Submit</Button>
+          <Button type="submit"
+          disabled={isUpdating}
+          >{isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isUpdating ? "Updating..." : "Save Changes"}
+            Submit
+          </Button>
           <Button type="button" onClick={onCancel}>
             Cancel
           </Button>

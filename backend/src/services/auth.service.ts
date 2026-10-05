@@ -247,6 +247,21 @@ export class AuthService implements IAuthService {
     };
   };
 
+//---CHANGE PASSWORD
+  changePassword= async (userId:string,current:string ,newPassword:string): Promise<BaseResponseDTO> => {
+    const user = await this._userRepo.findById(userId);
+    if (!user) throw new AppError(ERROR_MESSAGES.AUTH.USER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
+     const isMatch = await bcrypt.compare(current, user.password);
+    if (!isMatch) throw new AppError(ERROR_MESSAGES.AUTH.INVALID_PASSWORD, STATUS_CODE.ERROR.NOT_FOUND);
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this._userRepo.updatePassword(userId, hashedPassword);
+    console.log('password updated');
+    return {
+      success: true,
+      message: SUCCESS_MESSAGES.AUTH.PASSWORD_UPDATED,
+      statusCode: STATUS_CODE.SUCCESS.CREATED,
+    };
+  }
   //authentication check
   authMe = async (userId: string): Promise<AuthMeResponseDto> => {
     const user = await this._userRepo.findById(userId);

@@ -17,6 +17,7 @@ import { trainerService } from '../../service/trainerService';
 import { PersonalInfoSchema } from '../../types/trainer.profile.schema';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { Loader2 } from 'lucide-react';
 
 
 
@@ -77,6 +78,9 @@ const PersonalInfoEditForm = ({
     } catch (error) {
       toast.error('Failed to update. Please try again.');
       console.error('Failed to update Personal Info', error);
+    }
+    finally{
+        setIsSubmitting(false);
     }
   }
   return(
@@ -230,7 +234,11 @@ const PersonalInfoEditForm = ({
           <Button variant="ghost" type="button" onClick={onCancel}>
             Cancel
           </Button>
-          <Button  disabled={isSubmitting} type="submit">Update Personal Info</Button>
+          <Button  disabled={isSubmitting} type="submit">
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isSubmitting ? "Updating..." : "Update Personal Info"}
+            
+            </Button>
         </div>
       </form>
     </Form>

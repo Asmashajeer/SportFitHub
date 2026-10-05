@@ -31,12 +31,7 @@ function ResetPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // const result =ResetPasswordSchema.safeParse({email,otp,newPassword});
-    // if (!result.success) {
-    //   const error = z.treeifyError(result.error).errors[0];
-    //   setError(error);
-    //   return;
-    // }
+    
 
     setError('');
     try {

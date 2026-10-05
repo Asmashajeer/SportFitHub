@@ -165,6 +165,19 @@ export default class AuthController {
     }
   };
 
+changePassword=async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    const userId=req.user.id;
+     try {
+      const { currentPassword, newPassword } = req.body;
+
+      const result = await this._authService.changePassword(userId, currentPassword, newPassword );
+      res.status(result.statusCode).json(result);
+    } catch (error) {
+      next(error);
+    }
+
+}
+
   //-----------------------Logout user
   logout = async (req: Request, res: Response): Promise<void> => {
     const authReq = req as AuthRequest;
@@ -193,24 +206,5 @@ export default class AuthController {
     }
   };
 
-  // -----------------------Set Cookies---------------
-  // private _setAuthCookies(res: Response, accessToken: string, refreshToken?: string) {
-  //   const isProd = process.env.NODE_ENV === 'production';
 
-  //   res.cookie('accessToken', accessToken, {
-  //     httpOnly: true,
-  //     secure: isProd,
-  //     sameSite: 'lax',
-  //     maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
-  //   });
-
-  //   if (refreshToken) {
-  //     res.cookie('refreshToken', refreshToken, {
-  //       httpOnly: true,
-  //       secure: isProd,
-  //       sameSite: 'lax',
-  //       maxAge: Number(process.env.REFRESH_TOKEN_MAXAGE),
-  //     });
-  //   }
-  // }
 }

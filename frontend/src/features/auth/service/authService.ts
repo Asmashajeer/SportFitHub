@@ -7,6 +7,7 @@ import type {
   ResendOtpResponse,
 } from '../types/auth.types';
 import type {
+  ChangePasswordValues,
   LoginCredentials,
   registerCredentials,
   ResendOtpData,
@@ -29,6 +30,11 @@ export const authService = {
   },
   logout: async () => {
     await api.post(AUTH_ROUTES.LOGOUT);
+  },
+
+  changePassword: async (data: ChangePasswordValues): Promise<Response> => {
+    const response = await api.patch(AUTH_ROUTES.CHANGE_PASSWORD, data);
+    return response.data;
   },
 
   getMe: async () => {

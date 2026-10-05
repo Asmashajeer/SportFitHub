@@ -12,7 +12,7 @@ import earningsRoute from './earnings.route';
 const upload = uploadMiddleware();
 import { Router } from 'express';
 import { validateBody } from '@/middleware/validate.middleware';
-import { AvailabilityPricingSchema, BasicInfoSchema, CertificatesSchema, IdVerificationSchema, PaymentInfoSchema, PersonalInfoSchema } from '@/dtos/request/trainer/trainer.profile.request.dto';
+import { AvailabilityPricingSchema, BasicInfoSchema, CertificatesSchema, IdVerificationSchema,  PersonalInfoSchema } from '@/dtos/request/trainer/trainer.profile.request.dto';
 
 const router = Router();
 router.use(protect);
@@ -41,7 +41,7 @@ router.patch('/profile/:id/personalInfo', validateBody(PersonalInfoSchema), trai
 router.patch('/profile/:id/certificationInfo', validateBody(CertificatesSchema), trainerController.updateCertificates);
 router.patch('/profile/:id/idVerification', validateBody(IdVerificationSchema), trainerController.updateIdverification);
 router.patch('/profile/:id/availability_pricing', validateBody(AvailabilityPricingSchema), trainerController.updateAvailabilityPricing);
-router.patch('/profile/:id/paymentInfo', validateBody(PaymentInfoSchema), trainerController.updatePaymentInfo);
+// router.patch('/profile/:id/paymentInfo', validateBody(PaymentInfoSchema), trainerController.updatePaymentInfo);
 router.patch('/profile/:id/trainer-status', trainerController.updateStatus);
 
 router.get('/profile', trainerController.getProfile);

@@ -111,11 +111,6 @@ export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO
       effectiveTo:trainer.availability.effectiveTo ? trainer.availability.effectiveTo.toString():"",
     } : undefined,
 
-    paymentInfo: {
-      bankAccount: trainer.paymentInfo?.bankAccount ? { ...trainer.paymentInfo.bankAccount } : {},
-
-      upiId: trainer.paymentInfo?.upiId,
-    },
 
     status: trainer.status,
     verificationRemarks: {

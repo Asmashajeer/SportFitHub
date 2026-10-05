@@ -11,6 +11,7 @@ export interface IAuthService {
   login(data: LoginDTO): Promise<UserResponseDTO>;
   googleLogin(token: string): Promise<UserResponseDTO>;
   setActiveRole(data: UpdateRoleDTO): Promise<UserResponseDTO>;
+   changePassword(userId:string,current:string ,newPassword:string): Promise<BaseResponseDTO>
   authMe(userId: string): Promise<AuthMeResponseDto>;
   refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }>;
   updateFcmToken(userId: string, fcmToken: string): Promise<void>;

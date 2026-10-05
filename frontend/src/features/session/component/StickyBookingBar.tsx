@@ -65,29 +65,7 @@ const StickyBookingBar = ({
 
               <button
                 onClick={() => {
-                  if (isReady) {
-                    // if(pricePlan?.sessionCount>1){
-                    //   const data: IPayload = {
-                    //       sessionId: sessionId,
-                    //       date: selectedDate!,
-                    //       slotId: selectedSlot!._id,
-                    //       slotTime: `${selectedSlot!.startTime} - ${selectedSlot!.endTime}`,
-                    //       planId: pricePlan!._id!,
-                    //       numberOfSessions:  pricePlan!.sessionCount,
-                    //       amount: pricePlan!.price,
-                    //       type: 'SESSION'
-                    //   }
-                    // else{
-                    //   const data: IPayload = {
-                    //       sessionId: sessionId,
-                    //       date: selectedDate!,
-                    //       slotId: selectedSlot!._id,
-                    //       slotTime: `${selectedSlot!.startTime} - ${selectedSlot!.endTime}`,
-                    //       planId: pricePlan!._id!,
-                    //       numberOfSessions:  pricePlan!.sessionCount,
-                    //       amount: pricePlan!.price,
-                    //       type: 'SESSION'
-                    // }
+                  if (isReady) {                   
                     onBooking();
                   }
                 }}

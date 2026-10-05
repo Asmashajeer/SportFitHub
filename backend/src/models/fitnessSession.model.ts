@@ -1,4 +1,4 @@
-import { AGE_GROUP, DAY, GENDER, INTENSITY_LEVEL, SESSION_MODE, SESSION_TYPE } from '@/constants/enums';
+                                                                                                                                                                                                                                                                                       import { AGE_GROUP, DAY, GENDER, INTENSITY_LEVEL, SESSION_MODE, SESSION_TYPE } from '@/constants/enums';
 import mongoose, { Document, Types } from 'mongoose';
 
 interface IVenue {
@@ -57,7 +57,6 @@ export interface IFitnessSession extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
-
 const FitnessSessionSchema = new mongoose.Schema<IFitnessSession>(
   {
     trainerId: {

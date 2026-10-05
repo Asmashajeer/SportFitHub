@@ -15,6 +15,8 @@ export const AUTH_ROUTES = {
   FORGOT_PASSWORD: '/auth/forgotPassword',
   RESET_PASSWORD: '/auth/resetPassword',
 
+
+  CHANGE_PASSWORD:'/auth/change-password',
   //  roles
 
   // SET_ROLE: '/auth/updateRole',

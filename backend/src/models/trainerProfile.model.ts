@@ -249,16 +249,16 @@ const TrainerProfileSchema = new mongoose.Schema(
       
     },
 
-    // --- Payment Data ---
-    paymentInfo: {
-      bankAccount: {
-        accountName: { type: String },
-        accountNumber: { type: String },
-        bankName: { type: String },
-        ifscCode: { type: String },
-      },
-      upiId: { type: String },
-    },
+    // // --- Payment Data ---
+    // paymentInfo: {
+    //   bankAccount: {
+    //     accountName: { type: String },
+    //     accountNumber: { type: String },
+    //     bankName: { type: String },
+    //     ifscCode: { type: String },
+    //   },
+    //   upiId: { type: String },
+    // },
 
     // --- Administrative State ---
     status: {

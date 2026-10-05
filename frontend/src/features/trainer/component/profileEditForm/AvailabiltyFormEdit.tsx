@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useTrainerStore } from '../../store/useTrainerStore';
 import { Form } from '@/components/ui/form';
-import { Calendar } from 'lucide-react';
+import { Calendar, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 
 import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 interface AvailabilityFormValues {
   pricing: { sessionCharge: number; currency: string };
@@ -54,6 +55,7 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
   const profile = useTrainerStore((state) => state.profile);
   const setProfile = useTrainerStore((state) => state.setProfile);
   const form = useForm<AvailabilityFormValues>({ defaultValues: initialData });
+  const [isUpdating,setIsUpdating]=useState(false);
   const { user } = useAuthStore();
   const {
     register,
@@ -62,8 +64,7 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
     formState: { errors },
   } = form;
   
-  // const [conflicts, setConflicts] = useState("");
-  // const [serverError, setServerError] = useState<string | null>(null);
+
   const tz = user?.timezone;
   const todayStr = () => new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date()); // "2026-09-19"
 
@@ -72,14 +73,16 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
 
   const onSubmit = async (data: AvailabiltyPricing) => {
     if (!profile) return;
-    // setConflicts("");
-    console.log(data);
+    setIsUpdating(true);
     try {
       const updatedData = await trainerService.updateAvailability_Pricing(profile?.id, data);
       setProfile(updatedData.profile);
       onCancel();
     } catch (err: any) {     
      toast.error(err.response?.data?.message ?? 'Cannot update schedule right now, try again');
+    }
+    finally{
+      setIsUpdating(false);
     }
   };
 
@@ -150,7 +153,11 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
         })}
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button type="submit">Save Availability</Button>
+          <Button type="submit"
+          disabled={isUpdating}>
+            {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isUpdating  ? "updating..." : "Save Availability"}
+           </Button>
           <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>

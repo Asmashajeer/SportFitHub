@@ -2,7 +2,7 @@ import { DOC_VERIFY_STATUS, TRAINER_STATUS, UserRole } from '@/constants/enums';
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 import { getTimezone } from '@/context/timezone.context';
 
-import { AvailabiltyPricingReqDTO, BasicInfoReqDTO, CertificationReqDTO, idVerificationReqDTO, PaymentInfoReqDTO, PersonalInfoReqDTO } from '@/dtos/request/trainer/trainer.profile.request.dto';
+import { AvailabiltyPricingReqDTO, BasicInfoReqDTO, CertificationReqDTO, idVerificationReqDTO,  PersonalInfoReqDTO } from '@/dtos/request/trainer/trainer.profile.request.dto';
 import { TrainerProfileResponseDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { IBookingSessionRepository } from '@/interfaces/repositories/IBook.session.repository';
@@ -315,26 +315,26 @@ export class TrainerService implements ITrainerService {
     return ToTrainerProfileDTO(result);
   }
   //--------------- update payment info
-  async updatePaymentInfo(id: string | Types.ObjectId, data: PaymentInfoReqDTO, user: AuthUser): Promise<TrainerProfileDTO> {
-    const trainer = await this._trainerRepo.findById(id);
-    if (!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
-    const status = trainer.paymentInfo !== data.paymentInfo ? TRAINER_STATUS.VARIFICATION_REQUIRED : trainer.status;
-    const changedField = trainer.paymentInfo !== data.paymentInfo ? 'paymentInfo' : '';
-    const newData = {
-      ...data,
-      status,
-    };
+  // async updatePaymentInfo(id: string | Types.ObjectId, data: PaymentInfoReqDTO, user: AuthUser): Promise<TrainerProfileDTO> {
+  //   const trainer = await this._trainerRepo.findById(id);
+  //   if (!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
+  //   const status = trainer.paymentInfo !== data.paymentInfo ? TRAINER_STATUS.VARIFICATION_REQUIRED : trainer.status;
+  //   const changedField = trainer.paymentInfo !== data.paymentInfo ? 'paymentInfo' : '';
+  //   const newData = {
+  //     ...data,
+  //     status,
+  //   };
 
-    const updatedDoc = await this._trainerRepo.updateSection(id, newData, changedField);
+  //   const updatedDoc = await this._trainerRepo.updateSection(id, newData, changedField);
 
-    if (!updatedDoc) {
-      throw new AppError('Update failed', STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
-    }
-    const result = serializeTrainerProfile(updatedDoc, { id: user?.id, role: user?.role });
-    const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(result);
-    if (changedField) this.sendVerificationPendingNotification(user, trainer, changedField);
-    return trainerData;
-  }
+  //   if (!updatedDoc) {
+  //     throw new AppError('Update failed', STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
+  //   }
+  //   const result = serializeTrainerProfile(updatedDoc, { id: user?.id, role: user?.role });
+  //   const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(result);
+  //   if (changedField) this.sendVerificationPendingNotification(user, trainer, changedField);
+  //   return trainerData;
+  // }
 
   //----------------------resubmit Application
   async resubmitApplicaion(id: string | Types.ObjectId, status: TRAINER_STATUS, user: AuthUser): Promise<TrainerProfileDTO> {

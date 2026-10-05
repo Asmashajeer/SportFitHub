@@ -1,16 +1,14 @@
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, Loader2 } from 'lucide-react';
 import { useForm, useFieldArray } from 'react-hook-form';
-import {
-  useTrainerStore,
-  type ICertification,
-} from '../../store/useTrainerStore';
+import { useTrainerStore, type ICertification } from '../../store/useTrainerStore';
 import { uploadService } from '@/service/upload.service';
 import { TRAINER_STATUS, UPLOAD_TYPE } from '@/constants/constants';
 import { trainerService } from '../../service/trainerService';
 import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 interface CertificatesFormValues {
   documents: ICertificate[];
@@ -29,7 +27,6 @@ interface FormValues {
 interface Props {
   initialData: ICertificate[];
   onCancel: () => void;
-
   onSuccess: () => void;
 }
 
@@ -46,29 +43,25 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
   const isRejected = profile?.status === TRAINER_STATUS.REJECTED;
   const isVerificationRequired = profile?.status === TRAINER_STATUS.VARIFICATION_REQUIRED;
   const canEditExisting = isRejected;
-   const canAdd = isApproved || isRejected || isVerificationRequired; 
-
+  const canAdd = isApproved || isRejected || isVerificationRequired;
+  const [isUpdating, setIsUpdating] = useState(false);
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'documents',
   });
 
   const onSubmit = async (data: CertificatesFormValues) => {
+    setIsUpdating(true);
     if (profile?.userId) {
       const userId = profile?.userId;
       const folderPath = `trainers/${userId}/${profile?.category}`;
 
       const uploadedCerts = await Promise.all(
         data.documents.map(async (doc: any) => {
-          const newFile =  doc.file instanceof File ? doc.file : null;
+          const newFile = doc.file instanceof File ? doc.file : null;
           if (newFile) {
             console.log('New file detected for:', doc.name);
-            const [url] = await uploadService.upload(
-              newFile,
-              `${folderPath}/certifications`,
-              userId,
-              UPLOAD_TYPE.CERTIFICATES
-            );
+            const [url] = await uploadService.upload(newFile, `${folderPath}/certifications`, userId, UPLOAD_TYPE.CERTIFICATES);
             return {
               id: doc.id ?? crypto.randomUUID(),
               name: doc.name,
@@ -78,7 +71,7 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
             };
           }
           if (doc.url) {
-          // if(url){
+            // if(url){
             return {
               id: doc.id ?? crypto.randomUUID(),
               name: doc.name,
@@ -90,7 +83,7 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
           return null;
         })
       );
-      console.log(uploadedCerts);
+      
       if (uploadedCerts === null) {
         toast.custom('please add atleast  oneCertificate');
         return;
@@ -105,10 +98,7 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
 
         try {
           if (profile) {
-            const updatedData = await trainerService.updateCertificationInfo(
-              profile?.id,
-              cleanCerts
-            );
+            const updatedData = await trainerService.updateCertificationInfo(profile?.id, cleanCerts);
             toast.success('Certificates updated ');
             setProfile(updatedData.profile);
             onSuccess();
@@ -116,103 +106,80 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
         } catch (error) {
           toast.error(error?.toString() || 'Something went wrong');
         }
+        finally{
+          setIsUpdating(false);
+        }
       }
+
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-     
-        {fields.map((field, index) => {
-          const isExisting = index < initialData.length; // existing cert
-          const isLocked =  isExisting && !canEditExisting; 
-          return( 
-            <div
-              key={field.id}
-              className="p-4 border rounded-lg relative space-y-4 bg-background/50"
-            >
-              <p className='text-[10px] text-amber-400'>* changes in certificates require admin Approval</p>
-              {!isLocked &&(
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => remove(index)}
-                  className="absolute top-2 right-2 text-red-500"
-                >
-                  <Trash2 size={16} />
-                </Button>
-              )}
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="hidden"
-                  {...register(`documents.${index}.url` as const)}
-                />
-                {/* Certificate Name */}
-                <div className="space-y-2">
-                  <Label>Name</Label>
-                  <Input {...register(`documents.${index}.name` as const)} 
-                  disabled={isLocked}/>
-                </div>
-
-                {/* File Upload */}
-                <div className="space-y-2">
-                  <Label>Document</Label>
-                  <Input
-                    type="file"
-                     disabled={isLocked}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setValue(`documents.${index}.file`, file);
-                      }
-                    }}
-                  />
-                </div>
-
-                {/* Dates */}
-                <div className="space-y-2">
-                  <Label>Issued At</Label>
-                  <Input
-                    type="date"
-                    {...register(`documents.${index}.issuedAt` as const)}
-                     disabled={isLocked}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Valid Until</Label>
-                  <Input
-                    type="date"
-                    {...register(`documents.${index}.validUpto` as const)}
-                     disabled={isLocked}
-                  />
-                </div>
+      {fields.map((field, index) => {
+        const isExisting = index < initialData.length; // existing cert
+        const isLocked = isExisting && !canEditExisting;
+        return (
+          <div key={field.id} className="p-4 border rounded-lg relative space-y-4 bg-background/50">
+            <p className="text-[10px] text-amber-400">* changes in certificates require admin Approval</p>
+            {!isLocked && (
+              <Button type="button" variant="ghost" onClick={() => remove(index)} className="absolute top-2 right-2 text-red-500">
+                <Trash2 size={16} />
+              </Button>
+            )}
+            <div className="grid grid-cols-2 gap-4">
+              <input type="hidden" {...register(`documents.${index}.url` as const)} />
+              {/* Certificate Name */}
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input {...register(`documents.${index}.name` as const)} disabled={isLocked} />
               </div>
-               {isLocked && (
-                <p className="text-[10px] text-muted-foreground">
-                  Existing certificates cannot be edited after approval.
-                </p>
-              )}
+
+              {/* File Upload */}
+              <div className="space-y-2">
+                <Label>Document</Label>
+                <Input
+                  type="file"
+                  disabled={isLocked}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setValue(`documents.${index}.file`, file);
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Dates */}
+              <div className="space-y-2">
+                <Label>Issued At</Label>
+                <Input type="date" {...register(`documents.${index}.issuedAt` as const)} disabled={isLocked} />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Valid Until</Label>
+                <Input type="date" {...register(`documents.${index}.validUpto` as const)} disabled={isLocked} />
+              </div>
             </div>
-        )})}
+            {isLocked && <p className="text-[10px] text-muted-foreground">Existing certificates cannot be edited after approval.</p>}
+          </div>
+        );
+      })}
       {/* } */}
       <div className="flex justify-between mt-4">
-        {canAdd && 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              append({ name: '', issuedAt: '', validUpto: '', url: '' })
-            }
-          >
+        {canAdd && (
+          <Button type="button" variant="outline" onClick={() => append({ name: '', issuedAt: '', validUpto: '', url: '' })}>
             <Plus size={16} className="mr-2" /> Add Certificate
           </Button>
-        }
+        )}
         <div className="flex gap-2">
           <Button type="button" variant="ghost" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit" className="bg-trainer-primary">
+          <Button type="submit" className="bg-trainer-primary"
+          disabled={isUpdating}>
+            {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isUpdating ? "updating..." : " Save Changes"}
             Save Changes
           </Button>
         </div>

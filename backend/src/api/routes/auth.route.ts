@@ -3,7 +3,7 @@ import { authController } from '../../container';
 import { protect } from '../../middleware/auth.middleware';
 
 import { validateBody } from '../../middleware/validate.middleware';
-import { LoginSchema, RegisterSchema, updateRoleSchema, VerifyEmailSchema } from '../../dtos/request/auth.request.dto';
+import { changePasswordSchema, LoginSchema, RegisterSchema, updateRoleSchema, VerifyEmailSchema } from '../../dtos/request/auth.request.dto';
 import { restrictTo } from '@/middleware/role.middleware';
 
 import { UserRole } from '@/constants/enums';
@@ -16,7 +16,7 @@ router.post('/resendOtp', authController.resendOtp);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword', authController.resetPassword);
 router.post('/login', validateBody(LoginSchema), authController.login);
-// router.patch('/updateRole', protect, validateBody(updateRoleSchema), authController.updateRole);
+router.patch('/change-password',protect,validateBody(changePasswordSchema), authController.changePassword)
 
 router.post('/refresh', authController.refresh);
 

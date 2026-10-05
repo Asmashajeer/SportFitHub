@@ -19,7 +19,7 @@ import BasicInfoForm from '../component/addProfile/BasicInfo';
 import ProfessionalInfoForm from '../component/addProfile/ProfessionalInfoForm';
 import PersonalInfoForm from '../component/addProfile/PersonalInfo';
 import Rates_ScheduleForm from '../component/addProfile/Rates_ScheduleForm';
-import FinancialInfoForm from '../component/addProfile/FinancialInfoForm';
+
 import { trainerService } from '../service/trainerService';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { AddTrainerProfileSchema } from '../types/trainer.profile.schema';
@@ -97,15 +97,15 @@ const TrainerOnboarding = () => {
         effectiveTo: '' ,  
       },
       // Step 5: Financial
-      paymentInfo: {
-        bankAccount: {
-          accountName: '',
-          accountNumber: '',
-          bankName: '',
-          ifscCode: '',
-        },
-        upiId: '',
-      },
+      // paymentInfo: {
+      //   bankAccount: {
+      //     accountName: '',
+      //     accountNumber: '',
+      //     bankName: '',
+      //     ifscCode: '',
+      //   },
+      //   upiId: '',
+      // },
     },
 
     mode: 'onChange', //Validates when a user clicks away from an input
@@ -178,6 +178,7 @@ const TrainerOnboarding = () => {
         toast.error('User session expired. Please log in again.');
         return;
       }
+       
       const folderPath = `trainers/${userId}/${data.category}`;
       // 1. Upload Profile Picture
       let profilePicUrl = '';
@@ -333,14 +334,14 @@ const TrainerOnboarding = () => {
               <PersonalInfoForm onNext={nextStep} onBack={prevStep} />
             )}
             {step === 4 && (
-              <Rates_ScheduleForm onNext={nextStep} onBack={prevStep} />
+              <Rates_ScheduleForm  onBack={prevStep} isSubmitting={isSubmitting} />
             )}
-            {step === 5 && (
+            {/* {step === 5 && (
               <FinancialInfoForm
                 onBack={prevStep}
                 isSubmitting={isSubmitting}
               />
-            )}
+            )} */}
           </form>
         </div>
       </FormProvider>

@@ -33,3 +33,9 @@ export interface ResendOtpResponse {
 export interface BaseResponse {
   message: string;
 }
+export interface Response{
+    success: boolean;
+  message: string;
+  statusCode: string;
+  userId:string
+}

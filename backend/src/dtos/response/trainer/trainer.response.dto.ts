@@ -87,15 +87,15 @@ export interface TrainerProfileDTO {
   };
 
   // payment Data
-  paymentInfo: {
-    bankAccount?: {
-      accountName?: string;
-      accountNumber?: string;
-      bankName?: string;
-      ifscCode?: string;
-    };
-    upiId?: string;
-  };
+  // paymentInfo: {
+  //   bankAccount?: {
+  //     accountName?: string;
+  //     accountNumber?: string;
+  //     bankName?: string;
+  //     ifscCode?: string;
+  //   };
+  //   upiId?: string;
+  // };
 
   // Administrative State
   status: TRAINER_STATUS;

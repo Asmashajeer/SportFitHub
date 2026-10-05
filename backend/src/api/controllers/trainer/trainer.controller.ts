@@ -164,21 +164,21 @@ export class TrainerController {
     }
   };
 
-  updatePaymentInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const data = req.body;
-      const { user } = req as AuthRequest;
+  // updatePaymentInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  //   try {
+  //     const { id } = req.params;
+  //     const data = req.body;
+  //     const { user } = req as AuthRequest;
 
-      const profile = await this._trainerService.updatePaymentInfo(id, data, user);
-      res.status(STATUS_CODE.SUCCESS.OK).json({
-        success: true,
-        profile,
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
+  //     const profile = await this._trainerService.updatePaymentInfo(id, data, user);
+  //     res.status(STATUS_CODE.SUCCESS.OK).json({
+  //       success: true,
+  //       profile,
+  //     });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // };
 
   updateStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;

@@ -65,7 +65,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   ];
 
   return (
-    <Card className="w-full border-2  border-gray-400">
+    <Card className="w-full border-2 bg-zinc-800/70 ">
       <CardHeader>
         <CardTitle>Branding</CardTitle>
       </CardHeader>
@@ -107,8 +107,11 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               {errors.profilePic.message}
             </p>
           )}
-          <p>{user?.name}</p>
-          <span className='text-sm text-emerald-600'>{user?.email}</span>
+          <div>
+            <p>{user?.name}</p>
+            <span className='text-sm  text-emerald-600'>{user?.email}</span>
+          </div>
+          
         </div>
 
         {/* display Name */}
