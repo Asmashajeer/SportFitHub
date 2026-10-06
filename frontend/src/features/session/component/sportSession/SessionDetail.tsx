@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { getDay, parse } from 'date-fns';
+import { getDay, parse, parseISO } from 'date-fns';
 import { Clock, MapPin, Users, Shield, ArrowLeft, CheckCircle2, Trophy, Star } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';
@@ -28,6 +28,7 @@ import { useCheckAvailability } from '@/hooks/useCheckAvailability';
 import { reviewService } from '@/features/review/service/reviewService';
 import MapSkeleton from '@/components/reusable/MapSkeleton';
 import ReviewsSkeleton from '@/components/reusable/ReviewsSkeleton';
+import { trainerUnavailabilityService } from '@/features/trainer/service/trainer.unavailability.service';
 const MapView = lazy(() => import('@/components/reusable/MapView'));
 const ChatDrawer = lazy(() => import('@/features/chat/component/ChatDrawer'));
 const SessionReviews = lazy(() => import('@/features/review/components/session/SessionReviews'));
@@ -50,6 +51,7 @@ const SessionDetail = () => {
   const [isReadyToBook, setIsReadyToBook] = useState(false);
   const { setPayload } = useBookingStore();
   const { checkAvailability } = useCheckAvailability();
+  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -60,6 +62,13 @@ const SessionDetail = () => {
       try {
         const data = await sportSessionService.getSessionById(sessionId!);
         setSession(data.session);
+
+        try {
+          const days = await trainerUnavailabilityService.getUnavailableDates(data.session.trainer.id);
+          setUnavailableDates(days.map((d: string) => parseISO(d)));
+        } catch {
+          setUnavailableDates([]); 
+        }
 
         if (data.session && data.session.timeSlots) {
           const availableDays = data.session.timeSlots.map((slot: TimeSlot) => slot.day.toLowerCase());
@@ -364,6 +373,7 @@ const SessionDetail = () => {
                   session={session}
                   occupiedSlots={occupiedSlots}
                   filledDates={filledDates}
+                  unavailableDates={unavailableDates}
                   bookingSlots={bookingSlots}
                   setBookingSlots={setBookingSlots}
                   effectiveFrom={session.trainer.effectiveFrom}

@@ -110,6 +110,10 @@ import { EmbeddingService } from './services/embeddingService';
 import { SessionsSearchService } from './services/session/sessions.search.service';
 import { DashboardService } from './services/admin/dashboard.service';
 import { AdminDashboardController } from './api/controllers/admin/admin.dashboard.controller';
+import { TrainerUnavailabilityRepository } from './repositories/trainerUnavailability.repository';
+import { AvailabilityException } from './models/availabilityExceptions';
+import { TrainerUnavailabilityService } from './services/trainer/trainerUnavailability.service';
+import { TrainerUnavailabilityController } from './api/controllers/trainer/trainer.unavailability.controller';
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-03-25.dahlia',
@@ -131,6 +135,8 @@ const bookingRepository = new BookingRepository(bookingModel);
 const bookingSessionRepository = new BookingSessionRepository(bookingSessionModel);
 const penaltyRepository = new PenaltyRepository(TrainerProfile);
 const reviewRepository=new ReviewRepository(reviewModel);
+const trainerUnavailabilityRepository=new TrainerUnavailabilityRepository(AvailabilityException);
+
 const reviewService=new ReviewService(reviewRepository,bookingSessionRepository,sportsSessionRepository,fitnessSessionRepository);
 export const reviewController=new ReviewController(reviewService);
 const settingsRepo = new SettingsRepository(PlatformSettingsModel);
@@ -180,7 +186,8 @@ const walletTransactionService = new WalletTransactionService(walletRepository, 
 export const walletController = new WalletController(walletService, walletTransactionService);
 const penaltyLedgerRepository=new PenaltyLedgerRepository(PenaltyLedgerModel)
 const penaltyService = new PenaltyService(penaltyRepository,penaltyLedgerRepository);
-
+const trainerUnavailabilityService=new TrainerUnavailabilityService(trainerUnavailabilityRepository,trainerRepository,bookingSessionRepository);
+export const trainerUnavailabilityController=new TrainerUnavailabilityController(trainerUnavailabilityService)
 export const bookingService = new BookingService(
   bookingRepository,
   bookingSessionRepository,

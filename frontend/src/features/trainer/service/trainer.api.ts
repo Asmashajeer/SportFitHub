@@ -11,6 +11,7 @@ export const TRAINER_ROUTES = {
       BY_ID: (profileId: string) => `trainer/profile/profile_pic/${profileId}`,
     },
 
+    UNAVAILABLE_DAYS:'/trainer/unavailable-days',
 
       //------------Booking------------
   GET_BOOKINGS: '/trainer/bookings',

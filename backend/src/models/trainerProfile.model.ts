@@ -94,15 +94,15 @@ export interface ITrainerProfile extends Document {
   };
 
   // payment Data
-  paymentInfo: {
-    bankAccount: {
-      accountName: string;
-      accountNumber: string;
-      bankName: string;
-      ifscCode: string;
-    };
-    upiId?: string;
-  };
+  // paymentInfo: {
+  //   bankAccount: {
+  //     accountName: string;
+  //     accountNumber: string;
+  //     bankName: string;
+  //     ifscCode: string;
+  //   };
+  //   upiId?: string;
+  // };
 
   // Administrative State
   status: TRAINER_STATUS;
@@ -249,16 +249,7 @@ const TrainerProfileSchema = new mongoose.Schema(
       
     },
 
-    // // --- Payment Data ---
-    // paymentInfo: {
-    //   bankAccount: {
-    //     accountName: { type: String },
-    //     accountNumber: { type: String },
-    //     bankName: { type: String },
-    //     ifscCode: { type: String },
-    //   },
-    //   upiId: { type: String },
-    // },
+  
 
     // --- Administrative State ---
     status: {

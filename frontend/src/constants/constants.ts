@@ -157,7 +157,7 @@ export const trainerNavLinks = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/trainer/dashboard' },
   { label: 'Sessions', icon: CalendarDays, path: '/trainer/sessions' },
   { label: 'Bookings ', icon: UserCheck, path: '/trainer/bookings' },
-  { label: 'Attandance', icon: CheckCircle, path: '/trainer/attendance' },
+  { label: 'Attendance', icon: CheckCircle, path: '/trainer/attendance' },
   { label: 'Earnings', icon: Wallet2, path: '/trainer/earnings' },
   { label: 'Messages',    icon: MessageCircle,    path: '/trainer/messages',  },
   { label: 'Review & Rating', icon: MessageSquareDiff,    path: '/trainer/review-rating',  },

@@ -84,11 +84,7 @@ export const toTrainerProfileDTOPopulatedUser = (trainer: ITrainerPopulated) => 
       } 
        : undefined,
 
-    paymentInfo: {
-      bankAccount: trainer.paymentInfo?.bankAccount ? { ...trainer.paymentInfo.bankAccount } : {},
-
-      upiId: trainer.paymentInfo?.upiId,
-    },
+    
 
     status: trainer.status,
     verificationRemarks: {

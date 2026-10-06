@@ -1015,7 +1015,5 @@ export class BookingService implements IBookingService {
     await sendPushNotification(fcmToken, payload);
   }
 
-  // createBooking(payload)
-
 
 }

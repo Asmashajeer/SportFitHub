@@ -27,6 +27,7 @@ interface props {
   session: SportsSessionDetailedPublicResponseData | FitnessSessionDetailedPublicResponseData | null;
   occupiedSlots: BookingSlot[];
   filledDates: Date[];
+  unavailableDates:Date[];
   bookingSlots: IBookedSlot[];
   setBookingSlots: (slot: IBookedSlot[]) => void;
   effectiveFrom: string;
@@ -52,6 +53,7 @@ const TimeSlotPicker = ({
   session,
   occupiedSlots,
   filledDates,
+  unavailableDates,
   bookingSlots,
   setBookingSlots,
   effectiveFrom,
@@ -77,6 +79,7 @@ const disabledDays = range
       { before: range.minDate },
       { after: lastSelectableDate! },
       ...filledDates,
+      ...unavailableDates
     ]
   : []; 
 
@@ -86,6 +89,9 @@ const disabledDays = range
       backgroundColor: '#FF0000', // Slate-100
       textDecoration: 'line-through',
     },
+    unavailable:{
+      textDecoration: 'line-through',
+    }
   };
   const sessionTimezone = session?.timezone || 'UTC';
   //---Formats HH:mm string according to timezone & session mode
@@ -209,7 +215,7 @@ const disabledDays = range
             selected={selectedDates}
             onSelect={handleSelectDates}
             disabled={disabledDays}
-            modifiers={{ filled: filledDates }}
+            modifiers={{ filled: filledDates, unavailable: unavailableDates }}
             modifiersStyles={modifiersStyles}
             required={true}
             footer={
@@ -234,7 +240,7 @@ const disabledDays = range
             selected={selectedDate}
             onSelect={handleSelectDate}
             disabled={disabledDays}
-            modifiers={{ filled: filledDates }}
+            modifiers={{ filled: filledDates, unavailable: unavailableDates } }
             modifiersStyles={modifiersStyles}
             required={true}
             footer={

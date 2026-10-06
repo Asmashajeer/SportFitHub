@@ -1,7 +1,7 @@
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
-import { ExternalLink, CreditCard, ShieldCheck, Award, Edit2, VerifiedIcon, User2Icon, Camera, Loader2, KeyRound } from 'lucide-react';
+import { ExternalLink, CreditCard, ShieldCheck, Award, Edit2, VerifiedIcon, User2Icon, Camera, Loader2, KeyRound, CalendarOff } from 'lucide-react';
 
 import { useEffect, useRef, useState } from 'react';
 
@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { uploadService } from '@/service/upload.service';
 import { documentsService } from '../service/documentsService';
 import ChangePassword from '@/features/auth/component/ChangePassword';
+import DaysOffCard from './DaysOffCard';
 
 const ProfileView = () => {
   const fetchProfile = useTrainerStore((state) => state.fetchProfile);
@@ -486,6 +487,24 @@ const ProfileView = () => {
                       onCancel={() => setEditingSection(null)}
                     />
                   )}
+                </AccordionContent>
+              </AccordionItem>
+             <AccordionItem value="days-off" className="border rounded-lg px-4">
+                <AccordionTrigger
+                  className="hover:no-underline py-4 border-b border-gray-500
+                    data-[state=open]:text-gray-400
+                    data-[state=open]:bg-green-900/50
+                    data-[state=open]:border-b-2
+                    data-[state=open]:px-2
+                    data-[state=open]:rounded-t-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <CalendarOff className="text-green-600 h-5 w-5" />
+                    <span className="font-bold">Days Off</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pt-4">
+                  <DaysOffCard availability={profile.availability} />
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

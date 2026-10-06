@@ -42,3 +42,11 @@ export const createUtcDateTime = (date: string, time: string, timezone: string):
 
 export const toDateStr = (d: Date | string): string =>
   typeof d === 'string' ? d.slice(0, 10) : d.toISOString().slice(0, 10);
+
+
+
+
+export const isRealDate = (s: string) => {
+  const d = new Date(`${s}T00:00:00Z`);
+  return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s; // rejects 2026-02-31
+};

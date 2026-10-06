@@ -14,8 +14,12 @@ export const PUBLIC_ROUTE = {
   GET_BOOKED_SLOTS: {
     BY_SESSIONID: (sessionId: string) => `/availability/${sessionId}`,
   },
-
+  GET_UNAVAILABLE_TRAINER_DATES:{
+    BY_TRAINERID:(trainerId:string)=>`/unavailable-dates/${trainerId}`,
+  },
  CHECK_SLOT_AVAIL: '/checkSlotAvailability',
+
+
   GET_BATCH_RATING_REVIEW_COUNT:(sessionModel:ReviewType)=>`/batch_rating_review/${sessionModel}`,
   GET_AVG_RATING_REVIEW_COUNT:(sessionModel:ReviewType,sessionId:string)=>`/rating/${sessionModel}/${sessionId}`,
   GET_REVIEWS:(sessionModel:ReviewType,sessionId:string)=>`/session_review/${sessionModel}/${sessionId}`,  

@@ -270,25 +270,22 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
     ]);
   }
 
-  // async findConflicts(trainerId: string | Types.ObjectId, proposedAvailability: AvailabilityShape, timezone: string): Promise<ConflictBooking[]> {
-  //   const bookings = await this.model
-  //     .find({
-  //       trainerId,
-  //       status: BOOKING_SESSION_STATUS.SCHEDULED,
-  //       startDateTime: { $gt: new Date() }, // full timestamp, so a 6 PM session today counts
-  //     })
-  //     .select('bookingUID userId sessionId startDateTime endDateTime')
-  //     .sort({ startDateTime: 1 })
-  //     .lean<ConflictBooking[]>();
-
-  //   return bookings.filter((b) => !isWithinAvailability(b.startDateTime, b.endDateTime, proposedAvailability, timezone));
-  // }
+ 
 
   async countScheduledBetween(trainerId: string | Types.ObjectId, from: Date, to?: Date): Promise<number> {
     return this.model.countDocuments({
       trainerId,
       status: BOOKING_SESSION_STATUS.SCHEDULED,
       startDateTime: to ? { $gte: from, $lt: to } : { $gte: from },
+    });
+  }
+
+
+  async countActiveByTrainerAndDate(trainerId: string, date: Date): Promise<number> {
+    return this.model.countDocuments({
+      trainerId,
+      status:  BOOKING_SESSION_STATUS.SCHEDULED, 
+      date: date, 
     });
   }
 }

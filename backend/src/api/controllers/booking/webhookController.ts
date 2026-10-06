@@ -1,7 +1,9 @@
+import { BOOKING_TYPE } from '@/constants/enums';
 import { STATUS_CODE } from '@/constants/messages';
 
 import { IBookingService } from '@/interfaces/services/booking/IBooking.service';
 import { ISlotLockService } from '@/interfaces/services/booking/ISlotLock.service';
+import { sendNotificationEmail } from '@/utils/sendNotfication.mail';
 
 import { NextFunction, Request, Response } from 'express';
 import Stripe from 'stripe';
@@ -55,7 +57,7 @@ export class WebhookController {
           }
           await this._bookingService.confirmBooking(stripeSession, paymentIntent, invoiceId);
           console.log('booking completed');
-          this.releaseLocks(lockKeys);
+          await this.releaseLocks(lockKeys);
           res.status(STATUS_CODE.SUCCESS.OK).json({ received: true });
         } catch (err) {
           console.log(' booking or payment record not  completed or error while retreving payment reciept');
@@ -66,10 +68,7 @@ export class WebhookController {
       }
       case 'checkout.session.async_payment_failed':
       case 'checkout.session.expired':{
-        const stripeSession = event.data.object as Stripe.Checkout.Session;
-        const lockKeys = stripeSession.metadata.lockKeys;
-        this.releaseLocks(lockKeys);
-        console.log("payment failed");
+        await this.handlePaymentFailure(event);       
         res.status(STATUS_CODE.SUCCESS.OK).json({ received: true });
         break;
 
@@ -80,6 +79,42 @@ export class WebhookController {
     }
   };
 
+
+  private handlePaymentFailure = async (event: Stripe.Event) => {
+      const stripeSession = event.data.object as Stripe.Checkout.Session; 
+      
+      const { lockKeys, email,userName } = stripeSession.metadata || {}; 
+      const bookingType = stripeSession.metadata.bookingType as BOOKING_TYPE;
+      
+      const numberOfSessions = Number(stripeSession.metadata.numberOfSessions);
+      const amount = Number(stripeSession.metadata.amount);
+      try {
+        //  Release locks
+        await this.releaseLocks(lockKeys);
+        await sendNotificationEmail({
+                to:email,
+                title: 'Payment failed!',
+                description: event.type === 'checkout.session.expired' 
+              ? 'Checkout session has expired. Please create a new booking.'
+              : 'Payment processing failed. Please retry.',
+                details: {
+                  userName: userName,              
+                  numberOfSessions: numberOfSessions,
+                  amount: amount,
+                  type:bookingType
+                },
+                closingLine: "We're here to help if you run into issues. Contact support@example.com or reply to this email.",
+              });    
+      } catch (error) {
+        console.error(`Error handling payment failure `, error);     
+        try {
+          await this.releaseLocks(lockKeys);
+        } catch (lockError) {
+          console.error(`Failed to release locks `, lockError);
+        }        
+        throw error; // Re-throw so webhook handler catches it
+      }
+  };
   private async releaseLocks(lockKeys: string | undefined) {
     if (!lockKeys) return;
     const locks = lockKeys.split(',');

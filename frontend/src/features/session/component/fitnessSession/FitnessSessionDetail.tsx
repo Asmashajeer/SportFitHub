@@ -21,7 +21,7 @@ import StickyBookingBar from '../StickyBookingBar';
 import ImageCarousel from '@/components/reusable/ImageCarousel';
 import type { BookingSlot, Payload } from '@/features/booking/store/payment.types';
 import type { IBookedSlot } from '@/features/user/types/user.booking.types';
-import { getDay, parse } from 'date-fns';
+import { getDay, parse, parseISO } from 'date-fns';
 import BookingService from '@/features/booking/service/bookingService';
 import { useCheckAvailability } from '@/hooks/useCheckAvailability';
 import TimeSlotPicker from '../TimeSlotPicker';
@@ -31,6 +31,7 @@ const SessionReviews = lazy(() => import('@/features/review/components/session/S
 import { reviewService } from '@/features/review/service/reviewService';
 import MapSkeleton from '@/components/reusable/MapSkeleton';
 import ReviewsSkeleton from '@/components/reusable/ReviewsSkeleton';
+import { trainerUnavailabilityService } from '@/features/trainer/service/trainer.unavailability.service';
 
 const FitnessSessionDetail = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -51,7 +52,8 @@ const FitnessSessionDetail = () => {
   const [isReadyToBook, setIsReadyToBook] = useState(false);
   const { setPayload } = useBookingStore();
   const { checkAvailability } = useCheckAvailability();
-
+  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
+  
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
@@ -61,6 +63,14 @@ const FitnessSessionDetail = () => {
       try {
         const data = await fitnessSessionService.getSessionById(sessionId!);
         setSession(data.session);
+
+      try {
+              const days = await trainerUnavailabilityService.getUnavailableDates(data.session.trainer.id);
+              setUnavailableDates(days.map((d: string) => parseISO(d)));
+            } catch {
+              setUnavailableDates([]); 
+       }
+
         if (data.session && data.session.timeSlots) {
           const availableDays = data.session.timeSlots.map((slot: TimeSlot) => slot.day.toLowerCase());
           const offdays = [0, 1, 2, 3, 4, 5, 6].filter((i) => !availableDays.map((d: string) => getDay(parse(d, 'eeee', new Date()))).includes(i));
@@ -216,10 +226,9 @@ const FitnessSessionDetail = () => {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
-        {/* ================= TITLE (above banner, sets context first) ================= */}
+      
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black italic uppercase tracking-tighter leading-none text-white">{session.sessionName}</h1>
 
-        {/* ================= ROW 1: BANNER + TRAINER DETAILS ================= */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           {/* Main Image / Banner */}
           <div className="lg:col-span-8">
@@ -289,7 +298,7 @@ const FitnessSessionDetail = () => {
                 </div>
               </div>
 
-              {/* Chat action — pinned below specialties, separate from tags */}
+              {/* Chat action  */}
               <div className="pt-1">
                 <Suspense fallback={null}>
                   <ChatDrawer userId={session.trainer.userId} trainerName={session.trainer.displayName} contextSessionId={session.id} contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION} />
@@ -299,7 +308,7 @@ const FitnessSessionDetail = () => {
           </div>
         </section>
 
-        {/* ================= DESCRIPTION + QUICK STATS ================= */}
+        {/* DESCRIPTION + QUICK STATS  */}
         <section className="space-y-4 sm:space-y-6">
           <p className="text-zinc-400 text-sm sm:text-md leading-relaxed font-medium max-w-3xl">{session.description}</p>
           <div className="flex flex-wrap bg-zinc-900 rounded-2xl gap-x-6 sm:gap-x-10 gap-y-4 sm:gap-y-6 text-zinc-400 border-y border-zinc-900 p-4 sm:p-8">
@@ -330,7 +339,7 @@ const FitnessSessionDetail = () => {
           </div>
         </section>
 
-        {/* ================= ROW 2: PRICE DETAILS + CALENDAR / TIME SLOTS ================= */}
+        {/* PRICE DETAILS + CALENDAR / TIME SLOTS  */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
           {/* Pricing Card */}
           <div className="lg:col-span-4">
@@ -389,6 +398,7 @@ const FitnessSessionDetail = () => {
                   session={session}
                   occupiedSlots={occupiedSlots}
                   filledDates={filledDates}
+                  unavailableDates={unavailableDates}
                   bookingSlots={bookingSlots}
                   setBookingSlots={setBookingSlots}
                   effectiveFrom={session.trainer.effectiveFrom}

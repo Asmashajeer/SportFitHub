@@ -93,7 +93,8 @@ api.interceptors.response.use(
       }
     } else if (error instanceof Error) {
       console.error('Unexpected Error:', error.message);
-      errorMessage = 'An unexpected error occurred.';
+      
+      errorMessage = error.message||'An unexpected error occurred,';
     }
     return Promise.reject(new Error(errorMessage));
   }
