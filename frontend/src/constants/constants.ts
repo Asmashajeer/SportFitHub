@@ -119,6 +119,7 @@ export const UPLOAD_TYPE = {
   PROFILE_PIC: 'profile_pic',
   ID_ATTACHMENT: 'id_attachment',
   CERTIFICATES: 'certificates',
+  CHAT_FILE:'chat_file'
 };
 
 export const DAYS_OF_WEEK = [

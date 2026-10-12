@@ -1,7 +1,7 @@
-import { DAYS_OF_WEEK,  } from '@/constants/constants';
+import { DAYS_OF_WEEK } from '@/constants/constants';
 import { trainerService } from '../../service/trainerService';
-import type { AvailabiltyPricing, dayAvailability } from '../../types/trainerprofile.types';
-import { useForm} from 'react-hook-form';
+import type { AvailabiltyPricing } from '../../types/trainerprofile.types';
+import { useForm } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -13,49 +13,17 @@ import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import toast from 'react-hot-toast';
 import { useState } from 'react';
 
-interface AvailabilityFormValues {
-  pricing: { sessionCharge: number; currency: string };
-  availability: {
-    isAvailable: boolean;
-    Monday: dayAvailability;
-    Tuesday: dayAvailability;
-    Wednesday: dayAvailability;
-    Thursday: dayAvailability;
-    Friday: dayAvailability;
-    Saturday: dayAvailability;
-    Sunday: dayAvailability;
-    effectiveFrom: string;
-    effectiveTo: string;
-  };
-}
 
 interface props {
-  initialData: {
-    pricing: {
-      sessionCharge: number;
-      currency: string;
-    };
-    availability: {
-      isAvailable: boolean;
-      Monday: dayAvailability;
-      Tuesday: dayAvailability;
-      Wednesday: dayAvailability;
-      Thursday: dayAvailability;
-      Friday: dayAvailability;
-      Saturday: dayAvailability;
-      Sunday: dayAvailability;
-      effectiveFrom: string;
-      effectiveTo: string;
-    };
-  };
+  initialData:AvailabiltyPricing ,
   onCancel: () => void;
 }
 
 const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
   const profile = useTrainerStore((state) => state.profile);
   const setProfile = useTrainerStore((state) => state.setProfile);
-  const form = useForm<AvailabilityFormValues>({ defaultValues: initialData });
-  const [isUpdating,setIsUpdating]=useState(false);
+  const form = useForm<AvailabiltyPricing>({ defaultValues: initialData });
+  const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuthStore();
   const {
     register,
@@ -63,13 +31,12 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
     handleSubmit,
     formState: { errors },
   } = form;
-  
 
   const tz = user?.timezone;
-  const todayStr = () => new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date()); // "2026-09-19"
+  const todayStr = () => new Intl.DateTimeFormat('en-GB', { timeZone: tz }).format(new Date()); // "2026-09-19"
 
-  const hasStarted = initialData.availability.effectiveFrom.slice(0, 10) <= todayStr();
-
+  const effectiveFrom = initialData?.availability?.effectiveFrom?.slice(0, 10);
+  const hasStarted = effectiveFrom !== undefined && effectiveFrom <= todayStr();
 
   const onSubmit = async (data: AvailabiltyPricing) => {
     if (!profile) return;
@@ -78,10 +45,9 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
       const updatedData = await trainerService.updateAvailability_Pricing(profile?.id, data);
       setProfile(updatedData.profile);
       onCancel();
-    } catch (err: any) {     
-     toast.error(err.response?.data?.message ?? 'Cannot update schedule right now, try again');
-    }
-    finally{
+    } catch (err) {
+      toast.error(err instanceof Error? err.message : 'Cannot update schedule right now, try again');
+    } finally {
       setIsUpdating(false);
     }
   };
@@ -102,22 +68,14 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
                 <label className="block text-sm  text-slate-300 mb-2">From</label>
                 <div className="relative">
                   <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                  <Input
-                    type="date"
-                    readOnly={hasStarted}
-                    {...register('availability.effectiveFrom' )}
-                  />
+                  <Input type="date" readOnly={hasStarted} {...register('availability.effectiveFrom')} />
                 </div>
                 {errors?.availability?.effectiveFrom && <p className=" block text-[10px] text-red-500">{errors.availability?.effectiveFrom.message}</p>}
               </div>
               <div className="flex items-center  gap-2  space-y-2">
                 <label className="block text-sm  text-slate-300 mb-2">To</label>
                 <div className="relative">
-                  
-                  <Input
-                    type="date"
-                    {...register('availability.effectiveTo' )}
-                  />
+                  <Input type="date" {...register('availability.effectiveTo')} />
                 </div>
                 {errors?.availability?.effectiveTo && <p className="text-[10px] text-red-500">{errors.availability?.effectiveTo.message}</p>}
               </div>
@@ -153,11 +111,10 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
         })}
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button type="submit"
-          disabled={isUpdating}>
+          <Button type="submit" disabled={isUpdating}>
             {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isUpdating  ? "updating..." : "Save Availability"}
-           </Button>
+            {isUpdating ? 'updating...' : 'Save Availability'}
+          </Button>
           <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>

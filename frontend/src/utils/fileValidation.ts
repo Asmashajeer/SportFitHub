@@ -16,6 +16,34 @@ export const FILE_RULES = {
     mimeTypes: ['application/pdf'],
     label: 'PDF only',
   },
+  chat: {
+    accept:
+      'image/jpeg,image/png,image/webp,image/gif,' +
+      'application/pdf,' +
+      'application/msword,' +
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document,' +
+      'application/vnd.ms-excel,' +
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,' +
+      'text/plain,text/csv,' +
+      '.jpg,.jpeg,.png,.webp,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv',
+
+    mimeTypes: [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain',
+      'text/csv',
+    ],
+
+    label: 'Images, PDF, Word, Excel, TXT or CSV (max 10 MB)',
+    maxSizeMB: 10,
+  },
 } as const;
 
 export type UploadType = keyof typeof FILE_RULES;

@@ -1,5 +1,6 @@
 export const AppName = 'SportFitHub';
 export const AppEmail = 'sportfit.hub@gmail.com';
+export const OTP_EXPIRATION_MINUTES=1; //1 min
 export const DAYS_OF_WEEK = [
   'Monday',
   'Tuesday',
@@ -62,6 +63,12 @@ export enum DocumentType {
   CERTIFICATE = 'certificate',
   ID_ATTACHMENT = 'id-attachment',
 }
+export const UPLOAD_TYPE = {
+  PROFILE_PIC: 'profile_pic',
+  ID_ATTACHMENT: 'id_attachment',
+  CERTIFICATES: 'certificates',
+  CHAT_FILE:'chat_file'
+};
 export enum TRAINER_STATUS {
   SUBMITTED = 'submitted',
   UNDER_REVIEW = 'under review',

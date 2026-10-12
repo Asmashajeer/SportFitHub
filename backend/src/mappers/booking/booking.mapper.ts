@@ -91,7 +91,8 @@ export const toUserSessionsResponseDTOwithPopulatedSession = (bookedSession: IBo
     },
     sessionModel: bookedSession.sessionModel,
     slotId: bookedSession.slotId,
-    date: formatInTimeZone(bookedSession.date, bookedSession.timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
+    date:bookedSession.date.toDateString(),
+    // date: formatInTimeZone(bookedSession.date, bookedSession.timezone, 'yyyy-MM-dd HH:mm:ssXXX'),
     startTime: bookedSession.startTime,
     endTime: bookedSession.endTime,
     startDateTime: bookedSession.startDateTime.toISOString(),  //in UTC

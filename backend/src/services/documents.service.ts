@@ -15,8 +15,7 @@ export default class DocumentsService implements IDocumentsService {
   async getDocumentStream(type: DocumentType, trainerId: string, certId: string, user: AuthUser) {
     console.log('type: ', type);
     const trainer = await this._trainerRepo.findById(trainerId);
-    // const cert = trainer.certificationInfo.documents.find(d => d._id.toString() === certId);
-    // if (!cert) throw new AppError(ERROR_MESSAGES.CERT.NOT_fOUND, STATUS_CODE.ERROR.NOT_FOUND);
+    
     const isOwner = trainer.userId.toString() === user.id;
     const isAdmin = user.role === UserRole.ADMIN;
     if (!isOwner && !isAdmin) {
@@ -35,10 +34,7 @@ export default class DocumentsService implements IDocumentsService {
     } else {
       throw new AppError('Invalid document type', STATUS_CODE.ERROR.BAD_REQUEST);
     }
-    // console.log(cert);
-
-    // const signedUrl= getSignedFileUrl(publicId, 'image', 'authenticated');
-    // console.log(signedUrl);
+  
     const cloudRes = await fetch(signedUrl);
     if (!cloudRes.ok || !cloudRes.body) {
       console.log(cloudRes);

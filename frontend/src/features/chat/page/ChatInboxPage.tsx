@@ -34,7 +34,7 @@ const ChatInboxPage = () => {
             ) : (
               <div className="flex flex-1 items-center justify-center text-muted-foreground gap-2">
                 <MessageCircle className="h-5 w-5" />
-                <span>Select a conversation to start chatting</span>
+                <span>No messages yet</span>
               </div>
             )}
           </div>

@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'prompt',     
        pwaAssets: {
         config: true,
       },  

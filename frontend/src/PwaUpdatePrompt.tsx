@@ -31,7 +31,11 @@ export default function PwaUpdatePrompt() {
           <p className="mb-3">New version available.</p>
           <div className="flex gap-2">
             <button
-              onClick={() => updateServiceWorker(true)}
+              // onClick={() => updateServiceWorker(true)}
+              onClick={async () => {
+                await updateServiceWorker(true)
+                window.location.reload()
+              }}
               className="rounded-md bg-[#5cd119] px-3 py-1.5 font-semibold text-black hover:bg-[#4fba14]"
             >
               Reload

@@ -237,7 +237,7 @@ export class SportsSessionService implements ISportsSessionService {
   // ---------------------get  a session by ID-public-------------
   async getASession(id: string | Types.ObjectId): Promise<SportSessionDetailedPublicDTO> {
     const sessionData = await this._sportsSessionRepo.findBysessionId(id);
-    console.log(sessionData);
+    
     const session = toSportSessionDetailedPublicDTO(sessionData);
 
     return session;

@@ -81,7 +81,7 @@ const Login = () => {
     setIsSubmitting(true);
     setError('');
 
-    formData.timezone= Intl.DateTimeFormat().resolvedOptions().timeZone;
+    // formData.timezone= Intl.DateTimeFormat().resolvedOptions().timeZone;
     
     const result = LoginSchema.safeParse(formData);
 
@@ -92,10 +92,10 @@ const Login = () => {
       return;
     }
    
-    const { email, password,roles,activeRole,timezone } = result.data;
+    const { email, password,roles,activeRole } = result.data;
     
     try {
-      const data = await authService.login({ email, password,roles,activeRole,timezone });
+      const data = await authService.login({ email, password,roles,activeRole });
       if(!data) {
         toast.error("Invalid email or password")
         return;

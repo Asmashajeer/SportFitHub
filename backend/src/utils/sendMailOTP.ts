@@ -1,3 +1,4 @@
+import { OTP_EXPIRATION_MINUTES } from '@/constants/enums';
 import { transporter } from '@/utils/mailer';
 
 export const sendEmailOTP = async (email: string, otp: string) => {
@@ -26,7 +27,7 @@ export const sendEmailOTP = async (email: string, otp: string) => {
                                 </div>
 
                                 <p class="text-sm text-center text-gray-500 mb-10">
-                                    This code is valid for 5 minutes**.
+                                    This code is valid for${OTP_EXPIRATION_MINUTES}minutes**.
                                 </p>
 
                                 <div class="border-l-4 border-yellow-500 bg-yellow-50 p-4 mt-8">

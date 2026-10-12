@@ -77,7 +77,7 @@ export const ERROR_MESSAGES = {
     UPLOAD_FAILED: ' File upload failed',
     FAILED: 'Internal server Error',
     UPDATE_FAILED: 'updation failed',
-    INVALID:'invalid'
+    INVALID:'Invalid'
   },
   TRAINER: {
     TRAINER_NOT_FOUND: 'trainer not found',

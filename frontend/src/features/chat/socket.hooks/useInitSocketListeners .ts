@@ -15,8 +15,8 @@ export const useInitSocketListeners =()=>{
         const handleNewConversation=({conversationId,message}:{conversationId:string,message:Message})=>{
              console.log(` newMessage received on client:`, message);
             joinConversation(conversationId);
-            addMessage(message);
-            updateConversationsPreview(message);           
+            // addMessage(message);
+            // updateConversationsPreview(message);           
         }
        
         const handleNewMessage = ({message}:{message:Message,conversationId:string}) => {

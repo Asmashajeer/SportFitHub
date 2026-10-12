@@ -3,22 +3,15 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import 'leaflet/dist/leaflet.css';
 import App from './App.tsx';
-import { ErrorBoundary } from 'react-error-boundary';
-import { GlobalErrorFallback } from './components/common/errorBoundary/GlobalErrorFallback.tsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ErrorBoundary
-      FallbackComponent={GlobalErrorFallback}
-      onReset={() => {
-        window.location.reload();
-      }}
-    >
+   
       <GoogleOAuthProvider clientId={clientId}>
         <App />
       </GoogleOAuthProvider>
-    </ErrorBoundary>
+    
   </StrictMode>
 );

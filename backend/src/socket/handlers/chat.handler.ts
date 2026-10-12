@@ -4,14 +4,10 @@ import { IChatService } from '@/interfaces/services/IChat.service';
 import { PAYLOAD_MODEL } from '@/constants/enums';
 import { Types } from 'mongoose';
 import AppError from '@/utils/AppError';
+import { SendMessagePayload } from '../chat.types';
+import { IAttachment } from '@/models/message.model';
 
-interface SendMessagePayload {
-  conversationId?: string;
-  recipientId?: string; // present only on first message (no conversationId yet)
-  contextSessionId?: string; // optional,if conversation start from any session
-  contextSessionModel?: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
-  text: string;
-}
+
 
 export const createChatHandler = (chatService: IChatService) => {
   return (io: Server, socket: AuthenticatedSocket) => {
@@ -26,13 +22,32 @@ export const createChatHandler = (chatService: IChatService) => {
     });
 
     socket.on('sendMessage', async (payload: SendMessagePayload) => {
-      try {
-        if (!payload.text?.trim()) {
-          return socket.emit('errorMessage', 'Message cannot be empty');
+      const { type = 'text', attachment } = payload;
+
+      let messageData: {
+        type: 'text' | 'file';
+        text: string;
+        attachment?: IAttachment;
+      };
+      if (type === 'file') {
+        if (!attachment?.url) {
+          return socket.emit('errorMessage', 'Attachment missing');
         }
 
-        let conversationId = payload.conversationId ?? '';
+        // The uploader's folder must match the sender
+        if (!attachment.url.startsWith(`chat/${userId}/`)) {
+          return  socket.emit('errorMessage',  'Invalid attachment' );
+        }
 
+        messageData = { type: 'file', text: '', attachment };
+      } else {
+        const text = payload.text?.trim();
+        if (!text) return  socket.emit('errorMessage',  'Empty message' );
+        messageData = { type: 'text', text };
+      }
+
+      try {
+        let conversationId = payload.conversationId ?? '';
         let isNewConversation = false;
         if (!conversationId) {
           if (!payload.recipientId) {
@@ -56,7 +71,7 @@ export const createChatHandler = (chatService: IChatService) => {
           socket.emit('conversationCreated', { conversationId });
         }
                                                                                                                                                                                                                                                                                                                                                                                                                             
-        const message = await chatService.sendMessage({ conversationId, sender: userId, text: payload.text.trim(), readBy: [userId] });
+        const message = await chatService.sendMessage({ conversationId, sender: userId, ...messageData, readBy: [userId] });
         if (isNewConversation) {
           io.to(payload.recipientId).emit('newConversation', { conversationId, message });
         }

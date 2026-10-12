@@ -6,7 +6,7 @@ interface SignedUrlOptions {
   crop?: string;
 }
 export const getSignedFileUrl = (publicId: string, resourceType: string, deliveryType: 'upload' | 'authenticated' = 'authenticated', options: SignedUrlOptions = {}): string => {
-  // const { resourceType = 'image', deliveryType = 'authenticated', width, height, crop } = options;
+
   return cloudinary.url(publicId, {
     resource_type: resourceType,
     type: deliveryType,

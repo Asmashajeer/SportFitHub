@@ -20,6 +20,7 @@ import { X, Plus, Languages, Trash2,  CornerDownLeftIcon } from 'lucide-react';
 import type { TrainerOnboardingFormValues } from '../../types/trainerprofile.types';
 import { FILE_RULES } from '@/utils/fileValidation';
 import { COMMON_LANGUAGES, DISCIPLINE_SPECIALTIES } from '@/constants/constants';
+import  { FilePreview } from '@/components/reusable/FilePreview';
 
 
 interface ProfessionalInfoFormProps {
@@ -100,7 +101,8 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
     'specialties',
     'languages',
     'certificationInfo.documents',
-  ];
+  ];  
+
 
   return (
     <Card className="w-full">
@@ -296,84 +298,95 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
             </Button>
           </div>
 
-          {fields.map((field, index) => (
-            <div
-              key={field.id}
-              className="p-4 border rounded-lg bg-card space-y-3"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <Input
-                  placeholder="e.g. CPR Certification"
-                  {...register(
-                    `certificationInfo.documents.${index}.name` as FieldPath<TrainerOnboardingFormValues>,
-                    { required: 'Name is required' }
-                  )}
-                />
+          {fields.map((field, index) => {
+             const fileList = watch(
+                `certificationInfo.documents.${index}.file` as FieldPath<TrainerOnboardingFormValues>
+              ) as FileList | undefined;
+              const file = fileList?.[0];
+              const name = watch(
+                `certificationInfo.documents.${index}.name` as FieldPath<TrainerOnboardingFormValues>
+              ) as string | undefined;
+            return(
+              <div
+                key={field.id}
+                className="p-4 border rounded-lg bg-card space-y-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <Input
+                    placeholder="e.g. CPR Certification"
+                    {...register(
+                      `certificationInfo.documents.${index}.name` as FieldPath<TrainerOnboardingFormValues>,
+                      { required: 'Name is required' }
+                    )}
+                  />
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => remove(index)}
-                  className="text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex items-start justify-around ">
-                {/* issuedAt */}
-                <div>
-                  <Label>Issued At</Label>
-                  <Input
-                    type="date"
-                    required
-                    {...register(
-                      `certificationInfo.documents.${index}.issuedAt` as FieldPath<TrainerOnboardingFormValues>,
-                      { required: 'Issue date is required' }
-                    )}
-                    className="w-full pl-12 pr-4 py-3  [&::-webkit-calendar-picker-indicator]:invert rounded-xl bg-secondary/60 border border-[#454c59] text-white"
-                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => remove(index)}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                {/* Valid upto */}
-                <div>
-                  <Label>Valid upto</Label>
-                  <Input
-                    type="date"
-                    required
-                    {...register(
-                      `certificationInfo.documents.${index}.validUpto` as FieldPath<TrainerOnboardingFormValues>,
-                      { required: 'Expiry date is required'}
-                    )}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl [&::-webkit-calendar-picker-indicator]:invert bg-secondary/60 border border-[#454c59] text-white"
-                  />
+                <div className="flex items-start justify-around ">
+                  {/* issuedAt */}
+                  <div>
+                    <Label>Issued At</Label>
+                    <Input
+                      type="date"
+                      required
+                      {...register(
+                        `certificationInfo.documents.${index}.issuedAt` as FieldPath<TrainerOnboardingFormValues>,
+                        { required: 'Issue date is required' }
+                      )}
+                      className="w-full pl-12 pr-4 py-3  [&::-webkit-calendar-picker-indicator]:invert rounded-xl bg-secondary/60 border border-[#454c59] text-white"
+                    />
+                  </div>
+                  {/* Valid upto */}
+                  <div>
+                    <Label>Valid upto</Label>
+                    <Input
+                      type="date"
+                      required
+                      {...register(
+                        `certificationInfo.documents.${index}.validUpto` as FieldPath<TrainerOnboardingFormValues>,
+                        { required: 'Expiry date is required'}
+                      )}
+                      className="w-full pl-12 pr-4 py-3 rounded-xl [&::-webkit-calendar-picker-indicator]:invert bg-secondary/60 border border-[#454c59] text-white"
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="file"
-                  accept={FILE_RULES.certification.accept}
-                  {...register(
-                    `certificationInfo.documents.${index}.file` as FieldPath<TrainerOnboardingFormValues>,
-                    { required: 'file is required',
-                      validate: {
-                        fileType: (value) => {
-                          const fileList = value as FileList | null;
-                          const file = fileList?.[0];
-                          if (!file) return true;
-                          return file.type==='application/pdf'|| 'Only  pdf  files are allowed';
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    accept={FILE_RULES.certification.accept}
+                    {...register(
+                      `certificationInfo.documents.${index}.file` as FieldPath<TrainerOnboardingFormValues>,
+                      { required: 'file is required',
+                        validate: {
+                          fileType: (value) => {
+                            const fileList = value as FileList | null;
+                            const file = fileList?.[0];
+                            if (!file) return true;
+                            return file.type==='application/pdf'|| 'Only  pdf  files are allowed';
+                          },
+                          fileSize: (value) => {
+                            const fileList = value as FileList | null;
+                            const file = fileList?.[0];
+                            if (!file) return true;
+                            return file.size <= 5 * 1024 * 1024 || 'File must be under 5MB';
+                          },
                         },
-                        fileSize: (value) => {
-                          const fileList = value as FileList | null;
-                          const file = fileList?.[0];
-                          if (!file) return true;
-                          return file.size <= 5 * 1024 * 1024 || 'File must be under 5MB';
-                        },
-                      },
-                     }
-                  )}
-                />
+                      }
+                    )}
+                  />
+                </div>             
+              {file && <FilePreview file={file} name={name} />}
+              
               </div>
-            </div>
-          ))}
+            );
+          }) }
         </div>
       </CardContent>
       <CardFooter className="flex gap-4">

@@ -21,7 +21,7 @@ export const uploadService = {
     } else {
       formData.append('files', files);
     }
-    // formData.append("file", file);
+    
 
     const res = await api.post(UPLOAD_ROUTES.UPLOAD, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },

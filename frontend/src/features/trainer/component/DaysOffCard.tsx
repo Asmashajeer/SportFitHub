@@ -43,7 +43,7 @@ export default function DaysOffCard({ availability }: Props) {
   
   const validate = (value: string): string => {
     if (!value) return 'Select a date';
-    if (value < today) return 'Cannot select a past date';
+    if (value <=today) return 'Cannot select a past date';
     if (from && value < from) return 'Before your availability starts';
     if (to && value > to) return 'After your availability ends';
     const dayName = DAYS_OF_WEEK[new Date(`${value}T00:00:00Z`).getUTCDay()];

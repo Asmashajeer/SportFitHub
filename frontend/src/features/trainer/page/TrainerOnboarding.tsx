@@ -96,16 +96,7 @@ const TrainerOnboarding = () => {
         effectiveFrom: '' ,
         effectiveTo: '' ,  
       },
-      // Step 5: Financial
-      // paymentInfo: {
-      //   bankAccount: {
-      //     accountName: '',
-      //     accountNumber: '',
-      //     bankName: '',
-      //     ifscCode: '',
-      //   },
-      //   upiId: '',
-      // },
+  
     },
 
     mode: 'onChange', //Validates when a user clicks away from an input
@@ -178,7 +169,7 @@ const TrainerOnboarding = () => {
         toast.error('User session expired. Please log in again.');
         return;
       }
-       
+    
       const folderPath = `trainers/${userId}/${data.category}`;
       // 1. Upload Profile Picture
       let profilePicUrl = '';
@@ -189,8 +180,11 @@ const TrainerOnboarding = () => {
           userId!,
           UPLOAD_TYPE.PROFILE_PIC
         );
+      }else{
+        toast.error("Profile Pic required");
+        return;
       }
-
+    
       // 2. Upload ID Attachment
       let idAttachmentUrl = '';
       if (data.idVerification.idAttachment?.[0]) {
@@ -200,9 +194,16 @@ const TrainerOnboarding = () => {
           userId!,
           UPLOAD_TYPE.ID_ATTACHMENT
         );
+      }else{
+        toast.error("Please uplOAD Id Document");
+        return;
       }
 
       // 3. Upload Certifications Array
+      if( data.certificationInfo.documents.length===0){
+        toast.error("Please upload certificate ");
+        return;
+      }
       const uploadedCerts = await Promise.all(
         data.certificationInfo.documents.map(async (doc: DocumentValues) => {
           if (doc.file?.[0]) {
@@ -261,7 +262,7 @@ const TrainerOnboarding = () => {
 
       }
     } catch (error) {
-      toast.error((error as string) || 'Something went wrong');
+      toast.error(error instanceof Error  ? error.message: 'Something went wrong');
     } finally {
       setIsSubmitting(false);
     }

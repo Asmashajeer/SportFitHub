@@ -139,8 +139,8 @@ export class AuthService implements IAuthService {
     if (!user.isActive) throw new AppError(ERROR_MESSAGES.AUTH.USER_DELETED, STATUS_CODE.ERROR.FORBIDDEN);
     if (user.isBlocked) throw new AppError(ERROR_MESSAGES.AUTH.BLOCKED_USER, STATUS_CODE.ERROR.FORBIDDEN);
 
-    const userWithTimezone = await this._userRepo.findOneAndUpdate(user._id, { timezone: data.timezone });
-    const userData: UserDataDTO = toUserData(userWithTimezone);
+    // const userWithTimezone = await this._userRepo.findOneAndUpdate(user._id, { timezone: data.timezone });
+    const userData: UserDataDTO = toUserData(user);
     if (!user.isVerified) this.generateOtpAndSendMail(user._id.toString(), user.email, OtpType.VERIFICATION);
 
     // CHECK FOR PROFILE existence

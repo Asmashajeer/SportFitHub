@@ -3,20 +3,15 @@ import { Clock, MapPin, Users, Shield, ArrowLeft, CheckCircle2, Star, Flame, Use
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
 import { lazy, Suspense, useEffect, useState } from 'react';
-
 import { LoadingScreen } from '@/components/reusable/LoadingScreen';
-
 import toast from 'react-hot-toast';
-
 import { BOOKING_TYPE, PAYLOAD_MODEL, Review_Type, ROLES, SESSION_MODE } from '@/constants/constants';
 import GetMapsLink from '@/components/reusable/GetMapsLink';
 import type { FitnessSessionDetailedPublicResponseData } from '../../store/fitness.session.types';
 import { fitnessSessionService } from '../../service/fitnessSessionService ';
 import type { ISlots, PricePlan, Pricing, TimeSlot } from '../../store/session.types';
-
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { useBookingStore } from '@/features/booking/store/useBookingStore';
-
 import StickyBookingBar from '../StickyBookingBar';
 import ImageCarousel from '@/components/reusable/ImageCarousel';
 import type { BookingSlot, Payload } from '@/features/booking/store/payment.types';
@@ -37,7 +32,7 @@ const FitnessSessionDetail = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
 
   const [ratingReview, setRatingReview] = useState({ avgRating: 0, reviewCount: 0 });
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isLoading,isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const [session, setSession] = useState<FitnessSessionDetailedPublicResponseData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,7 +48,7 @@ const FitnessSessionDetail = () => {
   const { setPayload } = useBookingStore();
   const { checkAvailability } = useCheckAvailability();
   const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
-  
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
@@ -64,18 +59,20 @@ const FitnessSessionDetail = () => {
         const data = await fitnessSessionService.getSessionById(sessionId!);
         setSession(data.session);
 
-      try {
-              const days = await trainerUnavailabilityService.getUnavailableDates(data.session.trainer.id);
-              setUnavailableDates(days.map((d: string) => parseISO(d)));
-            } catch {
-              setUnavailableDates([]); 
-       }
+        // fetch unavailable days of trainer   
+        try {
+          const days = await trainerUnavailabilityService.getUnavailableDates(data.session.trainer.id);
+          setUnavailableDates(days.map((d: string) => parseISO(d)));
+        } catch {
+          setUnavailableDates([]);
+        }
 
         if (data.session && data.session.timeSlots) {
           const availableDays = data.session.timeSlots.map((slot: TimeSlot) => slot.day.toLowerCase());
           const offdays = [0, 1, 2, 3, 4, 5, 6].filter((i) => !availableDays.map((d: string) => getDay(parse(d, 'eeee', new Date()))).includes(i));
           setOffDays(offdays);
           if (data.session && sessionId) {
+            //fetch booked dates
             const bookings = await BookingService.getBookedSlots(sessionId);
             const { occupiedSlots } = await checkAvailability({
               sessionId: data.session.id,
@@ -86,7 +83,7 @@ const FitnessSessionDetail = () => {
             //Group occupied slots by date
             const occupiedByDate = occupiedSlots.reduce((acc: Record<string, number>, slot: IBookedSlot) => {
               const dateKey = new Date(slot.date).toDateString();
-              acc[dateKey] = (acc[dateKey] || 0) + 1;
+              acc[dateKey] = (acc[dateKey] || 0) + 1; //no:of slots/day
               return acc;
             }, {});
 
@@ -218,7 +215,7 @@ const FitnessSessionDetail = () => {
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans selection:bg-emerald-500/30">
       {/* STICKY NAVIGATION */}
-      <nav className="sticky top-16 z-50 bg-transparent backdrop-blur-md border-b border-zinc-900 px-4 sm:px-6 py-4 flex items-center justify-between">
+      <nav className="sticky top-16 z-40 bg-transparent backdrop-blur-md border-b border-zinc-900 px-4 sm:px-6 py-4 flex items-center justify-between">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors group">
           <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
           <span className="text-xs font-black uppercase tracking-tighter">Back</span>
@@ -226,7 +223,6 @@ const FitnessSessionDetail = () => {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
-      
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black italic uppercase tracking-tighter leading-none text-white">{session.sessionName}</h1>
 
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
@@ -299,11 +295,15 @@ const FitnessSessionDetail = () => {
               </div>
 
               {/* Chat action  */}
-              <div className="pt-1">
-                <Suspense fallback={null}>
-                  <ChatDrawer userId={session.trainer.userId} trainerName={session.trainer.displayName} contextSessionId={session.id} contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION} />
-                </Suspense>
-              </div>
+              {!isLoading && isAuthenticated && (
+                <div className="pt-1">
+                  <Suspense fallback={null}>
+                  
+                      <ChatDrawer userId={session.trainer.userId} trainerName={session.trainer.displayName} contextSessionId={session.id} contextSessionModel={PAYLOAD_MODEL.SPORT_SESSION} />
+                    {/* } */}
+                  </Suspense>
+                </div>)
+              }
             </div>
           </div>
         </section>

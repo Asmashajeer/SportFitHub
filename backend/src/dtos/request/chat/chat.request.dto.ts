@@ -1,5 +1,7 @@
 import { PAYLOAD_MODEL } from '@/constants/enums';
 import { IConversation } from '@/models/conversation.model';
+import { IAttachment } from '@/models/message.model';
+
 import { Types } from 'mongoose';
 
 export interface IconversationPopulatedParticipants extends Omit<IConversation, 'participants' | 'contextSessionId'> {
@@ -23,7 +25,8 @@ export interface createConversationRequestDTO {
 export interface sendMessageRequestDTO {
   conversationId: string;
   sender: string;
-  //   receiver: Types.ObjectId;
+  type: "text" | "file";
   text: string;
+  attachment?: IAttachment
   readBy: string[];
 }

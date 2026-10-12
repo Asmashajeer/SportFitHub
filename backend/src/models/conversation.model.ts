@@ -1,10 +1,12 @@
 import { PAYLOAD_MODEL } from '@/constants/enums';
 import mongoose, { Schema, Types } from 'mongoose';
 import { Document } from 'mongoose';
+import { MessageType } from './message.model';
 
 
 interface ILastMessage {
   text: string;
+  type:MessageType
   sender?: Types.ObjectId;
   createdAt?: Date;
 }
@@ -24,6 +26,7 @@ const ConversationSchema = new Schema(
     contextSessionModel: { type: String, enum: Object.values(PAYLOAD_MODEL), default: null },
     lastMessage: {
       text: { type: String, default: '' },
+      type: { type: String, enum: ['text', 'file'], default: 'text' },
       sender: { type: Types.ObjectId, ref: 'User' },
       createdAt: { type: Date },
     },

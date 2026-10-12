@@ -1,6 +1,7 @@
 import { sendMessageRequestDTO } from '@/dtos/request/chat/chat.request.dto';
 import { ConversationPopulatedResponseDTO, ConversationResponseDTO, MessageResponseDTO } from '@/dtos/response/chat/chat.response.dto';
 import { IConversation } from '@/models/conversation.model';
+import { IAttachment } from '@/models/message.model';
 
 
 export interface IChatService {
@@ -11,4 +12,5 @@ export interface IChatService {
   markAsRead(conversationId: string, userId: string): Promise<void>;
   unreadMessageCount(conversationId: string, recipientId: string): Promise<number>;
   unreadMessageCountInbox(recipientId: string): Promise<number>;
+  getAttachedFileStream( userId:string,conversationId:string,attachment:IAttachment) 
 }

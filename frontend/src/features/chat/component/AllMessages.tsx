@@ -7,7 +7,9 @@ import { cn } from "@/lib/utils";
 
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { formatDateLabel, formatTo12Hour } from "@/utils/formatDate";
-import { Check, CheckCheck } from "lucide-react";
+import { Check, CheckCheck} from "lucide-react";
+import FileMessage from "./FileMessage";
+import toast from "react-hot-toast";
 
 interface MessageThreadProps {
   conversationId: string;
@@ -17,20 +19,22 @@ export const AllMessages = ({ conversationId }: MessageThreadProps) => {
   const { messages, setMessages,markAsRead } = useChatStore();
   const {user}= useAuthStore();
   const currentUserId=user?.id;
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  const conversationMessages = messages[conversationId] || [];
+  const bottomRef = useRef<HTMLDivElement>(null);  
 
   useEffect(() => {   
    const fetchMessages=async()=>{
-    const msgs=await chatService.getMessages(conversationId);
-        setMessages(conversationId, msgs);
-    }  
-  
+    try{
+      const msgs=await chatService.getMessages(conversationId);
+          setMessages(conversationId, msgs);          
+      }catch(err){
+        toast.error(err instanceof Error?err.message:"loading messages failed" );
+      }  
+   }
     fetchMessages();
     markAsRead(conversationId);
   }, [conversationId, setMessages]);
 
+  const conversationMessages = messages[conversationId] || [];
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversationMessages.length]);
@@ -43,7 +47,6 @@ export const AllMessages = ({ conversationId }: MessageThreadProps) => {
   }
   function groupMessagesByDate( conversationMessages: Message[]): GroupedMessages[] {
     const groups = new Map<string, Message[]>();
-
     for (const msg of conversationMessages) {
       //  same-day messages group together
       const dateKey = new Date(msg.createdAt).toISOString().split("T")[0];
@@ -63,7 +66,7 @@ export const AllMessages = ({ conversationId }: MessageThreadProps) => {
   }
   const grouped = groupMessagesByDate(conversationMessages);
   return (
-    <ScrollArea className="flex-1 h-full p-4">
+    <ScrollArea className="flex-1 h-75 p-4">
       {grouped.map((group) => (
         <div key={group.date}>
           <div className="date-divider text-[10px] text-gray-500">- {group.label} -</div>
@@ -74,22 +77,24 @@ export const AllMessages = ({ conversationId }: MessageThreadProps) => {
                 <div
                   key={msg.id}
                   className={cn("flex flex-col max-w-[70%]", isOwn ? "self-end items-end" : "self-start items-start")}
-                >
+                >                
                   <div
                     className={cn(
                       " flex  rounded-md px-2 py-1 text-xs justify-between gap-2",
-                      isOwn ? "bg-primary text-white" : "bg-muted border"
+                      isOwn ? "bg-emerald-700 text-white" : "bg-muted border"
                     )}
                   >
-                    {msg.text}   
+                    {msg.type === 'file' && msg.attachment ? <FileMessage attachment={msg.attachment} conversationId={conversationId}  /> : msg.text}
                     <div className=" flex  items-end">
                       <p className="text-[6px] text-right text-gray-300 mt-1 ">                    
                           {formatTo12Hour (msg.createdAt)}
-                     </p>
-                     <p className=" px-0.7 text-green-300">{msg.readBy.length>1 ?<CheckCheck className=" w-2 h-2 text-green-500  " />:<Check className=" w-2 h-2 "/>}</p>
+                    </p>
+                    <p className=" px-0.7 text-green-300">{msg.readBy.length>1 ?<CheckCheck className=" w-2 h-2 text-green-500  " />:<Check className=" w-2 h-2 "/>}</p>
                     </div>          
                   
                   </div>
+                  
+                  
                 </div>
               );
             })}       

@@ -6,7 +6,21 @@ import { messaging } from '../config/firebase.config';
 import toast from 'react-hot-toast';
 
 import { authService } from '@/features/auth/service/authService';
-
+const waitForActive = (registration: ServiceWorkerRegistration) =>
+  new Promise<void>((resolve) => {
+    if (registration.active) return resolve();
+ 
+    const sw = registration.installing ?? registration.waiting;
+    if (!sw) return resolve();
+ 
+    const onChange = () => {
+      if (sw.state === 'activated') {
+        sw.removeEventListener('statechange', onChange);
+        resolve();
+      }
+    };
+    sw.addEventListener('statechange', onChange);
+  });
 export const useFCMToken = () => {
   const initFCM = async () => {
     try {
@@ -17,12 +31,16 @@ export const useFCMToken = () => {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') return;
 
-      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+      const registration = await navigator.serviceWorker.register(
+        '/firebase-messaging-sw.js',
+        { scope: '/firebase-cloud-messaging-push-scope' }
+      )
       .catch((err) => {
           console.error('SW registration failed:', err);
           throw err;
         });
-     await navigator.serviceWorker.ready;
+    //  await navigator.serviceWorker.ready;
+      await waitForActive(registration);
       const token = await getToken(messaging, {
         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
         serviceWorkerRegistration: registration,

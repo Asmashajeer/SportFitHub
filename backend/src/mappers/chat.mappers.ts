@@ -1,10 +1,9 @@
-
 import { IconversationPopulatedParticipants } from '@/dtos/request/chat/chat.request.dto';
 import { IConversation } from '@/models/conversation.model';
 import { IMessage } from '@/models/message.model';
+import { getSignedFileUrl } from '@/utils/cloudinary';
 
 export const toConversationResponseDTO = (conversation: Partial<IConversation>) => {
-
   return {
     id: conversation._id.toString(),
     participants: conversation.participants.map((p) => p.toString()),
@@ -49,8 +48,19 @@ export const toMessageResponseDTO = (message: IMessage) => {
   return {
     conversationId: message.conversationId.toString(),
     sender: message.sender.toString(),
-    //   receiver: string;
+    type: message.type,
     text: message.text,
+    attachment:
+      message.type === 'file' && message.attachment
+        ? {
+            // url: getSignedFileUrl(message.attachment.url, message.attachment.mimeType, 'authenticated'),
+            url: message.attachment.url,
+            originalName: message.attachment.originalName,
+            size: message.attachment.size,
+            mimeType: message.attachment.mimeType,
+          }
+        : undefined,
+
     readBy: message.readBy.map((u) => u.toString()),
     createdAt: message.createdAt.toString(),
     updatedAt: message.updatedAt.toString(),

@@ -20,6 +20,8 @@ import type { TrainerOnboardingFormValues } from '../../types/trainerprofile.typ
 import { GENDER, GOVT_ID_TYPE } from '@/constants/constants';
 import { Calendar, MapPin, Upload } from 'lucide-react';
 import { FILE_RULES } from '@/utils/fileValidation';
+import { FilePreview } from '@/components/reusable/FilePreview';
+
 
 interface PersonalInfoFormProps {
   onNext: (fields: any[]) => void;
@@ -55,6 +57,9 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
     'idVerification.idNumber',
   ];
   const selectedIDType = watch('idVerification.idType');
+  const idFileList = watch('idVerification.idAttachment') as FileList | undefined;
+  const idFile = idFileList?.[0];
+  const idType = watch('idVerification.idType') as string | undefined;
   return (
     <Card className="w-full">
       <CardHeader>
@@ -278,12 +283,13 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
                   {errors.idVerification.idNumber.message}
                 </p>
               )}
+              
             </div>
             {/* ID File Upload */}
-            <div className="space-y-2">
+            <div className="space-y-2">                       
               <Label>Upload ID Proof (Photo/PDF)</Label>
-              <div className="flex items-center justify-center w-full">
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-100">
+              <div className="flex items-center justify-between gap-2 w-full">
+                <label className="flex flex-col items-center justify-center w-full  border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-600">
                   <div className="flex flex-col items-center justify-center pt-5 pb-3">
                     <Upload className="w-5 h-5 mb-3" />
                     <p
@@ -322,7 +328,9 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
                     </p>
                   )}
                 </label>
+                {idFile && <FilePreview file={idFile} name={idType} />}              
               </div>
+               
             </div>
           </div>
         </div>

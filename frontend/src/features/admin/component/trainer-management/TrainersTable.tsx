@@ -45,6 +45,7 @@ const TrainersTable = () => {
   const [category, setCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const  [selectedTrainer,setSelectedTrainer]= useState< string|null>(null);
+  ;
  
 
   type trainerStatusKey = 'confirmed' | 'cancelled' | 'completed' | 'pending';

@@ -9,5 +9,5 @@ router.post('/conversations', chatController.createConversation);
 router.get('/conversations', chatController.getConversations);
 router.get('/messages', chatController.getMessages);
 router.get('/messages/unread', chatController.getUnreadMessageCount);
-
+router.get('/getAttachment', chatController.getAttachedFile);
 export default router;

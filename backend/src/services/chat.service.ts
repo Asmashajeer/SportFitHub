@@ -5,9 +5,12 @@ import { IConversationRepository } from '@/interfaces/repositories/IConversation
 import { IMessageRepository } from '@/interfaces/repositories/IMessage.repository';
 import { IChatService } from '@/interfaces/services/IChat.service';
 import { toConversationPopulatedResponseDTO, toConversationResponseDTO, toMessageResponseDTO } from '@/mappers/chat.mappers';
+import { AuthUser } from '@/middleware/auth.middleware';
 import { IConversation } from '@/models/conversation.model';
+import { IAttachment } from '@/models/message.model';
 
 import AppError from '@/utils/AppError';
+import { getSignedFileUrl } from '@/utils/cloudinary';
 import { Types } from 'mongoose';
 
 export class ChatService implements IChatService {
@@ -40,8 +43,9 @@ export class ChatService implements IChatService {
   getMessages = async (conversationId: string, lastCreatedAt: string, userId: string): Promise<MessageResponseDTO[]> => {
     this.checkConversation_Participants(conversationId, userId);
     const allMessages = await this._messageRepo.findMessages(conversationId, lastCreatedAt);
-    console.log(allMessages);
+
     const messages = allMessages.map((msg) => toMessageResponseDTO(msg));
+
     return messages;
   };
 
@@ -51,17 +55,20 @@ export class ChatService implements IChatService {
     const message = await this._messageRepo.create({
       conversationId: new Types.ObjectId(data.conversationId),
       sender: new Types.ObjectId(data.sender),
+      type: data.type,
       text: data.text,
+      attachment: data.attachment && data.attachment,
       readBy: [new Types.ObjectId(data.sender)], // sender  reads their own message
     });
 
     // keep the denormalized lastMessage in sync (from Step 1 design)
     await this._conversationRepo.updateLastMessage(data.conversationId, {
-      text: data.text,
+      text: message.type === 'file' ? (message.attachment?.originalName ?? 'Attachment') : message.text,
+      type: message.type,
       sender: data.sender,
       createdAt: message.createdAt,
     });
-    console.log(message);
+
     return toMessageResponseDTO(message);
   };
 
@@ -79,13 +86,41 @@ export class ChatService implements IChatService {
     const conversations = await this._conversationRepo.find({ participants: { $in: recipientId } });
     const conversationIds = conversations.map((conv) => conv._id);
     const unreadCount = await this._messageRepo.countUnreadInbox(conversationIds, recipientId);
-    console.log(unreadCount);
+
     return unreadCount;
   };
 
+  async getAttachedFileStream(userId: string, conversationId: string, attachment: IAttachment) {
+    const conversation = await this.checkConversation_Participants(conversationId, userId);
+
+    if (!attachment) {
+      throw new AppError(`${ERROR_MESSAGES.GENERAL.INVALID} file `, STATUS_CODE.ERROR.BAD_REQUEST);
+    }
+    if (!conversation) {
+      throw new AppError(`cannot fetch conversation right now.try again `, STATUS_CODE.ERROR.NOT_FOUND);
+    }
+
+    const resourceType = attachment.mimeType.startsWith('image') ? 'image' : 'raw';
+    let signedUrl: string = getSignedFileUrl(attachment.url, resourceType, 'authenticated');
+
+    const cloudRes = await fetch(signedUrl);
+    if (!cloudRes.ok || !cloudRes.body) {
+      throw new AppError('Could not fetch file');
+    }
+
+    return {
+      stream: cloudRes.body,
+      contentType: cloudRes.headers.get('content-type') || 'application/octet-stream',
+    };
+  }
+
   private checkConversation_Participants = async (conversationId: string, userId: string) => {
-    const conversation = await this._conversationRepo.findById(conversationId);
     if (!conversationId) {
+      throw new AppError(`conversationId NOT_FOUND`, STATUS_CODE.ERROR.BAD_REQUEST);
+    }
+    const conversation = await this._conversationRepo.findById(conversationId);
+
+    if (!conversation) {
       throw new AppError(ERROR_MESSAGES.CHAT.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     }
 

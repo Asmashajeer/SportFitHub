@@ -57,10 +57,8 @@ export default class AuthController {
   forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email } = req.body;
-
       const otpContext = OtpType.PASSWORD_RESET;
       const result = await this._authService.resendOtp(email, otpContext);
-
       res.status(result.statusCode).json(result);
     } catch (error) {
       next(error);
@@ -71,7 +69,6 @@ export default class AuthController {
   resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email, otp, newPassword } = req.body;
-
       const result = await this._authService.resetPassword({ email, otp, newPassword });
       res.status(result.statusCode).json(result);
     } catch (error) {
@@ -82,9 +79,9 @@ export default class AuthController {
   //----------------user Login-----------------
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { email, password, timezone } = req.body;
-      const result = await this._authService.login({ email, password, timezone });
-      Logger.info(`User logged in`, { userId: result.user.id, email: email, timezone: timezone });
+      const { email, password, } = req.body;
+      const result = await this._authService.login({ email, password});
+      Logger.info(`User logged in`, { userId: result.user.id, email: email,  });
       const { refreshToken, accessToken, ...data } = result;
       setAuthCookies(res, accessToken, refreshToken);
 
@@ -97,7 +94,6 @@ export default class AuthController {
   //------------------Google Login
   googleLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { token } = req.body; // Token from frontend
-
     try {
       const result = await this._authService.googleLogin(token);
       Logger.info(`User logged in via google login`, {
@@ -118,7 +114,6 @@ export default class AuthController {
     try {
       const authReq = req as AuthRequest;
       const CurrUser = authReq.user;
-
       const id = CurrUser.id;
       const { email, role } = req.body;
       if (!Object.values(UserRole).includes(role)) {
@@ -144,7 +139,6 @@ export default class AuthController {
       const authReq = req as AuthRequest;
       const userId = authReq.user.id;
       const data: AuthMeResponseDto = await this._authService.authMe(userId);
-
       res.status(STATUS_CODE.SUCCESS.OK).json(data);
     } catch (error) {
       next(error);

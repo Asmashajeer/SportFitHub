@@ -66,6 +66,11 @@ function Avatar() {
       }
       console.error(error);
     }
+     finally {
+    // ALWAYS clear client store and redirect
+      useAuthStore.getState().clearAuth();
+      window.location.href = '/login';
+    }
   };
 
 

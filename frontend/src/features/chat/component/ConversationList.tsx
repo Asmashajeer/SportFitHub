@@ -34,8 +34,7 @@ export const ConversationList = ({ onSelect, activeConversationId }: Conversatio
         )}
 
         {conversations.map((conv) => {
-          const otherParticipant = conv.participants.find((p) => p._id !== currentUserId);
-          otherParticipant && console.log(otherParticipant);
+          const otherParticipant = conv.participants.find((p) => p._id !== currentUserId);        
           const isActive = conv.id === activeConversationId;
 
           return (

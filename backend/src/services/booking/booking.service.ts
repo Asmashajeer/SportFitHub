@@ -69,6 +69,7 @@ import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repositor
 import { IPayoutLedgerRepository } from '@/interfaces/repositories/IPayoutLedger.repository';
 
 import { ISettingsService } from '@/interfaces/services/admin/ISettings.service';
+import { dateStrToDate, toDateStr } from '@/utils/date';
 
 
 export class BookingService implements IBookingService {
@@ -142,6 +143,15 @@ export class BookingService implements IBookingService {
 
   //----------payment and -booking slot ---------------
   async confirmBooking(stripeSession: Stripe.Checkout.Session, paymentIntent: Stripe.PaymentIntent, invoiceId: string): Promise<BookingConfirmResponseDTO> {
+     const existingBooking = await this._bookingRepo.findOne({ stripeSessionId: stripeSession.id });
+      
+
+    if (existingBooking?.status === BOOKING_STATUS.CONFIRMED) {
+      const existingPayment = await this._paymentRepo.findOne({ bookingId:existingBooking._id });
+      const bookingData = toUserBookingResponseDTO(existingBooking);
+      const paymentData = toUserPaymentResponseDTO(existingPayment);
+      return { booking: bookingData, payment: paymentData };              
+    }
     const metadata = stripeSession.metadata;
     if (!metadata) throw new Error('No metadata found in session');
     const dbSession = await mongoose.startSession();
@@ -255,7 +265,11 @@ export class BookingService implements IBookingService {
       const AllSessionsToBoook = await Promise.all(
         sessionsToBook.map(async (S) => {
           //convert to utc date
-          const utcDate = toUTC_Date(S.date, S.startTime, targetTimezone);
+          // const utcDate = toUTC_Date(S.date, S.startTime, targetTimezone);
+          const dateOnly = toDateStr(S.date, targetTimezone); 
+          console.log("S.date:  ",S.date);
+          const dateAsDate = new Date(`${S.date}T00:00:00.000Z`); 
+          console.log("dateAsDate :",dateAsDate)
           const startDateTimeUTC = createUtcDateTime(S.date, S.startTime, targetTimezone);
           const endDateTimeUTC = createUtcDateTime(S.date, S.endTime, targetTimezone);
           await this._bookingSessionRepo.createSessionBooking(
@@ -267,7 +281,8 @@ export class BookingService implements IBookingService {
               sessionId: new Types.ObjectId(sessionId),
               sessionModel: sessionModel,
               slotId: S.slotId,
-              date: utcDate,
+              date: dateStrToDate(dateOnly),   
+              // date: utcDate,
               startTime: S.startTime,
               endTime: S.endTime,
               startDateTime: startDateTimeUTC,
@@ -370,7 +385,7 @@ export class BookingService implements IBookingService {
 
     const currentBookings = await this._bookingSessionRepo.enrolledCount({
       sessionId: bookingData.sessionId,
-      // date: { $gte: startDay, $lte: endOfDay },
+    
       startDateTime: { $gte: startDay, $lte: endOfDay },
       slotId: bookingData.slotId,
       status: BOOKING_SESSION_STATUS.SCHEDULED,
@@ -533,7 +548,7 @@ export class BookingService implements IBookingService {
 
       return newBooking;
     } catch (error) {
-      console.log(error);
+      
       throw new AppError("error while rescheduling") ;
     } finally {
       dbSession.endSession();
@@ -703,7 +718,7 @@ export class BookingService implements IBookingService {
 
     const [sessions, totalCount] = await Promise.all([this._bookingSessionRepo.findBookedSessionsPopulatedUser(query, { skip, limit }), this._bookingSessionRepo.count(query)]);
     if (!sessions) {
-      console.log('no booked trainer session');
+     
       throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     }
 
@@ -937,11 +952,9 @@ export class BookingService implements IBookingService {
   async autoCompleteSessions() {
    const results = await this._bookingSessionRepo.autoCompleteExpiredSessions();   
    if (results .length === 0) return { modifiedCount: 0 };
-      console.log("from bookingServiceRepo");
-    console.log(results[0].bookingId.pricePlan.unitPrice);
-   const completedSessions= results.map((session)=>toBookingSession_Price(session));
-  
-    console.log(completedSessions);
+    
+   const completedSessions= results.map((session)=>toBookingSession_Price(session)); 
+    
     const commissionPercent = await this._settingsService.getCommissionPercent(); // admin config
     const holdHours = await this._settingsService.getHoldHours();  
     await Promise.all(completedSessions.map(async (session) => {

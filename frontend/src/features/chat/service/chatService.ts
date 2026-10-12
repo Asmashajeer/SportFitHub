@@ -1,6 +1,6 @@
 import api from "@/api/axiosInstance"
 import { CHAT_ROUTE } from "./chat.api"
-import type { Conversation, Message } from "../store/useChatStore";
+import type { Attachment, Conversation, Message } from "../store/useChatStore";
 
 export const chatService={
     getConversation:async(conversationId:string)=>{
@@ -22,5 +22,11 @@ export const chatService={
     getUnreadMessageCount:async():Promise<number>=>{
         const res=await api.get(CHAT_ROUTE.GET_MESSAGES_UNREAD_COUNT);
         return res.data; 
+    },
+    getAttachment: async(attachment:Attachment,conversationId:string)=>{
+        const res=await api.get(CHAT_ROUTE.GET_ATTACHMENT,{params:{conversationId,...attachment},
+            responseType: 'blob',
+    });
+        return res.data;
     }
 }

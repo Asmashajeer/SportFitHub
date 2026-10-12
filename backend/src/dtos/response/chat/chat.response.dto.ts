@@ -1,4 +1,5 @@
 import { PAYLOAD_MODEL } from '@/constants/enums';
+import { IAttachment, MessageType } from '@/models/message.model';
 
 interface LastMessage {
   text: string;
@@ -28,8 +29,9 @@ export interface ConversationPopulatedResponseDTO extends Omit<ConversationRespo
 export interface MessageResponseDTO {
   conversationId: string;
   sender: string;
-  //   receiver: string;
+  type:MessageType
   text: string;
+  attachment:IAttachment;
   readBy: string[];
   createdAt: string;
   updatedAt: string;

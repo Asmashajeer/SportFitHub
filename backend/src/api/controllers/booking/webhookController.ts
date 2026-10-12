@@ -20,6 +20,7 @@ export class WebhookController {
     this._stripe=stripe
   }
   public handleWebhook = async (req: Request, res: Response, next: NextFunction) => {
+    console.log("inside webhook controller");
     const sig = req.headers['stripe-signature'];
 
     if (!sig) {
