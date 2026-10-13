@@ -23,7 +23,7 @@ export const LoginSchema = z.object({
   password: passwordSchema,
   roles: z.array(z.enum(ROLES)),
   activeRole: z.enum(ROLES),
-  // timezone:z.string()
+  timezone:z.string()
 });
 
 export const RegisterSchema = LoginSchema.extend({
@@ -49,7 +49,7 @@ export type LoginCredentials = z.infer<typeof LoginSchema>;
 export type RegisterFormData = z.infer<typeof RegisterSchema>;
 export const registerCredentialSchema = LoginSchema.extend({
   name: z.string().min(3, 'Please enter a valid name'),
-  timezone:z.string(),
+ 
 });
 export type registerCredentials = z.infer<typeof registerCredentialSchema>;
 

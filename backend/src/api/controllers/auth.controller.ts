@@ -79,8 +79,8 @@ export default class AuthController {
   //----------------user Login-----------------
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { email, password, } = req.body;
-      const result = await this._authService.login({ email, password});
+      const { email, password,timezone } = req.body;
+      const result = await this._authService.login({ email, password,timezone});
       Logger.info(`User logged in`, { userId: result.user.id, email: email,  });
       const { refreshToken, accessToken, ...data } = result;
       setAuthCookies(res, accessToken, refreshToken);
