@@ -446,11 +446,12 @@ export class BookingService implements IBookingService {
   //-----------find user booked sessions------
   async getUserSessions(userId: string | Types.ObjectId): Promise<UserSessionsResponseDTOwithPopulatedSession[]> {
     const sessions = await this._bookingSessionRepo.findUserSessions({ userId: userId });
-
+    
     if (!sessions) throw new AppError(ERROR_MESSAGES.BOOKING.NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     
     const userSessions = sessions.map((session) => toUserSessionsResponseDTOwithPopulatedSession(session as unknown as IBookedSessionPopulate));
-
+     console.log("return from service",sessions);
+     console.log("DEPLOY CHECK 1")
     return userSessions;
   }
 

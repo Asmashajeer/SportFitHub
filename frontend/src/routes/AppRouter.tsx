@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
 import ProtectedRoute from './ProtectedRoute';
 import { ROLES } from '../constants/constants';
+import SupportPage from '@/pages/SupportPage';
 
 //  public pages
 const HomePage = lazy(() => import('../pages/HomePage'));
@@ -45,6 +46,7 @@ function AppRouter() {
             <Route path="/" element={<HomePage />} />
             <Route path="/sports" element={<SportsPage />} />
             <Route path="/fitness" element={<FitnessPage />} />
+            <Route path="/support" element={<SupportPage />} />
             <Route
               path="/sports/sessions/:sessionId"
               element={<SessionDetailPage />}

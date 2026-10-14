@@ -1,4 +1,7 @@
+import { useAuthStore } from "@/features/auth/store/useAuthStore";
+
 const Footer = () => {
+  const  {user,isAuthenticated}=useAuthStore();
   return (
     <footer className="w-full bg-background border-t border-border mt-40 pt-12 pb-8 transition-colors">
       <div className="container mx-auto px-6">
@@ -59,28 +62,30 @@ const Footer = () => {
           </div>
 
           {/* User & Platform Support */}
-          <div>
-            <h4 className="text-foreground font-bold uppercase tracking-widest text-[11px] mb-4">
-              Account & Help
-            </h4>
-            <ul className="space-y-2.5 text-muted-foreground text-sm">
-              <li>
-                <a href="/wallet" className="hover:text-primary transition-colors">
-                  Wallet & Credits
-                </a>
-              </li>
-              <li>
-                <a href="/my-bookings" className="hover:text-primary transition-colors">
-                  My Bookings
-                </a>
-              </li>
-              <li>
-                <a href="/support" className="hover:text-primary transition-colors">
-                  Support & FAQ
-                </a>
-              </li>
-            </ul>
-          </div>
+          {user && isAuthenticated &&
+            <div>
+              <h4 className="text-foreground font-bold uppercase tracking-widest text-[11px] mb-4">
+                Account & Help
+              </h4>
+              <ul className="space-y-2.5 text-muted-foreground text-sm">
+                <li>
+                  <a href="/user/my-wallet" className="hover:text-primary transition-colors">
+                    Wallet & Credits
+                  </a>
+                </li>
+                <li>
+                  <a href="/user/my-bookings" className="hover:text-primary transition-colors">
+                    My Bookings
+                  </a>
+                </li>
+                <li>
+                  <a href="/support" className="hover:text-primary transition-colors">
+                    Contact & Support 
+                  </a>
+                </li>
+              </ul>
+            </div>
+          }
         </div>
 
         {/* Bottom Bar */}

@@ -39,8 +39,9 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
       .populate('sessionId', '_id trainerId sessionName sessionType maxCapacity bookingDeadline cancellationWindow')
       .sort({ date: -1 })
       .lean()
-      .exec();
+      .exec();   
     return sessions;
+    
   }
 
   async bookingsessionsStatusInfo(bookingIds: string[]) {
