@@ -1,19 +1,22 @@
 import { useEffect } from "react";
 import { chatService } from "../service/chatService";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { cn } from "@/lib/utils";
 import { useConversation } from "../hook/useConversation";
 
+
+
 interface ConversationListProps {
+  setPartner:(name:string)=>void
   onSelect: (conversationId: string) => void;
   activeConversationId: string | null;
 }
 
-export const ConversationList = ({ onSelect, activeConversationId }: ConversationListProps) => {
+export const ConversationList = ({ setPartner,onSelect, activeConversationId }: ConversationListProps) => {
   const { conversations, setConversations } = useChatStore();
   const currentUserId = useAuthStore((s) => s.user?.id);
 
@@ -25,6 +28,8 @@ export const ConversationList = ({ onSelect, activeConversationId }: Conversatio
 
     fetchConversations();
   }, []);
+
+ 
   useConversation(activeConversationId);
    return (
     <ScrollArea className="h-full">
@@ -34,21 +39,31 @@ export const ConversationList = ({ onSelect, activeConversationId }: Conversatio
         )}
 
         {conversations.map((conv) => {
-          const otherParticipant = conv.participants.find((p) => p._id !== currentUserId);        
+          console.log(currentUserId);
+          const [otherParticipant] = conv.participants.filter((p) => p.id.toString() !== currentUserId);
           const isActive = conv.id === activeConversationId;
-
+          console.log(otherParticipant);
           return (
             <button
               key={conv.id}
-              onClick={() => onSelect(conv.id)}
+              onClick={() =>{
+                 onSelect(conv.id)
+                 setPartner(otherParticipant.name)
+              }}
               className={cn(
                 "flex items-center gap-3 p-3 bg-zinc-800 text-left hover:bg-muted transition-colors border-b",
                 isActive && "bg-green-800"
               )}
             >
-              <Avatar className=" bg-red-300 h-10 w-10 shrink-0">
-               
-                <AvatarFallback className=" bg-zinc-500">{otherParticipant?.name?.[0]?.toUpperCase()}</AvatarFallback>
+              <Avatar className="bg-red-300 h-10 w-10 shrink-0">
+                <AvatarImage 
+                  src={otherParticipant?.profilePic || ""} 
+                  alt={otherParticipant?.name || "User avatar"} 
+                  className="object-cover"
+                />
+                <AvatarFallback className="bg-zinc-500 text-white font-medium">
+                  {otherParticipant?.name?.[0]?.toUpperCase() || "?"}
+                </AvatarFallback>
               </Avatar>
 
               <div className="flex-1 min-w-0">

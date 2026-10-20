@@ -129,19 +129,19 @@ export const AddTrainerProfileSchema = z.object({
   }),
 
   // Payment Info (Optional during initial creation depending on your flow)
-  paymentInfo: z
-    .object({
-      bankAccount: z
-        .object({
-          accountName: z.string().optional(),
-          accountNumber: z.string().optional(),
-          bankName: z.string().optional(),
-          ifscCode: z.string().optional(),
-        })
-        .optional(),
-      upiId: z.string().optional(),
-    })
-    .optional(),
+  // paymentInfo: z
+  //   .object({
+  //     bankAccount: z
+  //       .object({
+  //         accountName: z.string().optional(),
+  //         accountNumber: z.string().optional(),
+  //         bankName: z.string().optional(),
+  //         ifscCode: z.string().optional(),
+  //       })
+  //       .optional(),
+  //     upiId: z.string().optional(),
+  //   })
+  //   .optional(),
 })
 .refine(
     (data) => {

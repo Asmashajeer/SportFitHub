@@ -1,4 +1,4 @@
-import type { TRAINER_CATEGORY, TRAINER_STATUS } from "@/constants/constants";
+import type { DOC_VERIFY_STATUS, TRAINER_CATEGORY, TRAINER_STATUS } from "@/constants/constants";
 
 export interface AdminTrainersData{
      id: string;
@@ -11,8 +11,8 @@ export interface AdminTrainersData{
   specialties: string[];
   experience: number;
   languages: string[];
-  isCertsVerified:boolean,
-  isIdVerified:boolean,
+  isCertsVerified:typeof DOC_VERIFY_STATUS [keyof typeof DOC_VERIFY_STATUS],
+  isIdVerified:typeof DOC_VERIFY_STATUS [keyof typeof DOC_VERIFY_STATUS],
   status: typeof TRAINER_STATUS [keyof typeof TRAINER_STATUS];
   createdAt: string; 
 }

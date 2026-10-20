@@ -35,11 +35,11 @@ function PaymentCard({ payment }: { payment: UserPaymentResponseData }) {
   return (
     <div className="bg-zinc-800/40 hover:bg-zinc-800/70 border border-zinc-700/40 hover:border-zinc-600/60 rounded-xl p-4 transition-all duration-200">
       {/* Top row */}
-      <div className="flex items-start justify-between mb-2">
-        <span className="text-xs font-mono text-zinc-500">
+      <div className="md:flex items-start justify-between gap-1 mb-2">
+        <span className="text-[10px] md:text-xs font-mono text-zinc-500">
           {payment.transactionId}
         </span>
-        <span className="text-xs font-mono text-zinc-500">
+        <span className=" text-[10px] md:text-xs font-mono text-zinc-500">
          BookingID: {payment.bookingUId}
         </span>
         <span
@@ -50,26 +50,26 @@ function PaymentCard({ payment }: { payment: UserPaymentResponseData }) {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-8 gap-x-4 gap-y-3 mb-2">
+      <div className="grid grid-cols-2 sm:grid-cols-8 gap-x-2 lg:gap-x-4 gap-y-3 mb-2">
         <div>
-          <p className="text-xs text-zinc-500 mb-1">Amount</p>
-          <p className="text-sm font-medium text-emerald-400">
+          <p className="text-[10px] lg:text-xs text-zinc-500 mb-1">Amount</p>
+          <p className="text-[10px] lg:text-sm font-medium text-emerald-400">
             ₹ {payment.amount.toFixed(2)}
           </p>
         </div>
         <div>
-          <p className="text-xs text-zinc-500 mb-1">Currency</p>
-          <p className="text-sm text-zinc-400">
+          <p className="text-[10px] lg:text-xs text-zinc-500 mb-1">Currency</p>
+          <p className="text-[10px] lg:text-xs text-zinc-400">
             {payment.currency.toUpperCase()}
           </p>
         </div>
         <div>
           <p className="text-xs text-zinc-500 mb-1">Method</p>
-          <p className="text-sm text-zinc-400">{payment.paymentMethod}</p>
+          <p className="text-xs md:text-sm text-zinc-400">{payment.paymentMethod}</p>
         </div>
         <div>
-          <p className="text-xs text-zinc-500 mb-1">Date</p>
-          <p className="text-sm text-zinc-400">
+          <p className="text-[12px] md:text-xs text-zinc-500 mb-1">Date</p>
+          <p className="text-xs md:text-sm text-zinc-400">
             {formatDateDDMMYY(payment.createdAt)}
           </p>
         </div>
@@ -85,22 +85,22 @@ function PaymentCard({ payment }: { payment: UserPaymentResponseData }) {
             </p>
           </div>
         )}
-        <div className="flex gap-2 col-span-2">
+        <div className="flex gap-1  lg:gap-2 col-span-2">
           {payment.invoiceId && (
             <button
               onClick={handleDownload}
               disabled={!hasReceipt}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center px-0.5  gap-1 lg:gap-1.5 text-[10px] lg:text-xs lg:px-1 py-1 rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              <Download className="w-3 h-3" /> Download Invoice
+              <Download className="w-3 md:w-5 h-3 md:h-5 text-green-500" /> Download Invoice
             </button>
           )}
           <button
             onClick={handleViewReceipt}
             disabled={!hasReceipt}
-            className="flex items-center  gap-1.5 text-xs px-3 text-center rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center   px-0.5  gap-1 lg:gap-1.5 text-[10px] lg:text-xs lg:px-1 text-center rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <ExternalLink className="w-3 h-3" /> View receipt
+            <ExternalLink className="w-3 md:w-5 h-3 md:h-5 text-green-500" /> View receipt
           </button>
         </div>
       </div>

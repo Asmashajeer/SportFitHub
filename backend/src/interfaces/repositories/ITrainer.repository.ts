@@ -6,7 +6,7 @@ import { stripeData } from '@/dtos/request/trainer/trainer.profile.request.dto';
 
 
 export interface ITrainerRepository extends IBaseRepository<ITrainerProfile> {
-  findAll(query: FilterQuery<ITrainerProfile>, options: { skip: number; limit: number });
+  findAll(query: FilterQuery<ITrainerProfile>, options: { skip: number; limit: number,sortBy: Record<string, 1 | -1> } );
   findByUserId(userId: Types.ObjectId | string): Promise<ITrainerProfile>;
   findUserIdByTrainerId(trainerId: string): Promise<string | null>;
   findTrainerPopulatedUserId(trainerId: string);

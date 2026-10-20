@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
 import type { UserRole } from '../../../constants/constants';
+import { authService } from '../service/authService';
 
 export interface User {
   id: string;
@@ -22,13 +23,14 @@ export interface AuthState {
   setUser: (user: User) => void;
   setHasProfile: (status: boolean) => void;
   clearAuth: () => void;
+  logOut:()=>void;
   setLoading: (loading: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   devtools(
     persist(
-      (set) => ({
+      (set, get) => ({
         user: null,
         isAuthenticated: false,
         isLoading: true,
@@ -46,7 +48,10 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             isLoading: false,
           }),
-
+        logOut:async()=>{
+          await authService.logout();
+          get().clearAuth();
+        },
         setHasProfile: (status) =>
           set((state) => ({
             user: state.user ? { ...state.user, hasProfile: status } : null,

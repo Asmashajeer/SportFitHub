@@ -26,6 +26,7 @@ export const toConversationPopulatedResponseDTO = (conversation: IconversationPo
       id: p._id.toString(),
       name: p.name,
       roles: p.roles,
+      profilePic:getSignedFileUrl(p.profilePic,'image','upload'),
     })),
     contextSession: conversation.contextSessionId
       ? {

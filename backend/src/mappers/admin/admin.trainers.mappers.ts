@@ -15,9 +15,9 @@ export const toAdminTrainersResponseDTO = (trainer: ITrainerProfilePopulatedUser
   const timezone = getTimezone();
   return {
     id: trainer._id.toString(),
-    userId: trainer.userId._id.toString(),
-    name: trainer.userId.name,
-    email: trainer.userId.email,
+    userId: trainer.userId?._id?.toString(),
+    name: trainer.userId?.name,
+    email: trainer.userId?.email,
     // basic Info Branding
     category: trainer.category,
     displayName: trainer.displayName,

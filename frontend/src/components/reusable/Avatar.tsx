@@ -5,7 +5,7 @@ import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ROLES } from '@/constants/constants';
-import { Bell, UserCog } from 'lucide-react';
+import {  MessageSquare, UserCog } from 'lucide-react';
 
 import { userService } from '@/features/user/service/userService';
 
@@ -83,7 +83,7 @@ function Avatar() {
         className="relative p-1 flex  justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors group hover:cursor-pointer"
         onClick={()=>navigate(`/${user?.activeRole}/messages`)}
       >
-        <Bell 
+        <MessageSquare 
           className={`w-5 h-5 ${user?.activeRole === ROLES.TRAINER ? 'text-trainer-primary  group-hover:text-trainer-primary' : 'text-primary  group-hover:text-primary'} transition-colors`}        
         />
         <Badge className="absolute text-[8px] text-white px-1 right-0 top-0">{unreadMessageCountInbox}</Badge>

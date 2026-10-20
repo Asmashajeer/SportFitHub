@@ -1,7 +1,7 @@
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from '@/features/auth/store/useAuthStore';
 
 const Footer = () => {
-  const  {user,isAuthenticated}=useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   return (
     <footer className="w-full bg-background border-t border-border mt-40 pt-12 pb-8 transition-colors">
       <div className="container mx-auto px-6">
@@ -12,16 +12,12 @@ const Footer = () => {
             <h3 className="text-xl font-black tracking-tighter mb-4 font-sans uppercase">
               <span className="text-primary">SportFit</span>Hub
             </h3>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
-              Connecting athletes with top coaches, live video sessions, and interactive training.
-            </p>
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">Connecting athletes with top coaches, live video sessions, and interactive training.</p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-foreground font-bold uppercase tracking-widest text-[11px] mb-4">
-              Explore
-            </h4>
+            <h4 className="text-foreground font-bold uppercase tracking-widest text-[11px] mb-4">Explore</h4>
             <ul className="space-y-2.5 text-muted-foreground text-sm">
               <li>
                 <a href="#home" className="hover:text-primary transition-colors">
@@ -43,30 +39,29 @@ const Footer = () => {
 
           {/* For Trainers / Community */}
           <div>
-            <h4 className="text-foreground font-bold uppercase tracking-widest text-[11px] mb-4">
-              Coaches & Trainers
-            </h4>
+            <h4 className="text-foreground font-bold uppercase tracking-widest text-[11px] mb-4">Coaches & Trainers</h4>
             <ul className="space-y-2.5 text-muted-foreground text-sm">
               <li>
-                <a href="/register" className="hover:text-primary transition-colors">
+                <a href={isAuthenticated ? '/trainer/add-Profile' : '/register'} className="hover:text-primary transition-colors">
                   Become a Trainer
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a href="/trainer-dashboard" className="hover:text-primary transition-colors">
                   Trainers
                 </a>
-              </li>
-              
+              </li> */}
             </ul>
           </div>
 
-          {/* User & Platform Support */}
-          {user && isAuthenticated &&
-            <div>
-              <h4 className="text-foreground font-bold uppercase tracking-widest text-[11px] mb-4">
-                Account & Help
-              </h4>
+          <div>
+            <h4 className="text-foreground font-bold uppercase tracking-widest text-[11px] mb-4">Account & Help</h4>
+            <a href="/support" className="hover:text-primary text-muted-foreground text-sm transition-colors p-2 ">
+              Contact & Support
+            </a>
+            {/* User & Platform Support */}
+
+            {user && isAuthenticated && (
               <ul className="space-y-2.5 text-muted-foreground text-sm">
                 <li>
                   <a href="/user/my-wallet" className="hover:text-primary transition-colors">
@@ -78,21 +73,15 @@ const Footer = () => {
                     My Bookings
                   </a>
                 </li>
-                <li>
-                  <a href="/support" className="hover:text-primary transition-colors">
-                    Contact & Support 
-                  </a>
-                </li>
               </ul>
-            </div>
-          }
+            )}
+          </div>
         </div>
 
         {/* Bottom Bar */}
         <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-[11px] font-medium text-center md:text-left">
-            © {new Date().getFullYear()}{' '}
-            <span className="text-foreground">SportFitHub</span>. All rights reserved.
+            © {new Date().getFullYear()} <span className="text-foreground">SportFitHub</span>. All rights reserved.
           </p>
 
           <div className="flex gap-6 text-[11px] text-muted-foreground">

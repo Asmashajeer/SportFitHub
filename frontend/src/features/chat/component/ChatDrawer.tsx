@@ -46,7 +46,7 @@ const ChatDrawer = ({ userId, trainerName, contextSessionId, contextSessionModel
         </SheetHeader>
 
         {conversationId ? (
-          <AllMessages conversationId={conversationId} />
+          <AllMessages conversationId={conversationId} partner={trainerName} />
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm p-4 text-center">
             Send a message to start the conversation

@@ -26,9 +26,9 @@ export class TrainerManagementService implements ITrainerManagementService {
     this._userRepo = userRepo;
   }
 
-  //--------------all ltrainers-----------
+  //--------------all Trainers-----------
   async getTrainers(filter: TrainerFilterRequestDTO, user: AuthUser): Promise<AdminTrainersDTOWithPagination> {
-    const { page, limit, search, status, category } = filter;
+    const { page, limit, search, status, category, sort } = filter;
     const skip = (page - 1) * limit;
 
     const query: FilterQuery<ITrainerProfile> = {};
@@ -43,8 +43,14 @@ export class TrainerManagementService implements ITrainerManagementService {
       query.category = category;
     }
 
-    const [trainers, totalCount] = await Promise.all([await this._trainerRepo.findAll(query, { skip, limit }), await this._trainerRepo.count(query)]);
-    
+    let sortBy: Record<string, 1 | -1> = { createdAt: -1 };
+    if (sort === 'asc') {
+      sortBy = { displayName: 1 };
+    } else if (sort === 'desc') {
+      sortBy = { displayName: -1 };
+    }
+    const [trainers, totalCount] = await Promise.all([await this._trainerRepo.findAll(query, { skip, limit, sortBy }), await this._trainerRepo.count(query)]);
+
     const result = trainers.map((trainer) => serializeTrainerProfile(trainer, { id: user?.id, role: user?.role }));
     const trainersData = result.map((t) => toAdminTrainersResponseDTO(t));
     return {

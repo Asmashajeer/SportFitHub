@@ -19,6 +19,7 @@ export interface ConversationPopulatedResponseDTO extends Omit<ConversationRespo
     id: string;
     name: string;
     roles: string[];
+    profilePic:string
   }[];
   contextSession: {
     id: string;

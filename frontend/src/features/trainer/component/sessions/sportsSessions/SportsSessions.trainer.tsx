@@ -35,13 +35,13 @@ const SportsSessions = () => {
   return (
     <div className="">
       <div className=" flex justify-end p-1">
-        {sessions.length > 0 && (
+      
           <>
             <SearchBar value={search} onChange={setSearch} onClear={() => setSearch('')} placeholder=" by sessionName,type or mode.." />
 
             <Button onClick={() => setIsModalOpen(true)}>Create Session +</Button>
           </>
-        )}
+       
         <CreateSportSessionModal isOpen={isModalOpen} isEditing={!!selectedSession} sessionIdToEdit={selectedSession ? selectedSession : ''} onSuccess={refresh} onClose={handleClose} />
       </div>
       {loading ? (
@@ -52,7 +52,7 @@ const SportsSessions = () => {
         <div className=" border border-dashed bg-transparent border-slate-800 rounded-xl p-12 text-center">
           <p className="text-slate-600 mb-4">You haven't created any sessions yet.</p>
           <Button variant="outline" onClick={() => setIsModalOpen(true)}>
-            Create your first session
+           No sessions ,Create your first session
           </Button>
         </div>
       )}

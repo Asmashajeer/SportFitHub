@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 
-type Props = { file?: File; name?: string };
+type Props = { file?:  File  | null; name?: string };
 
-export function FilePreview({ file, name }: Props) {
+export function FilePreview({ file:fileInput, name }: Props) {
   const [url, setUrl] = useState<string | null>(null);
-
+  const file = fileInput;
   useEffect(() => {
     if (!file) {
       setUrl(null);

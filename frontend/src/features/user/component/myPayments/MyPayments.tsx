@@ -39,7 +39,7 @@ const MyPayments = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-zinc-100 mb-1">
+          <h1 className="text-xl font-medium md:text-2xl md:font-semibold text-zinc-100 mb-1">
             Payments
           </h1>
           <p className="text-sm text-zinc-500">Track all payments </p>
@@ -51,7 +51,7 @@ const MyPayments = () => {
             <button
               key={f}
               onClick={() => setActiveFilter(f)}
-              className={`text-xs px-4 py-2 rounded-full border transition-all duration-150 font-medium ${
+              className={`text-xs px-2 py-1 md:px-4 md:py-2 rounded-full border transition-all duration-150 font-medium ${
                 activeFilter === f
                   ? 'bg-zinc-100 text-zinc-900 border-zinc-100'
                   : 'bg-transparent text-zinc-400 border-zinc-700 hover:border-zinc-500 hover:text-zinc-300'

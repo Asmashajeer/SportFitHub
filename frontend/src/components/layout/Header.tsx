@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, X, User, LogOut, LogIn, User2, UserCog2 } from 'lucide-react';
+import { Menu, X, User, LogOut, LogIn, User2, UserCog2, Award,  } from 'lucide-react';
 import {  NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import Avatar from '../reusable/Avatar';
@@ -12,7 +12,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const navigate = useNavigate();
-  const { user, isAuthenticated, isLoading} = useAuthStore();
+  const { user, isAuthenticated, isLoading,logOut} = useAuthStore();
   if (isLoading) return <div className="w-10 h-10" />;
 
 
@@ -24,18 +24,18 @@ const Header = () => {
     }
   }
  
-
+ const ToDashboard = () => user && navigate(`/${user.activeRole}/dashboard`);
   return (
     <header className="fixed top-0 left-0 z-50 w-full shrink-0 p-0 border-border bg-background/80 backdrop-blur-md transition-all">
       <div className="section-container px-4  flex h-16 md:h-20 items-center  justify-between">
        <div   
-          className="flex items-center justify-around   bg-black cursor-pointer group"
+          className={`flex items-center w-full justify-center md:justify-start md:w-auto  bg-black cursor-pointer group`}
           onClick={() => navigate('/')}
         >
           <img 
               src="/sportfithub_logo.png" 
               alt="SportFitHub" 
-              className="h-10 w-auto  px-4 object-contain transition-transform group-hover:scale-105"
+              className="h-8 w-auto  md:h-10 px-4 object-contain transition-transform group-hover:scale-105"
           />   
           
         </div>
@@ -92,15 +92,15 @@ const Header = () => {
                     className="w-full p-2 flex justify-center  rounded-xl gap-2 bg-green-700 items-center   text-xs text-foreground  hover:bg-transparent hover:border-2 hover:border-green-700 transition-colors "
                   >
                     <LogOut className="w-7 h-7 font-bold text-green-500" />
-                    switch to  User Mode
+                    To User Mode
                   </Button>
                 : <Button
                      variant="secondary"
                     onClick={switchUserMode}
                     className="w-full p-2 flex justify-center  rounded-xl gap-1 bg-transparent   items-center   text-xs text-foreground  hover:bg-green-800 hover:border-black hover: transition-colors "
                   >
-                    <LogOut className="w-7 h-7 font-bold text-green-500" />
-                    switch to Trainer Mode
+                    <Award className="w-7 h-7 font-bold text-green-500" />
+                     To Trainer Mode
                   </Button>
                 ):(
                   user?.activeRole===USER_ROLES.TRAINER?
@@ -142,7 +142,7 @@ const Header = () => {
 
       {/* Mobile Navigation - Styled with your 'card' background color */}
       {isMenuOpen && (
-        <nav className="md:hidden border-t border-border bg-card p-4 flex flex-col space-y-4 animate-in slide-in-from-top duration-300">
+        <nav className="md:hidden border-t border-border bg-card p-4  flex flex-col px-3 space-y-4 animate-in slide-in-from-top duration-300">
            <SearchBar
               value={query}
               onChange={setQuery}
@@ -153,7 +153,7 @@ const Header = () => {
               }}
               placeholder="Search ..."
             />
-          {['Sports', 'Fitness', 'Trainer'].map((item) => (
+          {['Sports', 'Fitness',].map((item) => (
             <a
               key={item}
               href={`/${item.toLowerCase()}`}
@@ -180,19 +180,32 @@ const Header = () => {
               {user?.roles && user.roles.length > 1 && user?.activeRole === ROLES.TRAINER? 
                   <button
                   onClick={switchUserMode}
-                  className="w-full py-3 flex justify-center  rounded-xl gap-2 bg-transparent items-center  text-foreground  hover:bg-primary transition-colors "
+                  className="w-full py-2 flex justify-center  rounded-xl gap-2 bg-transparent items-center  text-foreground  hover:border hover:border-b-emerald-900 transition-colors "
                 >
-                  <LogOut className="w-5 h-5 " />
-                  switch to userMode
+                  <LogOut className="w-4 h-4 " />
+                  To userMode
                 </button>
                 : <button
                   onClick={switchUserMode}
-                  className="w-full py-3 flex justify-center  rounded-xl gap-2 bg-transparent items-center  text-foreground  hover:bg-primary transition-colors "
+                  className="w-full py-2 flex justify-center  rounded-xl gap-2 bg-transparent items-center  text-foreground   hover:border hover:border-b-emerald-900 transition-colors "
                 >
-                  <LogOut className="w-5 h-5 " />
-                  switch to Trainer Mode
+                  <Award className="w-4 h-4  text-green-500" />
+                  To Trainer Mode
                 </button>
               }
+              <button
+                onClick={ToDashboard}
+                className="text-md font-medium text-foreground hover:text-primary transition-colors"
+              >
+                Dashboard
+              </button>
+              <hr className="my-1 " />
+              <button
+                onClick={logOut}
+                className="flex  items-center justify-center w-full text-md font-medium text-foreground hover:text-amber-700 transition-colors"
+              >
+                 <LogOut className="w-3 h-3 text-red-500 mx-1" />Logout
+              </button>
             </div>
             
           )}

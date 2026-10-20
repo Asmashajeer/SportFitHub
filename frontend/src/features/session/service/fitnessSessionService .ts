@@ -8,6 +8,7 @@ interface queryParamsOptions {
   ageGroup?: string;
   minRating?:number;
   sessionType?: string;
+  sessionMode?:string;
   limit?: number;
 }
 export const fitnessSessionService = {

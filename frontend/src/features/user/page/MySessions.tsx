@@ -291,7 +291,7 @@ export default function MySessions() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-8">
+        <div className="grid grid-cols-3 gap-1 sm:grid-cols-6 md:gap-3 mb-8">
           <StatCard
             label="All"
             value={userSessions.length}

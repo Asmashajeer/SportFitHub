@@ -91,9 +91,7 @@ export interface PaginationResponseData {
   page: number;
   limit: number;
   total: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
+  totalPages: number;  
 }
 
 export interface PricePlan {

@@ -15,7 +15,7 @@ export interface Message {
 
 export interface Conversation {
   id: string;
-  participants: { _id: string; name: string; role: string }[];
+  participants: { id: string; name: string; role: string,profilePic:string }[];
   lastMessage?: { text: string; sender: string; createdAt: string };
   contextSessionId?: { _id: string; sessionName: string; contextSessionModel: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL] } | null;
 }

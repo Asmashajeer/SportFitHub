@@ -301,8 +301,8 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
           {fields.map((field, index) => {
              const fileList = watch(
                 `certificationInfo.documents.${index}.file` as FieldPath<TrainerOnboardingFormValues>
-              ) as FileList | undefined;
-              const file = fileList?.[0];
+              ) as FileList|null | undefined;
+              const file = fileList && fileList.length > 0 ? fileList[0] : null;
               const name = watch(
                 `certificationInfo.documents.${index}.name` as FieldPath<TrainerOnboardingFormValues>
               ) as string | undefined;
@@ -382,7 +382,7 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
                     )}
                   />
                 </div>             
-              {file && <FilePreview file={file} name={name} />}
+              {file &&<FilePreview file={file} name={name} />}
               
               </div>
             );

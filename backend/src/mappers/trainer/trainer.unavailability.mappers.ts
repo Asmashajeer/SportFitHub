@@ -1,9 +1,10 @@
-import { getTimezone } from "@/context/timezone.context";
-import { UnavailableDayResponseDto } from "@/dtos/response/trainer/trainer.unavailablity.dto";
-import { formatInTimeZone } from "date-fns-tz";
 
-export const toUnavailableDayDto = (doc: any): UnavailableDayResponseDto => {
-   const timezone = getTimezone()
+import { UnavailableDayResponseDto } from "@/dtos/response/trainer/trainer.unavailablity.dto";
+import { IAvailabilityException } from "@/models/availabilityExceptions";
+
+
+export const toUnavailableDayDto = (doc: IAvailabilityException): UnavailableDayResponseDto => {
+  
   return {
   id: String(doc._id),
   date: new Date(doc.date).toISOString().slice(0, 10), 

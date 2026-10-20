@@ -9,6 +9,7 @@ export interface IconversationPopulatedParticipants extends Omit<IConversation, 
     _id: Types.ObjectId;
     name: string;
     roles: string[];
+    profilePic:string
   }[];
   contextSessionId: {
     _id: Types.ObjectId;

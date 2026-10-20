@@ -17,7 +17,7 @@ interface BookingPricePlan {
 }
 export interface AdminBookingListData {
   bookingId: string;
-  bookingUId:string;
+  bookingUID:string;
   userId:string,
   userName: string;
   userEmail: string; 

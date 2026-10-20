@@ -265,7 +265,9 @@ export const TRANSACTION_STATUS = {
   yoga: ['Hatha', 'Vinyasa', 'Ashtanga', 'Yin Yoga', 'Pranayama', 'Meditation'],
   fitness: ['Weight Loss', 'Muscle Building', 'HIIT', 'Cardio', 'Strength Training'],
   swimming: ['Freestyle', 'Butterfly', 'Backstroke', 'Breaststroke', 'Endurance'],
-  badminton:['Footwork & Movement','Smash Technique','Net Play & Drop Shots','Doubles Strategy','Singles Strategy','Serve & Return Mastery','Deception & Shot Disguise']
+  badminton:['Footwork & Movement','Smash Technique','Net Play & Drop Shots','Doubles Strategy','Singles Strategy','Serve & Return Mastery','Deception & Shot Disguise'],
+  hiit: ['Tabata', 'Circuit Training', 'Cardio Intervals', 'Plyometrics', 'Core Burner', 'Full Body Conditioning'],
+ strengthTraining: ['Powerlifting', 'Hypertrophy', 'Functional Strength', 'Weightlifting', 'Bodybuilding'],
 };
 
 export const COMMON_LANGUAGES = [

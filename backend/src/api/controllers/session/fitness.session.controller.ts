@@ -97,13 +97,14 @@ export class FitnessSessionController {
 
   // -----------------get all Fitness Session-------------------------
   getAllSessions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { page, limit, search, program, sessionType, ageGroup,minRating, lat, lng, radius } = req.query;
+    const { page, limit, search, program, sessionType,sessionMode, ageGroup,minRating, lat, lng, radius } = req.query;
     const filters = {
       page: parseInt(page as string) || 1,
       limit: parseInt(limit as string) || PAGINATION_LIMIT,
       search: search as string,
       program: program as string,
       sessionType: sessionType as string,
+       sessionMode: sessionMode as string,
       ageGroup: ageGroup as string,
       rating:parseInt( minRating as string),
       lat: parseInt(lat as string),

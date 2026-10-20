@@ -4,6 +4,7 @@ import { ISportsSession } from '@/models/sportsSession.model';
 import { formatInTimeZone } from 'date-fns-tz';
 import { getTimezone } from '@/context/timezone.context';
 import { IFitnessSessionDTOWithCategory, ISportsSessionDTOWithCategory } from '@/dtos/request/admin/admin.session.dto';
+import { getSignedFileUrl } from '@/utils/cloudinary';
 
 export const toAdminSessionResponseDTO = (session: ISportsSessionDTOWithCategory | IFitnessSessionDTOWithCategory) => {
   const timezone = getTimezone();
@@ -80,7 +81,7 @@ export const toAdminSessionDetailedViewDTO = (session: SportsSessionDetails | Fi
     trainer: session.trainerId
       ? {
           id: session.trainerId._id.toString(),
-          userId: session.trainerId.userId.toString(),
+          userId: session.trainerId?.userId?.toString(),
           displayName: session.trainerId.displayName,
           profilePic: session.trainerId.profilePic,
           coreDiscipline: session.trainerId.coreDiscipline,
@@ -114,7 +115,7 @@ export const toAdminSessionDetailedViewDTO = (session: SportsSessionDetails | Fi
     isActive: session.isActive,
     isApproved: session.isApproved,
     isDeleted: session.isDeleted,
-    images: session.images,
+    images:  (session.images ?? []).map((publicId) => getSignedFileUrl(publicId, 'image', 'upload')),
     rating: session.rating,
     createdAt: formatInTimeZone(session.createdAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX').toString(),
     updatedAt: formatInTimeZone(session.updatedAt, timezone, 'yyyy-MM-dd HH:mm:ssXXX').toString(),

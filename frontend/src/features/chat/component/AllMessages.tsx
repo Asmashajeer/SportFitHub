@@ -13,14 +13,16 @@ import toast from "react-hot-toast";
 
 interface MessageThreadProps {
   conversationId: string;
+  partner:string
 }
 
-export const AllMessages = ({ conversationId }: MessageThreadProps) => {
+export const AllMessages = ({ conversationId,partner }: MessageThreadProps) => {
   const { messages, setMessages,markAsRead } = useChatStore();
   const {user}= useAuthStore();
   const currentUserId=user?.id;
   const bottomRef = useRef<HTMLDivElement>(null);  
 
+  
   useEffect(() => {   
    const fetchMessages=async()=>{
     try{
@@ -66,42 +68,45 @@ export const AllMessages = ({ conversationId }: MessageThreadProps) => {
   }
   const grouped = groupMessagesByDate(conversationMessages);
   return (
-    <ScrollArea className="flex-1 h-75 p-4">
-      {grouped.map((group) => (
-        <div key={group.date}>
-          <div className="date-divider text-[10px] text-gray-500">- {group.label} -</div>
-          <div className="flex flex-col gap-2">
-            {group.messages.map((msg) => {
-              const isOwn = msg.sender === currentUserId;
-              return (
-                <div
-                  key={msg.id}
-                  className={cn("flex flex-col max-w-[70%]", isOwn ? "self-end items-end" : "self-start items-start")}
-                >                
+    <>
+     <h2 className=' font-bold text-green-600'> -{partner} -</h2> 
+      <ScrollArea className="flex-1 h-75 p-4">      
+        {grouped.map((group) => (
+          <div key={group.date}>
+            <div className="date-divider text-[10px] text-gray-500">- {group.label} -</div>
+            <div className="flex flex-col gap-2">
+              {group.messages.map((msg) => {
+                const isOwn = msg.sender === currentUserId;
+                return (
                   <div
-                    className={cn(
-                      " flex  rounded-md px-2 py-1 text-xs justify-between gap-2",
-                      isOwn ? "bg-emerald-700 text-white" : "bg-muted border"
-                    )}
-                  >
-                    {msg.type === 'file' && msg.attachment ? <FileMessage attachment={msg.attachment} conversationId={conversationId}  /> : msg.text}
-                    <div className=" flex  items-end">
-                      <p className="text-[6px] text-right text-gray-300 mt-1 ">                    
-                          {formatTo12Hour (msg.createdAt)}
-                    </p>
-                    <p className=" px-0.7 text-green-300">{msg.readBy.length>1 ?<CheckCheck className=" w-2 h-2 text-green-500  " />:<Check className=" w-2 h-2 "/>}</p>
-                    </div>          
-                  
+                    key={msg.id}
+                    className={cn("flex flex-col max-w-[70%]", isOwn ? "self-end items-end" : "self-start items-start")}
+                  >                
+                    <div
+                      className={cn(
+                        " flex  rounded-md px-2 py-1 text-xs justify-between gap-2",
+                        isOwn ? "bg-emerald-700 text-white" : "bg-muted border"
+                      )}
+                    >
+                      {msg.type === 'file' && msg.attachment ? <FileMessage attachment={msg.attachment} conversationId={conversationId}  /> : msg.text}
+                      <div className=" flex  items-end">
+                        <p className="text-[6px] text-right text-gray-300 mt-1 ">                    
+                            {formatTo12Hour (msg.createdAt)}
+                      </p>
+                      <p className=" px-0.7 text-green-300">{msg.readBy.length>1 ?<CheckCheck className=" w-2 h-2 text-green-500  " />:<Check className=" w-2 h-2 "/>}</p>
+                      </div>          
+                    
+                    </div>
+                    
+                    
                   </div>
-                  
-                  
-                </div>
-              );
-            })}       
-            <div ref={bottomRef} />
+                );
+              })}       
+              <div ref={bottomRef} />
+            </div>
           </div>
-        </div>
-      ))}
-    </ScrollArea>
+        ))}
+      </ScrollArea>
+    </>
   );
 };

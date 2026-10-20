@@ -44,8 +44,8 @@ export const AttendanceDisplayModal = ({ session, onClose }: AttendanceDisplayMo
         <div className="p-5 border-b border-zinc-800">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-zinc-100">{session.sessionName}</h2>
-              <p className="text-sm text-zinc-400 mt-1">
+              <h2 className="sm:text-sm md:text-lg font-semibold text-zinc-100">{session.sessionName}</h2>
+              <p className="sm:text-xs md:text-sm text-zinc-400 mt-1">
                 {session.sessionModel === PAYLOAD_MODEL.SPORT_SESSION
                   ? PAYLOAD_MODEL.SPORT_SESSION
                   : PAYLOAD_MODEL.FITNESS_SESSION}

@@ -14,6 +14,7 @@ import {
   LOCATION_RADIUS,
   PAGINATION_DEFAULT_LIMIT,
   Review_Type,
+  SESSION_MODE,
   SESSION_TYPE,
 } from '@/constants/constants';
 
@@ -58,6 +59,7 @@ const PublicFitnessSessions = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [programFilter, setProgramFilter] = useState('');
   const [sessionTypeFilter, setSessionTypeFilter] = useState('');
+   const [sessionModeFilter, setSessionModeFilter] = useState('');
   const [ageGroupFilter, setAgeGroupFilter] = useState('');
   const [radius, setRadius] = useState(0);
   const [location, setLocation] = useState({ lat: 0, lng: 0, radius: 0 });
@@ -67,7 +69,7 @@ const PublicFitnessSessions = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, programFilter, sessionTypeFilter, ageGroupFilter,ratingFilter, location]);
+  }, [debouncedSearch, programFilter, sessionTypeFilter, sessionModeFilter,ageGroupFilter,ratingFilter, location]);
 
   useEffect(() => {
     try {
@@ -90,6 +92,7 @@ const PublicFitnessSessions = () => {
           search: debouncedSearch,
           program: programFilter,
           sessionType: sessionTypeFilter,
+          sessionMode:sessionModeFilter,
           ageGroup: ageGroupFilter,
           ...(ratingFilter && ratingFilter !== 'all' && { minRating: Number(ratingFilter) }),
           ...(location.lat !== 0 && location.radius !== 0 && {
@@ -108,7 +111,7 @@ const PublicFitnessSessions = () => {
       }
     };
     loadSessions();
-  }, [currentPage, debouncedSearch, programFilter, sessionTypeFilter, ageGroupFilter,ratingFilter,  location]);
+  }, [currentPage, debouncedSearch, programFilter, sessionTypeFilter,sessionModeFilter, ageGroupFilter,ratingFilter,  location]);
 
   useEffect(() => {
     if (radius === 0) return;
@@ -175,6 +178,7 @@ const PublicFitnessSessions = () => {
     setSearchQuery('');
     setProgramFilter('');
     setSessionTypeFilter('');
+     setSessionModeFilter('');
     setAgeGroupFilter('');
      setRatingFilter('');
     setRadius(0);
@@ -182,7 +186,7 @@ const PublicFitnessSessions = () => {
   };
 
   const activeFilterCount =
-    [programFilter, sessionTypeFilter, ageGroupFilter,ratingFilter].filter(
+    [programFilter, sessionTypeFilter,sessionModeFilter, ageGroupFilter,ratingFilter].filter(
       (f) => f && f !== 'all'
     ).length + (location.lat !== 0 ? 1 : 0);
 
@@ -255,6 +259,25 @@ const PublicFitnessSessions = () => {
             {Object.values(SESSION_TYPE).map((type) => (
               <SelectItem key={type} value={type}>
                 {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+       {/* Session Mode */}
+      <div className="flex flex-col gap-1.5">
+        <Label className="text-xs text-muted-foreground uppercase tracking-wide">
+          Session Mode
+        </Label>
+        <Select value={sessionModeFilter} onValueChange={setSessionModeFilter}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="All Sessions" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Sessions</SelectItem>
+            {Object.values(SESSION_MODE).map((mode) => (
+              <SelectItem key={mode} value={mode}>
+                {mode===SESSION_MODE.OFFLINE?'On-Site':SESSION_MODE.ONLINE}
               </SelectItem>
             ))}
           </SelectContent>

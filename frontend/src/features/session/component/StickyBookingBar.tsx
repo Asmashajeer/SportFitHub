@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { ISlots, Pricing } from '../store/session.types';
 import { formatDateReadable, formatTo12Hour } from '@/utils/formatDate';
 import type { IBookedSlot } from '@/features/user/types/user.booking.types';
+import { CURRENCY } from '@/constants/constants';
 interface props {
   sessionId: string;
   selectedDate: string | undefined;
@@ -59,7 +60,7 @@ const StickyBookingBar = ({
                   Total
                 </p>
                 <p className="text-white font-black text-xl">
-                  ${pricePlan?.price}
+                  {pricePlan?.price} {CURRENCY}
                 </p>
               </div>
 
@@ -72,7 +73,7 @@ const StickyBookingBar = ({
                 className="bg-emerald-500 hover:bg-emerald-400 text-black px-8 py-3 rounded-2xl font-black text-sm transition-all active:scale-95 shadow-lg shadow-emerald-500/20 flex items-center gap-2"
               >
                 BookNow
-                <span className="sm:hidden">— ${pricePlan?.price}</span>
+                <span className="sm:hidden">— {pricePlan?.price} {CURRENCY}</span>
               </button>
             </div>
           </div>

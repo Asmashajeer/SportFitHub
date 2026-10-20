@@ -24,5 +24,4 @@ router.get('/unavailable-dates/:trainerId', trainerUnavailabilityController.getU
 router.get('/batch_rating_review/:sessionModel',reviewController.getBatchRatingAndReviewCount)
 router.get('/rating/:sessionModel/:sessionId',reviewController.getAvgRatingAndReviewCount)
 router.get('/session_review/:sessionModel/:sessionId',reviewController.getReviews)
-
 export default router;

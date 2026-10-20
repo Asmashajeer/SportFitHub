@@ -1,4 +1,4 @@
-import { LogOut,} from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../auth/store/useAuthStore';
 import { adminNavLinks } from '../../../constants/constants';
@@ -18,21 +18,14 @@ interface SidebarItemProps {
 const SidebarItem: React.FC<SidebarItemProps> = ({ label, icon, isActive, path, onClick }) => {
   if (path) {
     return (
-      <Link
-        to={path}
-        onClick={onClick}
-        className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'} p-2`}
-      >
+      <Link to={path} onClick={onClick} className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'} p-2`}>
         {icon}
         <span>{label}</span>
       </Link>
     );
   }
   return (
-    <div
-      onClick={onClick}
-      className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
-    >
+    <div onClick={onClick} className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}>
       {icon}
       <span>{label}</span>
     </div>
@@ -44,7 +37,7 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-const AdminSidebar: React.FC<SidebarProps> = ({  onClose }) => {
+const AdminSidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const navLinks = adminNavLinks;
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -66,10 +59,9 @@ const AdminSidebar: React.FC<SidebarProps> = ({  onClose }) => {
   return (
     <div className="flex flex-col h-full gap-2">
       {/* Logo */}
-      <span className="text-xl font-extrabold tracking-tighter uppercase">
-        <span className="text-primary">SportFit</span>
-        <span className="text-foreground">Hub</span>
-      </span>
+      <div className={`flex items-center w-full justify-center md:justify-start md:w-auto  bg-black cursor-pointer group`} onClick={() => navigate('/')}>
+        <img src="/sportfithub_logo.png" alt="SportFitHub" className="h-8 w-auto  md:h-10 px-4 object-contain transition-transform group-hover:scale-105" />
+      </div>
 
       {/* Profile */}
       <div className="flex flex-col items-center py-4 border-b border-zinc-800">
@@ -79,14 +71,7 @@ const AdminSidebar: React.FC<SidebarProps> = ({  onClose }) => {
       {/* Nav */}
       <nav className="flex flex-col gap-1 flex-1 overflow-y-auto">
         {navLinks.map((item) => (
-          <SidebarItem
-            key={item.label}
-            path={item.path}
-            icon={<item.icon className="h-4 w-4" />}
-            label={item.label}
-            isActive={pathname === item.path}
-            onClick={onClose}
-          />
+          <SidebarItem key={item.label} path={item.path} icon={<item.icon className="h-4 w-4" />} label={item.label} isActive={pathname === item.path} onClick={onClose} />
         ))}
       </nav>
 

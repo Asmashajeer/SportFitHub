@@ -59,19 +59,19 @@ function BookingSessionCard({
     }
   
   return (
-    <div className="bg-zinc-800/40 hover:bg-zinc-800/70 border border-zinc-700/40 hover:border-zinc-600/60 rounded-xl p-4 transition-all duration-200">
+    <div className="bg-zinc-800/40 hover:bg-zinc-800/70 border w-auto text-left border-zinc-700/40 hover:border-zinc-600/60 rounded-xl py-4 px-2 transition-all duration-200">
       {/* Top */}
       <div className="flex items-start justify-between mb-3">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-medium text-zinc-100">
+          <div className="flex items-center md:gap-2  sm:gap-1 mb-1">
+            <span className="sm:text-xs md:text-sm font-medium text-zinc-100">
               {first.sessionName}
             </span>
-            <span className="text-xs text-zinc-400 bg-zinc-700/50 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-zinc-400 bg-zinc-700/50 px-1  py-0.5 rounded-full">
               {first.sessionType}
             </span>
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-450">
             {first.venue ?<span>{first.venue.name}</span>:<span>Live Session</span>}
             <span>{formatDateDDMMYY(first.date)}</span>
             <span>
@@ -85,7 +85,7 @@ function BookingSessionCard({
         {type === 'upcoming' && (
           <div className="text-right">
             <span
-              className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+              className={`text-xs md:px-2.5 py-1 rounded-full font-medium ${
                 isFull
                   ? 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20'
                   : 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20'
@@ -94,9 +94,9 @@ function BookingSessionCard({
               {bookedCount} / {first.maxCapacity} booked
             </span>
             {/* Progress bar */}
-            <div className="w-20 h-0.5 bg-zinc-700 rounded-full mt-2 ml-auto">
+            <div className="w-18 h-0.5 bg-zinc-700 rounded-full mt-2 ml-auto">
               <div
-                className={`h-full rounded-full ${isFull ? 'bg-red-400' : 'bg-blue-400'}`}
+                className={`text-xs h-full rounded-full ${isFull ? 'bg-red-400' : 'bg-blue-400'}`}
                 style={{ width: `${(bookedCount / first.maxCapacity) * 100}%` }}
               />
             </div>

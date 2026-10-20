@@ -1,6 +1,7 @@
 import { formatDateReadable, formatTo12Hour } from '@/utils/formatDate';
 import type { BookingSlot, IVenueAddress } from '../store/payment.types';
 import { MapPin, Globe } from 'lucide-react';
+import { CURRENCY } from '@/constants/constants';
 
 interface props {
   data: {
@@ -100,7 +101,7 @@ interface props {
         <div className="flex justify-between items-center pt-2">
           <p className="text-zinc-400">Total to pay</p>
           <p className="text-2xl font-black text-white">
-            {data.price.toFixed(2)}
+            {data.price.toFixed(2)} {CURRENCY}
           </p>
         </div>
       </div>

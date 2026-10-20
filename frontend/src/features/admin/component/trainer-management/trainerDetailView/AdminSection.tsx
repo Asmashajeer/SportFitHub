@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { CURRENCY } from "@/constants/constants";
+import { CURRENCY, TRAINER_STATUS } from "@/constants/constants";
 import type { Trainer } from "@/features/admin/store/trainerSlice";
 import { formatDateReadable } from "@/utils/formatDate";
 
@@ -53,7 +53,7 @@ const AdminSection=({trainer}:{trainer:Trainer})=> {
             <div className="flex flex-col gap-0.5">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Current Status</span>
               <span className="text-sm font-medium text-slate-400 wrap-break-word">
-               {<Badge>{trainer.status}</Badge> }
+               {trainer.status===TRAINER_STATUS.APPROVED?<Badge>{trainer.status}</Badge> :<Badge variant='destructive'>{trainer.status}</Badge>}
               </span>
             </div> 
         
@@ -83,7 +83,8 @@ const AdminSection=({trainer}:{trainer:Trainer})=> {
               <strong>Suspended {formatDateReadable(trainer.suspendedAt)}:</strong> {trainer.suspensionReason}
             </div>
           )}
-          {trainer.rejectionReason && (
+          
+          {trainer.status === TRAINER_STATUS.REJECTED && trainer.rejectionReason && (
            <div className={`mt-3 rounded-lg border p-3 text-xs border-red-200 bg-red-50 text-red-800`}>
               <strong>Rejected {formatDateReadable(trainer.rejectedAt)}:</strong> {trainer.rejectionReason}
             </div>

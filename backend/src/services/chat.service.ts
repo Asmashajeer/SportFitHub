@@ -3,11 +3,14 @@ import { sendMessageRequestDTO } from '@/dtos/request/chat/chat.request.dto';
 import { ConversationPopulatedResponseDTO, ConversationResponseDTO, MessageResponseDTO } from '@/dtos/response/chat/chat.response.dto';
 import { IConversationRepository } from '@/interfaces/repositories/IConversation.repository';
 import { IMessageRepository } from '@/interfaces/repositories/IMessage.repository';
+import { IProfileRepository } from '@/interfaces/repositories/IProfile.repository';
+import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
 import { IChatService } from '@/interfaces/services/IChat.service';
 import { toConversationPopulatedResponseDTO, toConversationResponseDTO, toMessageResponseDTO } from '@/mappers/chat.mappers';
-import { AuthUser } from '@/middleware/auth.middleware';
+
 import { IConversation } from '@/models/conversation.model';
 import { IAttachment } from '@/models/message.model';
+
 
 import AppError from '@/utils/AppError';
 import { getSignedFileUrl } from '@/utils/cloudinary';
@@ -16,9 +19,13 @@ import { Types } from 'mongoose';
 export class ChatService implements IChatService {
   private _conversationRepo: IConversationRepository;
   private _messageRepo: IMessageRepository;
-  constructor(conversationRepo: IConversationRepository, messageRepo: IMessageRepository) {
+  private _profileRepo: IProfileRepository;
+  private _trainerRepo: ITrainerRepository;
+  constructor(conversationRepo: IConversationRepository, messageRepo: IMessageRepository, profileRepo: IProfileRepository, trainerRepo: ITrainerRepository) {
     this._conversationRepo = conversationRepo;
     this._messageRepo = messageRepo;
+    this._profileRepo = profileRepo;
+    this._trainerRepo = trainerRepo;
   }
 
   // ---------------create a new conversation or find existing one----------------
@@ -35,7 +42,25 @@ export class ChatService implements IChatService {
   //--------------------get convesations by userId----------------
   getConversations = async (userId: string): Promise<ConversationPopulatedResponseDTO[]> => {
     const allConversations = await this._conversationRepo.getConversations(userId);
-    const conversations = allConversations.map((conv) => toConversationPopulatedResponseDTO(conv));
+    const userIds = [...new Set(allConversations.flatMap((conv) => conv.participants.filter((p) => p._id.toString() !== userId).map((p) => p._id.toString())))]; //fetch all participant userIds
+   
+    const [userProfiles, trainerProfiles] = await Promise.all([this._profileRepo.find({ userId: { $in: userIds } }), this._trainerRepo.find({ userId: { $in: userIds } })]);
+    // Build a lookup map for profile pictures
+    const picMap = new Map();
+    userProfiles.forEach((p)=>picMap.set(p.userId.toString(),p.profilePic));
+    trainerProfiles.forEach((p)=>picMap.set(p.userId.toString(),p.profilePic));
+   
+    const all_Convs=allConversations.map((conv)=>({
+      ...conv,
+      participants:conv.participants.map((p)=>({
+        ...p,
+        profilePic: picMap.get(p._id.toString()) || null,
+
+      })),
+    }))
+  
+    const conversations =all_Convs.map((conv) => toConversationPopulatedResponseDTO(conv));
+   
     return conversations;
   };
 
@@ -101,7 +126,7 @@ export class ChatService implements IChatService {
     }
 
     const resourceType = attachment.mimeType.startsWith('image') ? 'image' : 'raw';
-    let signedUrl: string = getSignedFileUrl(attachment.url, resourceType, 'authenticated');
+    const signedUrl: string = getSignedFileUrl(attachment.url, resourceType, 'authenticated');
 
     const cloudRes = await fetch(signedUrl);
     if (!cloudRes.ok || !cloudRes.body) {

@@ -23,7 +23,7 @@ export const TrainerFitnessSessionService = {
     return response.data;
   },
   deleteSession: async (sessionId: string) => {
-    const response = await api.patch(FITNESS_SESSION_ROUTE.FITNESS_SESSION.BY_ID(sessionId));
+    const response = await api.delete(FITNESS_SESSION_ROUTE.FITNESS_SESSION.BY_ID(sessionId));
     return response.data;
   },
 

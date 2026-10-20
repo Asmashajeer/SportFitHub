@@ -1,5 +1,3 @@
-
-
 export interface DashboardStats {
   totalusers: number;
   ActiveUsers: number;
@@ -43,5 +41,6 @@ export interface TrainerFilter {
   limit: number;
   search: string;
   status: string;
-   category:string
+  category: string;
+  sort: string;
 }

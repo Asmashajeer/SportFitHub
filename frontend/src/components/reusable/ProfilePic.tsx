@@ -5,7 +5,7 @@ function ProfilePic() {
   const user = useAuthStore((state) => state.user);
 
   const alias = user?.name?.[0].toUpperCase();
-  const role=user?.activeRole==USER_ROLES.TRAINER? USER_ROLES.TRAINER:'Member';
+  const role=user?.activeRole==USER_ROLES.TRAINER? USER_ROLES.TRAINER:(user?.activeRole==USER_ROLES.USER?'Member': ' ');
   return (
     <div className="flex items-center text-center gap-2  pb-2">
       <div

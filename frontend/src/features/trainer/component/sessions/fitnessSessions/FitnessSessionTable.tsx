@@ -1,17 +1,18 @@
 import { Button } from '@/components/ui/Button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronsRight, Edit, Eye, EyeOff, X } from 'lucide-react';
+import {  Edit, Eye, EyeOff, X } from 'lucide-react';
 import ConfirmDialog from '@/components/reusable/ConfirmDialog';
 import toast from 'react-hot-toast';
 import type { FitnessSessionResponseData } from '../../../../session/store/fitness.session.types';
 import type { PaginationResponseData } from '../../../../session/store/session.types';
-import { useSearchParams } from 'react-router-dom';
+
 import { PAGINATION_DEFAULT_LIMIT } from '@/constants/constants';
 import { trainerBookingsService } from '@/features/trainer/service/trainer.bookings.service';
 import { useState } from 'react';
 import { TrainerFitnessSessionService } from '@/features/trainer/service/sessionService/trainer.fitness.session.service';
 import DeleteSessionDialog from '../DeleteSessionDialog';
+import Pagination from '@/components/reusable/Pagination';
 
 interface Props {
   sessions: FitnessSessionResponseData[];
@@ -21,10 +22,11 @@ interface Props {
 }
 
 export const FitnessSessionTable = ({ sessions, pagination, onEdit, refresh }: Props) => {
-  const [_, setSearchParams] = useSearchParams();
-  const handlePageChange = (newPage: number) => {
-    setSearchParams({ page: newPage.toString() });
-  };
+  // const [_, setSearchParams] = useSearchParams();
+   const [currentPage, setCurrentPage] = useState(pagination.page||1);
+  // const handlePageChange = (newPage: number) => {
+  //   setSearchParams({ page: newPage.toString() });
+  // };
   const [hasBookings, setHasBookings] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   if (sessions.length === 0) {
@@ -99,7 +101,8 @@ export const FitnessSessionTable = ({ sessions, pagination, onEdit, refresh }: P
                 <TableCell>
                   {/* Using Shadcn Badge component */}
                   <Badge variant={session.isActive ? 'default' : 'secondary'} className={session.isActive ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''}>
-                    {session.isActive ? 'Active' : 'Inactive'}
+                    {session.isActive ? 'Active' : 'Inactive'} <span className={`${session?.isApproved ?'text-green-600':'text-red-600'}`}> {session.isApproved?"":'Pending Approval' }</span>
+                   
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right space-x-2">
@@ -114,16 +117,18 @@ export const FitnessSessionTable = ({ sessions, pagination, onEdit, refresh }: P
                       handleSessionVisibility(session.id, !session.isActive);
                     }}
                   >
-                    {session.isActive ? (
-                      <>
-                        <EyeOff size={12} />
-                        Hide
-                      </>
-                    ) : (
-                      <>
-                        <Eye size={12} />
-                        Show
-                      </>
+                    {session.isApproved &&(
+                      session.isActive ? (
+                        <>
+                          <EyeOff size={12} />
+                          Hide
+                        </>
+                      ) : (
+                        <>
+                          <Eye size={12} />
+                          Show
+                        </>
+                      )
                     )}
                   </Button>
                   <ConfirmDialog
@@ -140,40 +145,14 @@ export const FitnessSessionTable = ({ sessions, pagination, onEdit, refresh }: P
         {hasBookings && deleteTarget && <DeleteSessionDialog sessionId={deleteTarget} onCancel={handleCancel} sessionVisibility={handleSessionVisibility} onDeleteAnyway={handleDeleteAnyway} />}
       </div>
       {/* --- PAGINATION CONTROLS --- */}
-      <div className="flex items-center justify-between px-2 py-4 border-t border-zinc-800">
-        <p className="text-xs font-medium text-zinc-500 uppercase tracking-widest">
-          Showing <span className="text-white">{(pagination.page - 1) * PAGINATION_DEFAULT_LIMIT + 1}</span> to{' '}
-          <span className="text-white">{Math.min(pagination.page * PAGINATION_DEFAULT_LIMIT, pagination.total)}</span> of <span className="text-white">{pagination.total}</span> entries
-        </p>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(pagination.page - 1)}
-            disabled={!pagination.hasPrevPage}
-            className="bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white disabled:opacity-30"
-          >
-            <ChevronLeft size={16} className="mr-1" /> Prev
-          </Button>
-
-          <div className="flex items-center gap-1 mx-2">
-            <span className="text-xs font-black text-white">{pagination.page}</span>
-            <span className="text-xs text-zinc-600">/</span>
-            <span className="text-xs text-zinc-600">{pagination.totalPages}</span>
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(pagination.page + 1)}
-            disabled={!pagination.hasNextPage}
-            className="bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white disabled:opacity-30"
-          >
-            Next <ChevronsRight size={16} className="ml-1" />
-          </Button>
-        </div>
-      </div>
+       <Pagination
+        totalPages={pagination.totalPages}
+        ITEMS_PER_PAGE={PAGINATION_DEFAULT_LIMIT}
+        currentPage={currentPage}
+        totalCount={pagination.total}
+        setCurrentPage={setCurrentPage}
+        label="Sessions"
+      />
     </div>
   );
 };

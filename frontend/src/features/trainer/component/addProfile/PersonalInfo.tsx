@@ -97,8 +97,22 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
               value={watch('personalInfo.DOB')}
               {...register('personalInfo.DOB', {
                 required: 'Date of Birth is required',
-                validate: (v) =>
-                  new Date(v) < new Date() || 'Date cannot be in the future',
+                validate:{
+                  notFuture: (v) => new Date(v) < new Date() || 'Date cannot be in the future',                  
+                  isOldEnough: (v) => {
+                    const dob = new Date(v);
+                    const today = new Date();
+                    
+                    let age = today.getFullYear() - dob.getFullYear();
+                    const monthDiff = today.getMonth() - dob.getMonth();
+                    
+                    // Adjust age if their birthday hasn't occurred yet this year
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                      age--;
+                    }                    
+                    return age >= 18 || 'Trainer must be at least 18 years old';
+                  },
+                },
               })}
               className="w-full pl-12 pr-4 py-3 rounded-xl [&::-webkit-calendar-picker-indicator]:invert bg-secondary/60 border border-[#454c59] text-white"
             />

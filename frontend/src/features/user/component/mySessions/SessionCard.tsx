@@ -1,4 +1,4 @@
-import { CalendarIcon, ClockIcon, PinIcon } from 'lucide-react';
+import { CalendarIcon, ClockIcon, MapPin} from 'lucide-react';
 import ActionButton from './ActionButton';
 import {
   formatDateDDMMYY,
@@ -125,18 +125,18 @@ function SessionCard({
                 { currentSession.session.sessionType}
               </span>
             </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500 mb-2">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-400 mb-2">
               <span className="flex items-center gap-1">
-                <CalendarIcon />
+                <CalendarIcon className='w-3 h-3 text-zinc-500'/>
                 {formatDateDDMMYY( currentSession.date)}
               </span>
               <span className="flex items-center gap-1">
-                <ClockIcon />
+                <ClockIcon className='w-3 h-3 text-zinc-500'/>
                 {formatTo12Hour( currentSession.startTime)} –{' '}
                 {formatTo12Hour( currentSession.endTime)}
               </span>
               <span className="flex items-center gap-1">
-                <PinIcon />
+                <MapPin className='w-3 h-3 text-zinc-500'/>
                 { currentSession.venue ? (currentSession.venue.name ,currentSession.venue?.address):'online'}
               </span>
             </div>

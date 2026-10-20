@@ -1,5 +1,3 @@
-
-
 import { useForm } from 'react-hook-form';
 import {
   Form,
@@ -19,10 +17,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
 
-
-
-
-interface PersonalInfoFormValues {  
+interface PersonalInfoFormValues {   
     fullName: string;
     DOB: string;
     gender: string;
@@ -35,12 +30,11 @@ interface PersonalInfoFormValues {
     };
 }
 
-
 const PersonalInfoEditForm = ({
   initialData,
   onCancel,
 }: {
-  initialData:PersonalInfoFormValues;
+  initialData: PersonalInfoFormValues;
   onCancel: () => void;
 }) => {
   const profile = useTrainerStore((state) => state.profile);
@@ -50,17 +44,16 @@ const PersonalInfoEditForm = ({
   const form = useForm<PersonalInfoFormValues>({
     defaultValues: initialData,
   });
- 
 
   const onSubmit = async (data: PersonalInfoFormValues) => {
     if (!profile?.id) return;
     setIsSubmitting(true);
-    const  personalInfo= {
+    const personalInfo = {
           ...data,
           DOB: initialData.DOB,
         };
-    const newData=PersonalInfoSchema.safeParse( personalInfo);
-    if(!newData.success){
+    const newData = PersonalInfoSchema.safeParse(personalInfo);
+    if (!newData.success) {
            const errorMessage = newData.error.issues[0].message;
             toast.error(errorMessage);
             console.log(errorMessage);
@@ -72,176 +65,166 @@ const PersonalInfoEditForm = ({
         profile.id,
         newData.data
       );
-       setProfile( updatedData.profile);
+       setProfile(updatedData.profile);
       toast.success("personal Info updated");
       onCancel();
     } catch (error) {
       toast.error('Failed to update. Please try again.');
       console.error('Failed to update Personal Info', error);
-    }
-    finally{
+    } finally {
         setIsSubmitting(false);
     }
-  }
+  };
+
   return(
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4 bg-[#161617] p-4 border border-primary/40 rounded-lg shadow-4xl shadow-black ring-1 ring-primary/30"
-      >   
-       
-          {/* personal info section */}
-          <div className="space-y-3 p-3 bg-secondary/10 rounded-md border border-white/5">
-            <h3 className="text-xs font-bold uppercase text-trainer-primary">
+        className="space-y-4 bg-[#161617] p-4 sm:p-6 border border-primary/40 rounded-lg shadow-4xl shadow-black ring-1 ring-primary/30 w-full max-w-full overflow-hidden text-xs sm:text-sm"
+      > 
+        {/* Personal Info Header */}
+        <div className="space-y-3 p-3 sm:p-4 bg-secondary/10 rounded-md border border-white/5">
+          <h3 className="text-xs sm:text-sm font-bold uppercase text-trainer-primary">
              Personal Information
-            </h3>
-          </div> 
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-6">   
-      
-            <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel className="text-[10px] uppercase">
-                    FullName
-                    </FormLabel>
-                    <FormControl>
-                    <Input {...field} placeholder="Badminton" />
-                    </FormControl>
-                    <FormDescription className='text-start text-[9px] text-amber-400'>
-                       * Changes in Full Name require admin approval.
-                    </FormDescription>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-            {/* <FormField
-                control={form.control}
-                name="DOB"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel className="text-[10px] uppercase">
-                    DOB
-                    </FormLabel>
-                    <FormControl>
-                    <Input {...field} value={formatDateDDMMYY(field.value)}/>
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            /> */}
-            <FormField
-                control={form.control}
-                name="gender"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel className="text-[10px] uppercase">
-                    Gender
-                    </FormLabel>
-                    <FormControl>
-                    <Input {...field} placeholder="" />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-             <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel className="text-[10px] uppercase">
-                        Phone
-                        </FormLabel>
-                        <FormControl>
-                        <Input {...field} placeholder="" />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-                />
-          </div>
-            {/* address info */}
+          </h3>
+        </div> 
 
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-6 border-2 p-3 rounded-xl">
-               <p className="col-span-2 text-left">Address</p>
-                <FormField
-                    control={form.control}
-                    name="address.street"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel className="text-[10px] uppercase">
-                        Street
-                        </FormLabel>
-                        <FormControl>
-                        <Input {...field} placeholder="" />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="address.city"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel className="text-[10px] uppercase">
-                        City
-                        </FormLabel>
-                        <FormControl>
-                        <Input {...field} placeholder="" />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                
-                <FormField
-                    control={form.control}
-                    name="address.state"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel className="text-[10px] uppercase">
-                       State
-                        </FormLabel>
-                        <FormControl>
-                        <Input {...field} placeholder="" />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="address.zip"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel className="text-[10px] uppercase">
-                       Zip
-                        </FormLabel>
-                        <FormControl>
-                        <Input {...field} placeholder="" />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-            </div>
-          
+        {/* Main Personal Fields Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">   
+          <FormField
+              control={form.control}
+              name="fullName"
+              render={({ field }) => (
+              <FormItem>
+                  <FormLabel className="text-[10px] sm:text-xs uppercase">
+                  FullName
+                  </FormLabel>
+                  <FormControl>
+                  <Input {...field} placeholder="Badminton" className="text-xs sm:text-sm" />
+                  </FormControl>
+                  <FormDescription className="text-start text-[9px] sm:text-[10px] text-amber-400">
+                      * Changes in Full Name require admin approval.
+                  </FormDescription>
+                  <FormMessage />
+              </FormItem>
+              )}
+          />
+
+          <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+              <FormItem>
+                  <FormLabel className="text-[10px] sm:text-xs uppercase">
+                  Gender
+                  </FormLabel>
+                  <FormControl>
+                  <Input {...field} placeholder="" className="text-xs sm:text-sm" />
+                  </FormControl>
+                  <FormMessage />
+              </FormItem>
+              )}
+          />
+
+          <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                  <FormItem className="col-span-full sm:col-span-1">
+                      <FormLabel className="text-[10px] sm:text-xs uppercase">
+                      Phone
+                      </FormLabel>
+                      <FormControl>
+                      <Input {...field} placeholder="" className="text-xs sm:text-sm" />
+                      </FormControl>
+                      <FormMessage />
+                  </FormItem>
+              )}
+          />
+        </div>
+
+        {/* Address Info Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 border-2 border-primary/20 p-3 sm:p-4 rounded-xl bg-secondary/5">
+            <p className="col-span-full text-left text-xs sm:text-sm font-semibold text-zinc-300 uppercase tracking-wide">Address</p>
+            
+            <FormField
+                control={form.control}
+                name="address.street"
+                render={({ field }) => (
+                <FormItem className="col-span-full">
+                    <FormLabel className="text-[10px] sm:text-xs uppercase">
+                    Street
+                    </FormLabel>
+                    <FormControl>
+                    <Input {...field} placeholder="" className="text-xs sm:text-sm" />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="address.city"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel className="text-[10px] sm:text-xs uppercase">
+                    City
+                    </FormLabel>
+                    <FormControl>
+                    <Input {...field} placeholder="" className="text-xs sm:text-sm" />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            
+            <FormField
+                control={form.control}
+                name="address.state"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel className="text-[10px] sm:text-xs uppercase">
+                   State
+                    </FormLabel>
+                    <FormControl>
+                    <Input {...field} placeholder="" className="text-xs sm:text-sm" />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="address.zip"
+                render={({ field }) => (
+                <FormItem className="col-span-full sm:col-span-1">
+                    <FormLabel className="text-[10px] sm:text-xs uppercase">
+                    Zip
+                    </FormLabel>
+                    <FormControl>
+                    <Input {...field} placeholder="" className="text-xs sm:text-sm" />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
         
-        <div className="flex justify-end gap-2 pt-2">
-          <Button variant="ghost" type="button" onClick={onCancel}>
+        {/* Action Buttons */}
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+          <Button variant="ghost" type="button" onClick={onCancel} className="w-full sm:w-auto text-xs sm:text-sm">
             Cancel
           </Button>
-          <Button  disabled={isSubmitting} type="submit">
+          <Button disabled={isSubmitting} type="submit" className="w-full sm:w-auto text-xs sm:text-sm">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isSubmitting ? "Updating..." : "Update Personal Info"}
-            
-            </Button>
+          </Button>
         </div>
       </form>
     </Form>
   );
-}
+};
+
 export default PersonalInfoEditForm;

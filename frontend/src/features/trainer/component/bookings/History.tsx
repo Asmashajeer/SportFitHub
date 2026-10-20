@@ -77,7 +77,7 @@ const History = () => {
   }, [sessionsData.sessions]);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2  px-2">
       <div className="flex gap-2 flex-wrap mb-6">
         <button
           onClick={() =>
@@ -90,7 +90,7 @@ const History = () => {
               ].join(','),
             }))
           }
-          className={`text-xs px-4 py-2 rounded-full border transition-all duration-150 font-medium ${
+          className={`text-xs md:px-4 md:py-2 rounded-full border transition-all duration-150 font-medium ${
             filters.status.includes(',') // all selected when comma-separated
               ? 'bg-zinc-100 text-zinc-900 border-zinc-100'
               : 'bg-transparent text-zinc-400 border-zinc-700 hover:border-zinc-500 hover:text-zinc-300'

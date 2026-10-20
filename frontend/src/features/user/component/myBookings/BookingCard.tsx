@@ -49,14 +49,14 @@ function BookingCard({
             {isMultiple ? 'sessions' : 'session'}
           </p>
           <p className="text-xs text-zinc-400 mt-2 mb-1">Amount paid</p>
-          <p className="text-sm font-medium text-emerald-400">
+          <p className="text-xs md:text-sm font-medium text-emerald-400">
             ₹ {booking.pricePlan.pricePaid}
           </p>
         </div>
         {booking.venue? (
           <div>
             <p className="text-xs text-zinc-400 mb-1">Venue</p>          
-              <p className="text-sm text-zinc-100">{booking.venue.name}</p>
+              <p className="text-xs md:text-sm text-zinc-100">{booking.venue.name}</p>
               <p className="text-xs text-zinc-400 mt-1">{booking.venue.address}</p>         
           </div>
          ):(<p className="text-xs text-zinc-400 mb-1">Online</p>  )}
@@ -74,11 +74,7 @@ function BookingCard({
           <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-700/50 text-zinc-400">
             {isMultiple ? 'Multiple sessions' : 'Single session'}
           </span>
-          {/* <span
-            className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusBadge[booking.status] ?? 'bg-zinc-700/50 text-zinc-400'}`}
-          >
-            {isActive ? 'Active' : booking.status}           
-          </span> */}
+          
           <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-700/50 text-zinc-400"> Sessions :{booking.pricePlan.totalSessions}</span>
           {booking.scheduledCount> 0 &&<span className="text-xs px-2.5 py-1 rounded-full bg-zinc-700/50 text-zinc-400"> Scheduled :{booking.scheduledCount}</span>}
           {booking.cancelledCount> 0 &&<span className="text-xs px-2.5 py-1 rounded-full bg-zinc-700/50 text-zinc-400"> cancelled :{booking.cancelledCount}</span>}
@@ -90,7 +86,7 @@ function BookingCard({
           }
           className="text-xs px-3 py-1.5 rounded-lg border border-emerald-600 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors"
         >
-          View sessions →
+          sessions
         </button>
       </div>
     </div>

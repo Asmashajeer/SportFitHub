@@ -12,12 +12,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, ChevronLeft, ChevronsRight, Edit, Eye, EyeOff, X } from 'lucide-react';
+import { AlertCircle,  Edit, Eye, EyeOff, X } from 'lucide-react';
 import ConfirmDialog from '@/components/reusable/ConfirmDialog';
 
 import toast from 'react-hot-toast';
 
-import { useSearchParams } from 'react-router-dom';
+
 import { PAGINATION_DEFAULT_LIMIT } from '@/constants/constants';
 
 import { trainerBookingsService } from '@/features/trainer/service/trainer.bookings.service';
@@ -25,6 +25,7 @@ import { trainerBookingsService } from '@/features/trainer/service/trainer.booki
 import { useState } from 'react';
 import DeleteSessionDialog from '../DeleteSessionDialog';
 import { TrainerSportSessionService } from '@/features/trainer/service/sessionService/trainer.sports.session.service';
+import Pagination from '@/components/reusable/Pagination';
 
 interface Props {
   sessions: SportsSessionResponseData[];
@@ -39,10 +40,8 @@ export const SessionTable = ({
   onEdit,
   refresh,
 }: Props) => {
-  const [_, setSearchParams] = useSearchParams();
-  const handlePageChange = (newPage: number) => {
-    setSearchParams({ page: newPage.toString() });
-  };
+    const [currentPage, setCurrentPage] = useState(pagination.page||1);
+
   const [hasBookings, setHasBookings] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   if (sessions.length === 0) {
@@ -210,54 +209,15 @@ const handleCancel = () => {
         )}
       </div>
       {/* --- PAGINATION CONTROLS --- */}
-      <div className="flex items-center justify-between px-2 py-4 border-t border-zinc-800">
-        <p className="text-xs font-medium text-zinc-500 uppercase tracking-widest">
-          Showing{' '}
-          <span className="text-white">
-            {(pagination.page - 1) * PAGINATION_DEFAULT_LIMIT + 1}
-          </span>{' '}
-          to{' '}
-          <span className="text-white">
-            {Math.min(
-              pagination.page * PAGINATION_DEFAULT_LIMIT,
-              pagination.total
-            )}
-          </span>{' '}
-          of <span className="text-white">{pagination.total}</span> entries
-        </p>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(pagination.page - 1)}
-            disabled={!pagination.hasPrevPage}
-            className="bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white disabled:opacity-30"
-          >
-            <ChevronLeft size={16} className="mr-1" /> Prev
-          </Button>
-
-          <div className="flex items-center gap-1 mx-2">
-            <span className="text-xs font-black text-white">
-              {pagination.page}
-            </span>
-            <span className="text-xs text-zinc-600">/</span>
-            <span className="text-xs text-zinc-600">
-              {pagination.totalPages}
-            </span>
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(pagination.page + 1)}
-            disabled={!pagination.hasNextPage}
-            className="bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white disabled:opacity-30"
-          >
-            Next <ChevronsRight size={16} className="ml-1" />
-          </Button>
-        </div>
-      </div>
+        <Pagination
+        totalPages={pagination.totalPages}
+        ITEMS_PER_PAGE={PAGINATION_DEFAULT_LIMIT}
+        currentPage={currentPage}
+        totalCount={pagination.total}
+        setCurrentPage={setCurrentPage}
+        label="Sessions"
+      />
+      
     </div>
   );
 };

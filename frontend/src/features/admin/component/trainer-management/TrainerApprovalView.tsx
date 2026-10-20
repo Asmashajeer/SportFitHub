@@ -7,7 +7,7 @@ import { ExternalLink, CreditCard,  ShieldCheck, Award, User2Icon, Loader2 } fro
 import { UseAdminStore } from '../../store/useAdminStore';
 import { useEffect, useState } from 'react';
 import type { ICertification, TrainerOverView } from '../../store/trainerSlice';
-import { DOC_VERIFY_STATUS, TRAINER_STATUS, type Doc_status_type } from '@/constants/constants';
+import { DOC_VERIFY_STATUS, TRAINER_STATUS, type Doc_status_type, type Trainer_status_type } from '@/constants/constants';
 import toast from 'react-hot-toast';
 import { parseISO } from 'date-fns';
 import { formatDateReadable, formatTo12Hour } from '@/utils/formatDate';
@@ -90,7 +90,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
 
   //update Trainer application Status
 
-  const trainerApplicationStatus = async (trainer: Trainer, status: Doc_status_type, reason?: string) => {
+  const trainerApplicationStatus = async (trainer: Trainer, status: Trainer_status_type, reason?: string) => {
     const actionKey = `application-${status.toLowerCase()}`;
     setLoadingAction(actionKey);
     try {
@@ -98,7 +98,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
         toast.error('please verify Id Document and Certification to continue.');
         return;
       }
-      if (status == TRAINER_STATUS.APPROVED && trainer.idVerification.status !== DOC_VERIFY_STATUS.VERIFIED && trainer.certificationInfo.status !== DOC_VERIFY_STATUS.VERIFIED) {
+      if ( trainer.idVerification.status !== DOC_VERIFY_STATUS.VERIFIED && trainer.certificationInfo.status !== DOC_VERIFY_STATUS.VERIFIED && status ===TRAINER_STATUS.APPROVED) {
         toast.error('The application can only be approved once all certificates and ID documents are verified.');
         return;
       }
@@ -470,7 +470,8 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
           <h4 className="font-bold text-sm mb-4">Verification Actions</h4>
           {selectedTrainer && (
             <div className="space-y-2 flex  justify-end gap-2">
-              <Button disabled={!!loadingAction} className="text-[13px] bg-green-600 hover:bg-green-700 " onClick={() => trainerApplicationStatus(selectedTrainer, TRAINER_STATUS.APPROVED)}>
+              
+              <Button disabled={!!loadingAction||selectedTrainer.certificationInfo.status!==DOC_VERIFY_STATUS.VERIFIED ||selectedTrainer.idVerification.status!==DOC_VERIFY_STATUS.VERIFIED } className="text-[13px] bg-green-600 hover:bg-green-700 " onClick={() => trainerApplicationStatus(selectedTrainer, TRAINER_STATUS.APPROVED)}>
                 {loadingAction === 'application-approved' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {loadingAction === 'application-approved' ? 'Approving...' : 'Approve Application'}
               </Button>

@@ -19,4 +19,5 @@ export interface TrainerFilterRequestDTO {
   search: string;
   status: string;
   category: string;
+  sort:string
 }

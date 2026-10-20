@@ -17,9 +17,10 @@ export class TrainerManagementController {
     const search = req.query.search as string;
     const status = req.query.status as string;
     const category = req.query.category as string;
+    const sort = req.query.sort as string;
     const { user } = req as AuthRequest;
     try {
-      const trainers = await this._trainerManagementService.getTrainers({ page, limit, search, status, category }, user);
+      const trainers = await this._trainerManagementService.getTrainers({ page, limit, search, status, category, sort }, user);
       if (!trainers) {
         res.status(STATUS_CODE.SUCCESS.OK).json({ success: true, message: 'No  trainers found', trainers: [] });
         return;

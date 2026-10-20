@@ -14,9 +14,7 @@ export const useSportSessions = (
     page: 1,
     limit: PAGINATION_DEFAULT_LIMIT || 10,
     total: 0, //total session
-    totalPages: 1,
-    hasNextPage: false,
-    hasPrevPage: false,
+    totalPages: 1,   
   });
 
   const loadSessions = useCallback(async () => {

@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { AuthenticatedSocket } from '../socket.types';
 import { IChatService } from '@/interfaces/services/IChat.service';
-import { PAYLOAD_MODEL } from '@/constants/enums';
+
 import { Types } from 'mongoose';
 import AppError from '@/utils/AppError';
 import { SendMessagePayload } from '../chat.types';

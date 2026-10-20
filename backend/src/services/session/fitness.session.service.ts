@@ -165,7 +165,7 @@ export class FitnessSessionService implements IFitnessSessionService {
 
   //--------------- get all sessions--public------------
   async getAllSessions(filters: FilterQuery<IFitnessSession>): Promise<GetFitnessSessionsResponseDTO> {
-    const { page, limit, search, program, sessionType, ageGroup,rating, lat, lng, radius } = filters;
+    const { page, limit, search, program, sessionType,sessionMode, ageGroup,rating, lat, lng, radius } = filters;
     
     const query: FilterQuery<IFitnessSession> = { isDeleted: false, isApproved: true, isActive: true };
 
@@ -174,6 +174,7 @@ export class FitnessSessionService implements IFitnessSessionService {
     }
     if (program && program !== 'all') query.fitnessCategory = program;
     if (sessionType && sessionType !== 'all') query.sessionType = sessionType;
+     if (sessionMode && sessionMode !== 'all') query.mode = sessionMode;
     if (ageGroup && ageGroup !== 'all') query.ageGroup = ageGroup;
     if (rating && rating !== 'all') query.rating = { $gte: Number(rating) };
 

@@ -224,7 +224,7 @@ export const attendanceController = new AttendanceController(attendanceService);
 const conversationRepository = new ConversationRepository(conversationModel);
 const messageRepository = new MessageRepository(messageModel);
 
-export const chatService = new ChatService(conversationRepository, messageRepository);
+export const chatService = new ChatService(conversationRepository, messageRepository,profileRepository,trainerRepository);
 export const chatHandler = createChatHandler(chatService);
 export const chatController = new ChatController(chatService);
 

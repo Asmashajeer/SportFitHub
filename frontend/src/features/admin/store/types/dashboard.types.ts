@@ -9,11 +9,7 @@ export interface RevenuePoint {
   name: string;
   value: number;
 }
-// export interface BookingDataMetrics {
-//   category: string;
-//   totalRevenue: number;
-//   totalSessions: number;
-// }
+
 export interface BookingDataMetric {
   name: string;
   value: number;

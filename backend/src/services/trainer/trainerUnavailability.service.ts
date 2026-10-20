@@ -6,10 +6,10 @@ import { IBookingSessionRepository } from '@/interfaces/repositories/IBook.sessi
 import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
 import { ITrainerUnavailabilityRepository } from '@/interfaces/repositories/ITrainerUnavalability.repository';
 import { ITrainerUnavailabilityService } from '@/interfaces/services/trainer/ITrainerUnavailability.service';
-import { toUnavailableDayDto } from '@/mappers/trainer/trainr.unavailability.mappers';
+import { toUnavailableDayDto } from '@/mappers/trainer/trainer.unavailability.mappers';
 
 import AppError from '@/utils/AppError';
-import { isRealDate, toDateStr, toUTC_Date } from '@/utils/formatTo';
+import { isRealDate, toDateStr } from '@/utils/formatTo';
 import { formatInTimeZone } from 'date-fns-tz';
 
 export class TrainerUnavailabilityService implements ITrainerUnavailabilityService {
@@ -34,7 +34,7 @@ export class TrainerUnavailabilityService implements ITrainerUnavailabilityServi
 
     const trainer = await this.getTrainer(userId);
     const a = trainer.availability;
-    const tz = a.timezone || 'UTC';
+   
 
     if (date <= toDateStr(new Date())) throw new AppError('Cannot select a past date', STATUS_CODE.ERROR.BAD_REQUEST);
     if (!a.isAvailable) throw new AppError('Your availability is turned off', STATUS_CODE.ERROR.BAD_REQUEST);
@@ -55,7 +55,7 @@ export class TrainerUnavailabilityService implements ITrainerUnavailabilityServi
     try {
       const canceledDay = await this._trainerUnavailabilityRepo.createUnavailableDate(trainer._id.toString(), utcDate, reason);
       return toUnavailableDayDto(canceledDay);
-    } catch (err: any) {
+    } catch (err) {
       if (err?.code === 11000) {
         throw new AppError('This date is already marked unavailable', STATUS_CODE.ERROR.CONFLICT);
       }

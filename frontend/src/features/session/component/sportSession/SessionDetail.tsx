@@ -214,20 +214,20 @@ const SessionDetail = () => {
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans selection:bg-emerald-500/30">
       {/* STICKY NAVIGATION */}
-      <nav className="sticky top-16 z-40 bg-transparent backdrop-blur-md border-b border-zinc-900 px-4 sm:px-6 py-4 flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors group">
-          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+      <nav className="sticky top-16 z-40 bg-transparent backdrop-blur-md mt-4 border-b border-zinc-900 px-4 sm:px-6 py-4 flex items-center justify-between">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors group ">
+          <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" />
           <span className="text-xs font-black uppercase tracking-tighter">Back</span>
         </button>
       </nav>
 
-      <main className="max-w-7xl  px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
+      <main className="max-w-7xl  px-4 sm:px-6 py-6 sm:py-12 space-y-8 sm:space-y-12">
         <h1 className="text-2xl sm:text-2xl lg:text-3xl font-black  uppercase tracking-tighter leading-none text-white">{session.sessionName}</h1>
 
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           {/* Main Image / Banner */}
           <div className="lg:col-span-8">
-            <div className="relative h-64 sm:h-80 lg:h-96 rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl border border-zinc-900">
+            <div className="relative h-58 sm:h-80 lg:h-96 rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl border border-zinc-900">
               <ImageCarousel images={session.images} />
               <div className="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 flex gap-2 sm:gap-3 flex-wrap">
                 <Badge className="bg-emerald-500 text-black font-black uppercase italic px-3 sm:px-4 py-1 border-none text-[10px] sm:text-xs">
@@ -236,6 +236,28 @@ const SessionDetail = () => {
                 <Badge className="bg-zinc-950/60 backdrop-blur-md text-emerald-400 border-zinc-800 uppercase font-bold text-[10px]">{session.sessionType}</Badge>
               </div>
             </div>
+             {/* -------------DESCRIPTION + QUICK STATS ---------- */}
+            <section className="space-y-4 sm:space-y-6">
+              <p className="text-zinc-400 pt-2 text-sm sm:text-md leading-relaxed font-medium max-w-3xl">{session.description}</p>
+              <div className="flex flex-wrap bg-zinc-900 rounded-2xl gap-x-6 sm:gap-x-10 gap-y-4 sm:gap-y-6 text-zinc-400 border-y border-zinc-900 p-4 sm:p-8">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Clock size={20} className="text-emerald-500" />
+                  <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.duration} MINS</span>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Users size={20} className="text-emerald-500" />
+                  <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.ageGroup}</span>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Trophy size={20} className="text-emerald-500" />
+                  <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">LIMIT: {session.maxCapacity}</span>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Star size={20} className="text-yellow-500" fill="currentColor" />
+                  <span className="font-bold text-zinc-400 tracking-tight text-sm">{ratingReview.avgRating || 'NEW'}</span>
+                </div>
+              </div>
+            </section>
           </div>
 
           {/* Coach / Trainer Profile Card */}
@@ -292,28 +314,7 @@ const SessionDetail = () => {
           </div>
         </section>
 
-        {/* -------------DESCRIPTION + QUICK STATS ---------- */}
-        <section className="space-y-4 sm:space-y-6">
-          <p className="text-zinc-400 text-sm sm:text-md leading-relaxed font-medium max-w-3xl">{session.description}</p>
-          <div className="flex flex-wrap bg-zinc-900 rounded-2xl gap-x-6 sm:gap-x-10 gap-y-4 sm:gap-y-6 text-zinc-400 border-y border-zinc-900 p-4 sm:p-8">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Clock size={20} className="text-emerald-500" />
-              <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.duration} MINS</span>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Users size={20} className="text-emerald-500" />
-              <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">{session.ageGroup}</span>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Trophy size={20} className="text-emerald-500" />
-              <span className="font-bold text-zinc-400 uppercase tracking-tight text-sm">LIMIT: {session.maxCapacity}</span>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Star size={20} className="text-yellow-500" fill="currentColor" />
-              <span className="font-bold text-zinc-400 tracking-tight text-sm">{ratingReview.avgRating || 'NEW'}</span>
-            </div>
-          </div>
-        </section>
+       
 
         {/* ----------------PRICE DETAILS + CALENDAR / TIME SLOTS -------- */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
@@ -418,11 +419,11 @@ const SessionDetail = () => {
         {/* Policies — full width */}
         <div className="text-xs text-zinc-400 bg-zinc-800 rounded-lg text-left p-3 space-y-2">
           <p className="text-zinc-300 text-sm font-medium mb-2">Policies</p>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between sm:justify-evenly">
             <span className="text-zinc-400">▫️ Booking Deadline</span>
             <span className="text-zinc-300">{session.bookingDeadline} hrs before</span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between sm:justify-evenly">
             <span className="text-zinc-400">▫️ Cancellation Policy</span>
             <span className="text-zinc-300">{session.cancellationPolicy}</span>
           </div>

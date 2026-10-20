@@ -25,7 +25,7 @@ export class ConversationRepository extends BaseRepository<IConversation> implem
       .populate('contextSessionId', 'sessionName')
       .sort({ 'lastMessage.createdAt': -1 })
       .lean();
-    console.log(conversations);
+    
     return conversations as unknown as IconversationPopulatedParticipants[];
   }
 

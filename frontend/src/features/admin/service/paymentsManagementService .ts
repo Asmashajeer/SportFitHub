@@ -15,8 +15,8 @@ export const  PaymentsManagementService = {
     const res = await api.get(ADMIN_ROUTES.GET_PAYMENT_STATS ,{params:{dateRange} });
     return res.data;
   },
-  getPayments:async (filter:PaymentFilter) => {
-    const res = await api.get(ADMIN_ROUTES.GET_PAYMENTS ,{params:{filter} });
+  getPayments:async (filter:PaymentFilter) => {    
+    const res = await api.get(ADMIN_ROUTES.GET_PAYMENTS ,{params:filter });
     return res.data;
   },
 }

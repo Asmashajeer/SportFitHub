@@ -71,7 +71,6 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
             };
           }
           if (doc.url) {
-            // if(url){
             return {
               id: doc.id ?? crypto.randomUUID(),
               name: doc.name,
@@ -85,7 +84,8 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
       );
       
       if (uploadedCerts === null) {
-        toast.custom('please add atleast  oneCertificate');
+        toast.custom('Please add at least one certificate');
+        setIsUpdating(false);
         return;
       } else {
         const cleanCerts: ICertification[] = uploadedCerts.map((cert) => ({
@@ -99,48 +99,51 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
         try {
           if (profile) {
             const updatedData = await trainerService.updateCertificationInfo(profile?.id, cleanCerts);
-            toast.success('Certificates updated ');
+            toast.success('Certificates updated');
             setProfile(updatedData.profile);
             onSuccess();
           }
         } catch (error) {
           toast.error(error?.toString() || 'Something went wrong');
-        }
-        finally{
+        } finally {
           setIsUpdating(false);
         }
       }
-
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 text-xs sm:text-xs w-full max-w-full overflow-hidden">
       {fields.map((field, index) => {
         const isExisting = index < initialData.length; // existing cert
         const isLocked = isExisting && !canEditExisting;
         return (
-          <div key={field.id} className="p-4 border rounded-lg relative space-y-4 bg-background/50">
-            <p className="text-[10px] text-amber-400">* changes in certificates require admin Approval</p>
+          <div key={field.id} className="p-4 sm:p-5 border rounded-lg relative space-y-4 bg-background/50">
+            <p className="text-[10px] sm:text-xs text-amber-400">
+              Changes in certificates require admin approval
+            </p>
             {!isLocked && (
-              <Button type="button" variant="ghost" onClick={() => remove(index)} className="absolute top-2 right-2 text-red-500">
+              <Button type="button" variant="ghost" onClick={() => remove(index)} className="absolute top-2 right-2 text-red-500 h-8 w-8 p-0">
                 <Trash2 size={16} />
               </Button>
             )}
-            <div className="grid grid-cols-2 gap-4">
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <input type="hidden" {...register(`documents.${index}.url` as const)} />
+              
               {/* Certificate Name */}
-              <div className="space-y-2">
-                <Label>Name</Label>
-                <Input {...register(`documents.${index}.name` as const)} disabled={isLocked} />
+              <div className="space-y-1.5">
+                <Label className="text-[10px] sm:text-xs uppercase">Name</Label>
+                <Input {...register(`documents.${index}.name` as const)} disabled={isLocked} className="text-xs" />
               </div>
 
               {/* File Upload */}
-              <div className="space-y-2">
-                <Label>Document</Label>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] sm:text-xs uppercase">Document</Label>
                 <Input
                   type="file"
                   disabled={isLocked}
+                  className="text-xs file:text-xs file:text-foreground"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
@@ -151,36 +154,36 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
               </div>
 
               {/* Dates */}
-              <div className="space-y-2">
-                <Label>Issued At</Label>
-                <Input type="date" {...register(`documents.${index}.issuedAt` as const)} disabled={isLocked} />
+              <div className="space-y-1.5">
+                <Label className="text-[10px] sm:text-xs uppercase">Issued At</Label>
+                <Input type="date" {...register(`documents.${index}.issuedAt` as const)} disabled={isLocked} className="text-xs" />
               </div>
 
-              <div className="space-y-2">
-                <Label>Valid Until</Label>
-                <Input type="date" {...register(`documents.${index}.validUpto` as const)} disabled={isLocked} />
+              <div className="space-y-1.5">
+                <Label className="text-[10px] sm:text-xs uppercase">Valid Until</Label>
+                <Input type="date" {...register(`documents.${index}.validUpto` as const)} disabled={isLocked} className="text-xs" />
               </div>
             </div>
-            {isLocked && <p className="text-[10px] text-muted-foreground">Existing certificates cannot be edited after approval.</p>}
+
+            {isLocked && <p className="text-[10px] sm:text-xs text-muted-foreground">Existing certificates cannot be edited after approval.</p>}
           </div>
         );
       })}
-      {/* } */}
-      <div className="flex justify-between mt-4">
+
+      {/* Footer / Buttons */}
+      <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-4">
         {canAdd && (
-          <Button type="button" variant="outline" onClick={() => append({ name: '', issuedAt: '', validUpto: '', url: '' })}>
+          <Button type="button" variant="outline" onClick={() => append({ name: '', issuedAt: '', validUpto: '', url: '' })} className="w-full sm:w-auto text-xs">
             <Plus size={16} className="mr-2" /> Add Certificate
           </Button>
         )}
-        <div className="flex gap-2">
-          <Button type="button" variant="ghost" onClick={onCancel}>
+        <div className="flex flex-col-reverse sm:flex-row gap-2 w-full sm:w-auto">
+          <Button type="button" variant="ghost" onClick={onCancel} className="w-full sm:w-auto text-xs">
             Cancel
           </Button>
-          <Button type="submit" className="bg-trainer-primary"
-          disabled={isUpdating}>
+          <Button type="submit" className="bg-trainer-primary w-full sm:w-auto text-xs" disabled={isUpdating}>
             {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isUpdating ? "updating..." : " Save Changes"}
-            Save Changes
+            {isUpdating ? "Updating..." : "Save Changes"}
           </Button>
         </div>
       </div>

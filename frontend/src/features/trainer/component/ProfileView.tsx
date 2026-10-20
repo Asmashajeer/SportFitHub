@@ -53,7 +53,7 @@ const ProfileView = () => {
   const canEditPersonalInfo = !LOCKED_STATUSES.includes(profile?.status!);
   const canEditProfessionalInfo = !LOCKED_STATUSES.includes(profile?.status!);
   const canEditPricingAvailability = !LOCKED_STATUSES.includes(profile?.status!);
-  const canEditIdDocuments = profile?.status === TRAINER_STATUS.REJECTED;
+  const canEditIdDocuments = profile?.status === TRAINER_STATUS.REJECTED || profile?.idVerification.status===DOC_VERIFY_STATUS.REJECTED;
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -147,12 +147,13 @@ const ProfileView = () => {
       <div className="  items-center  justify-center  gap-2 w-full pb-6 mb-4 z-50 font-bold">
         <h1>Profile Overview</h1>
         <p>{profile?.status === TRAINER_STATUS.REJECTED && <Badge variant="destructive"> {profile?.status}</Badge>}</p>
-        <span className="text-xs font-normal text-amber-200">{profile?.status === TRAINER_STATUS.APPROVED ? <VerifiedIcon className="text-primary" /> : `status: ${profile?.status}`}</span>
+        
       </div>
 
       {/* Avatar Row */}
       <div className="flex items-center justify-center gap-5 pb-6 border-b border-border/50">
         <div className="relative">
+          
           <Avatar className="h-16 w-16 border border-border">
             <AvatarImage src={`${trainerData?.profilePic}?v=${imageVersion}`} />
             <AvatarFallback className="bg-muted">
@@ -165,11 +166,13 @@ const ProfileView = () => {
           >
             <Camera className="h-3 w-3 text-muted-foreground" />
           </button>
-          {isLoading && <Loader2 className="animate-spin h-4 w-4" />}
+          {isLoading && <Loader2 className="animate-spin h-4 w-4" />}          
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
         </div>
         <div className="text-start">
-          <h3 className="text-base font-semibold">{profile?.displayName}</h3>
+          <div>
+            <h3 className="flex text-base font-semibold">{profile?.displayName}<span className="px-2 text-xs font-normal text-amber-200">{profile?.status === TRAINER_STATUS.APPROVED ? <VerifiedIcon className="text-primary" /> : `status: ${profile?.status}`}</span></h3>
+          </div>
           <p className="text-sm text-muted-foreground">{ROLES.TRAINER[0].toUpperCase() + ROLES.TRAINER.slice(1)}</p>
           <p className="text-sm text-primary ">{user?.email}</p>
         </div>
@@ -178,7 +181,7 @@ const ProfileView = () => {
         <>
           <div className="space-y-4 border-2 rounded-xl p-2 mb-2">
             {/* Basic info */}
-            <div className=" grid grid-cols-2 gap-y-4 justify-items-start text-left px-3 relative">
+            <div className=" grid grid-cols-2 gap-y-4 justify-items-start gap-2 text-left px-3 relative">
               {canEditBasicInfo && (
                 <Button className=" absolute right-0  " variant="ghost" onClick={() => setEditingSection('basicInfo')}>
                   <Edit2 className=" text-primary" />
@@ -186,34 +189,34 @@ const ProfileView = () => {
               )}
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase">Display Name:</p>
-                <p className="text-sm font-normal">{profile?.displayName}</p>
+                <p className="text-xs md:text-sm font-normal">{profile?.displayName}</p>
               </div>
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase">Core Discipline </p>
-                <p className="text-sm font-medium">
+                <p className="text-xs md:text-sm font-medium">
                   {profile?.category} -{profile?.coreDiscipline}
                 </p>
               </div>
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase">Email </p>
-                <p className="text-sm font-medium">{user?.email}</p>
+                <p className="text-xs md:text-sm break-all">{user?.email}</p>
               </div>
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase">Specialties </p>
-                <p className="text-sm font-medium">{profile?.specialties?.length > 1 ? profile?.specialties.join(', ') : profile?.specialties}</p>
+                <p className="text-xs md:text-sm font-medium">{profile?.specialties?.length > 1 ? profile?.specialties.join(', ') : profile?.specialties}</p>
               </div>
               <div>
-                <p className="text-sm font-semibold text-muted-foreground uppercase">Experience : </p> <span className="text-sm font-medium">{profile?.experience} year</span>
+                <p className="text-xs md:text-sm font-semibold text-muted-foreground uppercase">Experience : </p> <span className="text-xs md:text-sm font-medium">{profile?.experience} year</span>
                 <hr />
               </div>
               <div>
-                <p className="text-sm font-semibold text-muted-foreground uppercase">Language </p>
-                <span>{profile?.languages?.length > 1 ? profile?.languages.join(', ') : profile?.languages}</span>
+                <p className="text-xs md:text-sm font-semibold text-muted-foreground uppercase">Language </p>
+                <span className="text-xs md:text-sm ">{profile?.languages?.length > 1 ? profile?.languages.join(', ') : profile?.languages}</span>
               </div>
 
               <div className="col-span-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase">Bio</p>
-                <p className="text-sm">{profile?.bio} </p>
+                <p className="text-xs md:text-sm">{profile?.bio} </p>
               </div>
             </div>
           </div>
@@ -267,11 +270,11 @@ const ProfileView = () => {
                   <div className="grid grid-cols-2 gap-y-4 justify-items-start text-left px-3">
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">Full Name</p>
-                      <p className="text-sm font-medium">{profile?.personalInfo?.fullName}</p>
+                      <p className="text-xs md:text-sm  font-medium">{profile?.personalInfo?.fullName}</p>
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">DOB</p>
-                      <p className="text-sm font-medium">
+                      <p className="text-xs md:text-sm font-medium">
                         {parseISO(profile?.personalInfo?.DOB ?? '').toLocaleDateString()}
                         {}
                       </p>
@@ -282,12 +285,12 @@ const ProfileView = () => {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">Phone </p>
-                      <p className="text-sm font-medium">{profile?.personalInfo?.phone}</p>
+                      <p className="text-xs md:text-sm font-medium">{profile?.personalInfo?.phone}</p>
                     </div>
-
+ 
                     <div className="col-span-2">
                       <p className="text-xs font-semibold text-muted-foreground uppercase">Address</p>
-                      <p className="text-sm">
+                      <p className="text-xs md:text-sm">
                         {profile?.personalInfo?.address.street}, {profile?.personalInfo?.address.city}, {profile?.personalInfo?.address.state} - {profile?.personalInfo?.address.zip}
                       </p>
                     </div>
@@ -439,24 +442,24 @@ const ProfileView = () => {
                       <div>
                         <p className="text-xs font-semibold p-2 text-muted-foreground uppercase">
                           SessionCharge :
-                          <span className="text-sm px-2 text-white font-medium">
+                          <span className="text-xs md:text-sm px-2 text-white font-medium">
                             {' '}
                             {CURRENCY} {profile?.pricing?.sessionCharge}
                           </span>
                         </p>
                       </div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        Availabilty: <span className="px-2 text-sm font-bold text-primary">{profile?.availability?.isAvailable ? 'Active' : 'Not Available'} </span>
+                        Availabilty: <span className="px-2 text-xs md:text-sm font-bold text-primary">{profile?.availability?.isAvailable ? 'Active' : 'Not Available'} </span>
                       </p>
                     </div>
                     <div className=" space-y-2 border rounded-xl p-2">
                       {profile?.availability && (
-                        <div className="py-2">
-                          <p className="text-xs font-semibold text-muted-foreground uppercase ">Availabilty Period </p>
-                          <p className="text-emerald-600 px-2">
+                        <div className=" md:flex  justify-around py-2">
+                          <p className="text-xs font-semibold text-muted-foreground uppercase underline py-1 ">Availabilty Period </p>
+                          <p className="text-xs md:text-sm text-emerald-600 px-2">
                             From : <span className="text-white">{formatDateReadable(profile?.availability.effectiveFrom)}</span>{' '}
                           </p>
-                          <p className="text-emerald-600 px-2">
+                          <p className="text-xs md:text-sm text-emerald-600 px-2">
                             To : <span className="text-white">{formatDateReadable(profile?.availability.effectiveTo)}</span>{' '}
                           </p>
                         </div>
@@ -467,11 +470,10 @@ const ProfileView = () => {
                           .map(([day, info]: [string, any]) => (
                             <div
                               key={day}
-                              className="grid grid-cols-2 gap-y-2"
-                              // className="w-full flex justify-between items-center  text-sm border-b pb-1 border-muted/50"
+                              className="grid grid-cols-2 gap-x-1 gap-y-2"
                             >
-                              <span className="font-medium capitalize">{day}:</span>
-                              <span className="px-6 text-muted-foreground">
+                              <span className="text-xs md:text-sm font-medium capitalize">{day}:</span>
+                              <span className="text-xs md:text-sm md:px-4 text-muted-foreground">
                                 {formatTo12Hour(info.startTime)} - {formatTo12Hour(info.endTime)}
                               </span>
                             </div>

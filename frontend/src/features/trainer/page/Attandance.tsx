@@ -103,34 +103,21 @@ const Attendance = () => {
             return (
               <div
                 key={`${session.sessionId}_${session.slotId}`}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  border: '0.5px solid var(--border)',
-                  borderRadius: 8,
-                }}
+                className="flex items-center sm:text-xs md:text-sm  justify-between px-4 py-3 border-[0.5px] border-border rounded-lg"
               >
-                <div>
+                <div className='text-left '>
                   <p>{session.sessionName}</p>
                 </div>
                 <div>
-                  <p style={{ margin: 0, fontWeight: 500 }}>
+                  <p className='m-0 font-medium text-green-800'>
                     {session.sessionModel === PAYLOAD_MODEL.SPORT_SESSION ? PAYLOAD_MODEL.SPORT_SESSION : PAYLOAD_MODEL.FITNESS_SESSION}
                     {session.sessionType === SESSION_TYPE.GROUP ? ` · ${session.participants.length} participants` : ' · 1 :1'}
                   </p>
-                  <p
-                    style={{
-                      margin: '4px 0 0',
-                      fontSize: 13,
-                      color: 'var(--text-secondary)',
-                    }}
-                  >
+                  <p className='m-0 text-xs  text-gray-400'>
                     {new Date(session.date).toLocaleDateString()} · {formatTo12Hour(session.startTime)} - {formatTo12Hour(session.endTime)}
                   </p>
                 </div>
-                {shouldMarkAttendace ? <button onClick={() => setActiveSession(session)}>Mark Attendance</button> : <button onClick={() => setActiveSession(session)}>show Attendance</button>}
+                {shouldMarkAttendace ? <button className='hover:text-green-600 cursor-pointer' onClick={() => setActiveSession(session)}>Mark Attendance</button> : <button className='hover:text-green-600 cursor-pointer'  onClick={() => setActiveSession(session)}>show </button>}
               </div>
             );
           })}

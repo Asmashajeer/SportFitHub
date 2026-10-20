@@ -21,11 +21,7 @@ function ActionButton({
     rebook: {
       label: 'Rebook',
       cls: 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10 cursor-pointer',
-    },
-    // bookagain: {
-    //   label: 'Book again',
-    //   cls: 'border-zinc-600 text-zinc-400 hover:bg-zinc-700/50 cursor-pointer',
-    // },
+    },   
 
     viewDetails: {
       label: 'View',
@@ -36,7 +32,7 @@ function ActionButton({
   return (  
     <button
       onClick={() => onAction(type)}
-      className={`text-xs px-3 py-1.5 rounded-lg border transition-colors duration-150 ${c.cls}`}
+      className={`text-[10px] md:text-xs px-1 py-0.5 md:px-3 md:py-1.5 rounded-lg border transition-colors duration-150 ${c.cls}`}
     >
       {c.label}
     </button>

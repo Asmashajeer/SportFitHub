@@ -296,7 +296,7 @@ export class BookingService implements IBookingService {
       );
 
       // 3. Link Booking back to Payment
-      payment = await this._paymentRepo.updatePayment(payment._id, { bookingId: booking._id, bookingUID: booking.bookingUId }, dbSession);
+      payment = await this._paymentRepo.updatePayment(payment._id, { bookingId: booking._id, bookingUID:booking.bookingUID }, dbSession);
 
       await dbSession.commitTransaction();
       // const bookingSummary = AllSessionsToBoook.map((slot) => `${slot.date} [${formatTo12Hour(slot.startTime)}- ${formatTo12Hour(slot.endTime)}]`).join(', ');
@@ -549,7 +549,7 @@ export class BookingService implements IBookingService {
 
       return newBooking;
     } catch (error) {
-      
+      console.log(error);
       throw new AppError("error while rescheduling") ;
     } finally {
       dbSession.endSession();
@@ -874,7 +874,7 @@ export class BookingService implements IBookingService {
       );
 
       // 3. Link Booking back to Payment
-      payment = await this._paymentRepo.updatePayment(payment._id, { bookingId: booking._id, transactionId: walletTransaction.id }, dbSession);
+      payment = await this._paymentRepo.updatePayment(payment._id, { bookingId: booking._id,bookingUID:booking.bookingUID, transactionId: walletTransaction.id }, dbSession);
 
       await dbSession.commitTransaction();
       const keys = JSON.stringify(lockKeys);

@@ -87,7 +87,7 @@ const SessionDetailModal=({session,sessionModel,open,onClose,onAction}:SessionDe
               </button> 
               {!session.isApproved  &&(
                 <div className="flex items-center gap-2 p-1 justify-end">
-                  <button onClick={() => {onAction( session?.id, 'approve'); onClose }}
+                  <button onClick={() => {onAction( session?.id, 'approve' ); onClose }}
                       title="Approve"
                       className=" flex p-1.5  items-center  gap-2  rounded-lg border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
                       >

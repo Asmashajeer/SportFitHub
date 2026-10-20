@@ -17,7 +17,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const isLoginPath = originalRequest.url.includes('/auth/login');
-    const PUBLIC_PATHS = ['/', '/sports', '/fitness', '/login', '/register', /* ... */];
+    const PUBLIC_PATHS = ['/', '/sports', '/fitness', '/login', '/register','/support', /* ... */];
     const isPublicPath = () => PUBLIC_PATHS.some(p => window.location.pathname===p);
    
     if (

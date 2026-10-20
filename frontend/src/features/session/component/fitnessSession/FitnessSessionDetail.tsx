@@ -74,11 +74,9 @@ const FitnessSessionDetail = () => {
           if (data.session && sessionId) {
             //fetch booked dates
             const bookings = await BookingService.getBookedSlots(sessionId);
-            const { occupiedSlots } = await checkAvailability({
-              sessionId: data.session.id,
-              maxCapacity: data.session.maxCapacity,
-              ...bookings,
-            });
+            const bookedSlots = bookings.map((b: BookingSlot) => ({ ...b, maxCapacity: data.session.maxCapacity }));
+            
+            const { occupiedSlots } = await checkAvailability(bookedSlots);
             setOccupiedSlots(occupiedSlots);
             //Group occupied slots by date
             const occupiedByDate = occupiedSlots.reduce((acc: Record<string, number>, slot: IBookedSlot) => {

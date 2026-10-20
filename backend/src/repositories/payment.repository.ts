@@ -67,7 +67,7 @@ export class PaymentRepository extends BaseRepository<IPayment> implements IPaym
     const results = await this.model.aggregate([
       {
         $match: {
-          status: "success",
+          status: "succeeded",
           createdAt: { $gte: startDate },
         },
       },
@@ -78,9 +78,7 @@ export class PaymentRepository extends BaseRepository<IPayment> implements IPaym
         },
       },
     ]);
-
-    const totalsByDate = new Map(results.map((r) => [r._id, r.total]));
-
+    const totalsByDate = new Map(results.map((r) => [r._id, r.total]));    
     const points: RevenuePoint[] = [];
     for (let i = 0; i < days; i++) {
       const d = new Date(startDate);

@@ -163,7 +163,7 @@ const BookingsTable = () => {
                   <tr key={booking.bookingId} className="hover:bg-zinc-800/40 transition-colors">
                     {/* Booking ID */}
                     <td className={tdCls}>
-                      <span className="text-zinc-500 font-mono text-xs">#{booking.bookingUId}</span>
+                      <span className="text-zinc-500 font-mono text-xs">#{booking.bookingUID}</span>
                     </td>
 
                     {/* user */}

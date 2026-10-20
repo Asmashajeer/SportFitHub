@@ -32,7 +32,7 @@ export class PaymentsManagementController {
     const search = req.query.search as string;
     const date=req.query.date as string;
     const status = req.query.status as string;
-
+    
     const timezone = getTimezone();
     try {
       const paymentsData = await this._paymentsManagementService.getAllPayments(timezone,{ page, limit, search, status, date });
