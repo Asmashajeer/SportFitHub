@@ -47,6 +47,7 @@ export default function DaysOffCard({ availability }: Props) {
     if (from && value < from) return 'Before your availability starts';
     if (to && value > to) return 'After your availability ends';
     const dayName = DAYS_OF_WEEK[new Date(`${value}T00:00:00Z`).getUTCDay()];
+    console.log("day from Offcard ; ",dayName);
     if (!availability[dayName]?.available) return `${dayName} is not one of your working days`;
     if (days.some(d => d.date === value)) return 'Already marked unavailable';
     return '';

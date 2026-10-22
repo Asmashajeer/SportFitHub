@@ -289,4 +289,13 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
       date: date, 
     });
   }
+
+  // ---future bookings
+  async findActiveFutureBookings(trainerId: string|Types.ObjectId, todayStr: string) {
+    return await this.model.find({
+      trainerId: trainerId,
+      status: BOOKING_SESSION_STATUS.SCHEDULED, // or whatever your active status is
+      date: { $gte: todayStr } // matches pure DATE strings or timestamps
+    });
+  }
 }

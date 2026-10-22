@@ -21,4 +21,5 @@ export interface IBookingSessionRepository extends IBaseRepository<IBookingSessi
   getBookingCategoryMetrics(startDate?: Date, endDate?: Date)
   countScheduledBetween(trainerId: string | Types.ObjectId, from: Date, to?: Date): Promise<number>
    countActiveByTrainerAndDate(trainerId: string, date: Date): Promise<number>
+    findActiveFutureBookings(trainerId: string|Types.ObjectId, todayStr: string)
 }

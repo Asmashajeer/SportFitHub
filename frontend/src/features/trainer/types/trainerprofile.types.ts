@@ -3,7 +3,7 @@ import {
   TRAINER_STATUS,
   TRAINER_CATEGORY,
   DOC_VERIFY_STATUS,
-  CURRENCY,
+ 
 } from '@/constants/constants';
 export interface dayAvailability {
   available: boolean;
@@ -87,7 +87,7 @@ export interface idVerificationwithUrl {
 export interface AvailabiltyPricing {
   pricing: {
     sessionCharge: number;
-    currency: (typeof CURRENCY)[keyof typeof CURRENCY];
+    
   };
   availability: {
     isAvailable: boolean;

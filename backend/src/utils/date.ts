@@ -39,5 +39,9 @@ export function dateStrToDate(dateStr: string): Date {
 
 /** Date-only DB value -> 'YYYY-MM-DD' (read in UTC). */
 export function dateToDateStr(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  const isoStr = d.toISOString().slice(0, 10);
+  const [year, month, day] = isoStr.split('-');
+  
+  // Rearrange to DD-MM-YYYY
+  return `${day}-${month}-${year}`;
 }

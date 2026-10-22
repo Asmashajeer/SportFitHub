@@ -32,10 +32,12 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
   } = form;
 
   const tz = user?.timezone;
-  const todayStr = () => new Intl.DateTimeFormat('en-GB', { timeZone: tz }).format(new Date());
+  const todayStr = () => new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
 
   const effectiveFrom = initialData?.availability?.effectiveFrom?.slice(0, 10);
+  const effectiveTo=initialData?.availability?.effectiveTo?.slice(0, 10);
   const hasStarted = effectiveFrom !== undefined && effectiveFrom <= todayStr();
+  const hasEnded= effectiveTo !== undefined && effectiveTo<todayStr(); 
 
   const onSubmit = async (data: AvailabiltyPricing) => {
     if (!profile) return;
@@ -57,7 +59,7 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-[#1e1e1f] border-2 p-4 sm:p-6 my-4 rounded-lg w-full max-w-full overflow-hidden text-xs sm:text-xs">
         
         {/* Top Section: Session Charge & Effective Dates */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
           {/* Session Charge */}
           <div className="space-y-1.5 w-full">
             <Label className="text-xs sm:text-xs font-semibold text-foreground">Session Charge</Label>
@@ -74,7 +76,7 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
                 <label className="text-xs text-slate-300 font-medium">From</label>
                 <div className="relative w-full">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input type="date" readOnly={hasStarted} {...register('availability.effectiveFrom')} className="pl-9 text-xs" />
+                  <Input type="date" disabled={hasStarted && !hasEnded} readOnly={hasStarted} {...register('availability.effectiveFrom')} className="pl-9 text-xs" />
                 </div>
                 {errors?.availability?.effectiveFrom && <p className="text-[10px] text-red-500">{errors.availability?.effectiveFrom.message}</p>}
               </div>

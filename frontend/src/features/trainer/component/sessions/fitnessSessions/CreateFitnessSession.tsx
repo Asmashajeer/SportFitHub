@@ -81,7 +81,7 @@ const initialData = {
   pricing: [{ sessionCount: 1, price: 100 }],
   timeSlots: [
     {
-      day: DAYS_OF_WEEK[0],
+      day: DAYS_OF_WEEK[1],
       slots: [
         {
           startTime: '09:00',

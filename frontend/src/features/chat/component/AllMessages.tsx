@@ -17,7 +17,7 @@ interface MessageThreadProps {
 }
 
 export const AllMessages = ({ conversationId,partner }: MessageThreadProps) => {
-  const { messages, setMessages,markAsRead } = useChatStore();
+  const { messages, setMessages,markAsRead ,setUnreadMessageCountInbox} = useChatStore();
   const {user}= useAuthStore();
   const currentUserId=user?.id;
   const bottomRef = useRef<HTMLDivElement>(null);  
@@ -34,6 +34,7 @@ export const AllMessages = ({ conversationId,partner }: MessageThreadProps) => {
    }
     fetchMessages();
     markAsRead(conversationId);
+    setUnreadMessageCountInbox(0);
   }, [conversationId, setMessages]);
 
   const conversationMessages = messages[conversationId] || [];

@@ -104,13 +104,14 @@ export const ToTrainerProfileDTO = (trainer: ITrainerProfile): TrainerProfileDTO
     },
 
     currentLocation: trainer.currentLocation ? { ...trainer.currentLocation } : undefined,
-    availability: trainer.availability ? {
-       ...trainer.availability,
-       timezone:trainer.availability.timezone,
-      effectiveFrom:trainer.availability.effectiveFrom? trainer.availability.effectiveFrom.toString():"",
-      effectiveTo:trainer.availability.effectiveTo ? trainer.availability.effectiveTo.toString():"",
-    } : undefined,
-
+    availability: trainer.availability
+      ? {
+          ...trainer.availability,
+          timezone: trainer.availability.timezone,
+          effectiveFrom: trainer.availability.effectiveFrom ? new Date(trainer.availability.effectiveFrom).toISOString().split('T')[0] : '',
+          effectiveTo: trainer.availability.effectiveTo ? new Date(trainer.availability.effectiveTo).toISOString().split('T')[0] : '',
+        }
+      : undefined,
 
     status: trainer.status,
     verificationRemarks: {

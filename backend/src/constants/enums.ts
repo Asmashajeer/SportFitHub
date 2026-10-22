@@ -2,13 +2,13 @@ export const AppName = 'SportFitHub';
 export const AppEmail = 'sportfit.hub@gmail.com';
 export const OTP_EXPIRATION_MINUTES=1; //1 min
 export const DAYS_OF_WEEK = [
+  'Sunday',
   'Monday',
   'Tuesday',
   'Wednesday',
   'Thursday',
   'Friday',
-  'Saturday',
-  'Sunday',
+  'Saturday', 
 ] as const;
 export type DayName = (typeof DAYS_OF_WEEK)[number];
 //------AUTH----------

@@ -1,8 +1,8 @@
-import { DOC_VERIFY_STATUS, TRAINER_STATUS, UserRole } from '@/constants/enums';
+import { DAYS_OF_WEEK, DOC_VERIFY_STATUS, TRAINER_STATUS, UserRole } from '@/constants/enums';
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 import { getTimezone } from '@/context/timezone.context';
 
-import { AvailabiltyPricingReqDTO, BasicInfoReqDTO, CertificationReqDTO, idVerificationReqDTO,  PersonalInfoReqDTO } from '@/dtos/request/trainer/trainer.profile.request.dto';
+import { AvailabiltyPricingReqDTO, BasicInfoReqDTO, CertificationReqDTO, idVerificationReqDTO, PersonalInfoReqDTO } from '@/dtos/request/trainer/trainer.profile.request.dto';
 import { TrainerProfileResponseDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { TrainerProfileDTO } from '@/dtos/response/trainer/trainer.response.dto';
 import { IBookingSessionRepository } from '@/interfaces/repositories/IBook.session.repository';
@@ -15,6 +15,7 @@ import { AuthUser } from '@/middleware/auth.middleware';
 import { ITrainerProfile } from '@/models/trainerProfile.model';
 import AppError from '@/utils/AppError';
 import { isValidTimezone, nextDay } from '@/utils/availability';
+import { dateToDateStr } from '@/utils/date';
 import { formatDateTo, toDateStr } from '@/utils/formatTo';
 import { sendPushNotification } from '@/utils/push-notification.service';
 import { sendNotificationEmail } from '@/utils/sendNotfication.mail';
@@ -42,22 +43,24 @@ export class TrainerService implements ITrainerService {
 
   async addProfile(Data: Partial<ITrainerProfile>, user: AuthUser): Promise<TrainerProfileResponseDTO & { tokens?: { accessToken: string; refreshToken: string } }> {
     await this.checkExistingProfile(Data.userId);
-    const timezone = Data.availability?.timezone ?? getTimezone(); 
+    const timezone = Data.availability?.timezone ?? getTimezone();
     if (!timezone || !isValidTimezone(timezone)) throw new Error('Timezone is required');
-    const effectiveFromUTC= fromZonedTime(Data.availability.effectiveFrom,timezone);
-    const effectiveToUTC = Data.availability.effectiveTo
-      ? fromZonedTime(new Date(`${nextDay(toDateStr(Data.availability.effectiveTo))}T00:00:00`), timezone)
-      : null;
-    
-    const profileData={
+    const effectiveFrom = Data.availability.effectiveFrom;
+    const effectiveTo = Data.availability.effectiveTo;
+    // const effectiveFromUTC= fromZonedTime(Data.availability.effectiveFrom,timezone);
+    // const effectiveToUTC = Data.availability.effectiveTo
+    //   ? fromZonedTime(new Date(`${nextDay(toDateStr(Data.availability.effectiveTo))}T00:00:00`), timezone)
+    //   : null;
+
+    const profileData = {
       ...Data,
       availability: {
-        ...Data.availability,       
-        timezone:timezone,
-        effectiveFrom:effectiveFromUTC,
-        effectiveTo: effectiveToUTC 
-      }
-    }
+        ...Data.availability,
+        timezone: timezone,
+        effectiveFrom: effectiveFrom,
+        effectiveTo: effectiveTo,
+      },
+    };
     const data = await this._trainerRepo.create(profileData);
     // const data = await this._trainerRepo.create(profileData);
     const trainerData = serializeTrainerProfile(data, { id: user?.id, role: user?.role });
@@ -225,7 +228,7 @@ export class TrainerService implements ITrainerService {
   }
 
   //-------------update availability and pricing
- 
+
   async updateAvailabilityPricing(id: string | Types.ObjectId, data: AvailabiltyPricingReqDTO, user: AuthUser): Promise<TrainerProfileDTO> {
     const nextDay = (d: string) => {
       const dt = new Date(`${d}T00:00:00.000Z`);
@@ -240,22 +243,20 @@ export class TrainerService implements ITrainerService {
       throw new AppError('Forbidden', STATUS_CODE.ERROR.FORBIDDEN);
     }
 
-    const tz = trainer.availability?.timezone ?? getTimezone(); 
+    const tz = trainer.availability?.timezone ?? getTimezone();
     const today = formatInTimeZone(new Date(), tz, 'yyyy-MM-dd');
-
-    if (!data.availability.effectiveFrom) {
-      throw new AppError('Start date is required', STATUS_CODE.ERROR.BAD_REQUEST);
-    }
-
+    // ---check for changes for effectiveFrom and effectiveTo
     const currentFrom = toDateStr(trainer.availability.effectiveFrom);
     const currentTo = trainer.availability.effectiveTo ? toDateStr(trainer.availability.effectiveTo) : null;
-    const newFrom =  data.availability.effectiveTo ?toDateStr(fromZonedTime(data.availability.effectiveFrom,tz)):null;
-    const newTo = data.availability.effectiveTo ? toDateStr(fromZonedTime(data.availability.effectiveTo,tz)) : null;
-
-    const fromChanged =newFrom!==null && newFrom !== currentFrom;
+    const newFrom = data.availability.effectiveFrom ? toDateStr(fromZonedTime(data.availability.effectiveFrom, tz)) : null;
+    const newTo = data.availability.effectiveTo ? toDateStr(fromZonedTime(data.availability.effectiveTo, tz)) : null;
+    if (currentTo < today && !newFrom) {
+      throw new AppError('Start date is required', STATUS_CODE.ERROR.BAD_REQUEST);
+    }
+    const fromChanged = newFrom !== null && newFrom !== currentFrom;
     const toChanged = newTo !== currentTo;
 
-    // 1. effectiveFrom
+    //  effectiveFrom
     if (fromChanged) {
       if (currentFrom <= today) {
         throw new AppError('Start date of a running schedule cannot be changed', STATUS_CODE.ERROR.BAD_REQUEST);
@@ -264,8 +265,7 @@ export class TrainerService implements ITrainerService {
         throw new AppError('Start date cannot be in the past', STATUS_CODE.ERROR.BAD_REQUEST);
       }
     }
-
-    // 2. effectiveTo validity 
+    // effectiveTo validity
     if (newTo) {
       if (toChanged && newTo < today) {
         throw new AppError('End date cannot be in the past', STATUS_CODE.ERROR.BAD_REQUEST);
@@ -278,10 +278,11 @@ export class TrainerService implements ITrainerService {
     // 3. effectiveTo shortened -> bookings in the removed period block the edit
     const isShortening = newTo !== null && (currentTo === null || newTo < currentTo);
     if (isShortening) {
-      const removedFrom = fromZonedTime(`${nextDay(newTo)}T00:00:00`, tz);
+      const removedFrom = fromZonedTime(`${newTo}T00:00:00`, tz);
       const removedTo = currentTo ? fromZonedTime(`${nextDay(currentTo)}T00:00:00`, tz) : undefined;
 
       const count = await this._bookingSessionRepo.countScheduledBetween(trainer._id, removedFrom, removedTo);
+
       if (count > 0) {
         throw new AppError(`${count} booked session(s) exist after ${newTo}. Cancel or reschedule them first.`, STATUS_CODE.ERROR.CONFLICT);
       }
@@ -298,12 +299,42 @@ export class TrainerService implements ITrainerService {
       }
     }
 
+    //---check chnages in availability and timing
+
+    // 1. Fetch all active future bookings from 'today' onwards
+    const futureBookings = await this._bookingSessionRepo.findActiveFutureBookings(trainer._id, today);
+    console.log(futureBookings);
+    for (const booking of futureBookings) {        
+        const bookingDateObj = new Date(booking.date);
+        const dayName = DAYS_OF_WEEK[bookingDateObj.getUTCDay()];
+        
+        console.log("booking.date:", booking.date);
+        console.log("dayName:", dayName);
+
+        const newDayConfig = data.availability[dayName];
+        console.log("new config:", newDayConfig);
+      if (!newDayConfig) continue;
+
+      // CHECK 1: Was this day turned completely OFF?
+      if (!newDayConfig.available) {
+        throw new AppError(`Cannot close ${dayName}s. You have an active booking on ${dateToDateStr(booking.date)} at ${booking.startTime}.`, STATUS_CODE.ERROR.CONFLICT);
+      }
+
+      // CHECK 2: Were the hours shortened/shifted so that this booking now falls outside?
+      // Booking time strings are usually "HH:mm" (e.g., "07:00")
+      if (booking.startTime < newDayConfig.startTime || booking.endTime > newDayConfig.endTime) {
+        throw new AppError(
+          `Cannot update hours on ${dayName}s. Booking on ${dateToDateStr(booking.date)} (${booking.startTime}-${booking.endTime}) falls outside your new hours (${newDayConfig.startTime}-${newDayConfig.endTime}).`,
+          STATUS_CODE.ERROR.CONFLICT
+        );
+      }
+    }
     // Save with dates normalized to UTC midnight (the format already in your DB)
     const newData = {
       ...data,
       availability: {
         ...data.availability,
-        effectiveFrom:  newFrom ? new Date(`${newFrom}T00:00:00.000Z`)      : data.availability.effectiveFrom,
+        effectiveFrom: newFrom ? new Date(`${newFrom}T00:00:00.000Z`) : data.availability.effectiveFrom,
         effectiveTo: newTo ? new Date(`${newTo}T00:00:00.000Z`) : null,
       },
     };
@@ -314,27 +345,6 @@ export class TrainerService implements ITrainerService {
     const result = serializeTrainerProfile(updatedDoc, { id: user.id, role: user.role });
     return ToTrainerProfileDTO(result);
   }
-  //--------------- update payment info
-  // async updatePaymentInfo(id: string | Types.ObjectId, data: PaymentInfoReqDTO, user: AuthUser): Promise<TrainerProfileDTO> {
-  //   const trainer = await this._trainerRepo.findById(id);
-  //   if (!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
-  //   const status = trainer.paymentInfo !== data.paymentInfo ? TRAINER_STATUS.VARIFICATION_REQUIRED : trainer.status;
-  //   const changedField = trainer.paymentInfo !== data.paymentInfo ? 'paymentInfo' : '';
-  //   const newData = {
-  //     ...data,
-  //     status,
-  //   };
-
-  //   const updatedDoc = await this._trainerRepo.updateSection(id, newData, changedField);
-
-  //   if (!updatedDoc) {
-  //     throw new AppError('Update failed', STATUS_CODE.ERROR.INTERNAL_SERVER_ERROR);
-  //   }
-  //   const result = serializeTrainerProfile(updatedDoc, { id: user?.id, role: user?.role });
-  //   const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(result);
-  //   if (changedField) this.sendVerificationPendingNotification(user, trainer, changedField);
-  //   return trainerData;
-  // }
 
   //----------------------resubmit Application
   async resubmitApplicaion(id: string | Types.ObjectId, status: TRAINER_STATUS, user: AuthUser): Promise<TrainerProfileDTO> {
@@ -380,7 +390,4 @@ export class TrainerService implements ITrainerService {
       });
     }
   };
-
-
-  
 }

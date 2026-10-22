@@ -123,13 +123,14 @@ export const UPLOAD_TYPE = {
 };
 
 export const DAYS_OF_WEEK = [
+  'Sunday',
   'Monday',
   'Tuesday',
   'Wednesday',
   'Thursday',
   'Friday',
   'Saturday',
-  'Sunday',
+  
 ] as const;
 export type DayName = (typeof DAYS_OF_WEEK)[number];
 

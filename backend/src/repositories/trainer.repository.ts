@@ -3,6 +3,7 @@ import { BaseRepository } from './base.repository';
 import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
 import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 import { stripeData } from '@/dtos/request/trainer/trainer.profile.request.dto';
+import { BOOKING_SESSION_STATUS } from '@/constants/enums';
 
 
 export class TrainerRepository extends BaseRepository<ITrainerProfile> implements ITrainerRepository {
@@ -62,4 +63,6 @@ export class TrainerRepository extends BaseRepository<ITrainerProfile> implement
  async countActiveTrainers(): Promise<number> {
     return await this.model.countDocuments({ status: "approved" });
   }
+
+
 }
