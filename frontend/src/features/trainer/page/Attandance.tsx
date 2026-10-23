@@ -4,7 +4,7 @@ import { PAGINATION_DEFAULT_LIMIT, PAYLOAD_MODEL, SESSION_TYPE } from '@/constan
 import type { SessionOccuranceResponseData } from '../types/trainer.bookings.types';
 import { AttendanceModal } from '../component/attendance/AttendanceModel';
 import { trainerAttendanceService } from '../service/trainer.attendance.service';
-import { formatDateDDMMYY, formatTo12Hour } from '@/utils/formatDate';
+import {  formatTo12Hour } from '@/utils/formatDate';
 import { AttendanceDisplayModal } from '../component/attendance/AttendanceDisplayModal';
 import Pagination from '@/components/reusable/Pagination';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';

@@ -52,7 +52,6 @@ import type { SportsSessionFormValues } from '@/features/trainer/types/trainer.s
 import { TrainerSportSessionService } from '@/features/trainer/service/sessionService/trainer.sports.session.service';
 import { useTrainerAvailability } from '@/features/trainer/hook/useTrainerAvailability';
 
-const cancellationWindow = 24;
 
 const initialData = {
   sportCategory: '',
