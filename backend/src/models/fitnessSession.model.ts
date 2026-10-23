@@ -192,16 +192,16 @@ const FitnessSessionSchema = new mongoose.Schema<IFitnessSession>(
     ],
     cancellationPolicy: {
       type: String,
-      default: 'Full refund if cancelled at least 24 hours before the session starts. No-shows are non-refundable.',
+      default: 'Full refund if cancelled at least 12 hours before the session starts. No-shows are non-refundable.',
       trim: true,
     },
 
     // OPTIONAL: A numeric cancellation window for automated logic
     cancellationWindow: {
       type: Number,
-      default: 24, // hours
+      default: 12, // hours
     },
-    bookingDeadline: { type: Number, default: 2 },
+    bookingDeadline: { type: Number, default: 0 },
     //  ADMIN CONTROLS
     isActive: {
       type: Boolean,

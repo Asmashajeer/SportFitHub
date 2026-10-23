@@ -77,18 +77,7 @@ export const fitnessSessionSchema = z
         ctx.addIssue({ code: 'custom', message: 'Location is required for offline sessions', path: ['venue', 'location'] });
       }
     }
-
-    // // online → meetingLink required
-    // if (data.mode === SESSION_MODE.ONLINE) {
-    //   if (!data.meetingLink) {
-    //     ctx.addIssue({ code: 'custom', message: 'Meeting link is required for online sessions', path: ['meetingLink'] });
-    //   }
-    // }
-
-    // cancellation window check
-    if (data.cancellationWindow >= data.bookingDeadline) {
-      ctx.addIssue({ code: 'custom', message: 'Cancellation window must be less than  booking deadline', path: ['cancellationWindow'] });
-    }
+    
   });
 
 export type FitnessSessionInput = z.infer<typeof fitnessSessionSchema>;

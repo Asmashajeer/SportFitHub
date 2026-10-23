@@ -48,7 +48,8 @@ export interface queryParamsOptions {
 }
 export interface queryParamsWithAttendace {
   sessionModel?: (typeof PAYLOAD_MODEL)[keyof typeof PAYLOAD_MODEL];
-  attendanceMarked:boolean
+  attendanceMarked:boolean,
+  date:string
 } 
 
 interface participants{  

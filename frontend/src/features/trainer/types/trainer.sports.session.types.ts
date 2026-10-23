@@ -4,12 +4,7 @@ import type {
  
   SESSION_TYPE,
 } from '@/constants/constants';
-// interface SportsCategory {
-//   id: string;
-//   sportName: string;
-//   icon: string;
-//   slug: string;
-// }
+
 
 export interface Venue {
   name: string;

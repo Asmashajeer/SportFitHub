@@ -828,16 +828,14 @@ const CreateFitnessSessionModal = ({
                     + Add Day Slot
                   </Button>
                 </section>
-                <section>
+               <section>
                   {/* Booking Deadline Field */}
                   <div className="space-y-3">
                     <div className="flex justify-between items-end">
                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
                         Booking Deadline (Hours)
                       </label>
-                      <span className="text-xl font-black italic text-white leading-none">
-                        {watch('bookingDeadline')}h
-                      </span>
+                      
                     </div>
 
                     <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-2xl p-1 shadow-inner">
@@ -853,6 +851,11 @@ const CreateFitnessSessionModal = ({
                       >
                         <Minus size={18} />
                       </button>
+                       <div className="flex justify-between items-end">                   
+                        <span className="text-xl font-black italic text-white leading-none">
+                          {watch('bookingDeadline')}h
+                        </span>
+                      </div>
                       <div className="w-0.5 h-6 bg-zinc-800" />
                       <button
                         type="button"
@@ -893,29 +896,39 @@ const CreateFitnessSessionModal = ({
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
                       Cancellation Window
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[12, 24, 48].map((hrs) => (
-                        <button
-                          key={hrs}
-                          type="button"
-                          onClick={() => {
-                            setValue('cancellationWindow', hrs);
-                            setValue(
-                              'cancellationPolicy',
-                              `Full refund if cancelled at least ${hrs} hours before start.`
-                            );
-                          }}
-                          className={`py-2 rounded-xl border text-[10px] font-black uppercase transition-all
-                              ${
-                                watch('cancellationWindow') === hrs
-                                  ? 'bg-emerald-500 border-emerald-500 text-black'
-                                  : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700'
-                              }`}
-                        >
-                          {hrs}h
-                        </button>
-                      ))}
+                       <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-2xl p-1 shadow-inner">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setValue(
+                            'cancellationWindow',
+                            Math.max(2, watch('cancellationWindow') - 1)
+                          )
+                        }
+                        className="flex-1 py-3 flex justify-center hover:bg-zinc-800 rounded-xl transition-colors text-zinc-400 hover:text-white"
+                      >
+                        <Minus size={18} />
+                      </button>
+                      <div className="flex justify-between items-end">
+                     
+                      <span className="text-xl font-black italic text-white leading-none">
+                        {watch('cancellationWindow')}h
+                      </span>
                     </div>
+                      <div className="w-0.5 h-6 bg-zinc-800" />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setValue(
+                            'cancellationWindow',
+                            watch('cancellationWindow') + 1
+                          )
+                        }
+                        className="flex-1 py-3 flex justify-center hover:bg-zinc-800 rounded-xl transition-colors text-emerald-500"
+                      >
+                        <Plus size={18} />
+                      </button>
+                    </div>                    
                   </div>
                 </section>
               </div>

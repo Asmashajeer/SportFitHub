@@ -143,7 +143,7 @@ const ProfileView = () => {
   };
 
   return (
-    <div className="w-full max-w-3xl p-6 rounded-xl mx-auto z-50 bg-zinc-800/50">
+    <div className="w-full max-w-3xl p-6 rounded-xl mx-auto  bg-zinc-800/50">
       <div className="  items-center  justify-center  gap-2 w-full pb-6 mb-4 z-50 font-bold">
         <h1>Profile Overview</h1>
         <p>{profile?.status === TRAINER_STATUS.REJECTED && <Badge variant="destructive"> {profile?.status}</Badge>}</p>

@@ -52,6 +52,8 @@ import type { SportsSessionFormValues } from '@/features/trainer/types/trainer.s
 import { TrainerSportSessionService } from '@/features/trainer/service/sessionService/trainer.sports.session.service';
 import { useTrainerAvailability } from '@/features/trainer/hook/useTrainerAvailability';
 
+const cancellationWindow = 24;
+
 const initialData = {
   sportCategory: '',
   sessionName: '',
@@ -87,10 +89,11 @@ const initialData = {
     },
   ],
   amenities: '',
+  cancellationWindow:12,
+  bookingDeadline: 2,
   cancellationPolicy:
-    'Full refund available if cancelled at least 24 hours before start time. Late cancellations or no-shows are non-refundable.',
-  cancellationWindow: 24,
-  bookingDeadline: 12,
+    `Full refund available if cancelled at least cancellationWindow hours before start time. Late cancellations or no-shows are non-refundable.`,
+ 
 };
 
 interface Props {
@@ -556,33 +559,7 @@ const CreateSportSessionModal = ({
                         ))}
                       </div>
                     )}
-                  {/* {isEditing && existingImages.length > 0 && (
-                    <div className="grid grid-cols-4 gap-2 mb-4">
-                      {existingImages.map((url, index) => (
-                        <div
-                          key={url}
-                          className="relative group aspect-square rounded-lg overflow-hidden border"
-                        >
-                          <img
-                            src={url}
-                            alt="Session"
-                            className="object-cover w-full h-full"
-                          />
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setExistingImages((prev) =>
-                                prev.filter((_, i) => i !== index)
-                              )
-                            }
-                            className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )} */}
+                 
                   {/* 2. The File Input for NEW images */}
                   <div className="p-4 border border-gray-600 border-dashed rounded-lg text-center cursor-pointer hover:border-2 hover:border-green-800">
                     <ImageIcon className="mx-auto text-slate-300 mb-2" />
@@ -780,9 +757,7 @@ const CreateSportSessionModal = ({
                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
                         Booking Deadline (Hours)
                       </label>
-                      <span className="text-xl font-black italic text-white leading-none">
-                        {watch('bookingDeadline')}h
-                      </span>
+                      
                     </div>
 
                     <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-2xl p-1 shadow-inner">
@@ -798,6 +773,11 @@ const CreateSportSessionModal = ({
                       >
                         <Minus size={18} />
                       </button>
+                       <div className="flex justify-between items-end">                   
+                        <span className="text-xl font-black italic text-white leading-none">
+                          {watch('bookingDeadline')}h
+                        </span>
+                      </div>
                       <div className="w-0.5 h-6 bg-zinc-800" />
                       <button
                         type="button"
@@ -838,29 +818,41 @@ const CreateSportSessionModal = ({
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
                       Cancellation Window
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[12, 24, 48].map((hrs) => (
-                        <button
-                          key={hrs}
-                          type="button"
-                          onClick={() => {
-                            setValue('cancellationWindow', hrs);
-                            setValue(
-                              'cancellationPolicy',
-                              `Full refund if cancelled at least ${hrs} hours before start.`
-                            );
-                          }}
-                          className={`py-2 rounded-xl border text-[10px] font-black uppercase transition-all
-                              ${
-                                watch('cancellationWindow') === hrs
-                                  ? 'bg-emerald-500 border-emerald-500 text-black'
-                                  : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700'
-                              }`}
-                        >
-                          {hrs}h
-                        </button>
-                      ))}
+                       <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-2xl p-1 shadow-inner">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setValue(
+                            'cancellationWindow',
+                            Math.max(2, watch('cancellationWindow') - 1)
+                          )
+                        }
+                        className="flex-1 py-3 flex justify-center hover:bg-zinc-800 rounded-xl transition-colors text-zinc-400 hover:text-white"
+                      >
+                        <Minus size={18} />
+                      </button>
+                      <div className="flex justify-between items-end">
+                     
+                      <span className="text-xl font-black italic text-white leading-none">
+                        {watch('cancellationWindow')}h
+                      </span>
                     </div>
+                      <div className="w-0.5 h-6 bg-zinc-800" />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setValue(
+                            'cancellationWindow',
+                            watch('cancellationWindow') + 1
+                          )
+                        }
+                        className="flex-1 py-3 flex justify-center hover:bg-zinc-800 rounded-xl transition-colors text-emerald-500"
+                      >
+                        <Plus size={18} />
+                      </button>
+                    </div>
+
+                    
                   </div>
                 </section>
               </div>

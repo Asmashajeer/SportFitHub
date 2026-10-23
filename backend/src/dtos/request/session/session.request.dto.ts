@@ -71,10 +71,7 @@ export const sportsSessionSchema = z
       ctx.addIssue({ code: 'custom', message: 'Location is required ', path: ['venue', 'location'] });
     }
 
-    // cancellation window check
-    if (data.cancellationWindow > data.bookingDeadline) {
-      ctx.addIssue({ code: 'custom', message: 'Cancellation window must be < booking deadline', path: ['cancellationWindow'] });
-    }
+  
   });
 
 export type SportsSessionInput = z.infer<typeof sportsSessionSchema>;

@@ -6,12 +6,7 @@ import type {
   Session_Mode_type,
   SESSION_TYPE,
 } from '@/constants/constants';
-// interface FitnessCategory {
-//   id: string;
-//   programName: string;
-//   slug: string;
-//   description: string;
-// }
+
 
 interface Venue {
   name: string;

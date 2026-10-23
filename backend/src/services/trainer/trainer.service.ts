@@ -321,7 +321,7 @@ export class TrainerService implements ITrainerService {
       }
 
       // CHECK 2: Were the hours shortened/shifted so that this booking now falls outside?
-      // Booking time strings are usually "HH:mm" (e.g., "07:00")
+      
       if (booking.startTime < newDayConfig.startTime || booking.endTime > newDayConfig.endTime) {
         throw new AppError(
           `Cannot update hours on ${dayName}s. Booking on ${dateToDateStr(booking.date)} (${booking.startTime}-${booking.endTime}) falls outside your new hours (${newDayConfig.startTime}-${newDayConfig.endTime}).`,

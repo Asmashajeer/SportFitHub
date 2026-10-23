@@ -13,14 +13,12 @@ export class AttendanceController {
 
   getBookedSessionsOccurance = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const trainerId = req.query.trainerId as string;
-
-    const sessionModel = req.query.sessionModel as PAYLOAD_MODEL;
-    
-    // const status = req.query.status as string;
+    const sessionModel = req.query.sessionModel as PAYLOAD_MODEL;    
+    const date=req.query.date as string
     const attendanceMarked=req.query.attendanceMarked ==='true';
-    console.log("----",typeof req.query.attendanceMarked,typeof attendanceMarked,"----");
+   
     try {
-      const bookings = await this._attendanceService.getSessionOccurrences({ trainerId,  sessionModel, attendanceMarked });
+      const bookings = await this._attendanceService.getSessionOccurrences({ trainerId,  sessionModel, attendanceMarked,date });
       res.status(STATUS_CODE.SUCCESS.OK).json(bookings);
     } catch (error) {
       next(error);

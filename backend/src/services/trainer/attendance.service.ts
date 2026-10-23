@@ -25,7 +25,7 @@ export class AttendanceService implements IAttendanceService {
 
   //------------------------get completed sessions to mark participants attandance----
   async getSessionOccurrences(data: SessionOccuranceRequestDTO): Promise<SessionOccuranceResponseDTO[]> {
-    const { trainerId, sessionModel, attendanceMarked } = data;
+    const { trainerId, sessionModel, attendanceMarked,date } = data;
  
 
      const query: FilterQuery<IBookingSession>= {
@@ -38,7 +38,9 @@ export class AttendanceService implements IAttendanceService {
       if(!attendanceMarked ){
         query.attendance=null
       }
-    
+      if(date){
+        query.date={$gte:new Date(`${date}T00:00:00.000Z`),$lte:new Date(`${date}T23:59:59.999Z`)}
+      }
     const bookings = await this._bookingSessionRepo.findOccuredSessions( query  );
     if (!bookings || bookings.length === 0) {
       throw new AppError('No completed sessions to mark attendance');

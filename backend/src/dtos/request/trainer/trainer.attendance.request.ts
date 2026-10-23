@@ -3,6 +3,7 @@ export interface SessionOccuranceRequestDTO {
 
   sessionModel: string;  
   attendanceMarked:boolean
+  date:string
 }
 
 export interface AttendanceMarkingRequestDTO {
@@ -10,5 +11,6 @@ export interface AttendanceMarkingRequestDTO {
   records: {
     bookingSessionId: string;
     attendance: boolean;
+    
   }[];
 }
