@@ -15,11 +15,7 @@ export interface ICertification {
   validUpto: string;
   issuedAt: string;
 }
-interface IDayAvailability {
-  available: boolean;
-  startTime?: string;
-  endTime?: string;
-}
+
 
 export interface TrainerProfileDTO {
   id: string;

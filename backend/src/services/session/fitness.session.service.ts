@@ -3,7 +3,7 @@ import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 import { getTimezone } from '@/context/timezone.context';
 import { FitnessSessionDetailedPublicDTO, FitnessSessionResponseDTO, GetFitnessSessionsResponseDTO, PaginatedFitnessSessionsResponseDTO } from '@/dtos/response/session/fitness.session.response.dto';
 import { IFitnessSessionRepository } from '@/interfaces/repositories/IFitness.session.repository';
-import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
+
 
 import { IBookingService } from '@/interfaces/services/booking/IBooking.service';
 import { IFitnessSessionService } from '@/interfaces/services/session/IFitness.session.service ';

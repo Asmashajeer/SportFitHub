@@ -8,7 +8,7 @@ import {
   SportsSessionResponseDTO,
 } from '@/dtos/response/session/sports.session.response.dto';
 import { ISportsSessionRepository } from '@/interfaces/repositories/ISports.session.repository';
-import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repository';
+
 import { ISportsSessionService } from '@/interfaces/services/session/ISports.session.service';
 import { toSportSessionDetailedPublicDTO, toSportSessionPublicDTO, toSportsSessionResponseDTO, toSportsSessionUpdateResponseDTO } from '@/mappers/sports.session.mapper';
 
@@ -21,7 +21,7 @@ import { IBookingService } from '@/interfaces/services/booking/IBooking.service'
 import { getTimezone } from '@/context/timezone.context';
 import tz_lookup from 'tz-lookup';
 
-import { UserSessionsResponseDTOwithPrice } from '@/dtos/response/booking/booking.response.dto';
+
 import { IPenaltyService } from '@/interfaces/services/trainer/IPenalty.service';
 import { ITrainerService } from '@/interfaces/services/trainer/Itrainer.service';
 import { groupByOccurrence } from '@/utils/sessionGrouping';

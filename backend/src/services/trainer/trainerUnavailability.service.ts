@@ -1,4 +1,4 @@
-import { DAYS_OF_WEEK, TRAINER_STATUS } from '@/constants/enums';
+import {  TRAINER_STATUS } from '@/constants/enums';
 import { ERROR_MESSAGES, STATUS_CODE } from '@/constants/messages';
 import { CancelAvailabilityDto } from '@/dtos/request/trainer/trainer.unavailability.request';
 import { UnavailableDayResponseDto } from '@/dtos/response/trainer/trainer.unavailablity.dto';

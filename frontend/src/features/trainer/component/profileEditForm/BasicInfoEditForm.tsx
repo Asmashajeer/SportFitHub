@@ -24,8 +24,7 @@ import { CornerDownLeftIcon, Loader2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { BasicInfoSchema } from '../../types/trainer.profile.schema';
 import toast from 'react-hot-toast';
-import { sportSessionService } from '@/features/session/service/sportSessionService';
-import { fitnessSessionService } from '@/features/session/service/fitnessSessionService ';
+
 import type { FitnessData, SportData } from '@/features/admin/store/types';
 import { useSessionStore } from '@/features/session/store/useSessionStore';
 

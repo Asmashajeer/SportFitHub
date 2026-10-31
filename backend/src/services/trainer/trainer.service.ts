@@ -14,7 +14,7 @@ import { toTrainerProfileData, ToTrainerProfileDTO } from '@/mappers/trainer/tra
 import { AuthUser } from '@/middleware/auth.middleware';
 import { ITrainerProfile } from '@/models/trainerProfile.model';
 import AppError from '@/utils/AppError';
-import { isValidTimezone, nextDay } from '@/utils/availability';
+import { isValidTimezone,  } from '@/utils/availability';
 import { dateToDateStr } from '@/utils/date';
 import { formatDateTo, toDateStr } from '@/utils/formatTo';
 import { sendPushNotification } from '@/utils/push-notification.service';

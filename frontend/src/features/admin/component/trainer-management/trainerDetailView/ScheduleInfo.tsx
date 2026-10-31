@@ -1,6 +1,6 @@
 
 import type { Trainer } from "@/features/admin/store/trainerSlice"
-import { DAYS_OF_WEEK } from "@/constants/constants";
+
 import { formatDateReadable, formatTo12Hour } from "@/utils/formatDate";
 
 
