@@ -90,7 +90,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
 
   //update Trainer application Status
 
-  const trainerApplicationStatus = async (trainer: Trainer, status: Trainer_status_type, reason?: string) => {
+  const trainerApplicationStatus = async (trainer: Pick<Trainer, 'id' | 'idVerification' | 'certificationInfo'>, status: Trainer_status_type, reason?: string) => {
     const actionKey = `application-${status.toLowerCase()}`;
     setLoadingAction(actionKey);
     try {
@@ -107,6 +107,7 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
       if (data.success) {
         toast.success(`Trainer ${status}`);
         setSelectedTrainer(data.trainerData);
+     
         onClose();
       }
     } catch (error) {
@@ -423,40 +424,45 @@ export const TrainerApprovalView = ({ trainer, onClose }: { trainer: TrainerOver
               </div>
             </AccordionTrigger>
             <AccordionContent className="pb-4 border-t pt-4  bg-zinc-800/70 p-4">
-              <div className="grid grid-cols-2 gap-y-4">
-                <div className="">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">
+              <div className="grid md:grid-cols-2 gap-y-4"> 
+                <p className="text-xs font-semibold text-muted-foreground  uppercase">
                     SessionCharge
                     <span className="px-2 text-sm font-medium text-white">₹ {selectedTrainer?.pricing.sessionCharge} </span>
-                  </p>
-                  <div className="py-2">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase ">Availabilty Period </p>
+                  </p> 
+                <div>        
+                  <p className="text-xs font-semibold text-muted-foreground uppercase ">Availabilty Period </p>                                 
+                  <div className="flex px-2 bg-zinc-800 ">                     
                     <p className="text-emerald-600 px-2">
                       From : <span className="text-white">{formatDateReadable(selectedTrainer?.availability.effectiveFrom)}</span>{' '}
                     </p>
                     <p className="text-emerald-600 px-2">
                       To : <span className="text-white">{formatDateReadable(selectedTrainer?.availability.effectiveTo)}</span>{' '}
                     </p>
-                  </div>
+                  </div>      
                 </div>
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">
-                    Availabilty: <span className="text-sm font-medium">{selectedTrainer?.availability.isAvailable ? 'Active' : 'Not Available'} </span>
-                  </p>
-                  <div className="space-y-2">
-                    {selectedTrainer?.availability &&
-                      Object.entries(selectedTrainer.availability)
-                        .filter(([key, value]) => key !== 'isAvailable' && typeof value === 'object' && value.available)
-                        .map(([day, info]: [string, any]) => (
-                          <div key={day} className="flex justify-between items-center text-sm border-b pb-1 border-muted/50">
-                            <span className="font-medium capitalize">{day}</span>
-                            <span className="text-muted-foreground">
-                              {formatTo12Hour(info.startTime)} - {formatTo12Hour(info.endTime)}
-                            </span>
+                 
+                <div className="space-y-2">                    
+                    {selectedTrainer?.availability?.weeklySchedule &&
+                      selectedTrainer.availability.weeklySchedule
+                        .filter((value) =>typeof value === 'object' && value.isAvailable)
+                        .map((value) => (
+                          <div
+                            key={value.day}
+                            className="flex gap-x-1 gap-y-2 "
+                          >
+                            <span className="text-xs md:text-sm font-medium capitalize">{value.day}:</span>
+                            <div className=" flex gap-2 text-xs ">
+                              {value.slots.length>0 && value.slots.map((s)=>(
+                                <p className="text-xs text-muted-foreground p-1 border bg-zinc-800  ">
+                                  {formatTo12Hour(s.startTime)} - {formatTo12Hour(s.endTime)} 
+                                </p>  
+                                                            
+                              ))}
+                            </div>
                           </div>
                         ))}
-                  </div>
                 </div>
+                
               </div>
             </AccordionContent>
           </AccordionItem>

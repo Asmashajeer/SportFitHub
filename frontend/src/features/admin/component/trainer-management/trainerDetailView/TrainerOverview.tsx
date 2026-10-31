@@ -5,9 +5,12 @@ import { formatDateReadable} from "@/utils/formatDate";
 import {  useState } from "react";
 import GetMapsLink from "@/components/reusable/GetMapsLink";
 
+import { TRAINER_CATEGORY } from "@/constants/constants";
+import type { FitnessData, SportData } from "@/features/admin/store/types";
 
 
-const TrainerOverview=({trainer}:{trainer:Trainer})=> {
+
+const TrainerOverview=({trainer,sports,fitness}:{trainer:Trainer,sports:SportData[], fitness:FitnessData[]})=> {
   
   const [venueLocation, setVenueLocation]=useState("");
   const lat=trainer.currentLocation.coordinates[0];
@@ -51,15 +54,16 @@ const TrainerOverview=({trainer}:{trainer:Trainer})=> {
               Specialties
             </p>
             <div className="flex flex-wrap gap-1.5">
-              {trainer.specialties?.length ? (
-                trainer.specialties.map((s) => (
-                  <span key={s} className="rounded-full bg-gray-700 px-2.5 py-0.5 text-xs font-semibold text-green-500">
-                    {s}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-slate-300">None listed</span>
-              )}
+              <span className="text-zinc-400">
+                {trainer?.specialties
+                ?.map((specialtyId) =>
+                  trainer.category === TRAINER_CATEGORY.SPORT
+                    ? sports?.find((sport) => sport.id === specialtyId)?.sportName
+                    : fitness?.find((program) => program.id === specialtyId)?.programName,
+                )
+                .filter(Boolean)
+                .join(', ')}
+              </span>
             </div>
         </div>
           <div className="text-start">

@@ -44,7 +44,7 @@ const IdVerificationFormEdit = ({ initialData, onCancel }: props) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const {
     register,
-    formState: { errors },
+    formState: { errors,isDirty },
     handleSubmit,
     watch,
     control,
@@ -185,7 +185,7 @@ const IdVerificationFormEdit = ({ initialData, onCancel }: props) => {
         </div>
         <div className="flex  justify-end gap-3">
           <Button type="submit"
-          disabled={isUpdating}
+          disabled={isUpdating || !isDirty}
           >{isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isUpdating ? "Updating..." : "Save Changes"}
             Submit

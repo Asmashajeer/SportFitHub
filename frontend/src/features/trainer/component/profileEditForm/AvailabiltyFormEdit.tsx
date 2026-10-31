@@ -1,7 +1,6 @@
-import { DAYS_OF_WEEK } from '@/constants/constants';
 import { trainerService } from '../../service/trainerService';
 import type { AvailabiltyPricing } from '../../types/trainerprofile.types';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -12,6 +11,7 @@ import { useAuthStore } from '@/features/auth/store/useAuthStore';
 
 import toast from 'react-hot-toast';
 import { useState } from 'react';
+import { DayRow } from '../addProfile/DayRow';
 
 interface props {
   initialData: AvailabiltyPricing;
@@ -25,19 +25,23 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuthStore();
   const {
+    control,
     register,
-    watch,
     handleSubmit,
-    formState: { errors },
+    formState: { errors,isDirty },
   } = form;
 
   const tz = user?.timezone;
   const todayStr = () => new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
 
   const effectiveFrom = initialData?.availability?.effectiveFrom?.slice(0, 10);
-  const effectiveTo=initialData?.availability?.effectiveTo?.slice(0, 10);
+  const effectiveTo = initialData?.availability?.effectiveTo?.slice(0, 10);
   const hasStarted = effectiveFrom !== undefined && effectiveFrom <= todayStr();
-  const hasEnded= effectiveTo !== undefined && effectiveTo<todayStr(); 
+  const hasEnded = effectiveTo !== undefined && effectiveTo < todayStr();
+  const { fields: scheduleFields } = useFieldArray({
+    control,
+    name: 'availability.weeklySchedule',
+  });
 
   const onSubmit = async (data: AvailabiltyPricing) => {
     if (!profile) return;
@@ -57,7 +61,6 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-[#1e1e1f] border-2 p-4 sm:p-6 my-4 rounded-lg w-full max-w-full overflow-hidden text-xs sm:text-xs">
-        
         {/* Top Section: Session Charge & Effective Dates */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
           {/* Session Charge */}
@@ -70,7 +73,6 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
           <div className="space-y-1.5 w-full">
             <h3 className="text-start text-xs sm:text-xs font-semibold mb-1">Effective Range</h3>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center py-2 px-3 gap-3 bg-zinc-700/60 rounded-md">
-              
               {/* From Date */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 w-full">
                 <label className="text-xs text-slate-300 font-medium">From</label>
@@ -89,7 +91,6 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
                 </div>
                 {errors?.availability?.effectiveTo && <p className="text-[10px] text-red-500">{errors.availability?.effectiveTo.message}</p>}
               </div>
-
             </div>
           </div>
         </div>
@@ -99,37 +100,14 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
         {/* Global Toggle */}
         <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
           <Label className="text-xs sm:text-xs font-medium">Availability Status</Label>
-          <input type="checkbox" {...register('availability.isAvailable')} className="w-4 h-4 accent-emerald-500 cursor-pointer" />
+          {/* <input type="checkbox" {...register('availability.isAvailable')} className="w-4 h-4 accent-emerald-500 cursor-pointer" /> */}
         </div>
 
-        {/* Individual Days */}
-        <div className="space-y-2">
-          {DAYS_OF_WEEK.map((day) => {
-            const isDayActive = watch(`availability.${day}.available`);
-
-            return (
-              <div key={day} className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-center border-b border-zinc-800/60 py-2">
-                
-                {/* Checkbox and Day Name */}
-                <div className="flex items-center gap-2">
-                  <input type="checkbox" {...register(`availability.${day}.available`)} className="w-4 h-4 accent-emerald-500 cursor-pointer" />
-                  <span className="capitalize text-xs sm:text-xs font-medium text-zinc-200">{day}</span>
-                </div>
-
-                {/* Time Slots (Start & End) */}
-                {isDayActive ? (
-                  <div className="col-span-2 grid grid-cols-2 gap-2">
-                    <Input type="time" {...register(`availability.${day}.startTime`)} className="text-xs h-8" />
-                    <Input type="time" {...register(`availability.${day}.endTime`)} className="text-xs h-8" />
-                  </div>
-                ) : (
-                  <div className="col-span-2">
-                    <span className="text-[10px] sm:text-xs text-zinc-500 italic">Unavailable</span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        {/* Individual Days Iteration */}
+        <div className="space-y-4">
+          {scheduleFields.map((field, index) => (
+            <DayRow key={field.id} index={index} field={field} />
+          ))}
         </div>
 
         {/* Action Buttons */}
@@ -137,12 +115,11 @@ const AvailabilityFormEdit = ({ initialData, onCancel }: props) => {
           <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:w-auto text-xs">
             Cancel
           </Button>
-          <Button type="submit" disabled={isUpdating} className="w-full sm:w-auto text-xs">
+          <Button type="submit" disabled={isUpdating || !isDirty} className="w-full sm:w-auto text-xs">
             {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isUpdating ? 'Updating...' : 'Save Availability'}
           </Button>
         </div>
-
       </form>
     </Form>
   );

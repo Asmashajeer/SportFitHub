@@ -167,26 +167,28 @@ const handleCancel = () => {
                   >
                     <Edit />
                   </Button>
-                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 text-primary"
-                    onClick={() =>{                                         
-                      handleSessionVisibility(session.id,!session.isActive)}
-                    } 
-                  >
-                    {session.isActive ? (
-                      <>
-                        <EyeOff size={12} />
-                        Hide
-                      </>
-                    ) : (
-                      <>
-                        <Eye size={12}  />
-                        Show
-                      </>
-                    )}
-                  </Button>
+                  {session.isApproved &&(
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 text-primary"
+                        onClick={() =>{                                         
+                          handleSessionVisibility(session.id,!session.isActive)}
+                        } 
+                        >
+                        {session.isActive ? (
+                          <>
+                            <EyeOff size={12} />
+                            Hide
+                          </>
+                        ) : (
+                          <>
+                            <Eye size={12}  />
+                            Show
+                          </>
+                        )}
+                      </Button>
+                  )}
                   <ConfirmDialog
                     icon={<X className="h-4 w-4 text-red-400" />}
                     title={`Delete ${session.sessionName} ?`}

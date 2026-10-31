@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { timeSlotSchema } from './trainer.profile.request.dto';
 
 const dateString = z
   .string()
@@ -10,6 +11,8 @@ const dateString = z
 
 export const CancelAvailabilitySchema = z.object({
   date: dateString,
+  selectedSlot:timeSlotSchema.nullish(),
+  isFullDay:z.boolean(),
   reason: z.string().trim().max(300).optional(),
 });
 export type CancelAvailabilityDto = z.infer<typeof CancelAvailabilitySchema>;

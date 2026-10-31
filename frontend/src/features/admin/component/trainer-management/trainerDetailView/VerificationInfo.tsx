@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLink } from "lucide-react";
 import { documentsService } from "@/features/trainer/service/documentsService";
 import toast from "react-hot-toast";
+import { DOC_VERIFY_STATUS } from "@/constants/constants";
 
 
 
@@ -61,7 +62,9 @@ const VerificationInfo=({trainer}:{trainer:Trainer})=> {
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Certifications</h3>
-          <Badge>{trainer.certificationInfo.status}</Badge> 
+         <Badge variant={trainer.certificationInfo.status === DOC_VERIFY_STATUS.PENDING ? 'destructive' : 'default'}>
+          {trainer.certificationInfo.status}
+        </Badge> 
         </div>
 
         {trainer.certificationInfo.documents?.length ? (
@@ -128,7 +131,9 @@ const VerificationInfo=({trainer}:{trainer:Trainer})=> {
     <div>
       <div className="mb-3 flex items-center justify-between">
         <h3 className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Identity Verification</h3>
-        <Badge >{trainer.idVerification.status} </Badge>
+         <Badge variant={trainer.idVerification.status === DOC_VERIFY_STATUS.PENDING ? 'destructive' : 'default'}>
+          {trainer.idVerification.status}
+        </Badge> 
       </div>
         <div className={`text-start rounded-xl border bg-zinc-800/70 p-4 `}>
         <div className="grid grid-cols-2 gap-x-6 gap-y-4">

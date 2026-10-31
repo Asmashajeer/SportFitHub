@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Camera } from 'lucide-react';
 import type { TrainerOnboardingFormValues } from '../../types/trainerprofile.types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Select,
@@ -26,6 +26,9 @@ import { TRAINER_CATEGORY } from '@/constants/constants';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import toast from 'react-hot-toast';
 import { FILE_RULES } from '@/utils/fileValidation';
+import { sportSessionService } from '@/features/session/service/sportSessionService';
+import { fitnessSessionService } from '@/features/session/service/fitnessSessionService ';
+import type { FitnessData, SportData } from '@/features/admin/store/types';
 
 interface BasicInfoFormProps {
   setPreviewUrl: React.Dispatch<React.SetStateAction<string | null>>;
@@ -46,6 +49,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   } = form;
   const {user}=useAuthStore();
   const profilePicFile = watch('profilePic');
+  const [categories,setCategories]=useState([]);
 
   useEffect(() => {
     if (profilePicFile && profilePicFile[0]) {
@@ -55,6 +59,23 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     }
     setPreviewUrl(null);
   }, [profilePicFile, setPreviewUrl]);
+
+  const category=watch('category');
+
+  useEffect(() => {      
+    const getCategories = async () => {
+      // let categories=[];
+      if(category==TRAINER_CATEGORY.SPORT){
+        const data = await sportSessionService.getAvailableSports();
+        setCategories(data.sports);
+      }
+      else{ 
+        const data = await fitnessSessionService.getAvailableFitnessPgms();
+        setCategories(data.fitnessPgms);
+      }
+    };
+    getCategories();
+  }, [category]);
 
   const currentFields = [
     'displayName',
@@ -167,7 +188,26 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
         {/* Core Discipline */}
         <div className="space-y-2">
           <Label>Core Discipline</Label>
-          <Input
+          <Select
+            value={form.watch('coreDiscipline')}
+            onValueChange={(val) => form.setValue('coreDiscipline', val)}
+          >
+            <SelectTrigger className="w-full cursor-pointer hover:bg-slate-800">
+              <SelectValue placeholder="Select Category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories?.map((cat:SportData | FitnessData) => (
+                <SelectItem
+                  className="cursor-pointer focus:bg-[#197e04] focus:text-white"
+                  key={cat.id}
+                  value={cat.id}
+                >
+                  {'sportName' in cat ? cat.sportName : cat.programName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {/* <Input
             {...register('coreDiscipline', {
               required: 'CoreDiscipline is required',
               pattern: {
@@ -177,7 +217,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
             })}
             placeholder="eg: Football, Yoga"
             className={errors.coreDiscipline ? 'border-destructive' : ''}
-          />
+          /> */}
           {errors.coreDiscipline && (
             <p className="text-destructive text-sm">
               {errors.coreDiscipline.message}

@@ -12,7 +12,7 @@ export interface ITrainerService {
 
   // by trainer and admin
   getTrainer(user: AuthUser): Promise<TrainerProfileDTO>;
-  getTrainerByUserId(user: AuthUser): Promise<TrainerProfileDTO>;
+  getTrainerByUserId(user:string): Promise<TrainerProfileDTO>;
   updateProfilePic(id: string | Types.ObjectId, profilePic: string, user: AuthUser): Promise<TrainerProfileDTO>;
   updateBasicInfo(id: string | Types.ObjectId, data: BasicInfoReqDTO, user: AuthUser): Promise<TrainerProfileDTO>;
   updatePersonalInfo(id: string | Types.ObjectId, data: PersonalInfoReqDTO, user: AuthUser): Promise<TrainerProfileDTO>;
@@ -25,4 +25,5 @@ export interface ITrainerService {
   // updatePaymentInfo(id: string | Types.ObjectId, data: PaymentInfoReqDTO, user: AuthUser): Promise<TrainerProfileDTO>;
 
   resubmitApplicaion(id: string | Types.ObjectId, status: TRAINER_STATUS, user: AuthUser): Promise<TrainerProfileDTO>;
+  checkWithinWorkingHours (sessionData)
 }

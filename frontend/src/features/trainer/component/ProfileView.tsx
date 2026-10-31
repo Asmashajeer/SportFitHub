@@ -5,7 +5,7 @@ import { ExternalLink, CreditCard, ShieldCheck, Award, Edit2, VerifiedIcon, User
 
 import { useEffect, useRef, useState } from 'react';
 
-import { CURRENCY, DOC_VERIFY_STATUS, ROLES, TRAINER_STATUS, UPLOAD_TYPE } from '@/constants/constants';
+import { CURRENCY, DOC_VERIFY_STATUS, ROLES, TRAINER_CATEGORY, TRAINER_STATUS, UPLOAD_TYPE } from '@/constants/constants';
 
 import { parseISO } from 'date-fns';
 
@@ -26,6 +26,7 @@ import { uploadService } from '@/service/upload.service';
 import { documentsService } from '../service/documentsService';
 import ChangePassword from '@/features/auth/component/ChangePassword';
 import DaysOffCard from './DaysOffCard';
+import { useSessionStore } from '@/features/session/store/useSessionStore';
 
 const ProfileView = () => {
   const fetchProfile = useTrainerStore((state) => state.fetchProfile);
@@ -38,9 +39,11 @@ const ProfileView = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [imageVersion, setImageVersion] = useState(() => Date.now());
   const [changePassword, setChangePassword] = useState(false);
-
+  const{sports,fitness,loadSports,loadFitness}=useSessionStore()
   useEffect(() => {
     fetchProfile();
+    loadFitness();
+    loadSports()
   }, []);
 
   useEffect(() => {
@@ -194,7 +197,7 @@ const ProfileView = () => {
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase">Core Discipline </p>
                 <p className="text-xs md:text-sm font-medium">
-                  {profile?.category} -{profile?.coreDiscipline}
+                  {profile?.category} -{profile?.category===TRAINER_CATEGORY.SPORT ?( sports?.find((s)=>s.id===profile?.coreDiscipline)?.sportName):(fitness?.find((f)=>f.id===profile?.coreDiscipline)?.programName)}
                 </p>
               </div>
               <div>
@@ -203,7 +206,16 @@ const ProfileView = () => {
               </div>
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase">Specialties </p>
-                <p className="text-xs md:text-sm font-medium">{profile?.specialties?.length > 1 ? profile?.specialties.join(', ') : profile?.specialties}</p>
+                <p className="text-xs md:text-sm font-medium">
+                  {profile?.specialties
+                    ?.map((specialtyId) =>
+                      profile.category === TRAINER_CATEGORY.SPORT
+                        ? sports?.find((sport) => sport.id === specialtyId)?.sportName
+                        : fitness?.find((program) => program.id === specialtyId)?.programName,
+                    )
+                    .filter(Boolean)
+                    .join(', ')}
+                </p>
               </div>
               <div>
                 <p className="text-xs md:text-sm font-semibold text-muted-foreground uppercase">Experience : </p> <span className="text-xs md:text-sm font-medium">{profile?.experience} year</span>
@@ -448,9 +460,7 @@ const ProfileView = () => {
                           </span>
                         </p>
                       </div>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        Availabilty: <span className="px-2 text-xs md:text-sm font-bold text-primary">{profile?.availability?.isAvailable ? 'Active' : 'Not Available'} </span>
-                      </p>
+                     
                     </div>
                     <div className=" space-y-2 border rounded-xl p-2">
                       {profile?.availability && (
@@ -464,18 +474,23 @@ const ProfileView = () => {
                           </p>
                         </div>
                       )}
-                      {profile?.availability &&
-                        Object.entries(profile.availability)
-                          .filter(([key, value]) => key !== 'isAvailable' && typeof value === 'object' && value.available)
-                          .map(([day, info]: [string, any]) => (
+                      {profile?.availability?.weeklySchedule &&
+                        profile.availability.weeklySchedule
+                          .filter((value) =>typeof value === 'object' && value.isAvailable)
+                          .map((value) => (
                             <div
-                              key={day}
+                              key={value.day}
                               className="grid grid-cols-2 gap-x-1 gap-y-2"
                             >
-                              <span className="text-xs md:text-sm font-medium capitalize">{day}:</span>
-                              <span className="text-xs md:text-sm md:px-4 text-muted-foreground">
-                                {formatTo12Hour(info.startTime)} - {formatTo12Hour(info.endTime)}
-                              </span>
+                              <span className="text-xs md:text-sm font-medium capitalize">{value.day}:</span>
+                              <div className=" md:flex gap-2 text-xs ">
+                                {value.slots.length>0 && value.slots.map((s)=>(
+                                  <p className="text-xs text-muted-foreground p-1 border bg-zinc-800  ">
+                                    {formatTo12Hour(s.startTime)} - {formatTo12Hour(s.endTime)} 
+                                  </p>  
+                                                             
+                                ))}
+                              </div>
                             </div>
                           ))}
                     </div>

@@ -29,7 +29,8 @@ export class TrainerUnavailabilityService implements ITrainerUnavailabilityServi
     return trainer;
   }
 
-  async cancelAvailability(userId: string, { date, reason }: CancelAvailabilityDto) {
+  async cancelAvailability(userId: string, payload: CancelAvailabilityDto) {
+    const {date,selectedSlot,isFullDay,reason}=payload;
     if (!isRealDate(date)) throw new AppError('Date ' + ERROR_MESSAGES.GENERAL.INVALID, STATUS_CODE.ERROR.BAD_REQUEST);
 
     const trainer = await this.getTrainer(userId);
@@ -37,30 +38,87 @@ export class TrainerUnavailabilityService implements ITrainerUnavailabilityServi
    
 
     if (date <= toDateStr(new Date())) throw new AppError('Cannot select a past date', STATUS_CODE.ERROR.BAD_REQUEST);
-    if (!a.isAvailable) throw new AppError('Your availability is turned off', STATUS_CODE.ERROR.BAD_REQUEST);
     if (a.effectiveFrom && date < toDateStr(a.effectiveFrom)) throw new AppError('Date is before your availability starts', STATUS_CODE.ERROR.BAD_REQUEST);
     if (a.effectiveTo && date > toDateStr(a.effectiveTo)) throw new AppError('Date is after your availability ends', STATUS_CODE.ERROR.BAD_REQUEST);
 
-    const dayName = DAYS_OF_WEEK[new Date(`${date}T00:00:00Z`).getUTCDay()];
-    if (!a[dayName]?.available) throw new AppError('This is not one of your working days', STATUS_CODE.ERROR.BAD_REQUEST);
+    const day = new Date(`${date}T00:00:00Z`).getUTCDay();
+    if (!a.weeklySchedule[day]?.isAvailable) throw new AppError('This is not one of your working days', STATUS_CODE.ERROR.BAD_REQUEST);
 
     const utcDate = new Date(`${date}T00:00:00.000Z`);
-    const bookingCount = await this._bookingSessionRepo.countActiveByTrainerAndDate(String(trainer._id), utcDate);
-    if (bookingCount > 0) {
-      throw new AppError(
-        `You have ${bookingCount} booking(s) on this date. Cancel them first before marking the day unavailable.`,
-        STATUS_CODE.ERROR.CONFLICT
-      );
-    }
-    try {
-      const canceledDay = await this._trainerUnavailabilityRepo.createUnavailableDate(trainer._id.toString(), utcDate, reason);
-      return toUnavailableDayDto(canceledDay);
-    } catch (err) {
-      if (err?.code === 11000) {
-        throw new AppError('This date is already marked unavailable', STATUS_CODE.ERROR.CONFLICT);
+    if(isFullDay){
+      const bookingCount = await this._bookingSessionRepo.countActiveByTrainerAndDate(String(trainer._id), utcDate);
+      if (bookingCount > 0) {
+        throw new AppError(
+          `You have ${bookingCount} booking(s) on this date. Cancel them first before marking the day unavailable.`,
+          STATUS_CODE.ERROR.CONFLICT
+        );
       }
-      throw err;
+      const canceledDay = await this._trainerUnavailabilityRepo.upsertFullDayUnavailability(trainer._id.toString(),utcDate,reason);
+      
+      return toUnavailableDayDto(canceledDay);
     }
+    if (!isFullDay && selectedSlot) {
+      const bookingCount = await this._bookingSessionRepo.countActiveByTrainerAndDate_slot(String(trainer._id), utcDate, selectedSlot);
+      if (bookingCount > 0) {
+        throw new AppError(
+          `You have ${bookingCount} booking(s) on this selected slot of this date. Cancel them first before marking the day unavailable.`,
+          STATUS_CODE.ERROR.CONFLICT
+        );
+      }
+
+      try {
+        // Fetch any existing exception record for this date
+        const existingRecord = await this._trainerUnavailabilityRepo.findByTrainerAndDate(trainer._id.toString(), utcDate);
+
+        // If the day is already marked fully blocked
+        if (existingRecord?.isFullDay) {
+          throw new AppError('This date is already marked fully unavailable', STATUS_CODE.ERROR.CONFLICT);
+        }
+
+        //  Gather existing blocked slots and check for duplicates 
+        const existingSlots = existingRecord?.slots || [];  
+        const isAlreadyBlocked = existingSlots.some(
+          (s) => s.startTime === selectedSlot.startTime && s.endTime === selectedSlot.endTime
+        );
+
+        if (isAlreadyBlocked) {
+          throw new AppError('This slot is already marked unavailable', STATUS_CODE.ERROR.CONFLICT);
+        }
+
+        const updatedSlots = [...existingSlots, selectedSlot];
+        const day = new Date(`${date}T00:00:00Z`).getUTCDay();
+        const totalWorkingSlotsCount = a.weeklySchedule[day]?.slots.length;
+        
+        let canceledDay;
+
+        // . Check if all available slots for this day are now blocked
+        if (updatedSlots.length >= totalWorkingSlotsCount) {
+          // Auto-upgrade to Full Day!
+          canceledDay = await this._trainerUnavailabilityRepo.upsertFullDayUnavailability(
+            trainer._id.toString(), 
+            utcDate, 
+            reason
+          );
+        } else {
+          // Save as individual slot update
+          canceledDay = await this._trainerUnavailabilityRepo.upsertUnavailableSlot(
+            trainer._id.toString(), 
+            utcDate, 
+            selectedSlot, 
+            reason
+          );
+        }
+       
+        return toUnavailableDayDto(canceledDay);
+      } catch (err) {
+        if (err instanceof AppError) throw err;
+        if (err?.code === 11000) {
+          throw new AppError('This date or slot is already marked unavailable', STATUS_CODE.ERROR.CONFLICT);
+        }
+        throw err;
+      }
+    }
+    
   }
 
   async restoreAvailability(userId: string, date: string) {
@@ -68,7 +126,7 @@ export class TrainerUnavailabilityService implements ITrainerUnavailabilityServi
     const trainer = await this.getTrainer(userId);
     const utcDate = new Date(`${date}T00:00:00.000Z`);
     const result = await this._trainerUnavailabilityRepo.deleteDate(trainer._id.toString(), utcDate);
-    console.log('utcDate', utcDate);
+   
     if (result.deletedCount === 0) throw new AppError('That date was not marked unavailable', STATUS_CODE.ERROR.NOT_FOUND);
   }
 

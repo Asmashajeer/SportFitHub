@@ -110,13 +110,12 @@ export class TrainerService implements ITrainerService {
     return trainerData;
   }
 
-  async getTrainerByUserId(user: AuthUser): Promise<TrainerProfileDTO> {
-    const trainer = await this._trainerRepo.findOne({ userId: user.id });
-
+  async getTrainerByUserId(userId: string): Promise<TrainerProfileDTO> {
+    const trainer = await this._trainerRepo.findOne({ userId: userId });
+    const user=await this._userRepo.findById(userId);
     if (!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
-    const data = serializeTrainerProfile(trainer, { id: user?.id, role: user?.role });
-    const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(data);
-    return trainerData;
+    const data = serializeTrainerProfile(trainer, { id: user?.id, role: user?.activeRole });
+    const trainerData: TrainerProfileDTO = ToTrainerProfileDTO(data);    return trainerData;
   }
 
   //-------------------update profile pic----------
@@ -253,6 +252,8 @@ export class TrainerService implements ITrainerService {
     if (currentTo < today && !newFrom) {
       throw new AppError('Start date is required', STATUS_CODE.ERROR.BAD_REQUEST);
     }
+
+    console.log("---",newFrom,currentFrom,"---");
     const fromChanged = newFrom !== null && newFrom !== currentFrom;
     const toChanged = newTo !== currentTo;
 
@@ -334,7 +335,7 @@ export class TrainerService implements ITrainerService {
       ...data,
       availability: {
         ...data.availability,
-        effectiveFrom: newFrom ? new Date(`${newFrom}T00:00:00.000Z`) : data.availability.effectiveFrom,
+        effectiveFrom: newFrom ? new Date(`${newFrom}T00:00:00.000Z`) :trainer.availability.effectiveFrom,
         effectiveTo: newTo ? new Date(`${newTo}T00:00:00.000Z`) : null,
       },
     };
@@ -390,4 +391,31 @@ export class TrainerService implements ITrainerService {
       });
     }
   };
+
+
+  //--------------- check session is within in trainer working hours-----------------
+  checkWithinWorkingHours = async (sessionData) => {
+    const trainerProfile = await this._trainerRepo.findById(sessionData.trainerId);
+    const trainerSchedule = trainerProfile.availability.weeklySchedule;
+
+    sessionData.timeSlots.forEach((newDayEntry) => {
+      const dayName = newDayEntry.day;
+      const trainerDay = trainerSchedule.find((s)=>s.day===dayName);
+
+      // 1. Check if they even work that day
+      if (!trainerDay || !trainerDay.isAvailable) {
+        throw new AppError(`Trainer does not work on ${dayName}`, STATUS_CODE.ERROR.BAD_REQUEST);
+      }
+
+      // 2. Check every slot against working hours
+      newDayEntry.slots.forEach((slot) => {
+        const isOutsideHours = trainerDay.slots.map((s)=> slot.startTime <s.startTime || slot.endTime > s.endTime).filter(Boolean);
+
+        if (isOutsideHours) {
+          throw new AppError(`Slot ${slot.startTime}-${slot.endTime} is outside trainer  working hours `, STATUS_CODE.ERROR.BAD_REQUEST);
+        }
+      });
+    });
+  };
+  
 }

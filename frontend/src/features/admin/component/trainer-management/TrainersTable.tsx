@@ -9,6 +9,7 @@ import { formatDateDDMMYY } from '@/utils/formatDate';
 import { trainerManagementService } from '../../service/trainerManagementService';
 import type { AdminTrainersData } from '../../store/types/trainer.types';
 import TrainerDetailModal from './TrainerDetailModal';
+import { useSessionStore } from '@/features/session/store/useSessionStore';
 
 interface TrainersDataState {
   trainers: AdminTrainersData[];
@@ -31,6 +32,7 @@ const TrainersTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTrainer, setSelectedTrainer] = useState<string | null>(null);
   const [sort, setSort] = useState('');
+  const{sports,fitness,loadSports,loadFitness}=useSessionStore()
 
   const STATUS_BADGE: Record<Trainer_status_type, string> = {
     [TRAINER_STATUS.VARIFICATION_REQUIRED]: 'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20',
@@ -38,6 +40,11 @@ const TrainersTable = () => {
     [TRAINER_STATUS.SUBMITTED]: 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20',
     [TRAINER_STATUS.REJECTED]: 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20',
   };
+
+  useEffect(() => {    
+    loadFitness();
+    loadSports()
+  }, []);
 
   useEffect(() => {
     const getTrainers = async () => {
@@ -178,13 +185,23 @@ const TrainersTable = () => {
 
                     {/* category */}
                     <td className={tdCls}>
-                      <p className="text-zinc-200">{trainer.coreDiscipline}</p>
+                      <p className="text-zinc-200"> {trainer?.category===TRAINER_CATEGORY.SPORT ?( sports?.find((s)=>s.id===trainer?.coreDiscipline)?.sportName):(fitness?.find((f)=>f.id===trainer?.coreDiscipline)?.programName)}</p>
                       <p className="text-zinc-400">({trainer.category})</p>
                     </td>
 
                     {/* specialities */}
                     <td className={tdCls}>
-                      <span className="text-zinc-400">{trainer.specialties.join(', ')}</span>
+                      <span className="text-zinc-400">
+                       
+                         {trainer?.specialties
+                    ?.map((specialtyId) =>
+                      trainer.category === TRAINER_CATEGORY.SPORT
+                        ? sports?.find((sport) => sport.id === specialtyId)?.sportName
+                        : fitness?.find((program) => program.id === specialtyId)?.programName,
+                    )
+                    .filter(Boolean)
+                    .join(', ')}
+                        </span>
                     </td>
 
                     {/*expr*/}

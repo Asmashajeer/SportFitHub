@@ -2,8 +2,7 @@ import { IBookingSession } from '@/models/booking.session.model';
 import { IBaseRepository } from './IBase.repository';
 import { ClientSession, FilterQuery, Types } from 'mongoose';
 import { UpdateQuery } from 'mongoose';
-
-
+import { ITimeSlot } from '@/models/trainerProfile.model';
 
 export interface IBookingSessionRepository extends IBaseRepository<IBookingSession> {
   enrolledCount(filter: FilterQuery<IBookingSession>): Promise<number>;
@@ -15,11 +14,12 @@ export interface IBookingSessionRepository extends IBaseRepository<IBookingSessi
   findBookedSessionsPopulatedUser(filter: FilterQuery<IBookingSession>, options?: { skip?: number; limit?: number });
   findAllByBookingId(id: string | Types.ObjectId);
   findOccuredSessions(filter: FilterQuery<IBookingSession>);
- autoCompleteExpiredSessions();
-  findOneSession(filter:FilterQuery<IBookingSession>)
-  getRecentBookings(limit: number );
-  getBookingCategoryMetrics(startDate?: Date, endDate?: Date)
-  countScheduledBetween(trainerId: string | Types.ObjectId, from: Date, to?: Date): Promise<number>
-   countActiveByTrainerAndDate(trainerId: string, date: Date): Promise<number>
-    findActiveFutureBookings(trainerId: string|Types.ObjectId, todayStr: string)
+  autoCompleteExpiredSessions();
+  findOneSession(filter: FilterQuery<IBookingSession>);
+  getRecentBookings(limit: number);
+  getBookingCategoryMetrics(startDate?: Date, endDate?: Date);
+  countScheduledBetween(trainerId: string | Types.ObjectId, from: Date, to?: Date): Promise<number>;
+  countActiveByTrainerAndDate(trainerId: string, date: Date): Promise<number>;
+  countActiveByTrainerAndDate_slot(trainerId: string, date: Date, slot: ITimeSlot): Promise<number>;
+  findActiveFutureBookings(trainerId: string | Types.ObjectId, todayStr: string);
 }

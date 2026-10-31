@@ -46,7 +46,7 @@ export class TrainerController {
     try {
       const { user } = req as AuthRequest;
 
-      const profile = await this._trainerService.getTrainerByUserId(user);
+      const profile = await this._trainerService.getTrainerByUserId(user.id);
       const profilePic = profile.profilePic;
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
@@ -62,7 +62,7 @@ export class TrainerController {
     try {
       const { user } = req as AuthRequest;
       console.log(user);
-      const profile = await this._trainerService.getTrainerByUserId(user);
+      const profile = await this._trainerService.getTrainerByUserId(user.id);
 
       res.status(STATUS_CODE.SUCCESS.OK).json({
         success: true,
@@ -164,21 +164,6 @@ export class TrainerController {
     }
   };
 
-  // updatePaymentInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //   try {
-  //     const { id } = req.params;
-  //     const data = req.body;
-  //     const { user } = req as AuthRequest;
-
-  //     const profile = await this._trainerService.updatePaymentInfo(id, data, user);
-  //     res.status(STATUS_CODE.SUCCESS.OK).json({
-  //       success: true,
-  //       profile,
-  //     });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // };
 
   updateStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;

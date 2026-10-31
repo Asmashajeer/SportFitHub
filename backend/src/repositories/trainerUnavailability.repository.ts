@@ -2,6 +2,7 @@ import { IAvailabilityException } from "@/models/availabilityExceptions";
 import { BaseRepository } from "./base.repository";
 import { Model } from "mongoose";
 import { ITrainerUnavailabilityRepository } from "@/interfaces/repositories/ITrainerUnavalability.repository";
+import { ITimeSlot } from "@/models/trainerProfile.model";
 
 export class TrainerUnavailabilityRepository extends BaseRepository<IAvailabilityException> implements ITrainerUnavailabilityRepository {
   constructor(model: Model<IAvailabilityException>) {
@@ -11,10 +12,31 @@ export class TrainerUnavailabilityRepository extends BaseRepository<IAvailabilit
 
 
 
-  async createUnavailableDate(trainerId: string, date: Date, reason?: string): Promise<IAvailabilityException> {
-    return this.model.create({ trainerId, date, reason });
-  }
+ async upsertUnavailableSlot(trainerId: string, date: Date, slot: ITimeSlot, reason?: string) {
+  const cancelledDay=await this.model.findOneAndUpdate(
+    { trainerId, date },
+    { 
+      $set: {
+        trainerId, 
+        date,
+        isFullDay: false, reason }, 
+      $addToSet: { slots: slot } 
+    },
+    { new: true,upsert: true }
+  );
+  console.log("---------------",cancelledDay);
+  return cancelledDay;
+}
 
+async upsertFullDayUnavailability(trainerId: string, date: Date, reason?: string) {
+  return await this.model.findOneAndUpdate(
+    { trainerId, date },
+    { 
+      $set: {trainerId,date, isFullDay: true, reason ,slots: [] } // Clear slots when full day is marked
+    },
+    {new: true, upsert: true }
+  );
+}
   async deleteDate(trainerId: string, date: Date): Promise<{ deletedCount: number }> {
     const res = await this.model.deleteOne({ trainerId, date });
     return { deletedCount: res.deletedCount ?? 0 };
@@ -34,7 +56,7 @@ export class TrainerUnavailabilityRepository extends BaseRepository<IAvailabilit
       .lean<{ date: string }[]>();
   }
 
-//   async exists(trainerId: string, date: string): Promise<boolean> {
-//     return !!(await this.model.exists({ trainerId, date }));
-//   }
+  async findByTrainerAndDate(trainerId: string, date: Date) {
+    return await this.model.findOne({ trainerId, date });
+  }
 }

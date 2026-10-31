@@ -123,10 +123,12 @@ const SessionsTable = ({
     case 'approve':
       await SessionManagementService.approveSession(id, sessionModel, true);
       toast.success('Session Approved');
+      setSelectedSession(null);
       break;
     case 'reject':
       await SessionManagementService.approveSession(id, sessionModel, false);
       toast.success('Session Rejected');
+      setSelectedSession(null);
       break;
     case 'activate':
       await SessionManagementService.activateSession(id, sessionModel, true);

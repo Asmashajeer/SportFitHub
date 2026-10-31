@@ -132,7 +132,7 @@ export const DAYS_OF_WEEK = [
   'Saturday',
   
 ] as const;
-export type DayName = (typeof DAYS_OF_WEEK)[number];
+export type  DayName = (typeof DAYS_OF_WEEK)[number];
 
 export const  adminNavLinks= [
     {path:"/admin/dashboard"         , icon:LayoutDashboard ,label:"Dashboard"  },

@@ -6,6 +6,7 @@ import { IBookingSessionRepository } from '@/interfaces/repositories/IBook.sessi
 import { FilterQuery } from 'mongoose';
 import { BOOKING_SESSION_STATUS } from '@/constants/enums';
 import { BookingDataMetricDTO } from '@/dtos/response/admin/dashboard.dto';
+import { ITimeSlot } from '@/models/trainerProfile.model';
 
 
 
@@ -289,7 +290,16 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
       date: date, 
     });
   }
-
+  
+  async countActiveByTrainerAndDate_slot(trainerId: string, date: Date,slot: ITimeSlot): Promise<number> {
+    return this.model.countDocuments({
+      trainerId,
+      status:  BOOKING_SESSION_STATUS.SCHEDULED, 
+      date: date, 
+      startTime:slot.startTime,
+      endTime:slot.endTime
+    });
+  }
   // ---future bookings
   async findActiveFutureBookings(trainerId: string|Types.ObjectId, todayStr: string) {
     return await this.model.find({
@@ -298,4 +308,5 @@ export class BookingSessionRepository extends BaseRepository<IBookingSession> im
       date: { $gte: todayStr } // matches pure DATE strings or timestamps
     });
   }
+  
 }

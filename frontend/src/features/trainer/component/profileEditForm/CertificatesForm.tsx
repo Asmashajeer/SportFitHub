@@ -33,7 +33,7 @@ interface Props {
 const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
   const profile = useTrainerStore((state) => state.profile);
   const setProfile = useTrainerStore((state) => state.setProfile);
-  const { register, control, handleSubmit, setValue } = useForm<FormValues>({
+  const { register, control, handleSubmit, setValue,formState:{isDirty}} = useForm<FormValues>({
     defaultValues: {
       documents: initialData || [],
     },
@@ -181,7 +181,7 @@ const CertificatesForm = ({ initialData, onCancel, onSuccess }: Props) => {
           <Button type="button" variant="ghost" onClick={onCancel} className="w-full sm:w-auto text-xs">
             Cancel
           </Button>
-          <Button type="submit" className="bg-trainer-primary w-full sm:w-auto text-xs" disabled={isUpdating}>
+          <Button type="submit" className="bg-trainer-primary w-full sm:w-auto text-xs" disabled={isUpdating ||!isDirty}>
             {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isUpdating ? "Updating..." : "Save Changes"}
           </Button>

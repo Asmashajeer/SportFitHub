@@ -2,7 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import type { AdminFitnessSessionDetails, AdminSportSessionDetails, } from "../../../store/types/session.types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, X, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, X, XCircle } from "lucide-react";
 
 import Overview from "./Overview";
 import Schedule from "./Schedule";
@@ -10,6 +10,7 @@ import Pricing from "./Pricing";
 import Trainer from "./Trainer";
 import { formatDateDDMMYY } from "@/utils/formatDate";
 import { Button } from "@/components/ui/Button";
+import { useState } from "react";
 
 
 interface SessionDetailModalProps {
@@ -21,6 +22,7 @@ interface SessionDetailModalProps {
 }
 const SessionDetailModal=({session,sessionModel,open,onClose,onAction}:SessionDetailModalProps )=>{
   if(!open)return null;
+  const [isLoading,setIsLoading]=useState(false);
  return (
   <div className=" fixed inset-0 mt-6 z-50 flex items-center justify-center shadow-xl ">
       
@@ -87,11 +89,12 @@ const SessionDetailModal=({session,sessionModel,open,onClose,onAction}:SessionDe
               </button> 
               {!session.isApproved  &&(
                 <div className="flex items-center gap-2 p-1 justify-end">
-                  <button onClick={() => {onAction( session?.id, 'approve' ); onClose }}
+                  <button onClick={() => {onAction( session?.id, 'approve' );  }}
                       title="Approve"
+                      disabled={session.isApproved}
                       className=" flex p-1.5  items-center  gap-2  rounded-lg border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
                       >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <CheckCircle2 className="w-3.5 h-3.5" />  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Approve
                   </button>                                    
                   <button

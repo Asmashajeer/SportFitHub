@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   useFormContext,
   useFieldArray,
@@ -19,8 +19,11 @@ import { Badge } from '@/components/ui/badge';
 import { X, Plus, Languages, Trash2,  CornerDownLeftIcon } from 'lucide-react';
 import type { TrainerOnboardingFormValues } from '../../types/trainerprofile.types';
 import { FILE_RULES } from '@/utils/fileValidation';
-import { COMMON_LANGUAGES, DISCIPLINE_SPECIALTIES } from '@/constants/constants';
+import { COMMON_LANGUAGES, TRAINER_CATEGORY } from '@/constants/constants';
 import  { FilePreview } from '@/components/reusable/FilePreview';
+import { sportSessionService } from '@/features/session/service/sportSessionService';
+import { fitnessSessionService } from '@/features/session/service/fitnessSessionService ';
+import type { FitnessData, SportData } from '@/features/admin/store/types';
 
 
 interface ProfessionalInfoFormProps {
@@ -43,23 +46,39 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
     setError,
     clearErrors,
   } = form;
-
+  const [categories,setCategories]=useState([]);
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'certificationInfo.documents' as FieldArrayPath<TrainerOnboardingFormValues>, //  schema key
   });
 
+  const category=watch('category');
  
+   useEffect(() => {      
+     const getCategories = async () => {
+       // let categories=[];
+       if(category==TRAINER_CATEGORY.SPORT){
+         const data = await sportSessionService.getAvailableSports();
+         setCategories(data.sports);
+       }
+       else{ 
+         const data = await fitnessSessionService.getAvailableFitnessPgms();
+         setCategories(data.fitnessPgms);
+       }
+     };
+     getCategories();
+   }, [category]);
+
   const [newSpecialty, setNewSpecialty] = useState('');
   const [newLang, setNewLang] = useState('');
 
   const specialties = watch('specialties') || [];
   const languages = watch('languages') || [];
 
-  const coreDiscipline = watch('coreDiscipline')||'';
-  const suggestions = (
-    DISCIPLINE_SPECIALTIES[coreDiscipline?.toLowerCase()] || []
-  ).filter((s) => !specialties.includes(s));
+ 
+  // const suggestions = (
+  //   DISCIPLINE_SPECIALTIES[coreDiscipline?.toLowerCase()] || []
+  // ).filter((s) => !specialties.includes(s));
 
   const languageSuggestions = COMMON_LANGUAGES.filter(
   (l) => !languages.includes(l)
@@ -92,7 +111,7 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
     const updatedArray = currentArray.filter((i: string) => i !== item);
     setValue(field, updatedArray, { shouldValidate: true, shouldDirty: true });
     if (updatedArray.length === 0) {
-      setError(field, { message: 'Add minimum one ' }, { shouldFocus: true });
+      // setError(field, { message: 'Add minimum one ' }, { shouldFocus: true });
     } else clearErrors(field);
   };
 
@@ -139,22 +158,22 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
         <div className="space-y-3">
           <Label>Specialties</Label>
           {/*  Suggestions based on coreDiscipline */}
-            {suggestions.length > 0 && (
+            {categories.length > 0 && (
               <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Suggested for {coreDiscipline}:</p>
+                <p className="text-xs text-muted-foreground">Addon {category} categories:</p>
                 <div className="flex flex-wrap gap-2">
-                  {suggestions.map((suggestion) => (
+                  {categories.map((cat:SportData | FitnessData) => (
                     <button
-                      key={suggestion}
+                      key={cat.id}
                       type="button"
                       onClick={() =>
-                        addToArray('specialties', suggestion, setNewSpecialty)
+                        addToArray('specialties', cat.id , setNewSpecialty)
                       }
                       className="px-2 py-1 text-xs rounded-full border border-dashed 
                                 border-muted-foreground text-muted-foreground 
                                 hover:border-primary hover:text-primary transition-colors"
                     >
-                      + {suggestion}
+                      + {'sportName' in cat ?cat.sportName : cat.programName}
                     </button>
                   ))}
                 </div>
@@ -167,7 +186,7 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
                 clearErrors('specialties');
                 setNewSpecialty(e.target.value);
               }}
-              placeholder="Add skills and enter..."
+              placeholder="Addon sport categories..."
               onKeyDown={(e) =>
                 e.key === 'Enter' &&
                 (e.preventDefault(),
@@ -291,7 +310,7 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
               size="sm"
               onClick={() => {
                 clearErrors('certificationInfo.documents');
-                append({ name: '', file: null });
+                append({ name: '', file: null,issuedAt: '',       validUpto: '' });
               }}
             >
               <Plus className="h-4 w-4 mr-2" /> Add
@@ -395,13 +414,7 @@ const ProfessionalInfoForm: React.FC<ProfessionalInfoFormProps> = ({
         </Button>
         <Button
           onClick={() => {
-            if (specialties.length === 0) {
-              setError('specialties', {
-                type: 'manual',
-                message: 'At least one specialty required',
-              });
-              return;
-            }
+          
             const docs = getValues('certificationInfo.documents');
             if (!docs || docs.length === 0) {
               setError('certificationInfo.documents', {

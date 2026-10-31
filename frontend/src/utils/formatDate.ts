@@ -14,6 +14,11 @@ export const formatTo12Hour = (time24: string = ''): string => {
   return `${hours}:${minutes} ${period}`;
 };
 
+export const timeToMinutes = (timeStr: string): number => {
+  if (!timeStr) return 0;
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 60 + minutes;
+};
 // --------------Formats a date string into a readable format (e.g., "Sunday, April 5")
 
 export const formatDateReadable = (dateString: string = ''): string => {

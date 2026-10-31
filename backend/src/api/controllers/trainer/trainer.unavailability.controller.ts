@@ -12,9 +12,9 @@ export class TrainerUnavailabilityController {
 
     CancelAvailability=async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const userId=req.user.id;
-            const {date,reason}=req.body;
-            await this._trainerUnavailabilityService.cancelAvailability(userId,{date,reason});
+            const userId=req.user.id;            
+            const {date}=req.body;
+            await this._trainerUnavailabilityService.cancelAvailability(userId,req.body);
         res.status(STATUS_CODE.SUCCESS.CREATED).json({ message: `${date} marked unavailable` });
         }
         catch(err){

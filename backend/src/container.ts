@@ -208,9 +208,9 @@ export const paymentController = new PaymentController(paymentService, bookingSe
 export const bookingController = new BookingController(bookingService);
 
 export const webhookController = new WebhookController(bookingService, slotLockService,stripe);
-const sportsSessionService = new SportsSessionService(sportsSessionRepository, trainerRepository, bookingService,penaltyService);
+const sportsSessionService = new SportsSessionService(sportsSessionRepository, trainerService, bookingService,penaltyService);
 export const sportsSessionController = new SportsSessionController(sportsSessionService);
-const fitnessSessionService = new FitnessSessionService(fitnessSessionRepository, trainerRepository, bookingService);
+const fitnessSessionService = new FitnessSessionService(fitnessSessionRepository, trainerService, bookingService,penaltyService);
 export const fitnessSessionController = new FitnessSessionController(fitnessSessionService);
 const sessionsSearchService=new SessionsSearchService(sportsSessionRepository,fitnessSessionRepository,embeddingService);
 export const sessionController = new SessionController(sportsSessionService, fitnessSessionService,sessionsSearchService);

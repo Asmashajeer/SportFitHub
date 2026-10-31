@@ -1,5 +1,5 @@
 import mongoose, { Document, Types } from 'mongoose';
-import { DOC_VERIFY_STATUS, GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY, TRAINER_STATUS } from '@/constants/enums';
+import { DAYS_OF_WEEK, DOC_VERIFY_STATUS, GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY, TRAINER_STATUS } from '@/constants/enums';
 
 interface IAddress {
   street?: string;
@@ -16,12 +16,29 @@ export interface ICertification {
   issuedAt: Date;
 }
 
-interface IDayAvailability {
-  available: boolean;
-  startTime?: string; // 24 hr
-  endTime?: string; // 24 hr ("17:00")
+// interface IDayAvailability {
+//   available: boolean;
+//   startTime?: string; // 24 hr
+//   endTime?: string; // 24 hr ("17:00")
+// }
+
+export interface ITimeSlot {
+  startTime: string; // e.g., "09:00"
+  endTime: string;   // e.g., "17:00"
 }
 
+export interface IDailyAvailability {
+  day:  typeof DAYS_OF_WEEK ;
+  isAvailable: boolean;
+  slots: ITimeSlot[];
+}
+
+export interface ITrainerAvailability {
+  weeklySchedule: IDailyAvailability[];
+  timezone: string;
+  effectiveFrom?: Date | null;
+  effectiveTo?: Date | null;
+}
 export interface ITrainerProfile extends Document {
   _id: Types.ObjectId;
   userId: Types.ObjectId;
@@ -31,7 +48,7 @@ export interface ITrainerProfile extends Document {
   displayName: string;
   coreDiscipline: string;
   bio?: string;
-  specialties: string[];
+  specialties?: string[];
   experience: number;
   languages: string[];
   profilePic: string;
@@ -79,30 +96,9 @@ export interface ITrainerProfile extends Document {
   };
 
  
-  availability: {
-    isAvailable: boolean;
-    Monday: IDayAvailability;
-    Tuesday: IDayAvailability;
-    Wednesday: IDayAvailability;
-    Thursday: IDayAvailability;
-    Friday: IDayAvailability;
-    Saturday: IDayAvailability;
-    Sunday: IDayAvailability;
-    timezone:string;
-    effectiveFrom?: Date | null;
-    effectiveTo?: Date | null;
-  };
+  availability: ITrainerAvailability
 
-  // payment Data
-  // paymentInfo: {
-  //   bankAccount: {
-  //     accountName: string;
-  //     accountNumber: string;
-  //     bankName: string;
-  //     ifscCode: string;
-  //   };
-  //   upiId?: string;
-  // };
+ 
 
   // Administrative State
   status: TRAINER_STATUS;
@@ -143,6 +139,20 @@ const verificationRemarksSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const availabilitySlotSchema = new mongoose.Schema({
+  startTime: { type: String, required: true }, // e.g., "09:00"
+  endTime: { type: String, required: true }    // e.g., "17:00"
+}, { _id: false });
+
+const dailyAvailabilitySchema = new mongoose.Schema({
+  day: { 
+    type: String, 
+    enum: DAYS_OF_WEEK,
+    required: true 
+  },
+  isAvailable: { type: Boolean, default: true },
+  slots: [availabilitySlotSchema] // Allows multiple ranges per day (e.g., morning & evening shifts)
+}, { _id: false });
 
 const TrainerProfileSchema = new mongoose.Schema(
   {
@@ -223,29 +233,11 @@ const TrainerProfileSchema = new mongoose.Schema(
 
     // ---- Availability----
     availability: {
-      isAvailable: { type: Boolean, default: true },
-      Monday: { available: { type: Boolean, default: false }, startTime: String, endTime: String },
-      Tuesday: { available: { type: Boolean, default: false }, startTime: String, endTime: String },
-      Wednesday: {
-        available: { type: Boolean, default: false },
-        startTime: String,
-        endTime: String,
-      },
-      Thursday: {
-        available: { type: Boolean, default: false },
-        startTime: String,
-        endTime: String,
-      },
-      Friday: { available: { type: Boolean, default: false }, startTime: String, endTime: String },
-      Saturday: {
-        available: { type: Boolean, default: false },
-        startTime: String,
-        endTime: String,
-      },
-      Sunday: { available: { type: Boolean, default: false }, startTime: String, endTime: String },
+      
+      weeklySchedule: [dailyAvailabilitySchema],
       timezone: { type: String, default: 'UTC' },
-      effectiveFrom: { type: Date, default: null }, //  trainer availability from
-      effectiveTo: { type: Date, default: null },   // trainer availabitity To
+      effectiveFrom: { type: Date, default: null },
+      effectiveTo: { type: Date, default: null }
       
     },
 

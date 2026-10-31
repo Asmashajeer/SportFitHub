@@ -1,14 +1,13 @@
-import {
-  GOVT_ID_TYPE,
-  TRAINER_STATUS,
-  TRAINER_CATEGORY,
-  DOC_VERIFY_STATUS,
- 
-} from '@/constants/constants';
-export interface dayAvailability {
-  available: boolean;
-  startTime?: string;
-  endTime?: string;
+import { GOVT_ID_TYPE, TRAINER_STATUS, TRAINER_CATEGORY, DOC_VERIFY_STATUS, type DayName } from '@/constants/constants';
+export interface TimeSlot {
+  startTime: string; // e.g., "09:00"
+  endTime: string; // e.g., "17:00"
+}
+
+export interface DailyAvailability {
+  day: DayName;
+  isAvailable: boolean;
+  slots: TimeSlot[];
 }
 // Trainer form values
 export interface TrainerOnboardingFormValues {
@@ -21,7 +20,7 @@ export interface TrainerOnboardingFormValues {
   experience: number;
   languages: string[];
   certificationInfo: {
-    documents: [];
+    documents:documents[] ;
   };
   personalInfo: {
     fullName: string;
@@ -48,23 +47,12 @@ export interface TrainerOnboardingFormValues {
     sessionCharge: number;
   };
   availability: {
-    isAvailable: boolean;
-    Monday: dayAvailability;
-    Tuesday: dayAvailability;
-    Wednesday: dayAvailability;
-    Thursday: dayAvailability;
-    Friday: dayAvailability;
-    Saturday: dayAvailability;
-    Sunday: dayAvailability;
-    effectiveFrom:  string, 
-    effectiveTo: string,   
+    weeklySchedule: DailyAvailability[];
+    timezone: string;
+    effectiveFrom: string;
+    effectiveTo: string;
   };
- 
 }
-
-
-
-
 
 export interface documents {
   name: string;
@@ -87,19 +75,12 @@ export interface idVerificationwithUrl {
 export interface AvailabiltyPricing {
   pricing: {
     sessionCharge: number;
-    
   };
   availability: {
-    isAvailable: boolean;
-    Monday: dayAvailability;
-    Tuesday: dayAvailability;
-    Wednesday: dayAvailability;
-    Thursday: dayAvailability;
-    Friday: dayAvailability;
-    Saturday: dayAvailability;
-    Sunday: dayAvailability;
-    effectiveFrom?:  string, 
-    effectiveTo?: string,  
+    weeklySchedule: DailyAvailability[];
+    timezone: string;
+    effectiveFrom?: string;
+    effectiveTo?: string;
   };
 }
 
@@ -115,7 +96,7 @@ export interface paymentInfoData {
 
 export interface DocumentValues {
   name: string;
-  file: FileList;
+  file: FileList | null;
   validUpto: Date;
   issuedAt: Date;
 }
@@ -128,7 +109,7 @@ interface BasicResponse {
 export interface basicInfo {
   displayName: string;
   profilePic: string;
-  category: typeof TRAINER_CATEGORY[keyof typeof TRAINER_CATEGORY];
+  category: (typeof TRAINER_CATEGORY)[keyof typeof TRAINER_CATEGORY];
   coreDiscipline: string;
   bio?: string;
   specialties: string[];
@@ -136,8 +117,6 @@ export interface basicInfo {
   languages: string[];
 }
 // export interface basicInfoData extends Omit<basicInfo,'profilePic'>{}
-
-
 
 interface idStatus {
   type: typeof GOVT_ID_TYPE;

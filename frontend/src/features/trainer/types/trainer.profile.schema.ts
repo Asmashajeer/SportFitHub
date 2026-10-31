@@ -1,25 +1,23 @@
-import { CURRENCY, GENDER, GOVT_ID_TYPE } from '@/constants/constants';
+import {  DAYS_OF_WEEK, GENDER, GOVT_ID_TYPE } from '@/constants/constants';
 import z from 'zod';
 const endOfToday = new Date(new Date().setHours(23, 59, 59, 999));
-const dayAvailabilitySchema = z
+const timeSlotSchema = z
   .object({
-    available: z.boolean().default(false),
-    startTime: z.string().optional(),
-    endTime: z.string().optional(),
+    startTime: z.string().min(1, 'Start time is required'),
+    endTime: z.string().min(1, 'End time is required'),
   })
-  .refine(
-    (data) => {
-      if (data.available && data.startTime && data.endTime) {
-        return data.endTime > data.startTime;
-      }
-      return true;
-    },
-    {
-      message: 'End time must be after start time',
-      path: ['endTime'],
-    }
-  )
-  .optional();
+  .refine((data) => data.endTime > data.startTime, {
+    message: 'End time must be after start time',
+    path: ['endTime'],
+  });
+
+const dailyAvailabilitySchema = z.object({
+  day: z.enum(DAYS_OF_WEEK),
+  isAvailable: z.boolean().default(false),
+  slots: z.array(timeSlotSchema),
+});
+
+
 
 export const DocumentsInfoSchema = z
   .object({
@@ -58,7 +56,7 @@ export const AddTrainerProfileSchema = z.object({
   bio: z.string().min(10, 'Bio should be at least 10 characters').max(500),
   profilePic: z.string('profile pic required'),
   //professionalInfo
-  specialties: z.array(z.string()).min(1, 'Select at least one specialty'),
+  specialties: z.array(z.string()),
   experience: z.number().min(0, 'Experience cannot be negative'),
   languages: z.array(z.string()).min(1, 'Select at least one language'),
   certificationInfo: z.object({
@@ -99,50 +97,28 @@ export const AddTrainerProfileSchema = z.object({
     sessionCharge: z.coerce
       .number()
       .min(1, 'Price must be at least 1')
-      .max(10000, 'Price seems too high'),
-    currency: z.string().default(CURRENCY),
+      .max(10000, 'Price seems too high'),   
   }),
   // Availability
   availability: z.object({
-    isAvailable: z.boolean().default(true),
-    Monday: dayAvailabilitySchema,
-    Tuesday: dayAvailabilitySchema,
-    Wednesday: dayAvailabilitySchema,
-    Thursday: dayAvailabilitySchema,
-    Friday: dayAvailabilitySchema,
-    Saturday: dayAvailabilitySchema,
-    Sunday: dayAvailabilitySchema,
-    effectiveFrom: z.coerce.date({
-      message: 'Effective start date is required',  
-    }),
-    effectiveTo: z.coerce.date({
-      message: 'Effective end date is required', 
-    }),
+      weeklySchedule: z.array(dailyAvailabilitySchema).min(1, 'Please add at least one available day'),
+      timezone: z.string().default('UTC'),
+      effectiveFrom: z.coerce.date({
+        message: 'Effective start date is required',
+      }),
+      effectiveTo: z.coerce.date({
+        message: 'Effective end date is required',
+      }),
+    })
+      .refine((data) => data.effectiveFrom > endOfToday, {
+        message: 'Start date cannot be in the past',
+        path: ['effectiveFrom'],
+      })
+      .refine((data) => data.effectiveTo > data.effectiveFrom, {
+        message: 'Availability end date must be greater than availability start date',
+        path: ['effectiveTo'],
+      }),
   })
-  .refine((data) => data.effectiveFrom > endOfToday, {
-    message: 'Start date cannot be in the past',
-    path: ['effectiveFrom'],
-  })
-  .refine((data) => data.effectiveTo > data.effectiveFrom, {
-    message: 'Availabilty End date must be greater than availability start date',
-    path: ['effectiveTo'],
-  }),
-
-  // Payment Info (Optional during initial creation depending on your flow)
-  // paymentInfo: z
-  //   .object({
-  //     bankAccount: z
-  //       .object({
-  //         accountName: z.string().optional(),
-  //         accountNumber: z.string().optional(),
-  //         bankName: z.string().optional(),
-  //         ifscCode: z.string().optional(),
-  //       })
-  //       .optional(),
-  //     upiId: z.string().optional(),
-  //   })
-  //   .optional(),
-})
 .refine(
     (data) => {
       const today = new Date();

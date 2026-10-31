@@ -21,9 +21,13 @@ import { Textarea } from '@/components/ui/textarea';
 
 import { Badge } from '@/components/ui/badge';
 import { CornerDownLeftIcon, Loader2, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BasicInfoSchema } from '../../types/trainer.profile.schema';
 import toast from 'react-hot-toast';
+import { sportSessionService } from '@/features/session/service/sportSessionService';
+import { fitnessSessionService } from '@/features/session/service/fitnessSessionService ';
+import type { FitnessData, SportData } from '@/features/admin/store/types';
+import { useSessionStore } from '@/features/session/store/useSessionStore';
 
 interface BasicInfoFormValues {
   displayName: string;
@@ -48,10 +52,30 @@ const BasicInfoEditForm = ({
   const form = useForm<BasicInfoFormValues>({
     defaultValues: initialData,
   });
-  const { getValues, setValue, setError, clearErrors } = form;
+  const { getValues, setValue, setError, clearErrors,watch,formState: {  isDirty }, } = form;
   const [newSpecialty, setNewSpecialty] = useState('');
   const [newLang, setNewLang] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [categories,setCategories]=useState<SportData[] | FitnessData[]>([]);
+  const {sports,fitness,loadSports,loadFitness}=useSessionStore();
+  const category=watch('category');
+   
+     useEffect(() => {      
+       const getCategories = async () => {
+         // let categories=[];
+         if(category==TRAINER_CATEGORY.SPORT){
+          //  const data = await sportSessionService.getAvailableSports();
+          loadSports()
+           setCategories(sports);
+         }
+         else{ 
+          //  const data = await fitnessSessionService.getAvailableFitnessPgms();
+          loadFitness()
+           setCategories(fitness);
+         }
+       };
+       getCategories();
+     }, [category]);
 
   const addToArray = (
     field: 'specialties' | 'languages',
@@ -158,11 +182,39 @@ const BasicInfoEditForm = ({
                       Specialties
                     </FormLabel>
                     
+                     {categories.length > 0 && (
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">Addon {category} categories:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {categories.map((cat:SportData | FitnessData) => (
+                                <button
+                                  key={cat.id}
+                                  type="button"
+                                  onClick={() =>
+                                    addToArray('specialties', cat.id , setNewSpecialty)
+                                  }
+                                  className="px-2 py-1 text-xs rounded-full border border-dashed 
+                                            border-muted-foreground text-muted-foreground 
+                                            hover:border-primary hover:text-primary transition-colors"
+                                >
+                                  + {'sportName' in cat ?cat.sportName : cat.programName}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                     {/* Badges Wrap Container */}
                     <div className="flex flex-wrap items-center gap-1.5 mb-2">
                       {field.value.map((s) => (
                         <Badge key={s} variant="secondary" className="border text-emerald-500 py-1 px-2">
-                          {s}
+                          {(() => {
+                            const selectedCategory = categories.find((cat) => cat.id === s);
+                            return selectedCategory
+                              ? 'sportName' in selectedCategory
+                                ? selectedCategory.sportName
+                                : selectedCategory.programName
+                              : s;
+                          })()}
                           <button
                             type="button" 
                             onClick={(e) => {
@@ -178,8 +230,8 @@ const BasicInfoEditForm = ({
                       ))}
                     </div>
 
-                    <div className="flex gap-2">
-                      <FormControl>
+                    {/* <div className="flex gap-2">
+                      <FormControl>                       
                         <Input
                           className='text-xs'
                           value={newSpecialty}
@@ -206,7 +258,7 @@ const BasicInfoEditForm = ({
                       >
                         <CornerDownLeftIcon className="h-5 w-5 text-emerald-500 border hover:border-emerald-400 hover:bg-black" />
                       </Button> 
-                    </div>
+                    </div> */}
 
                     <div className="flex items-center justify-between mt-1">
                       {newSpecialty && (
@@ -339,7 +391,7 @@ const BasicInfoEditForm = ({
             Cancel
           </Button>
           
-          <Button disabled={isUpdating} type="submit" className="w-full sm:w-auto sm:text-xs">
+          <Button disabled={isUpdating ||!isDirty} type="submit" className="w-full sm:w-auto sm:text-xs">
             {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isUpdating ? "Updating..." : "Update Basic Info"}
           </Button>

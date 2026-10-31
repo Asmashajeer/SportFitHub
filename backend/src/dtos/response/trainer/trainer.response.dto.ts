@@ -1,4 +1,5 @@
 import { DOC_VERIFY_STATUS, GENDER, GOVT_ID_TYPE, TRAINER_CATEGORY, TRAINER_STATUS } from '@/constants/enums';
+import { IDailyAvailability } from '@/models/trainerProfile.model';
 
 // get single trainer by admin
 
@@ -73,29 +74,11 @@ export interface TrainerProfileDTO {
 
   // availability
   availability: {
-    isAvailable: boolean;
-    Monday: IDayAvailability;
-    Tuesday: IDayAvailability;
-    Wednesday: IDayAvailability;
-    Thursday: IDayAvailability;
-    Friday: IDayAvailability;
-    Saturday: IDayAvailability;
-    Sunday: IDayAvailability;
+    weeklySchedule: IDailyAvailability[];
     timezone:string;
     effectiveFrom: string // start dateof trainer availabitity
     effectiveTo: string,  
   };
-
-  // payment Data
-  // paymentInfo: {
-  //   bankAccount?: {
-  //     accountName?: string;
-  //     accountNumber?: string;
-  //     bankName?: string;
-  //     ifscCode?: string;
-  //   };
-  //   upiId?: string;
-  // };
 
   // Administrative State
   status: TRAINER_STATUS;

@@ -3,6 +3,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import {
   AppName,
+ 
   GENDER,
   GOVT_ID_TYPE,  
   TRAINER_CATEGORY,
@@ -10,7 +11,7 @@ import {
   USER_ROLES,
 } from '@/constants/constants';
 import type {
-  DocumentValues,
+  documents,
   TrainerOnboardingFormValues,
 } from '../types/trainerprofile.types';
 import toast from 'react-hot-toast';
@@ -85,14 +86,16 @@ const TrainerOnboarding = () => {
         sessionCharge: undefined,
       },
       availability: {
-        isAvailable: false,
-        Monday: { available: false, startTime: '09:00', endTime: '17:00' },
-        Tuesday: { available: false, startTime: '09:00', endTime: '17:00' },
-        Wednesday: { available: false, startTime: '09:00', endTime: '17:00' },
-        Thursday: { available: false, startTime: '09:00', endTime: '17:00' },
-        Friday: { available: false, startTime: '09:00', endTime: '17:00' },
-        Saturday: { available: false, startTime: '09:00', endTime: '17:00' },
-        Sunday: { available: false, startTime: '09:00', endTime: '17:00' },
+        weeklySchedule: [
+        { day: 'Sunday', isAvailable: false, slots: [] },
+        { day: 'Monday', isAvailable: false, slots: [] },
+        { day: 'Tuesday', isAvailable: false, slots: [] },
+        { day: 'Wednesday', isAvailable: false, slots: [] },
+        { day: 'Thursday', isAvailable: false, slots: [] },
+        { day: 'Friday', isAvailable: false, slots: [] },
+        { day: 'Saturday', isAvailable: false, slots: [] },
+        ],
+        timezone: 'UTC',
         effectiveFrom: '' ,
         effectiveTo: '' ,  
       },
@@ -200,12 +203,12 @@ const TrainerOnboarding = () => {
       }
 
       // 3. Upload Certifications Array
-      if( data.certificationInfo.documents.length===0){
+      if( data.certificationInfo.documents?.length===0){
         toast.error("Please upload certificate ");
         return;
       }
       const uploadedCerts = await Promise.all(
-        data.certificationInfo.documents.map(async (doc: DocumentValues) => {
+        data.certificationInfo.documents!.map(async (doc: documents) => {
           if (doc.file?.[0]) {
             const [url] = await uploadService.upload(
               doc.file[0],
@@ -243,6 +246,7 @@ const TrainerOnboarding = () => {
           documents: validCerts,
         },
       };
+      console.log(payload);
       const finalPayload = AddTrainerProfileSchema.safeParse(payload);
       if (!finalPayload.success) {
         const errorMessage = finalPayload.error.issues[0].message;

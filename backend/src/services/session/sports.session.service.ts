@@ -23,24 +23,26 @@ import tz_lookup from 'tz-lookup';
 
 import { UserSessionsResponseDTOwithPrice } from '@/dtos/response/booking/booking.response.dto';
 import { IPenaltyService } from '@/interfaces/services/trainer/IPenalty.service';
+import { ITrainerService } from '@/interfaces/services/trainer/Itrainer.service';
+import { groupByOccurrence } from '@/utils/sessionGrouping';
 
 export class SportsSessionService implements ISportsSessionService {
   private _sportsSessionRepo: ISportsSessionRepository;
-  private _trainerRepo: ITrainerRepository;
+  private _trainerService: ITrainerService;
   private _bookingService: IBookingService;
-  private _penaltyService:IPenaltyService;
+  private _penaltyService: IPenaltyService;
 
-  constructor(sportsSessionRepo: ISportsSessionRepository, trainerRepo: ITrainerRepository, bookingService: IBookingService,penaltyService:IPenaltyService) {
+  constructor(sportsSessionRepo: ISportsSessionRepository, trainerService: ITrainerService, bookingService: IBookingService, penaltyService: IPenaltyService) {
     this._sportsSessionRepo = sportsSessionRepo;
-    this._trainerRepo = trainerRepo;
+    this._trainerService = trainerService;
     this._bookingService = bookingService;
-    this._penaltyService=penaltyService;
+    this._penaltyService = penaltyService;
   }
 
   //----------create Session------------------
   async createSportSession(sessionData: Partial<ISportsSession>): Promise<SportsSessionResponseDTO> {
     //-----------check timeslots are within trainer working hours
-    this.checkWithinWorkingHours(sessionData);
+    this._trainerService.checkWithinWorkingHours(sessionData);
 
     //check for conflict with existing session's timeslots
     const newSlots = sessionData.timeSlots;
@@ -81,7 +83,7 @@ export class SportsSessionService implements ISportsSessionService {
   //--------update session-----------
   async updateSportSession(id: string, sessionData: Partial<ISportsSession>): Promise<SportSessionUpdateResponseDTO> {
     //check timeslots are within trainer working hours
-    this.checkWithinWorkingHours(sessionData);
+    this._trainerService.checkWithinWorkingHours(sessionData);
 
     //check for conflict with existing session's timeslots
     const newSlots = sessionData.timeSlots;
@@ -130,7 +132,7 @@ export class SportsSessionService implements ISportsSessionService {
     // ----with bookings
     const cancellationWindow = bookingSessions[0].session.cancellationWindow;
     const withinWindow = bookingSessions.some((bookingSession) =>
-      this._bookingService.isWithinCancellationWindow(bookingSession.date.toString(), bookingSession.startTime, bookingSession.session.cancellationWindow,bookingSession.timezone)
+      this._bookingService.isWithinCancellationWindow(bookingSession.date.toString(), bookingSession.startTime, bookingSession.session.cancellationWindow, bookingSession.timezone)
     );
 
     if (withinWindow) {
@@ -140,7 +142,7 @@ export class SportsSessionService implements ISportsSessionService {
     await Promise.all(
       bookingSessions.map(async (bookingSession) => {
         const sessionBookingId = bookingSession.id;
-       
+
         const reason = 'Cancelled by trainer';
 
         await this._bookingService.cancelSession(sessionBookingId, reason, cancelledBy);
@@ -148,13 +150,13 @@ export class SportsSessionService implements ISportsSessionService {
     );
     //  apply penalty once PER OCCURRENCE,
     if (cancelledBy === UserRole.TRAINER) {
-    const occurrenceGroups = groupByOccurrence(bookingSessions); // group by slotId + startDateTime
+      const occurrenceGroups = groupByOccurrence(bookingSessions); // group by slotId + startDateTime
       await Promise.all(
         occurrenceGroups.map((group) => {
           const sessionRevenue = group.bookings.reduce((sum, b) => sum + b.unitPrice, 0);
           return this._penaltyService.applyPenalty(
             group.trainerId,
-            id,               // sessionId (template)
+            id, // sessionId (template)
             group.slotId,
             group.startDateTime,
             sessionRevenue
@@ -184,7 +186,7 @@ export class SportsSessionService implements ISportsSessionService {
 
   //-------------- get all sessions by a trianerId--------------
   async getSessionsByTrainer(userId: string | Types.ObjectId, filters: FilterQuery<ISportsSession>): Promise<PaginatedSportsSessionsResponseDTO> {
-    const trainer = await this._trainerRepo.findByUserId(userId);
+    const trainer = await this._trainerService.getTrainerByUserId(userId.toString());
     if (!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     const { search, page, limit } = filters;
     const query: FilterQuery<ISportsSession> = { trainerId: trainer.id, isDeleted: false, page: page, limit: limit };
@@ -204,7 +206,7 @@ export class SportsSessionService implements ISportsSessionService {
 
   //--------------- get all sessions-----Public Listing---------
   async getAllSessions(filters: FilterQuery<ISportsSession>): Promise<GetSessionsResponseDTO> {
-    const { page, limit, search, sport, sessionType, ageGroup, rating,lat, lng, radius } = filters;
+    const { page, limit, search, sport, sessionType, ageGroup, rating, lat, lng, radius } = filters;
 
     const query: FilterQuery<ISportsSession> = { isDeleted: false, isApproved: true, isActive: true };
 
@@ -214,20 +216,19 @@ export class SportsSessionService implements ISportsSessionService {
     if (sport && sport !== 'all') query.sportCategory = sport;
     if (sessionType && sessionType !== 'all') query.sessionType = sessionType;
     if (ageGroup && ageGroup !== 'all') query.ageGroup = ageGroup;
-     if (rating && rating !== 'all') query.rating = { $gte: Number(rating) };
-
+    if (rating && rating !== 'all') query.rating = { $gte: Number(rating) };
 
     if (lat && lng && radius) {
       query['venue.location'] = {
         $geoWithin: {
           $centerSphere: [
-            [Number(lng),Number(lat) ], // [longitude, latitude]
+            [Number(lng), Number(lat)], // [longitude, latitude]
             radius / 6371,
           ],
         },
       };
-    }    
-    
+    }
+
     const result = await this._sportsSessionRepo.findAll(query, { page: Number(page) || 1, limit: Number(limit) || PAGINATION_LIMIT });
     const sessionData = result?.sessions || [];
     const sessions = sessionData.map((session) => toSportSessionPublicDTO(session));
@@ -237,7 +238,7 @@ export class SportsSessionService implements ISportsSessionService {
   // ---------------------get  a session by ID-public-------------
   async getASession(id: string | Types.ObjectId): Promise<SportSessionDetailedPublicDTO> {
     const sessionData = await this._sportsSessionRepo.findBysessionId(id);
-    
+
     const session = toSportSessionDetailedPublicDTO(sessionData);
 
     return session;
@@ -278,42 +279,4 @@ export class SportsSessionService implements ISportsSessionService {
     }
     return { hasConflict: false };
   };
-
-  //--------------- check session is within in trainer working hours-----------------
-  checkWithinWorkingHours = async (sessionData) => {
-    const trainerProfile = await this._trainerRepo.findById(sessionData.trainerId);
-    const availability = trainerProfile.availability;
-
-    sessionData.timeSlots.forEach((newDayEntry) => {
-      const dayName = newDayEntry.day;
-      const trainerDay = availability[dayName];
-
-      // 1. Check if they even work that day
-      if (!trainerDay || !trainerDay.available) {
-        throw new AppError(`Trainer does not work on ${dayName}`, STATUS_CODE.ERROR.BAD_REQUEST);
-      }
-
-      // 2. Check every slot against working hours
-      newDayEntry.slots.forEach((slot) => {
-        const isOutsideHours = slot.startTime < trainerDay.startTime || slot.endTime > trainerDay.endTime;
-
-        if (isOutsideHours) {
-          throw new AppError(`Slot ${slot.startTime}-${slot.endTime} is outside working hours (${trainerDay.startTime}-${trainerDay.endTime})`, STATUS_CODE.ERROR.BAD_REQUEST);
-        }
-      });
-    });
-  };
-}
-function groupByOccurrence(bookingSessions: UserSessionsResponseDTOwithPrice[]) {
-  const map = new Map<string, { trainerId: string; slotId: string; startDateTime: Date; bookings: typeof bookingSessions }>();
-
-  for (const b of bookingSessions) {
-    const key = `${b.slotId}_${b.startDateTime}`;
-    if (!map.has(key)) {
-      map.set(key, { trainerId: b.trainer.id, slotId: b.slotId, startDateTime:new Date (b.startDateTime), bookings: [] });
-    }
-    map.get(key)!.bookings.push(b);
-  }
-
-  return Array.from(map.values());
 }

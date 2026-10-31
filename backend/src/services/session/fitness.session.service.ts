@@ -7,28 +7,32 @@ import { ITrainerRepository } from '@/interfaces/repositories/ITrainer.repositor
 
 import { IBookingService } from '@/interfaces/services/booking/IBooking.service';
 import { IFitnessSessionService } from '@/interfaces/services/session/IFitness.session.service ';
+import { IPenaltyService } from '@/interfaces/services/trainer/IPenalty.service';
+import { ITrainerService } from '@/interfaces/services/trainer/Itrainer.service';
 import { toFitnessSessionDetailedPublicDTO, toFitnessSessionPublicDTO, toFitnessSessionResponseDTO } from '@/mappers/fitness.session.mapper';
 import { IFitnessSession } from '@/models/fitnessSession.model';
 import AppError from '@/utils/AppError';
 import { formatTo12Hour } from '@/utils/formatTo';
+import { groupByOccurrence } from '@/utils/sessionGrouping';
 import { FilterQuery, Types } from 'mongoose';
 import tz_lookup from 'tz-lookup';
 
 export class FitnessSessionService implements IFitnessSessionService {
   private _fitnessSessionRepo: IFitnessSessionRepository;
-  private _trainerRepo: ITrainerRepository;
+  private _trainerService: ITrainerService;
   private _bookingService: IBookingService;
-
-  constructor(fitnessSessionRepo: IFitnessSessionRepository, trainerRepo: ITrainerRepository, bookingService: IBookingService) {
+  private _penaltyService: IPenaltyService;
+  constructor(fitnessSessionRepo: IFitnessSessionRepository, trainerService: ITrainerService, bookingService: IBookingService, penaltyService: IPenaltyService) {
     this._fitnessSessionRepo = fitnessSessionRepo;
-    this._trainerRepo = trainerRepo;
-     this._bookingService=bookingService;
+    this._trainerService = trainerService;
+    this._bookingService = bookingService;
+    this._penaltyService = penaltyService;
   }
 
   //----------create Session------------------
   async createFitnessSession(sessionData: Partial<IFitnessSession>): Promise<FitnessSessionResponseDTO> {
     //-----------check timeslots are within trainer working hours
-    this.checkWithinWorkingHours(sessionData);
+    this._trainerService.checkWithinWorkingHours(sessionData);
 
     //check for conflict with existing session's timeslots
     const newSlots = sessionData.timeSlots;
@@ -64,7 +68,7 @@ export class FitnessSessionService implements IFitnessSessionService {
   //--------update session-----------
   async updateFitnessSession(id: string, sessionData: Partial<IFitnessSession>): Promise<FitnessSessionResponseDTO> {
     //check timeslots are within trainer working hours
-    this.checkWithinWorkingHours(sessionData);
+    this._trainerService.checkWithinWorkingHours(sessionData);
 
     //check for conflict with existing session's timeslots
     const newSlots = sessionData.timeSlots;
@@ -107,7 +111,7 @@ export class FitnessSessionService implements IFitnessSessionService {
     // ----with bookings
     const cancellationWindow = bookingSessions[0].session.cancellationWindow;
     const withinWindow = bookingSessions.some((bookingSession) =>
-      this._bookingService.isWithinCancellationWindow(bookingSession.date.toString(), bookingSession.startTime, bookingSession.session.cancellationWindow,bookingSession.timezone)
+      this._bookingService.isWithinCancellationWindow(bookingSession.date.toString(), bookingSession.startTime, bookingSession.session.cancellationWindow, bookingSession.timezone)
     );
     if (withinWindow) {
       throw new AppError(`Cannot delete — one or more booked sessions are within the ${cancellationWindow}hr cancellation window`, STATUS_CODE.ERROR.BAD_REQUEST);
@@ -115,12 +119,29 @@ export class FitnessSessionService implements IFitnessSessionService {
     await Promise.all(
       bookingSessions.map(async (bookingSession) => {
         const sessionBookingId = bookingSession.id;
-    
+
         const reason = 'Cancelled by trainer';
 
         await this._bookingService.cancelSession(sessionBookingId, reason, cancelledBy);
       })
     );
+    //  apply penalty once PER OCCURRENCE,
+    if (cancelledBy === UserRole.TRAINER) {
+      const occurrenceGroups = groupByOccurrence(bookingSessions); // group by slotId + startDateTime
+      await Promise.all(
+        occurrenceGroups.map((group) => {
+          const sessionRevenue = group.bookings.reduce((sum, b) => sum + b.unitPrice, 0);
+          return this._penaltyService.applyPenalty(
+            group.trainerId,
+            id, // sessionId (template)
+            group.slotId,
+            group.startDateTime,
+            sessionRevenue
+          );
+        })
+      );
+    }
+
     const data = await this._fitnessSessionRepo.deleteASession(id);
 
     if (!data) {
@@ -141,7 +162,7 @@ export class FitnessSessionService implements IFitnessSessionService {
 
   //-------------- get all sessions by a trianerId--------------
   async getSessionsByTrainer(userId: string | Types.ObjectId, filters: FilterQuery<IFitnessSession>): Promise<PaginatedFitnessSessionsResponseDTO> {
-    const trainer = await this._trainerRepo.findByUserId(userId);
+    const trainer = await this._trainerService.getTrainerByUserId(userId.toString());
     if (!trainer) throw new AppError(ERROR_MESSAGES.TRAINER.TRAINER_NOT_FOUND, STATUS_CODE.ERROR.NOT_FOUND);
     const { search, page, limit } = filters;
     const query: FilterQuery<IFitnessSession> = { trainerId: trainer.id, isDeleted: false, page: page, limit: limit };
@@ -165,8 +186,8 @@ export class FitnessSessionService implements IFitnessSessionService {
 
   //--------------- get all sessions--public------------
   async getAllSessions(filters: FilterQuery<IFitnessSession>): Promise<GetFitnessSessionsResponseDTO> {
-    const { page, limit, search, program, sessionType,sessionMode, ageGroup,rating, lat, lng, radius } = filters;
-    
+    const { page, limit, search, program, sessionType, sessionMode, ageGroup, rating, lat, lng, radius } = filters;
+
     const query: FilterQuery<IFitnessSession> = { isDeleted: false, isApproved: true, isActive: true };
 
     if (search) {
@@ -174,7 +195,7 @@ export class FitnessSessionService implements IFitnessSessionService {
     }
     if (program && program !== 'all') query.fitnessCategory = program;
     if (sessionType && sessionType !== 'all') query.sessionType = sessionType;
-     if (sessionMode && sessionMode !== 'all') query.mode = sessionMode;
+    if (sessionMode && sessionMode !== 'all') query.mode = sessionMode;
     if (ageGroup && ageGroup !== 'all') query.ageGroup = ageGroup;
     if (rating && rating !== 'all') query.rating = { $gte: Number(rating) };
 
@@ -182,7 +203,7 @@ export class FitnessSessionService implements IFitnessSessionService {
       query['venue.location'] = {
         $geoWithin: {
           $centerSphere: [
-             [Number(lng),Number(lat) ], // [longitude, latitude]
+            [Number(lng), Number(lat)], // [longitude, latitude]
             radius / 6371,
           ],
         },
@@ -208,7 +229,7 @@ export class FitnessSessionService implements IFitnessSessionService {
     for (const dayEntry of newTimeSlots) {
       const { day, slots } = dayEntry;
       for (const slot of slots) {
-        const query:FilterQuery<IFitnessSession> = {
+        const query: FilterQuery<IFitnessSession> = {
           trainerId,
           timeSlots: {
             $elemMatch: {
@@ -237,29 +258,5 @@ export class FitnessSessionService implements IFitnessSessionService {
       }
     }
     return { hasConflict: false };
-  };
-  //--------------- check session is within in trainer working hours-----------------
-  checkWithinWorkingHours = async (sessionData) => {
-    const trainerProfile = await this._trainerRepo.findById(sessionData.trainerId);
-    const availability = trainerProfile.availability;
-
-    sessionData.timeSlots.forEach((newDayEntry) => {
-      const dayName = newDayEntry.day;
-      const trainerDay = availability[dayName];
-
-      // 1. Check if they even work that day
-      if (!trainerDay || !trainerDay.available) {
-        throw new AppError(`Trainer does not work on ${dayName}`, STATUS_CODE.ERROR.BAD_REQUEST);
-      }
-
-      // 2. Check every slot against working hours
-      newDayEntry.slots.forEach((slot) => {
-        const isOutsideHours = slot.startTime < trainerDay.startTime || slot.endTime > trainerDay.endTime;
-
-        if (isOutsideHours) {
-          throw new AppError(`Slot ${slot.startTime}-${slot.endTime} is outside working hours (${trainerDay.startTime}-${trainerDay.endTime})`, STATUS_CODE.ERROR.BAD_REQUEST);
-        }
-      });
-    });
   };
 }

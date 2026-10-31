@@ -7,6 +7,7 @@ import {
   type GenderType,
   type TRAINER_CATEGORY,
 } from '@/constants/constants';
+import type { DailyAvailability } from '@/features/trainer/types/trainerprofile.types';
 
 //--------------- Trainer Slice--------------
 
@@ -69,11 +70,11 @@ export interface ICertification {
   validUpto: Date;
   issuedAt: Date;
 }
-interface IDayAvailability {
-  available: boolean;
-  startTime?: string;
-  endTime?: string;
-}
+// interface IDayAvailability {
+//   available: boolean;
+//   startTime?: string;
+//   endTime?: string;
+// }
 
 export interface Trainer {
   id: string;
@@ -121,29 +122,13 @@ export interface Trainer {
     type: 'Point';
     coordinates: [number, number]; // [longitude, latitude]
   };
-  availability: {
-    // availability
-    isAvailable: boolean;
-    Monday: IDayAvailability;
-    Tuesday: IDayAvailability;
-    Wednesday: IDayAvailability;
-    Thursday: IDayAvailability;
-    Friday: IDayAvailability;
-    Saturday: IDayAvailability;
-    Sunday: IDayAvailability;
+  availability: {    
+    weeklySchedule:DailyAvailability[];
+    timeZone:string;
     effectiveFrom:string;
     effectiveTo:string;
   };
-  paymentInfo: {
-    // payment Data
-    bankAccount?: {
-      accountName?: string;
-      accountNumber?: string;
-      bankName?: string;
-      ifscCode?: string;
-    };
-    upiId?: string;
-  };
+  
   status: (typeof TRAINER_STATUS)[keyof typeof TRAINER_STATUS]; // Administrative State
   verificationRemarks: {
     fields: string[],
