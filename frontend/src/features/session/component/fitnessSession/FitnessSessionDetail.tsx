@@ -27,6 +27,7 @@ import { reviewService } from '@/features/review/service/reviewService';
 import MapSkeleton from '@/components/reusable/MapSkeleton';
 import ReviewsSkeleton from '@/components/reusable/ReviewsSkeleton';
 import { trainerUnavailabilityService } from '@/features/trainer/service/trainer.unavailability.service';
+import { useSessionStore } from '../../store/useSessionStore';
 
 const FitnessSessionDetail = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -48,9 +49,11 @@ const FitnessSessionDetail = () => {
   const { setPayload } = useBookingStore();
   const { checkAvailability } = useCheckAvailability();
   const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
+  const{fitness,loadFitness}=useSessionStore()
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
+     loadFitness();
   }, []);
 
   useEffect(() => {
@@ -268,7 +271,7 @@ const FitnessSessionDetail = () => {
               <div className="grid grid-cols-2 gap-4 text-sm border-y border-zinc-900 py-4">
                 <div>
                   <p className="text-[10px] uppercase tracking-widest text-zinc-500">Discipline</p>
-                  <p className="font-bold text-white truncate">{session.trainer?.coreDiscipline}</p>
+                  <p className="font-bold text-white truncate">{fitness?.find((f)=>f.id===session.trainer?.coreDiscipline)?.programName}</p>
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-widest text-zinc-500">Experience</p>
@@ -284,11 +287,17 @@ const FitnessSessionDetail = () => {
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-2">Specialties</p>
                 <div className="flex flex-wrap gap-2">
-                  {session.trainer?.specialties?.map((item: string, i: number) => (
-                    <span key={i} className="text-[11px] font-medium text-emerald-400 bg-emerald-500/5 border border-emerald-500/20 px-2 py-1 rounded-lg">
-                      #{item.replace(/\s+/g, '')}
-                    </span>
-                  ))}
+                    {session.trainer?.specialties
+                          ?.map((specialtyId) =>  (
+                             <span className="text-[11px] font-medium text-emerald-400 bg-emerald-500/5 border border-emerald-500/20 px-2 py-1 rounded-lg">   
+                             {fitness?.find((program) => program.id === specialtyId)?.programName  }
+                            </span>
+                          )                      
+                                                  
+                          )
+                        .filter(Boolean)
+                        
+                    }  
                 </div>
               </div>
 
