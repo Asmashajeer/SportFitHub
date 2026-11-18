@@ -48,12 +48,14 @@ This project was independently designed and developed as a full-stack applicatio
 - Git and GitHub
 - 
 
-## Application Screenshots
-- ### Homepage
-![SportFit Hub Homepage](./screenshots/sportfithub.com_.png)
 
--### Sports Listing
-![Sports Listing](./screenshots/sportfithub.com_sports.png)
+## Application Screenshots
+
+<h3>Homepage</h3>
+<img src="./screenshots/homepage.png" alt="SportFit Hub Homepage" width="600">
+
+<h3>Sports Listing</h3>
+<img src="./screenshots/sports-page.png" alt="Sports Listing Page" width="600">
 
 ## Deployment
 
